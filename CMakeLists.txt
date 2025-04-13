@@ -7,7 +7,9 @@ include_directories(include)
 
 add_executable(mips_cpp src/main.cpp
         include/fileio.h
-        src/fileio.cpp)
+        src/fileio.cpp
+        src/tokenizer.cpp
+        src/tokenizer.h)
 
 include(FetchContent)
 FetchContent_Declare(
