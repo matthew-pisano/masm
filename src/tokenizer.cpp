@@ -14,7 +14,7 @@ std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cas
 
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    return (os << "<" << tokenTypeToString(t.type) << ", '" << t.value << "'>" << std::endl);
+    return os << "<" << tokenTypeToString(t.type) << ", '" << t.value << "'>";
 }
 
 

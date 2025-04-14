@@ -35,10 +35,13 @@ struct Token {
     std::string value;
 };
 
+std::ostream& operator<<(std::ostream& os, const Token& t);
+
 
 class Tokenizer {
     std::vector<std::string> lines;
 
+public:
     explicit Tokenizer(const std::vector<std::string>& lines) : lines(lines) {}
 
     [[nodiscard]] std::vector<std::vector<Token>> tokenize() const;

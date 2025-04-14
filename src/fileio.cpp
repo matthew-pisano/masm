@@ -23,7 +23,7 @@ std::vector<std::string> readFileLines(const std::string& fileName) {
         // Close the file
         inputFile.close();
     } else
-        throw std::runtime_error("Could not open file");
+        throw std::runtime_error("Could not open file " + fileName);
 
     return result;
 }
