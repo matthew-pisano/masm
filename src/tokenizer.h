@@ -13,6 +13,7 @@ enum class TokenType {
     UNKNOWN,
     DIRECTIVE,
     LABEL,
+    LABELREF,
     INSTRUCTION,
     REGISTER,
     IMMEDIATE,
@@ -21,8 +22,8 @@ enum class TokenType {
 };
 
 
-constexpr std::array<const char*, 8> tokenTypeNames = {
-        "UNKNOWN",  "DIRECTIVE", "LABEL",     "INSTRUCTION",
+constexpr std::array<const char*, 9> tokenTypeNames = {
+        "UNKNOWN",  "DIRECTIVE", "LABEL",     "LABELREF", "INSTRUCTION",
         "REGISTER", "IMMEDIATE", "SEPERATOR", "STRING",
 };
 

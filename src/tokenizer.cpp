@@ -14,7 +14,7 @@ std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cas
 
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    return os << "<" << tokenTypeToString(t.type) << ", '" << t.value << "'>";
+    return os << "<" << tokenTypeToString(t.type) << ", \"" << t.value << "\">";
 }
 
 
@@ -40,7 +40,7 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
 
-    for (const char c : (line + ' ')) {
+    for (char c : (line + ' ')) {
         if (currentType == TokenType::STRING) {
             if (c == '"' && prevChar != '\\') {
                 currentType = TokenType::UNKNOWN;
@@ -65,6 +65,8 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
             }
             if (c == ',')
                 tokens.push_back({TokenType::SEPERATOR, ","});
+
+            c = '\0';
         } else if (c == '.') {
             currentType = TokenType::DIRECTIVE;
         } else if (c == '$') {
@@ -74,7 +76,10 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
             currentType = TokenType::IMMEDIATE;
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
-            currentType = TokenType::INSTRUCTION;
+            if (tokens.empty())
+                currentType = TokenType::INSTRUCTION;
+            else
+                currentType = TokenType::LABELREF;
         } else if (c == '"') {
             currentType = TokenType::STRING;
             continue;
@@ -83,8 +88,10 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
             break;
         }
 
-        currentToken += c;
-        prevChar = c;
+        if (c != '\0') {
+            currentToken += c;
+            prevChar = c;
+        }
     }
 
     if (!currentToken.empty())
