@@ -5,4 +5,45 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#endif //TOKENIZER_H
+#include <array>
+#include <string>
+#include <vector>
+
+enum class TokenType {
+    UNKNOWN,
+    DIRECTIVE,
+    LABEL,
+    INSTRUCTION,
+    REGISTER,
+    IMMEDIATE,
+    SEPERATOR,
+    STRING,
+};
+
+
+constexpr std::array<const char*, 8> tokenTypeNames = {
+        "UNKNOWN",  "DIRECTIVE", "LABEL",     "INSTRUCTION",
+        "REGISTER", "IMMEDIATE", "SEPERATOR", "STRING",
+};
+
+
+std::string tokenTypeToString(TokenType t);
+
+
+struct Token {
+    TokenType type;
+    std::string value;
+};
+
+
+class Tokenizer {
+    std::vector<std::string> lines;
+
+    explicit Tokenizer(const std::vector<std::string>& lines) : lines(lines) {}
+
+    [[nodiscard]] std::vector<std::vector<Token>> tokenize() const;
+
+    static std::vector<Token> tokenizeLine(const std::string& line);
+};
+
+#endif // TOKENIZER_H
