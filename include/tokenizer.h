@@ -22,12 +22,6 @@ enum class TokenType {
 };
 
 
-constexpr std::array<const char*, 9> tokenTypeNames = {
-        "UNKNOWN",  "DIRECTIVE", "LABEL",     "LABELREF", "INSTRUCTION",
-        "REGISTER", "IMMEDIATE", "SEPERATOR", "STRING",
-};
-
-
 std::string tokenTypeToString(TokenType t);
 
 

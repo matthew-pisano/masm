@@ -2,13 +2,18 @@
 // Created by matthew on 4/13/25.
 //
 
-#include "../include/tokenizer.h"
+#include "tokenizer.h"
 
 #include <ostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+
+constexpr std::array<const char*, 9> tokenTypeNames = {
+        "UNKNOWN",  "DIRECTIVE", "LABEL",     "LABELREF", "INSTRUCTION",
+        "REGISTER", "IMMEDIATE", "SEPERATOR", "STRING",
+};
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
 
