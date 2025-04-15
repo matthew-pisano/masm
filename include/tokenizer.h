@@ -36,6 +36,8 @@ struct Token {
     std::string value;
 };
 
+
+bool operator==(const Token& lhs, const Token& rhs);
 std::ostream& operator<<(std::ostream& os, const Token& t);
 
 

@@ -2,7 +2,7 @@
 // Created by matthew on 4/13/25.
 //
 
-#include "tokenizer.h"
+#include "../include/tokenizer.h"
 
 #include <ostream>
 #include <stdexcept>
@@ -12,6 +12,9 @@
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
 
+bool operator==(const Token& lhs, const Token& rhs) {
+    return lhs.type == rhs.type && lhs.value == rhs.value;
+}
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
     return os << "<" << tokenTypeToString(t.type) << ", \"" << t.value << "\">";
@@ -67,12 +70,15 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
                 tokens.push_back({TokenType::SEPERATOR, ","});
 
             c = '\0';
-        } else if (c == '.') {
+        } else if (c == '.' && currentType == TokenType::UNKNOWN) {
             currentType = TokenType::DIRECTIVE;
-        } else if (c == '$') {
+            c = '\0';
+        } else if (c == '$' && currentType == TokenType::UNKNOWN) {
             currentType = TokenType::REGISTER;
+            c = '\0';
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::IMMEDIATE) &&
-                   (isdigit(c) || (c == '-' && currentToken.empty()))) {
+                   (isdigit(c) || (c == '-' && currentToken.empty()) ||
+                    (c == '.' && !currentToken.empty()))) {
             currentType = TokenType::IMMEDIATE;
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
