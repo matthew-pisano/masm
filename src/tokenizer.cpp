@@ -10,9 +10,9 @@
 #include <vector>
 
 
-constexpr std::array<const char*, 9> tokenTypeNames = {
-        "UNKNOWN",  "DIRECTIVE", "LABEL",     "LABELREF", "INSTRUCTION",
-        "REGISTER", "IMMEDIATE", "SEPERATOR", "STRING",
+constexpr std::array<const char*, 10> tokenTypeNames = {
+        "UNKNOWN",     "MEMDIRECTIVE", "DIRECTIVE", "LABEL",     "LABELREF",
+        "INSTRUCTION", "REGISTER",     "IMMEDIATE", "SEPERATOR", "STRING",
 };
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
@@ -48,6 +48,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenize() const {
 
 
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line) {
+    std::array<std::string, 2> memDirectives = {"data", "text"};
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
@@ -70,6 +71,11 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line)
         if (isspace(c) || c == ',' || c == ':') {
             if (c == ':')
                 currentType = TokenType::LABEL;
+
+            // Set as memory directive if directive is data, text, etc.
+            if (currentType == TokenType::DIRECTIVE &&
+                std::ranges::find(memDirectives, currentToken) != memDirectives.end())
+                currentType = TokenType::MEMDIRECTIVE;
 
             if (!currentToken.empty()) {
                 tokens[tokens.size() - 1].push_back({currentType, currentToken});

@@ -10,6 +10,7 @@
 
 enum class TokenType {
     UNKNOWN,
+    MEMDIRECTIVE,
     DIRECTIVE,
     LABEL,
     LABELREF,

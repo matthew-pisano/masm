@@ -9,9 +9,15 @@
 
 TEST_CASE("Test Single Tokens") {
     SECTION("Test Directive") {
+        const std::string line = ".asciiz";
+        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenizeLine(line);
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::DIRECTIVE, "asciiz"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
+    SECTION("Test Memory Directive") {
         const std::string line = ".data";
         std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenizeLine(line);
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::DIRECTIVE, "data"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::MEMDIRECTIVE, "data"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Label Declaration") {
