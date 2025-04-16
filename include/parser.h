@@ -10,14 +10,10 @@
 
 #include "tokenizer.h"
 
-
-struct Word {
-    uint32_t data{};
-    std::optional<std::string> label;
-};
+std::vector<uint8_t> stringToBytes(const std::string& string);
 
 
-std::vector<Word> stringToWords(std::string string);
+std::vector<uint8_t> intStringToBytes(const std::string& string);
 
 
 enum class MemSection { DATA, TEXT };
@@ -25,21 +21,22 @@ enum class MemSection { DATA, TEXT };
 
 MemSection nameToMemSection(const std::string& name);
 
-using MemLayout = std::map<MemSection, std::vector<Word>>;
+using MemLayout = std::map<MemSection, std::vector<uint8_t>>;
 
 
 std::vector<Token> filterList(const std::vector<Token>& listTokens);
 
 
+bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Token>& tokens);
+
+
 class Parser {
 
-    MemLayout parse(std::vector<std::vector<Token>> tokens);
+    static MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 
-    static std::vector<Word> parseDirective(const std::vector<Token>& dirTokens);
+    static std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
 
-    Word parseInstruction(std::vector<Token> intrTokens);
-
-    bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Token>& tokens);
+    static std::vector<uint8_t> parseInstruction(const std::vector<Token>& instrTokens);
 };
 
 #endif // PARSER_H
