@@ -1,7 +1,8 @@
 # Hello, World!
 .data ## Data declaration section
 ## String to be printed:
-out_string: .asciiz "\nHello, World!\n"
+out_string: .asciiz "\nHello, World!"
+out_string2: .asciiz "\nHello, World!"
 
 .text ## Assembly language instructions go in text segment
 main: ## Start of code section
