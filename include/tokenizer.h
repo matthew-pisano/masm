@@ -5,7 +5,6 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <array>
 #include <string>
 #include <vector>
 
@@ -43,7 +42,7 @@ public:
 
     [[nodiscard]] std::vector<std::vector<Token>> tokenize() const;
 
-    static std::vector<Token> tokenizeLine(const std::string& line);
+    static std::vector<std::vector<Token>> tokenizeLine(const std::string& line);
 };
 
 #endif // TOKENIZER_H

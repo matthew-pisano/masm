@@ -27,23 +27,28 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 
 
 std::vector<std::vector<Token>> Tokenizer::tokenize() const {
-    std::vector<std::vector<Token>> tokenizedLines(lines.size());
+    std::vector<std::vector<Token>> tokenizedFile = {};
 
     for (size_t i = 0; i < lines.size(); ++i) {
-        const std::string& line = lines[i];
+        const std::string& rawLine = lines[i];
+        std::vector<std::vector<Token>> tokenizedLines;
         try {
-            tokenizedLines[i] = tokenizeLine(line);
+            tokenizedLines = tokenizeLine(rawLine);
         } catch (const std::runtime_error& e) {
             throw std::runtime_error("Error in line " + std::to_string(i + 1) + ": " + e.what());
         }
+        if (tokenizedLines.empty())
+            continue;
+
+        tokenizedFile.insert(tokenizedFile.end(), tokenizedLines.begin(), tokenizedLines.end());
     }
 
-    return tokenizedLines;
+    return tokenizedFile;
 }
 
 
-std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
-    std::vector<Token> tokens;
+std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line) {
+    std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
@@ -52,7 +57,7 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
         if (currentType == TokenType::STRING) {
             if (c == '"' && prevChar != '\\') {
                 currentType = TokenType::UNKNOWN;
-                tokens.push_back({TokenType::STRING, currentToken});
+                tokens[tokens.size() - 1].push_back({TokenType::STRING, currentToken});
                 currentToken.clear();
             } else {
                 currentToken += c;
@@ -67,12 +72,16 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
                 currentType = TokenType::LABEL;
 
             if (!currentToken.empty()) {
-                tokens.push_back({currentType, currentToken});
+                tokens[tokens.size() - 1].push_back({currentType, currentToken});
                 currentToken.clear();
                 currentType = TokenType::UNKNOWN;
             }
-            if (c == ',')
-                tokens.push_back({TokenType::SEPERATOR, ","});
+
+            // Start a new line if a label was given
+            if (c == ':')
+                tokens.emplace_back();
+            else if (c == ',')
+                tokens[tokens.size() - 1].push_back({TokenType::SEPERATOR, ","});
 
             c = '\0';
         } else if (c == '.' && currentType == TokenType::UNKNOWN) {
@@ -87,7 +96,7 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
             currentType = TokenType::IMMEDIATE;
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
-            if (tokens.empty())
+            if (tokens[tokens.size() - 1].empty())
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABELREF;
@@ -107,6 +116,9 @@ std::vector<Token> Tokenizer::tokenizeLine(const std::string& line) {
 
     if (!currentToken.empty())
         throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
+
+    if (tokens[tokens.size() - 1].empty())
+        tokens.pop_back();
 
     return tokens;
 }
