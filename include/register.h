@@ -4,6 +4,7 @@
 
 #ifndef REGISTER_H
 #define REGISTER_H
+
 #include <array>
 #include <cstdint>
 #include <map>

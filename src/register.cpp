@@ -4,8 +4,15 @@
 
 #include "register.h"
 
+#include <stdexcept>
 
-int RegisterFile::indexFromName(const std::string& name) { return nameToIndex[name]; }
+
+int RegisterFile::indexFromName(const std::string& name) {
+    if (!nameToIndex.contains(name))
+        throw std::runtime_error("Unknown register " + name);
+
+    return nameToIndex[name];
+}
 
 
 uint32_t RegisterFile::operator[](const int index) const { return registers[index]; }
