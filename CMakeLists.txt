@@ -27,7 +27,7 @@ target_link_libraries(mipscpp CLI11::CLI11)
 find_package(Catch2 3 REQUIRED)
 add_executable(mipscpp-tests
         test/test_tokenizer.cpp
-        test/test_parser.cpp
+        test/test_utils.cpp
         src/tokenizer.cpp
         src/parser.cpp
         src/utils.cpp

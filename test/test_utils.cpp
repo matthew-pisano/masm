@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "parser.h"
+#include "utils.h"
 
 
 TEST_CASE("Test String to Bytes") {

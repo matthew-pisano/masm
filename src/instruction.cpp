@@ -7,6 +7,8 @@
 #include <map>
 #include <stdexcept>
 
+#include "utils.h"
+
 
 std::map<InstructionType, std::vector<std::vector<TokenType>>> instructionPatternMap = {
         {InstructionType::R_TYPE,
@@ -91,19 +93,9 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         throw std::runtime_error("Unknown instruction type " +
                                  std::to_string(static_cast<int>(instructionType)));
 
-    for (const std::vector<TokenType>& pattern : instructionPatternMap[instructionType]) {
-        if (pattern.size() != args.size())
-            continue;
-
-        bool typesMatch = true;
-        for (size_t i = 0; i < pattern.size(); i++)
-            if (args[i].type != pattern[i]) {
-                typesMatch = false;
-                break;
-            }
-        if (typesMatch)
+    for (const std::vector<TokenType>& pattern : instructionPatternMap[instructionType])
+        if (tokenTypeMatch(pattern, args))
             return;
-    }
 
     throw std::runtime_error("Instruction " + instruction.value +
                              " arguments do not match any known patterns");
