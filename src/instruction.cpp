@@ -8,7 +8,15 @@
 #include <stdexcept>
 
 
-std::map<InstructionType, std::vector<std::vector<TokenType>>> instructionPatternMap = {};
+std::map<InstructionType, std::vector<std::vector<TokenType>>> instructionPatternMap = {
+        {InstructionType::R_TYPE,
+         {{TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER}}},
+
+        {InstructionType::I_TYPE,
+         {{TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE}}},
+
+        {InstructionType::J_TYPE, {{TokenType::IMMEDIATE}, {TokenType::LABELREF}}}};
+
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
         {"add", {InstructionType::R_TYPE, 0x20}},
