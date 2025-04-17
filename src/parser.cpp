@@ -11,18 +11,6 @@
 #include "utils.h"
 
 
-MemSection nameToMemSection(const std::string& name) {
-    switch (name) {
-        case "text":
-            return MemSection::TEXT;
-        case "data":
-            return MemSection::DATA;
-        default:
-            throw std::runtime_error("Unknown memory directive " + name);
-    }
-}
-
-
 std::vector<uint8_t> stringToBytes(const std::string& string) {
     std::vector<uint8_t> bytes = {};
     for (const char c : string)
@@ -109,8 +97,58 @@ std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens)
 }
 
 
+std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t opcode, const uint32_t rs,
+                                                   const uint32_t rt, const uint32_t rd,
+                                                   const uint32_t shamt, const uint32_t funct) {
+
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
+                                 (rd & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
+
+    // Break the instruction into 4 bytes (big-endian)
+    std::vector<uint8_t> bytes(4);
+    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
+    bytes[1] = (instruction >> 16) & 0xFF;
+    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[3] = instruction & 0xFF; // Least significant byte
+
+    return bytes;
+}
+
+
+std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const uint32_t rs,
+                                                   const uint32_t rt, const uint32_t immediate) {
+
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction =
+            (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | (immediate & 0xFFFF);
+
+    // Break the instruction into 4 bytes (big-endian)
+    std::vector<uint8_t> bytes(4);
+    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
+    bytes[1] = (instruction >> 16) & 0xFF;
+    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[3] = instruction & 0xFF; // Least significant byte
+
+    return bytes;
+}
+
+std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const uint32_t address) {
+
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (opcode & 0x3F) << 26 | (address & 0x3FFFFFF);
+
+    // Break the instruction into 4 bytes (big-endian)
+    std::vector<uint8_t> bytes(4);
+    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
+    bytes[1] = (instruction >> 16) & 0xFF;
+    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[3] = instruction & 0xFF; // Least significant byte
+
+    return bytes;
+}
+
 std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTokens) {
-    uint8_t machineCode{};
     RegisterFile regFile{};
 
     const std::vector unfilteredArgs(instrTokens.begin() + 1, instrTokens.end());
@@ -133,18 +171,36 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
                     regFile.indexFromName(arg.value);
                 break;
             case TokenType::LABELREF:
+                if (!labelMap.contains(arg.value))
+                    throw std::runtime_error("Unknown label " + arg.value);
+                argCode.push_back(labelMap[arg.value]);
                 break;
+            default:
+                throw std::runtime_error("Invalid argument type " +
+                                         std::to_string(static_cast<int>(arg.type)));
         }
     }
 
-    return {machineCode};
+    switch (instructionOp.type) {
+        case InstructionType::R_TYPE:
+            return parseRTypeInstruction(0, argCode[0], argCode[1], argCode[2], 0,
+                                         instructionOp.opFuncCode);
+        case InstructionType::I_TYPE:
+            return parseITypeInstruction(instructionOp.opFuncCode, argCode[0], argCode[1],
+                                         argCode[2]);
+        case InstructionType::J_TYPE:
+            return parseJTypeInstruction(instructionOp.opFuncCode, argCode[0]);
+    }
+
+    throw std::runtime_error("Unknown instruction type " +
+                             std::to_string(static_cast<int>(instructionOp.type)));
 }
 
 
 MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
-    std::map<std::string, size_t> labelMap = {};
     MemSection currSection = MemSection::TEXT;
-    MemLayout memory = {{currSection, {}}};
+    memory[currSection] = {};
+    std::vector<std::string> pendingLabels = {};
 
     for (const std::vector<Token>& line : tokens) {
         if (line.empty())
@@ -161,14 +217,28 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
                 std::vector<uint8_t> directiveBytes = parseDirective(line);
                 memory[currSection].insert(memory[currSection].end(), directiveBytes.begin(),
                                            directiveBytes.end());
+                break;
             case TokenType::INSTRUCTION:
                 const std::vector<uint8_t> instructionBytes = parseInstruction(line);
                 memory[currSection].insert(memory[currSection].end(), instructionBytes.begin(),
                                            instructionBytes.end());
+                break;
+            case TokenType::LABEL:
+                pendingLabels.push_back(firstToken.value);
+                break;
             case TokenType::UNKNOWN:
                 throw std::runtime_error(
                         "Encountered unknown token type during parsing for token " +
                         firstToken.value);
+        }
+
+        if (firstToken.type == TokenType::DIRECTIVE && firstToken.type == TokenType::INSTRUCTION) {
+            for (const std::string& label : pendingLabels) {
+                if (labelMap.contains(label))
+                    throw std::runtime_error("Duplicate label " + label);
+                labelMap[label] =
+                        memSectionOffset(currSection) + 8 * (memory[currSection].size() - 1);
+            }
         }
     }
 

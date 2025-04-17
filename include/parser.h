@@ -8,6 +8,7 @@
 #include <map>
 #include <optional>
 
+#include "memory.h"
 #include "tokenizer.h"
 
 std::vector<uint8_t> stringToBytes(const std::string& string);
@@ -15,11 +16,6 @@ std::vector<uint8_t> stringToBytes(const std::string& string);
 
 std::vector<uint8_t> intStringToBytes(const std::string& string);
 
-
-enum class MemSection { DATA, TEXT };
-
-
-MemSection nameToMemSection(const std::string& name);
 
 using MemLayout = std::map<MemSection, std::vector<uint8_t>>;
 
@@ -32,11 +28,22 @@ bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Tok
 
 class Parser {
 
-    static MemLayout parse(const std::vector<std::vector<Token>>& tokens);
+    std::map<std::string, uint32_t> labelMap;
+    MemLayout memory;
 
-    static std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
+    MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 
-    static std::vector<uint8_t> parseInstruction(const std::vector<Token>& instrTokens);
+    std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
+
+    std::vector<uint8_t> parseInstruction(const std::vector<Token>& instrTokens);
+
+    static std::vector<uint8_t> parseRTypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
+                                                      uint32_t rd, uint32_t shamt, uint32_t funct);
+
+    static std::vector<uint8_t> parseITypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
+                                                      uint32_t immediate);
+
+    static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
 };
 
 #endif // PARSER_H
