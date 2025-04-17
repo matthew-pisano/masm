@@ -33,7 +33,7 @@ class Parser {
 
     MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 
-    std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
+    static std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
 
     std::vector<uint8_t> parseInstruction(const std::vector<Token>& instrTokens);
 

@@ -72,28 +72,29 @@ std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens)
 
     std::vector<uint8_t> bytes = {};
 
-    switch (const std::string dirName = dirTokens[0].value) {
-        case "asciiz":
-            if (dirTokens.size() != 2)
-                throw std::runtime_error(".asciiz expects exactly one argument");
-            return stringToBytes(dirTokens[1].value);
-        case "word":
-            if (dirTokens.size() < 2)
-                throw std::runtime_error(".word expects at least one argument");
-
-            const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
-            std::vector<Token> args = filterList(unfilteredArgs);
-
-            for (const Token& arg : args) {
-                if (arg.type != TokenType::IMMEDIATE)
-                    throw std::runtime_error(".word expects immediate values as arguments");
-                std::vector<uint8_t> immediateBytes = intStringToBytes(arg.value);
-                bytes.insert(bytes.end(), immediateBytes.begin(), immediateBytes.end());
-            }
-            return bytes;
-        default:
-            throw std::runtime_error("Unsupported directive " + dirName);
+    const std::string dirName = dirTokens[0].value;
+    if (dirName == "asciiz") {
+        if (dirTokens.size() != 2)
+            throw std::runtime_error(".asciiz expects exactly one argument");
+        return stringToBytes(dirTokens[1].value);
     }
+    if (dirName == "word") {
+        if (dirTokens.size() < 2)
+            throw std::runtime_error(".word expects at least one argument");
+
+        const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
+        std::vector<Token> args = filterList(unfilteredArgs);
+
+        for (const Token& arg : args) {
+            if (arg.type != TokenType::IMMEDIATE)
+                throw std::runtime_error(".word expects immediate values as arguments");
+            std::vector<uint8_t> immediateBytes = intStringToBytes(arg.value);
+            bytes.insert(bytes.end(), immediateBytes.begin(), immediateBytes.end());
+        }
+        return bytes;
+    }
+
+    throw std::runtime_error("Unsupported directive " + dirName);
 }
 
 
@@ -153,6 +154,7 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
 
     const std::vector unfilteredArgs(instrTokens.begin() + 1, instrTokens.end());
     const std::vector<Token> args = filterList(unfilteredArgs);
+    // Throw error if pattern for instruction is invalud
     validateInstruction(instrTokens[0], args);
 
     InstructionOp instructionOp = nameToInstructionOp(instrTokens[0].value);
@@ -208,28 +210,33 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
 
         const Token& firstToken = line[0];
         switch (firstToken.type) {
-            case TokenType::MEMDIRECTIVE:
+            case TokenType::MEMDIRECTIVE: {
                 currSection = nameToMemSection(firstToken.value);
                 if (!memory.contains(currSection))
                     memory[currSection] = {};
                 break;
-            case TokenType::DIRECTIVE:
+            }
+            case TokenType::DIRECTIVE: {
                 std::vector<uint8_t> directiveBytes = parseDirective(line);
                 memory[currSection].insert(memory[currSection].end(), directiveBytes.begin(),
                                            directiveBytes.end());
                 break;
-            case TokenType::INSTRUCTION:
+            }
+            case TokenType::INSTRUCTION: {
                 const std::vector<uint8_t> instructionBytes = parseInstruction(line);
                 memory[currSection].insert(memory[currSection].end(), instructionBytes.begin(),
                                            instructionBytes.end());
                 break;
-            case TokenType::LABEL:
+            }
+            case TokenType::LABEL: {
                 pendingLabels.push_back(firstToken.value);
                 break;
-            case TokenType::UNKNOWN:
+            }
+            default: {
                 throw std::runtime_error(
                         "Encountered unknown token type during parsing for token " +
                         firstToken.value);
+            }
         }
 
         if (firstToken.type == TokenType::DIRECTIVE && firstToken.type == TokenType::INSTRUCTION) {

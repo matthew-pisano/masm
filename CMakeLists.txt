@@ -30,7 +30,9 @@ add_executable(mipscpp-tests
         test/test_parser.cpp
         src/tokenizer.cpp
         src/parser.cpp
+        src/utils.cpp
         src/register.cpp
+        src/instruction.cpp
         src/memory.cpp
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)

@@ -8,14 +8,11 @@
 
 
 MemSection nameToMemSection(const std::string& name) {
-    switch (name) {
-        case "text":
-            return MemSection::TEXT;
-        case "data":
-            return MemSection::DATA;
-        default:
-            throw std::runtime_error("Unknown memory directive " + name);
-    }
+    if (name == "text")
+        return MemSection::TEXT;
+    if (name == "data")
+        return MemSection::DATA;
+    throw std::runtime_error("Unknown memory directive " + name);
 }
 
 

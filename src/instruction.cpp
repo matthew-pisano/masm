@@ -91,10 +91,19 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         throw std::runtime_error("Unknown instruction type " +
                                  std::to_string(static_cast<int>(instructionType)));
 
-    for (const std::vector<TokenType>& pattern : instructionPatternMap[instructionType])
-        if (pattern.size() == args.size() &&
-            std::equal(pattern.begin(), pattern.end(), args.begin()))
+    for (const std::vector<TokenType>& pattern : instructionPatternMap[instructionType]) {
+        if (pattern.size() != args.size())
+            continue;
+
+        bool typesMatch = true;
+        for (size_t i = 0; i < pattern.size(); i++)
+            if (args[i].type != pattern[i]) {
+                typesMatch = false;
+                break;
+            }
+        if (typesMatch)
             return;
+    }
 
     throw std::runtime_error("Instruction " + instruction.value +
                              " arguments do not match any known patterns");
