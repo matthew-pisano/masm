@@ -8,6 +8,11 @@ include_directories(include)
 add_executable(mipscpp src/main.cpp
         src/fileio.cpp
         src/tokenizer.cpp
+        src/parser.cpp
+        src/register.cpp
+        src/utils.cpp
+        src/instruction.cpp
+        src/memory.cpp
 )
 
 include(FetchContent)
@@ -22,7 +27,11 @@ target_link_libraries(mipscpp CLI11::CLI11)
 find_package(Catch2 3 REQUIRED)
 add_executable(mipscpp-tests
         test/test_tokenizer.cpp
+        test/test_parser.cpp
         src/tokenizer.cpp
+        src/parser.cpp
+        src/register.cpp
+        src/memory.cpp
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
