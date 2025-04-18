@@ -12,7 +12,7 @@
 
 
 void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
-    for (auto& arg : instructionArgs)
+    for (Token& arg : instructionArgs)
         if (arg.type == TokenType::LABELREF) {
             if (!labelMap.contains(arg.value))
                 throw std::runtime_error("Unknown label " + arg.value);
@@ -23,21 +23,23 @@ void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
 
 std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens) {
 
+    const std::string dirName = dirTokens[0].value;
+    if (dirTokens.size() < 2)
+        throw std::runtime_error("Directive " + dirName + " expects at least one argument");
+
+    const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
+    std::vector<Token> args = filterTokenList(unfilteredArgs);
+
     std::vector<uint8_t> bytes = {};
 
-    const std::string dirName = dirTokens[0].value;
     if (dirName == "asciiz") {
-        if (dirTokens.size() != 2)
+        if (args.size() > 1)
             throw std::runtime_error(".asciiz expects exactly one argument");
-        return stringToBytes(dirTokens[1].value);
+        if (args[0].type != TokenType::STRING)
+            throw std::runtime_error(".asciiz expects a string argument");
+        return stringToBytes(args[0].value);
     }
     if (dirName == "word") {
-        if (dirTokens.size() < 2)
-            throw std::runtime_error(".word expects at least one argument");
-
-        const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
-        std::vector<Token> args = filterTokenList(unfilteredArgs);
-
         for (const Token& arg : args) {
             if (arg.type != TokenType::IMMEDIATE)
                 throw std::runtime_error(".word expects immediate values as arguments");
@@ -61,9 +63,9 @@ std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t opcode, const 
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
-    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
-    bytes[1] = (instruction >> 16) & 0xFF;
-    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[0] = instruction >> 24 & 0xFF; // Most significant byte
+    bytes[1] = instruction >> 16 & 0xFF;
+    bytes[2] = instruction >> 8 & 0xFF;
     bytes[3] = instruction & 0xFF; // Least significant byte
 
     return bytes;
@@ -75,13 +77,13 @@ std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const 
 
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
-            (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | (immediate & 0xFFFF);
+            (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | immediate & 0xFFFF;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
-    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
-    bytes[1] = (instruction >> 16) & 0xFF;
-    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[0] = instruction >> 24 & 0xFF; // Most significant byte
+    bytes[1] = instruction >> 16 & 0xFF;
+    bytes[2] = instruction >> 8 & 0xFF;
     bytes[3] = instruction & 0xFF; // Least significant byte
 
     return bytes;
@@ -94,9 +96,9 @@ std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const 
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
-    bytes[0] = (instruction >> 24) & 0xFF; // Most significant byte
-    bytes[1] = (instruction >> 16) & 0xFF;
-    bytes[2] = (instruction >> 8) & 0xFF;
+    bytes[0] = instruction >> 24 & 0xFF; // Most significant byte
+    bytes[1] = instruction >> 16 & 0xFF;
+    bytes[2] = instruction >> 8 & 0xFF;
     bytes[3] = instruction & 0xFF; // Least significant byte
 
     return bytes;
@@ -115,6 +117,7 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
 
     InstructionOp instructionOp = nameToInstructionOp(instrTokens[0].value);
     std::vector<uint32_t> argCodes = {};
+    // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
         switch (arg.type) {
             case TokenType::IMMEDIATE:
@@ -134,6 +137,7 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
         }
     }
 
+    // Parse integer arguments into a single instruction word
     switch (instructionOp.type) {
         case InstructionType::R_TYPE:
             return parseRTypeInstruction(0, argCodes[0], argCodes[1], argCodes[2], 0,
@@ -144,9 +148,6 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
     }
-
-    throw std::runtime_error("Unknown instruction type " +
-                             std::to_string(static_cast<int>(instructionOp.type)));
 }
 
 
@@ -190,7 +191,8 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
             }
         }
 
-        if (firstToken.type == TokenType::DIRECTIVE && firstToken.type == TokenType::INSTRUCTION) {
+        // Assign pending labels to current instruction or directive
+        if (firstToken.type == TokenType::DIRECTIVE || firstToken.type == TokenType::INSTRUCTION) {
             for (const std::string& label : pendingLabels) {
                 if (labelMap.contains(label))
                     throw std::runtime_error("Duplicate label " + label);

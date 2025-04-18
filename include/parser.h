@@ -21,7 +21,7 @@ class Parser {
 
     MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 
-    void Parser::resolveLabels(std::vector<Token>& instructionArgs);
+    void resolveLabels(std::vector<Token>& instructionArgs);
 
     static std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
 
