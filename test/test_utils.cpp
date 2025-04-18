@@ -8,6 +8,31 @@
 #include "utils.h"
 
 
+TEST_CASE("Test Is Signed Integer") {
+    SECTION("Test Valid Integer") {
+        std::string intString = "0";
+        REQUIRE(isSignedInteger(intString));
+
+        intString = "-5";
+        REQUIRE(isSignedInteger(intString));
+
+        intString = "3647";
+        REQUIRE(isSignedInteger(intString));
+    }
+
+    SECTION("Test Invalid Integer") {
+        std::string intString = "abdc";
+        REQUIRE_FALSE(isSignedInteger(intString));
+
+        intString = "-45.6";
+        REQUIRE_FALSE(isSignedInteger(intString));
+
+        intString = "abc123def";
+        REQUIRE_FALSE(isSignedInteger(intString));
+    }
+}
+
+
 TEST_CASE("Test String to Bytes") {
     SECTION("Test Single Char") {
         std::vector<uint8_t> expectedBytes = {0x61};
