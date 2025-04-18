@@ -91,3 +91,44 @@ TEST_CASE("Test Filter Token List") {
         REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
     }
 }
+
+
+TEST_CASE("Test Token Type Match") {
+    SECTION("Test Match") {
+        std::vector<TokenType> pattern = {};
+        std::vector<Token> tokens = {};
+        REQUIRE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {TokenType::REGISTER};
+        tokens = {{TokenType::REGISTER, "reg"}};
+        REQUIRE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {TokenType::REGISTER, TokenType::REGISTER};
+        tokens = {{TokenType::REGISTER, "reg"}, {TokenType::REGISTER, "reg2"}};
+        REQUIRE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {TokenType::REGISTER, TokenType::LABELREF, TokenType::IMMEDIATE};
+        tokens = {{TokenType::REGISTER, "reg"},
+                  {TokenType::LABELREF, "label"},
+                  {TokenType::IMMEDIATE, "42"}};
+        REQUIRE(tokenTypeMatch(pattern, tokens));
+    }
+
+    SECTION("Test No Match") {
+        std::vector pattern = {TokenType::REGISTER};
+        std::vector<Token> tokens = {};
+        REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {};
+        tokens = {{TokenType::REGISTER, "reg"}};
+        REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {TokenType::REGISTER};
+        tokens = {{TokenType::LABELREF, "label"}};
+        REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
+
+        pattern = {TokenType::REGISTER};
+        tokens = {{TokenType::REGISTER, "reg"}, {TokenType::LABELREF, "label"}};
+        REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
+    }
+}
