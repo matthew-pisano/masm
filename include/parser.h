@@ -23,12 +23,13 @@ class Parser {
 
     void resolveLabels(std::vector<Token>& instructionArgs);
 
-    static std::vector<uint8_t> parseDirective(const std::vector<Token>& dirTokens);
+    static std::vector<uint8_t> parseDirective(const Token& dirToken,
+                                               const std::vector<Token>& args);
 
-    std::vector<uint8_t> parseInstruction(const std::vector<Token>& instrTokens);
+    std::vector<uint8_t> parseInstruction(const Token& instrToken, std::vector<Token>& args);
 
-    static std::vector<uint8_t> parseRTypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
-                                                      uint32_t rd, uint32_t shamt, uint32_t funct);
+    static std::vector<uint8_t> parseRTypeInstruction(uint32_t rs, uint32_t rt, uint32_t rd,
+                                                      uint32_t shamt, uint32_t funct);
 
     static std::vector<uint8_t> parseITypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
                                                       uint32_t immediate);

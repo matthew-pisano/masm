@@ -21,14 +21,10 @@ void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
 }
 
 
-std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens) {
-
-    const std::string dirName = dirTokens[0].value;
-    if (dirTokens.size() < 2)
+std::vector<uint8_t> Parser::parseDirective(const Token& dirToken, const std::vector<Token>& args) {
+    const std::string dirName = dirToken.value;
+    if (args.empty())
         throw std::runtime_error("Directive " + dirName + " expects at least one argument");
-
-    const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
-    std::vector<Token> args = filterTokenList(unfilteredArgs);
 
     std::vector<uint8_t> bytes = {};
 
@@ -53,12 +49,12 @@ std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens)
 }
 
 
-std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t opcode, const uint32_t rs,
-                                                   const uint32_t rt, const uint32_t rd,
-                                                   const uint32_t shamt, const uint32_t funct) {
+std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t rs, const uint32_t rt,
+                                                   const uint32_t rd, const uint32_t shamt,
+                                                   const uint32_t funct) {
 
     // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
+    const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
                                  (rd & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
 
     // Break the instruction into 4 bytes (big-endian)
@@ -104,18 +100,15 @@ std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const 
     return bytes;
 }
 
-std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTokens) {
+std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vector<Token>& args) {
     RegisterFile regFile{};
-
-    const std::vector unfilteredArgs(instrTokens.begin() + 1, instrTokens.end());
-    std::vector<Token> args = filterTokenList(unfilteredArgs);
 
     // Resolve label references to their computed address values
     resolveLabels(args);
     // Throw error if pattern for instruction is invalid
-    validateInstruction(instrTokens[0], args);
+    validateInstruction(instrToken, args);
 
-    InstructionOp instructionOp = nameToInstructionOp(instrTokens[0].value);
+    InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
     std::vector<uint32_t> argCodes = {};
     // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
@@ -140,7 +133,7 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
     // Parse integer arguments into a single instruction word
     switch (instructionOp.type) {
         case InstructionType::R_TYPE:
-            return parseRTypeInstruction(0, argCodes[0], argCodes[1], argCodes[2], 0,
+            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0,
                                          instructionOp.opFuncCode);
         case InstructionType::I_TYPE:
             return parseITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1],
@@ -148,6 +141,9 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
     }
+    // Should never be reached
+    throw std::runtime_error("Unknown instruction type " +
+                             std::to_string(static_cast<int>(instructionOp.type)));
 }
 
 
@@ -161,6 +157,9 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
             continue;
 
         const Token& firstToken = line[0];
+        const std::vector unfilteredArgs(line.begin() + 1, line.end());
+        std::vector<Token> args = filterTokenList(unfilteredArgs);
+
         switch (firstToken.type) {
             case TokenType::MEMDIRECTIVE: {
                 currSection = nameToMemSection(firstToken.value);
@@ -169,13 +168,13 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::DIRECTIVE: {
-                std::vector<uint8_t> directiveBytes = parseDirective(line);
+                std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
                 memory[currSection].insert(memory[currSection].end(), directiveBytes.begin(),
                                            directiveBytes.end());
                 break;
             }
             case TokenType::INSTRUCTION: {
-                const std::vector<uint8_t> instructionBytes = parseInstruction(line);
+                const std::vector<uint8_t> instructionBytes = parseInstruction(firstToken, args);
                 memory[currSection].insert(memory[currSection].end(), instructionBytes.begin(),
                                            instructionBytes.end());
                 break;
