@@ -34,6 +34,7 @@ add_executable(mipscpp-tests
         src/register.cpp
         src/instruction.cpp
         src/memory.cpp
+        test/test_parser.cpp
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
