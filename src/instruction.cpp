@@ -10,15 +10,6 @@
 #include "utils.h"
 
 
-std::map<InstructionType, std::vector<std::vector<TokenType>>> instructionPatternMap = {
-        {InstructionType::R_TYPE,
-         {{TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER}}},
-
-        {InstructionType::I_TYPE,
-         {{TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE}}},
-
-        {InstructionType::J_TYPE, {{TokenType::IMMEDIATE}, {TokenType::LABELREF}}}};
-
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
         {"add", {InstructionType::R_TYPE, 0x20}},
@@ -84,19 +75,19 @@ InstructionOp nameToInstructionOp(const std::string& name) {
 
 
 void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
-    if (instruction.type != TokenType::INSTRUCTION)
-        throw std::runtime_error("Expected instruction token, got " +
-                                 std::to_string(static_cast<int>(instruction.type)));
     InstructionType instructionType = nameToInstructionOp(instruction.value).type;
 
-    if (!instructionPatternMap.contains(instructionType))
-        throw std::runtime_error("Unknown instruction type " +
-                                 std::to_string(static_cast<int>(instructionType)));
-
-    for (const std::vector<TokenType>& pattern : instructionPatternMap[instructionType])
-        if (tokenTypeMatch(pattern, args))
-            return;
-
-    throw std::runtime_error("Instruction " + instruction.value +
-                             " arguments do not match any known patterns");
+    switch (instructionType) {
+        case InstructionType::R_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
+                                args))
+                throw std::runtime_error("Invalid R-Type instruction");
+        case InstructionType::I_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
+                                args))
+                throw std::runtime_error("Invalid I-Type instruction");
+        case InstructionType::J_TYPE:
+            if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::LABELREF}, args))
+                throw std::runtime_error("Invalid J-Type instruction");
+    }
 }

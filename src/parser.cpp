@@ -11,6 +11,16 @@
 #include "utils.h"
 
 
+void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
+    for (auto& arg : instructionArgs)
+        if (arg.type == TokenType::LABELREF) {
+            if (!labelMap.contains(arg.value))
+                throw std::runtime_error("Unknown label " + arg.value);
+            arg = {TokenType::IMMEDIATE, std::to_string(labelMap[arg.value])};
+        }
+}
+
+
 std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens) {
 
     std::vector<uint8_t> bytes = {};
@@ -96,29 +106,27 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
     RegisterFile regFile{};
 
     const std::vector unfilteredArgs(instrTokens.begin() + 1, instrTokens.end());
-    const std::vector<Token> args = filterTokenList(unfilteredArgs);
-    // Throw error if pattern for instruction is invalud
+    std::vector<Token> args = filterTokenList(unfilteredArgs);
+
+    // Resolve label references to their computed address values
+    resolveLabels(args);
+    // Throw error if pattern for instruction is invalid
     validateInstruction(instrTokens[0], args);
 
     InstructionOp instructionOp = nameToInstructionOp(instrTokens[0].value);
-    std::vector<uint32_t> argCode = {};
+    std::vector<uint32_t> argCodes = {};
     for (const Token& arg : args) {
         switch (arg.type) {
             case TokenType::IMMEDIATE:
                 if (!isSignedInteger(arg.value))
                     throw std::runtime_error("Invalid integer " + arg.value);
-                argCode.push_back(static_cast<uint32_t>(std::stoi(arg.value)));
+                argCodes.push_back(static_cast<uint32_t>(std::stoi(arg.value)));
                 break;
             case TokenType::REGISTER:
                 if (isSignedInteger(arg.value) && std::stoi(arg.value) >= 0)
-                    argCode.push_back(std::stoi(arg.value));
+                    argCodes.push_back(std::stoi(arg.value));
                 else
-                    regFile.indexFromName(arg.value);
-                break;
-            case TokenType::LABELREF:
-                if (!labelMap.contains(arg.value))
-                    throw std::runtime_error("Unknown label " + arg.value);
-                argCode.push_back(labelMap[arg.value]);
+                    argCodes.push_back(regFile.indexFromName(arg.value));
                 break;
             default:
                 throw std::runtime_error("Invalid argument type " +
@@ -128,13 +136,13 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
 
     switch (instructionOp.type) {
         case InstructionType::R_TYPE:
-            return parseRTypeInstruction(0, argCode[0], argCode[1], argCode[2], 0,
+            return parseRTypeInstruction(0, argCodes[0], argCodes[1], argCodes[2], 0,
                                          instructionOp.opFuncCode);
         case InstructionType::I_TYPE:
-            return parseITypeInstruction(instructionOp.opFuncCode, argCode[0], argCode[1],
-                                         argCode[2]);
+            return parseITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1],
+                                         argCodes[2]);
         case InstructionType::J_TYPE:
-            return parseJTypeInstruction(instructionOp.opFuncCode, argCode[0]);
+            return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
     }
 
     throw std::runtime_error("Unknown instruction type " +
