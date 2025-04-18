@@ -35,7 +35,7 @@ std::vector<uint8_t> intStringToBytes(const std::string& string) {
 }
 
 
-std::vector<Token> filterList(const std::vector<Token>& listTokens) {
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens) {
     std::vector<Token> elements = {};
 
     for (size_t i = 0; i < listTokens.size(); i++) {

@@ -26,7 +26,7 @@ std::vector<uint8_t> Parser::parseDirective(const std::vector<Token>& dirTokens)
             throw std::runtime_error(".word expects at least one argument");
 
         const std::vector unfilteredArgs(dirTokens.begin() + 1, dirTokens.end());
-        std::vector<Token> args = filterList(unfilteredArgs);
+        std::vector<Token> args = filterTokenList(unfilteredArgs);
 
         for (const Token& arg : args) {
             if (arg.type != TokenType::IMMEDIATE)
@@ -96,7 +96,7 @@ std::vector<uint8_t> Parser::parseInstruction(const std::vector<Token>& instrTok
     RegisterFile regFile{};
 
     const std::vector unfilteredArgs(instrTokens.begin() + 1, instrTokens.end());
-    const std::vector<Token> args = filterList(unfilteredArgs);
+    const std::vector<Token> args = filterTokenList(unfilteredArgs);
     // Throw error if pattern for instruction is invalud
     validateInstruction(instrTokens[0], args);
 

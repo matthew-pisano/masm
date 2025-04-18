@@ -59,3 +59,35 @@ TEST_CASE("Test Integer String to Bytes") {
         REQUIRE_THROWS(intStringToBytes("-2147483649"));
     }
 }
+
+
+TEST_CASE("Test Filter Token List") {
+    Token reg = {TokenType::REGISTER, "reg"};
+    Token sep = {TokenType::SEPERATOR, ","};
+
+    SECTION("Test Valid Token Lists") {
+        std::vector tokens = {reg};
+        std::vector expectedTokens = {reg};
+        std::vector<Token> actualTokens = filterTokenList(tokens);
+        REQUIRE(expectedTokens == actualTokens);
+
+        tokens = {reg, sep, reg, sep, reg};
+        expectedTokens = {reg, reg, reg};
+        actualTokens = filterTokenList(tokens);
+        REQUIRE(expectedTokens == actualTokens);
+    }
+
+    SECTION("Test Invalid Token Lists") {
+        std::vector tokens = {sep};
+        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+
+        tokens = {sep, reg};
+        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+
+        tokens = {reg, sep};
+        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+
+        tokens = {reg, sep, reg, sep};
+        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+    }
+}

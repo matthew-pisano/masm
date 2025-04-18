@@ -15,7 +15,7 @@ std::vector<uint8_t> stringToBytes(const std::string& string);
 
 std::vector<uint8_t> intStringToBytes(const std::string& string);
 
-std::vector<Token> filterList(const std::vector<Token>& listTokens);
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens);
 
 bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Token>& tokens);
 
