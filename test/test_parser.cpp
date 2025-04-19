@@ -34,7 +34,7 @@ TEST_CASE("Test Parse Labels") {
 }
 
 
-TEST_CASE("Test Arithmetic") {
+TEST_CASE("Test Parse Arithmetic") {
     Parser parser{};
     const std::vector<std::vector<Token>> program = {
             // .data
@@ -87,5 +87,43 @@ TEST_CASE("Test Arithmetic") {
                                0x21, 0x2a, 0x04, 0x00,
                                // sub $t2, $t2, $t0
                                0x01, 0x48, 0x50, 0x22}}};
+    REQUIRE(expectedMem == actualMem);
+}
+
+
+TEST_CASE("Test Parse Syscall") {
+    Parser parser{};
+    const std::vector<std::vector<Token>> program = {
+            // .data
+            {{TokenType::MEMDIRECTIVE, "data"}},
+            // string: .asciiz "hello"
+            {{TokenType::LABEL, "string"}},
+            {{TokenType::DIRECTIVE, "asciiz"}, {TokenType::STRING, "hello"}},
+            // .text
+            {{TokenType::MEMDIRECTIVE, "text"}},
+            // main: li $v0, 4
+            {{TokenType::LABEL, "main"}},
+            {{TokenType::INSTRUCTION, "li"},
+             {TokenType::REGISTER, "v0"},
+             {TokenType::SEPERATOR, ","},
+             {TokenType::IMMEDIATE, "4"}},
+            // la $a0, string
+            {{TokenType::INSTRUCTION, "la"},
+             {TokenType::REGISTER, "a0"},
+             {TokenType::SEPERATOR, ","},
+             {TokenType::LABELREF, "string"}},
+            // syscall
+            {{TokenType::INSTRUCTION, "syscall"}}};
+    MemLayout actualMem = parser.parse(program);
+    MemLayout expectedMem = {{MemSection::DATA, {'h', 'e', 'l', 'l', 'o'}},
+                             {MemSection::TEXT,
+                              {// addiu $v0, $zero, 0x00000004
+                               0x24, 0x02, 0x00, 0x04,
+                               // lui $at, 0x00001001
+                               0x3c, 0x01, 0x10, 0x01,
+                               // ori $a0, $at, 0x00000000
+                               0x34, 0x24, 0x00, 0x00,
+                               // syscall
+                               0x00, 0x00, 0x00, 0x0c}}};
     REQUIRE(expectedMem == actualMem);
 }
