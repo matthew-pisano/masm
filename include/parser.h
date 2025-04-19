@@ -24,7 +24,8 @@ class Parser {
     static std::vector<uint8_t> parseDirective(const Token& dirToken,
                                                const std::vector<Token>& args);
 
-    std::vector<uint8_t> parseInstruction(const Token& instrToken, std::vector<Token>& args);
+    std::vector<uint8_t> parseInstruction(uint32_t loc, const Token& instrToken,
+                                          std::vector<Token>& args);
 
     static std::vector<uint8_t> parseRTypeInstruction(uint32_t rs, uint32_t rt, uint32_t rd,
                                                       uint32_t shamt, uint32_t funct);
@@ -35,16 +36,17 @@ class Parser {
     static std::vector<uint8_t> parseShortITypeInstruction(uint32_t opcode, uint32_t rt,
                                                            uint32_t immediate);
 
-    static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
+    static std::vector<uint8_t> parseJTypeInstruction(uint32_t loc, uint32_t opcode,
+                                                      uint32_t address);
 
     static std::vector<uint8_t> parseSyscallInstruction();
 
-    std::vector<uint8_t> parsePseudoInstruction(const std::string& instructionName,
+    std::vector<uint8_t> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
                                                 std::vector<Token>& args);
 
-    std::vector<uint8_t> parseBranchPseudoInstruction(const Token& reg1, const Token& reg2,
-                                                      const Token& label, bool checkLt,
-                                                      bool checkEq);
+    std::vector<uint8_t> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
+                                                      const Token& reg2, const Token& label,
+                                                      bool checkLt, bool checkEq);
 
     void populateLabels(const std::vector<std::vector<Token>>& tokens);
 

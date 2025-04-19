@@ -94,10 +94,11 @@ std::vector<uint8_t> Parser::parseShortITypeInstruction(const uint32_t opcode, c
 }
 
 
-std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const uint32_t address) {
+std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t loc, const uint32_t opcode,
+                                                   const uint32_t address) {
 
-    // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (opcode & 0x3F) << 26 | (address & 0x3FFFFFF);
+    // Combine fields into 32-bit instruction code (address shifted by 2 to byte align to 4)
+    const uint32_t instruction = (opcode & 0x3F) << 26 | (address & 0x3FFFFFF) >> 2;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
@@ -113,12 +114,13 @@ std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const 
 std::vector<uint8_t> Parser::parseSyscallInstruction() { return {0x00, 0x00, 0x00, 0x0c}; }
 
 
-std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructionName,
+std::vector<uint8_t> Parser::parsePseudoInstruction(const uint32_t loc,
+                                                    const std::string& instructionName,
                                                     std::vector<Token>& args) {
 
     if (instructionName == "li") {
         std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
-        return parseInstruction({TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
+        return parseInstruction(loc, {TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
     }
     if (instructionName == "la") {
         const unsigned int upperBytes = (std::stoi(args[1].value) & 0xFFFF0000) >> 16;
@@ -126,54 +128,56 @@ std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructi
         std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "at"},
                                            {TokenType::IMMEDIATE, std::to_string(upperBytes)}};
         std::vector<uint8_t> luiBytes =
-                parseInstruction({TokenType::INSTRUCTION, "lui"}, modifiedArgs);
+                parseInstruction(loc, {TokenType::INSTRUCTION, "lui"}, modifiedArgs);
 
         modifiedArgs = {args[0],
                         {TokenType::REGISTER, "at"},
                         {TokenType::IMMEDIATE, std::to_string(lowerBytes)}};
         std::vector<uint8_t> oriBytes =
-                parseInstruction({TokenType::INSTRUCTION, "ori"}, modifiedArgs);
+                parseInstruction(loc, {TokenType::INSTRUCTION, "ori"}, modifiedArgs);
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end()) {
         if (instructionName == branchPseudoInstrs[0])
-            return parseBranchPseudoInstruction(args[0], args[1], args[3], true, false);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], true, false);
         if (instructionName == branchPseudoInstrs[1])
-            return parseBranchPseudoInstruction(args[0], args[1], args[3], false, false);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], false, false);
         if (instructionName == branchPseudoInstrs[2])
-            return parseBranchPseudoInstruction(args[0], args[1], args[3], false, true);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], false, true);
         if (instructionName == branchPseudoInstrs[3])
-            return parseBranchPseudoInstruction(args[0], args[1], args[3], true, true);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], true, true);
     }
 
     throw std::runtime_error("Unknown pseudo instruction " + instructionName);
 }
 
 
-std::vector<uint8_t> Parser::parseBranchPseudoInstruction(const Token& reg1, const Token& reg2,
-                                                          const Token& label, const bool checkLt,
-                                                          const bool checkEq) {
+std::vector<uint8_t> Parser::parseBranchPseudoInstruction(const uint32_t loc, const Token& reg1,
+                                                          const Token& reg2, const Token& label,
+                                                          const bool checkLt, const bool checkEq) {
     std::vector<Token> modifiedArgs;
     if (checkLt)
         modifiedArgs = {{TokenType::REGISTER, "at"}, reg1, reg2};
     else
         modifiedArgs = {{TokenType::REGISTER, "at"}, reg2, reg1};
 
-    std::vector<uint8_t> sltBytes = parseInstruction({TokenType::INSTRUCTION, "slt"}, modifiedArgs);
+    std::vector<uint8_t> sltBytes =
+            parseInstruction(loc, {TokenType::INSTRUCTION, "slt"}, modifiedArgs);
     std::vector<uint8_t> branchBytes;
     modifiedArgs = {{TokenType::REGISTER, "at"}, {TokenType::REGISTER, "zero"}, label};
     if (checkEq)
-        branchBytes = parseInstruction({TokenType::INSTRUCTION, "beq"}, modifiedArgs);
+        branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "beq"}, modifiedArgs);
     else
-        branchBytes = parseInstruction({TokenType::INSTRUCTION, "bne"}, modifiedArgs);
+        branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "bne"}, modifiedArgs);
 
     sltBytes.insert(sltBytes.end(), branchBytes.begin(), branchBytes.end());
     return sltBytes;
 }
 
-std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vector<Token>& args) {
+std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
+                                              std::vector<Token>& args) {
     RegisterFile regFile{};
 
     // Throw error if pattern for instruction is invalid
@@ -216,13 +220,13 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
             return parseShortITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1]);
 
         case InstructionType::J_TYPE:
-            return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
+            return parseJTypeInstruction(loc, instructionOp.opFuncCode, argCodes[0]);
 
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
 
         case InstructionType::PSEUDO:
-            return parsePseudoInstruction(instrToken.value, args);
+            return parsePseudoInstruction(loc, instrToken.value, args);
     }
     // Should never be reached
     throw std::runtime_error("Unknown instruction type " +
@@ -282,6 +286,7 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
         if (line.empty())
             continue;
 
+        const uint32_t memLoc = memSectionOffset(currSection) + memory[currSection].size();
         const Token& firstToken = line[0];
         const std::vector unfilteredArgs(line.begin() + 1, line.end());
         std::vector<Token> args = filterTokenList(unfilteredArgs);
@@ -300,7 +305,8 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::INSTRUCTION: {
-                const std::vector<uint8_t> instructionBytes = parseInstruction(firstToken, args);
+                const std::vector<uint8_t> instructionBytes =
+                        parseInstruction(memLoc, firstToken, args);
                 memory[currSection].insert(memory[currSection].end(), instructionBytes.begin(),
                                            instructionBytes.end());
                 break;
