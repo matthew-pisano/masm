@@ -26,7 +26,7 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenize() const {
+std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& lines) {
     std::vector<std::vector<Token>> tokenizedFile = {};
 
     for (size_t i = 0; i < lines.size(); ++i) {

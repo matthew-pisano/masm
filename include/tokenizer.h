@@ -39,9 +39,8 @@ class Tokenizer {
     std::vector<std::string> lines;
 
 public:
-    explicit Tokenizer(const std::vector<std::string>& lines) : lines(lines) {}
-
-    [[nodiscard]] std::vector<std::vector<Token>> tokenize() const;
+    [[nodiscard]] static std::vector<std::vector<Token>>
+    tokenize(const std::vector<std::string>& lines);
 
     static std::vector<std::vector<Token>> tokenizeLine(const std::string& line);
 };
