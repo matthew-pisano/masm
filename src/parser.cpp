@@ -54,8 +54,8 @@ std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t rs, const uint
                                                    const uint32_t funct) {
 
     // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
-                                 (rd & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
+    const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rd & 0x1F) << 16 |
+                                 (rt & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
@@ -240,7 +240,7 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
             for (const std::string& label : pendingLabels) {
                 if (labelMap.contains(label))
                     throw std::runtime_error("Duplicate label " + label);
-                labelMap[label] = memSectionOffset(currSection) + 8 * initialMemSecSize;
+                labelMap[label] = memSectionOffset(currSection) + initialMemSecSize;
             }
             pendingLabels.clear();
         }
