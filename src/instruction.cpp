@@ -60,6 +60,7 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"lh", {InstructionType::I_TYPE, 0x21}},
         {"lhu", {InstructionType::I_TYPE, 0x25}},
         {"lw", {InstructionType::I_TYPE, 0x23}},
+        {"lui", {InstructionType::I_TYPE, 0x0f}},
 
         // Store Instructions
         {"sb", {InstructionType::I_TYPE, 0x28}},
@@ -82,12 +83,15 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
                                 args))
                 throw std::runtime_error("Invalid R-Type instruction");
+            break;
         case InstructionType::I_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
                 throw std::runtime_error("Invalid I-Type instruction");
+            break;
         case InstructionType::J_TYPE:
-            if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::LABELREF}, args))
+            if (!tokenTypeMatch({TokenType::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid J-Type instruction");
+            break;
     }
 }

@@ -19,8 +19,6 @@ class Parser {
     std::map<std::string, uint32_t> labelMap;
     MemLayout memory;
 
-    MemLayout parse(const std::vector<std::vector<Token>>& tokens);
-
     void resolveLabels(std::vector<Token>& instructionArgs);
 
     static std::vector<uint8_t> parseDirective(const Token& dirToken,
@@ -35,6 +33,9 @@ class Parser {
                                                       uint32_t immediate);
 
     static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
+
+public:
+    MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 };
 
 #endif // PARSER_H

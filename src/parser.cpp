@@ -159,6 +159,7 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
         const Token& firstToken = line[0];
         const std::vector unfilteredArgs(line.begin() + 1, line.end());
         std::vector<Token> args = filterTokenList(unfilteredArgs);
+        size_t initialMemSecSize = memory[currSection].size();
 
         switch (firstToken.type) {
             case TokenType::MEMDIRECTIVE: {
@@ -195,9 +196,9 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
             for (const std::string& label : pendingLabels) {
                 if (labelMap.contains(label))
                     throw std::runtime_error("Duplicate label " + label);
-                labelMap[label] =
-                        memSectionOffset(currSection) + 8 * (memory[currSection].size() - 1);
+                labelMap[label] = memSectionOffset(currSection) + 8 * initialMemSecSize;
             }
+            pendingLabels.clear();
         }
     }
 
