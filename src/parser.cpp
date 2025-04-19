@@ -50,13 +50,13 @@ std::vector<uint8_t> Parser::parseDirective(const Token& dirToken, const std::ve
 }
 
 
-std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t rs, const uint32_t rt,
-                                                   const uint32_t rd, const uint32_t shamt,
+std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t rd, const uint32_t rs,
+                                                   const uint32_t rt, const uint32_t shamt,
                                                    const uint32_t funct) {
 
     // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rd & 0x1F) << 16 |
-                                 (rt & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
+    const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
+                                 (rd & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
