@@ -7,7 +7,7 @@
 #include <cstdint>
 #include "tokenizer.h"
 
-enum class InstructionType { R_TYPE, I_TYPE, J_TYPE, SHORT_I_TYPE, PSEUDO };
+enum class InstructionType { R_TYPE, I_TYPE, J_TYPE, SHORT_I_TYPE, SYSCALL, PSEUDO };
 
 struct InstructionOp {
     InstructionType type;

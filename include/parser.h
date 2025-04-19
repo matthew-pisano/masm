@@ -37,6 +37,8 @@ class Parser {
 
     static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
 
+    static std::vector<uint8_t> parseSyscallInstruction();
+
     std::vector<uint8_t> parsePseudoInstruction(const std::string& instructionName,
                                                 std::vector<Token>& args);
 

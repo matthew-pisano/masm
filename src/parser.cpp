@@ -109,6 +109,9 @@ std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const 
 }
 
 
+std::vector<uint8_t> Parser::parseSyscallInstruction() { return {0x00, 0x00, 0x00, 0x0c}; }
+
+
 std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructionName,
                                                     std::vector<Token>& args) {
     // Resolve label references to their computed address values
@@ -181,6 +184,9 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
 
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
+
+        case InstructionType::SYSCALL:
+            return parseSyscallInstruction();
 
         case InstructionType::PSEUDO:
             return parsePseudoInstruction(instrToken.value, args);

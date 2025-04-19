@@ -69,7 +69,10 @@ std::map<std::string, InstructionOp> instructionNameMap = {
 
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, 0}},
-        {"la", {InstructionType::PSEUDO, 0}}};
+        {"la", {InstructionType::PSEUDO, 0}},
+
+        // Syscall
+        {"syscall", {InstructionType::SYSCALL, 0}}};
 
 
 InstructionOp nameToInstructionOp(const std::string& name) {
@@ -104,6 +107,10 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for I-Type instruction " +
                                          instruction.value);
+            break;
+        case InstructionType::SYSCALL:
+            if (!tokenTypeMatch({}, args))
+                throw std::runtime_error("Invalid format for Syscall");
             break;
         case InstructionType::PSEUDO:
             validatePseudoInstruction(instruction, args);
