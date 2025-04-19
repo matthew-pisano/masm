@@ -73,7 +73,7 @@ std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const 
 
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
-            (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | immediate & 0xFFFF;
+            (opcode & 0x3F) << 26 | (rt & 0x1F) << 21 | (rs & 0x1F) << 16 | immediate & 0xFFFF;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
@@ -84,6 +84,14 @@ std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const 
 
     return bytes;
 }
+
+
+std::vector<uint8_t> Parser::parseShortITypeInstruction(const uint32_t opcode, const uint32_t rt,
+                                                        const uint32_t immediate) {
+
+    return parseITypeInstruction(opcode, rt, 0, immediate);
+}
+
 
 std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const uint32_t address) {
 
@@ -100,11 +108,39 @@ std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const 
     return bytes;
 }
 
+
+std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructionName,
+                                                    std::vector<Token>& args) {
+    // Resolve label references to their computed address values
+    resolveLabels(args);
+
+    if (instructionName == "li") {
+        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "0"}, args[1]};
+        return parseInstruction({TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
+    }
+    if (instructionName == "la") {
+        const unsigned int upperBytes = (std::stoi(args[1].value) & 0xFFFF0000) >> 16;
+        const unsigned int lowerBytes = std::stoi(args[1].value) & 0x0000FFFF;
+        std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "at"},
+                                           {TokenType::IMMEDIATE, std::to_string(upperBytes)}};
+        std::vector<uint8_t> luiBytes =
+                parseInstruction({TokenType::INSTRUCTION, "lui"}, modifiedArgs);
+
+        modifiedArgs = {args[0],
+                        {TokenType::REGISTER, "at"},
+                        {TokenType::IMMEDIATE, std::to_string(lowerBytes)}};
+        std::vector<uint8_t> oriBytes =
+                parseInstruction({TokenType::INSTRUCTION, "ori"}, modifiedArgs);
+        luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
+        return luiBytes;
+    }
+
+    throw std::runtime_error("Unknown pseudo instruction " + instructionName);
+}
+
 std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vector<Token>& args) {
     RegisterFile regFile{};
 
-    // Resolve label references to their computed address values
-    resolveLabels(args);
     // Throw error if pattern for instruction is invalid
     validateInstruction(instrToken, args);
 
@@ -124,6 +160,8 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
                 else
                     argCodes.push_back(regFile.indexFromName(arg.value));
                 break;
+            case TokenType::LABELREF:
+                break;
             default:
                 throw std::runtime_error("Invalid argument type " +
                                          std::to_string(static_cast<int>(arg.type)));
@@ -138,8 +176,14 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
         case InstructionType::I_TYPE:
             return parseITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1],
                                          argCodes[2]);
+        case InstructionType::SHORT_I_TYPE:
+            return parseShortITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1]);
+
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
+
+        case InstructionType::PSEUDO:
+            return parsePseudoInstruction(instrToken.value, args);
     }
     // Should never be reached
     throw std::runtime_error("Unknown instruction type " +

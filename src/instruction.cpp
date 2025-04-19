@@ -60,12 +60,16 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"lh", {InstructionType::I_TYPE, 0x21}},
         {"lhu", {InstructionType::I_TYPE, 0x25}},
         {"lw", {InstructionType::I_TYPE, 0x23}},
-        {"lui", {InstructionType::I_TYPE, 0x0f}},
+        {"lui", {InstructionType::SHORT_I_TYPE, 0x0f}},
 
         // Store Instructions
         {"sb", {InstructionType::I_TYPE, 0x28}},
         {"sh", {InstructionType::I_TYPE, 0x29}},
-        {"sw", {InstructionType::I_TYPE, 0x2B}}};
+        {"sw", {InstructionType::I_TYPE, 0x2B}},
+
+        // Pseudo Instructions
+        {"li", {InstructionType::PSEUDO, 0}},
+        {"la", {InstructionType::PSEUDO, 0}}};
 
 
 InstructionOp nameToInstructionOp(const std::string& name) {
@@ -82,16 +86,39 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         case InstructionType::R_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
                                 args))
-                throw std::runtime_error("Invalid R-Type instruction");
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
             break;
         case InstructionType::I_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
-                throw std::runtime_error("Invalid I-Type instruction");
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
             break;
         case InstructionType::J_TYPE:
             if (!tokenTypeMatch({TokenType::IMMEDIATE}, args))
-                throw std::runtime_error("Invalid J-Type instruction");
+                throw std::runtime_error("Invalid format for J-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::SHORT_I_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::PSEUDO:
+            validatePseudoInstruction(instruction, args);
             break;
     }
+}
+
+
+void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
+    std::string instructionName = instruction.value;
+
+    if (instructionName == "li" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "la" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }

@@ -32,7 +32,13 @@ class Parser {
     static std::vector<uint8_t> parseITypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
                                                       uint32_t immediate);
 
+    static std::vector<uint8_t> parseShortITypeInstruction(uint32_t opcode, uint32_t rt,
+                                                           uint32_t immediate);
+
     static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
+
+    std::vector<uint8_t> parsePseudoInstruction(const std::string& instructionName,
+                                                std::vector<Token>& args);
 
 public:
     MemLayout parse(const std::vector<std::vector<Token>>& tokens);
