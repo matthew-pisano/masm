@@ -12,67 +12,75 @@
 
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
-        {"add", {InstructionType::R_TYPE, 0x20}},
-        {"addu", {InstructionType::R_TYPE, 0x21}},
-        {"addi", {InstructionType::I_TYPE, 0x08}},
-        {"addiu", {InstructionType::I_TYPE, 0x09}},
-        {"and", {InstructionType::R_TYPE, 0x24}},
-        {"andi", {InstructionType::I_TYPE, 0x0C}},
-        {"div", {InstructionType::R_TYPE, 0x1A}},
-        {"divu", {InstructionType::R_TYPE, 0x1B}},
-        {"mult", {InstructionType::R_TYPE, 0x18}},
-        {"multu", {InstructionType::R_TYPE, 0x19}},
-        {"nor", {InstructionType::R_TYPE, 0x27}},
-        {"or", {InstructionType::R_TYPE, 0x25}},
-        {"ori", {InstructionType::I_TYPE, 0x0D}},
-        {"sll", {InstructionType::R_TYPE, 0x00}},
-        {"sllv", {InstructionType::R_TYPE, 0x04}},
-        {"sra", {InstructionType::R_TYPE, 0x03}},
-        {"srav", {InstructionType::R_TYPE, 0x07}},
-        {"srl", {InstructionType::R_TYPE, 0x02}},
-        {"srlv", {InstructionType::R_TYPE, 0x06}},
-        {"sub", {InstructionType::R_TYPE, 0x22}},
-        {"subu", {InstructionType::R_TYPE, 0x23}},
-        {"xor", {InstructionType::R_TYPE, 0x26}},
-        {"xori", {InstructionType::I_TYPE, 0x0E}},
+        {"add", {InstructionType::R_TYPE, 0x20, 4}},
+        {"addu", {InstructionType::R_TYPE, 0x21, 4}},
+        {"addi", {InstructionType::I_TYPE, 0x08, 4}},
+        {"addiu", {InstructionType::I_TYPE, 0x09, 4}},
+        {"and", {InstructionType::R_TYPE, 0x24, 4}},
+        {"andi", {InstructionType::I_TYPE, 0x0C, 4}},
+        {"div", {InstructionType::R_TYPE, 0x1A, 4}},
+        {"divu", {InstructionType::R_TYPE, 0x1B, 4}},
+        {"mult", {InstructionType::R_TYPE, 0x18, 4}},
+        {"multu", {InstructionType::R_TYPE, 0x19, 4}},
+        {"nor", {InstructionType::R_TYPE, 0x27, 4}},
+        {"or", {InstructionType::R_TYPE, 0x25, 4}},
+        {"ori", {InstructionType::I_TYPE, 0x0D, 4}},
+        {"sll", {InstructionType::R_TYPE, 0x00, 4}},
+        {"sllv", {InstructionType::R_TYPE, 0x04, 4}},
+        {"sra", {InstructionType::R_TYPE, 0x03, 4}},
+        {"srav", {InstructionType::R_TYPE, 0x07, 4}},
+        {"srl", {InstructionType::R_TYPE, 0x02, 4}},
+        {"srlv", {InstructionType::R_TYPE, 0x06, 4}},
+        {"sub", {InstructionType::R_TYPE, 0x22, 4}},
+        {"subu", {InstructionType::R_TYPE, 0x23, 4}},
+        {"xor", {InstructionType::R_TYPE, 0x26, 4}},
+        {"xori", {InstructionType::I_TYPE, 0x0E, 4}},
 
         // Comparison Instructions
-        {"slt", {InstructionType::R_TYPE, 0x2a}},
-        {"sltu", {InstructionType::R_TYPE, 0x29}},
-        {"slti", {InstructionType::I_TYPE, 0x0a}},
-        {"sltiu", {InstructionType::I_TYPE, 0x09}},
+        {"slt", {InstructionType::R_TYPE, 0x2a, 4}},
+        {"sltu", {InstructionType::R_TYPE, 0x29, 4}},
+        {"slti", {InstructionType::I_TYPE, 0x0a, 4}},
+        {"sltiu", {InstructionType::I_TYPE, 0x09, 4}},
 
         // Branch Instructions
-        {"beq", {InstructionType::I_TYPE, 0x04}},
-        {"bgtz", {InstructionType::I_TYPE, 0x07}},
-        {"blez", {InstructionType::I_TYPE, 0x06}},
-        {"bne", {InstructionType::I_TYPE, 0x05}},
+        {"beq", {InstructionType::I_TYPE, 0x04, 4}},
+        {"bgtz", {InstructionType::I_TYPE, 0x07, 4}},
+        {"blez", {InstructionType::I_TYPE, 0x06, 4}},
+        {"bltz", {InstructionType::I_TYPE, 0x07, 4}},
+        {"bgez", {InstructionType::I_TYPE, 0x06, 4}},
+        {"bne", {InstructionType::I_TYPE, 0x05, 4}},
 
         // Jump Instructions
-        {"j", {InstructionType::J_TYPE, 0x02}},
-        {"jal", {InstructionType::J_TYPE, 0x03}},
-        {"jalr", {InstructionType::R_TYPE, 0x09}},
-        {"jr", {InstructionType::R_TYPE, 0x08}},
+        {"j", {InstructionType::J_TYPE, 0x02, 4}},
+        {"jal", {InstructionType::J_TYPE, 0x03, 4}},
+        {"jalr", {InstructionType::R_TYPE, 0x09, 4}},
+        {"jr", {InstructionType::R_TYPE, 0x08, 4}},
 
         // Load Instructions
-        {"lb", {InstructionType::I_TYPE, 0x20}},
-        {"lbu", {InstructionType::I_TYPE, 0x24}},
-        {"lh", {InstructionType::I_TYPE, 0x21}},
-        {"lhu", {InstructionType::I_TYPE, 0x25}},
-        {"lw", {InstructionType::I_TYPE, 0x23}},
-        {"lui", {InstructionType::SHORT_I_TYPE, 0x0f}},
+        {"lb", {InstructionType::I_TYPE, 0x20, 4}},
+        {"lbu", {InstructionType::I_TYPE, 0x24, 4}},
+        {"lh", {InstructionType::I_TYPE, 0x21, 4}},
+        {"lhu", {InstructionType::I_TYPE, 0x25, 4}},
+        {"lw", {InstructionType::I_TYPE, 0x23, 4}},
+        {"lui", {InstructionType::SHORT_I_TYPE, 0x0f, 4}},
 
         // Store Instructions
-        {"sb", {InstructionType::I_TYPE, 0x28}},
-        {"sh", {InstructionType::I_TYPE, 0x29}},
-        {"sw", {InstructionType::I_TYPE, 0x2B}},
-
-        // Pseudo Instructions
-        {"li", {InstructionType::PSEUDO, 0}},
-        {"la", {InstructionType::PSEUDO, 0}},
+        {"sb", {InstructionType::I_TYPE, 0x28, 4}},
+        {"sh", {InstructionType::I_TYPE, 0x29, 4}},
+        {"sw", {InstructionType::I_TYPE, 0x2B, 4}},
 
         // Syscall
-        {"syscall", {InstructionType::SYSCALL, 0}}};
+        {"syscall", {InstructionType::SYSCALL, 0, 4}},
+
+        // Pseudo Instructions
+        {"li", {InstructionType::PSEUDO, 0, 4}},
+        {"la", {InstructionType::PSEUDO, 0, 8}},
+        {"blt", {InstructionType::PSEUDO, 0, 8}},
+        {"bgt", {InstructionType::PSEUDO, 0, 8}},
+        {"bge", {InstructionType::PSEUDO, 0, 8}},
+        {"ble", {InstructionType::PSEUDO, 0, 8}},
+
+};
 
 
 InstructionOp nameToInstructionOp(const std::string& name) {
@@ -99,7 +107,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                                          instruction.value);
             break;
         case InstructionType::J_TYPE:
-            if (!tokenTypeMatch({TokenType::IMMEDIATE}, args))
+            if (!tokenTypeMatch({TokenType::LABELREF}, args))
                 throw std::runtime_error("Invalid format for J-Type instruction " +
                                          instruction.value);
             break;
@@ -120,6 +128,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 
 
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
+    std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
     std::string instructionName = instruction.value;
 
     if (instructionName == "li" &&
@@ -127,5 +136,8 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "la" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABELREF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }

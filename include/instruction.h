@@ -12,6 +12,7 @@ enum class InstructionType { R_TYPE, I_TYPE, J_TYPE, SHORT_I_TYPE, SYSCALL, PSEU
 struct InstructionOp {
     InstructionType type;
     uint8_t opFuncCode;
+    uint8_t size;
 };
 
 

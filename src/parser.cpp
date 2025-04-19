@@ -4,6 +4,7 @@
 
 #include "parser.h"
 
+#include <algorithm>
 #include <register.h>
 #include <stdexcept>
 
@@ -114,11 +115,9 @@ std::vector<uint8_t> Parser::parseSyscallInstruction() { return {0x00, 0x00, 0x0
 
 std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructionName,
                                                     std::vector<Token>& args) {
-    // Resolve label references to their computed address values
-    resolveLabels(args);
 
     if (instructionName == "li") {
-        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "0"}, args[1]};
+        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
         return parseInstruction({TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
     }
     if (instructionName == "la") {
@@ -137,8 +136,41 @@ std::vector<uint8_t> Parser::parsePseudoInstruction(const std::string& instructi
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
+    std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
+    if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end()) {
+        if (instructionName == branchPseudoInstrs[0])
+            return parseBranchPseudoInstruction(args[0], args[1], args[3], true, false);
+        if (instructionName == branchPseudoInstrs[1])
+            return parseBranchPseudoInstruction(args[0], args[1], args[3], false, false);
+        if (instructionName == branchPseudoInstrs[2])
+            return parseBranchPseudoInstruction(args[0], args[1], args[3], false, true);
+        if (instructionName == branchPseudoInstrs[3])
+            return parseBranchPseudoInstruction(args[0], args[1], args[3], true, true);
+    }
 
     throw std::runtime_error("Unknown pseudo instruction " + instructionName);
+}
+
+
+std::vector<uint8_t> Parser::parseBranchPseudoInstruction(const Token& reg1, const Token& reg2,
+                                                          const Token& label, const bool checkLt,
+                                                          const bool checkEq) {
+    std::vector<Token> modifiedArgs;
+    if (checkLt)
+        modifiedArgs = {{TokenType::REGISTER, "at"}, reg1, reg2};
+    else
+        modifiedArgs = {{TokenType::REGISTER, "at"}, reg2, reg1};
+
+    std::vector<uint8_t> sltBytes = parseInstruction({TokenType::INSTRUCTION, "slt"}, modifiedArgs);
+    std::vector<uint8_t> branchBytes;
+    modifiedArgs = {{TokenType::REGISTER, "at"}, {TokenType::REGISTER, "zero"}, label};
+    if (checkEq)
+        branchBytes = parseInstruction({TokenType::INSTRUCTION, "beq"}, modifiedArgs);
+    else
+        branchBytes = parseInstruction({TokenType::INSTRUCTION, "bne"}, modifiedArgs);
+
+    sltBytes.insert(sltBytes.end(), branchBytes.begin(), branchBytes.end());
+    return sltBytes;
 }
 
 std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vector<Token>& args) {
@@ -146,6 +178,9 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
 
     // Throw error if pattern for instruction is invalid
     validateInstruction(instrToken, args);
+
+    // Resolve label references to their computed address values
+    resolveLabels(args);
 
     InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
     std::vector<uint32_t> argCodes = {};
@@ -162,8 +197,6 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
                     argCodes.push_back(std::stoi(arg.value));
                 else
                     argCodes.push_back(regFile.indexFromName(arg.value));
-                break;
-            case TokenType::LABELREF:
                 break;
             default:
                 throw std::runtime_error("Invalid argument type " +
@@ -197,10 +230,9 @@ std::vector<uint8_t> Parser::parseInstruction(const Token& instrToken, std::vect
 }
 
 
-MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
+void Parser::populateLabels(const std::vector<std::vector<Token>>& tokens) {
     MemSection currSection = MemSection::TEXT;
-    memory[currSection] = {};
-    std::vector<std::string> pendingLabels = {};
+    std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
 
     for (const std::vector<Token>& line : tokens) {
         if (line.empty())
@@ -209,7 +241,50 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
         const Token& firstToken = line[0];
         const std::vector unfilteredArgs(line.begin() + 1, line.end());
         std::vector<Token> args = filterTokenList(unfilteredArgs);
-        size_t initialMemSecSize = memory[currSection].size();
+        switch (firstToken.type) {
+            case TokenType::MEMDIRECTIVE: {
+                currSection = nameToMemSection(firstToken.value);
+                if (!memSizes.contains(currSection))
+                    memSizes[currSection] = 0;
+                break;
+            }
+            case TokenType::DIRECTIVE: {
+                std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
+                memSizes[currSection] += directiveBytes.size();
+                break;
+            }
+            case TokenType::INSTRUCTION: {
+                memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
+                break;
+            }
+            case TokenType::LABEL: {
+                if (labelMap.contains(firstToken.value))
+                    throw std::runtime_error("Duplicate label " + firstToken.value);
+                labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+
+MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
+    // Resolve all labels before parsing instructions
+    populateLabels(tokens);
+
+    MemSection currSection = MemSection::TEXT;
+    memory[currSection] = {};
+
+    for (const std::vector<Token>& line : tokens) {
+        if (line.empty())
+            continue;
+
+        const Token& firstToken = line[0];
+        const std::vector unfilteredArgs(line.begin() + 1, line.end());
+        std::vector<Token> args = filterTokenList(unfilteredArgs);
 
         switch (firstToken.type) {
             case TokenType::MEMDIRECTIVE: {
@@ -231,7 +306,6 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::LABEL: {
-                pendingLabels.push_back(firstToken.value);
                 break;
             }
             default: {
@@ -239,16 +313,6 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
                         "Encountered unknown token type during parsing for token " +
                         firstToken.value);
             }
-        }
-
-        // Assign pending labels to current instruction or directive
-        if (firstToken.type == TokenType::DIRECTIVE || firstToken.type == TokenType::INSTRUCTION) {
-            for (const std::string& label : pendingLabels) {
-                if (labelMap.contains(label))
-                    throw std::runtime_error("Duplicate label " + label);
-                labelMap[label] = memSectionOffset(currSection) + initialMemSecSize;
-            }
-            pendingLabels.clear();
         }
     }
 

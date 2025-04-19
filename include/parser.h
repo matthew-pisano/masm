@@ -42,6 +42,12 @@ class Parser {
     std::vector<uint8_t> parsePseudoInstruction(const std::string& instructionName,
                                                 std::vector<Token>& args);
 
+    std::vector<uint8_t> parseBranchPseudoInstruction(const Token& reg1, const Token& reg2,
+                                                      const Token& label, bool checkLt,
+                                                      bool checkEq);
+
+    void populateLabels(const std::vector<std::vector<Token>>& tokens);
+
 public:
     MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 };
