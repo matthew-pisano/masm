@@ -10,9 +10,19 @@
 #include <map>
 #include <string>
 
+/**
+ * Class representing the state and labels of registers
+ */
 class RegisterFile {
+
+    /**
+     * A mapping between register numbers and values stored in the registers
+     */
     std::array<uint32_t, 32> registers = {};
 
+    /**
+     * A mapping between the common names of registers and their register numbers
+     */
     std::map<std::string, int> nameToIndex = {
             {"zero", 0}, {"at", 1},  {"v0", 2},  {"v1", 3},  {"a0", 4},  {"a1", 5},  {"a2", 6},
             {"a3", 7},   {"t0", 8},  {"t1", 9},  {"t2", 10}, {"t3", 11}, {"t4", 12}, {"t5", 13},
@@ -21,6 +31,12 @@ class RegisterFile {
             {"gp", 28},  {"sp", 29}, {"fp", 30}, {"ra", 31}};
 
 public:
+    /**
+     * Returns the register number associated with a name
+     * @param name The name of a register
+     * @return The associated register number
+     * @throw runtime_error When an invalid register is requested
+     */
     int indexFromName(const std::string& name);
 
     uint32_t operator[](int index) const;
