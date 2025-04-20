@@ -14,16 +14,16 @@ std::vector<std::string> readFileLines(const std::string& fileName) {
 
     inputFile.open(fileName);
 
-    if (inputFile.is_open()) {
-        std::string line;
-        // Read data from the file line by line
-        while (getline(inputFile, line))
-            result.push_back(line);
-
-        // Close the file
-        inputFile.close();
-    } else
+    if (!inputFile.is_open())
         throw std::runtime_error("Could not open file " + fileName);
+
+    std::string line;
+    // Read data from the file line by line
+    while (getline(inputFile, line))
+        result.push_back(line);
+
+    // Close the file
+    inputFile.close();
 
     return result;
 }

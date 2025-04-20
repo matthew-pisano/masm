@@ -79,11 +79,11 @@ TEST_CASE("Test Single Tokens") {
 
 TEST_CASE("Test Lines") {
     SECTION("Test Labeled String") {
-        const std::vector<std::string> lines = {R"(out_string: .asciiz "\nHello, World!\n")"};
+        const std::vector<std::string> lines = {R"(out_string: .asciiz "\nHello, #World!\n")"};
         std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::LABEL, "out_string"}},
-                {{TokenType::DIRECTIVE, "asciiz"}, {TokenType::STRING, R"(\nHello, World!\n)"}}};
+                {{TokenType::DIRECTIVE, "asciiz"}, {TokenType::STRING, R"(\nHello, #World!\n)"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Immediate Pseudo-Instruction") {

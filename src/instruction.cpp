@@ -10,6 +10,9 @@
 #include "utils.h"
 
 
+/**
+ * A mapping between instruction names and their associated properties
+ */
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
         {"add", {InstructionType::R_TYPE, 0x20, 4}},
@@ -91,9 +94,8 @@ InstructionOp nameToInstructionOp(const std::string& name) {
 
 
 void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
-    InstructionType instructionType = nameToInstructionOp(instruction.value).type;
 
-    switch (instructionType) {
+    switch (nameToInstructionOp(instruction.value).type) {
         case InstructionType::R_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
                                 args))
@@ -130,7 +132,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
-    std::string instructionName = instruction.value;
+    const std::string instructionName = instruction.value;
 
     if (instructionName == "li" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))

@@ -48,7 +48,7 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens) {
 
         if (listTokens[i].type == TokenType::SEPERATOR)
             continue;
-
+        // Only push non seperator elements
         elements.push_back(listTokens[i]);
     }
 
