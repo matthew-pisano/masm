@@ -39,7 +39,7 @@ class Parser {
      * @param tokens The program tokens
      * @throw runtime_error When a duplicate label definition is detected
      */
-    void populateLabels(const std::vector<std::vector<Token>>& tokens);
+    void populateLabelMap(const std::vector<std::vector<Token>>& tokens);
 
     /**
      * Parses a directive and its arguments into bytes that can be allocated to memory
@@ -126,6 +126,12 @@ class Parser {
                                                       const Token& reg2, const Token& label,
                                                       bool checkLt, bool checkEq);
 
+    /**
+     * Parse a single line of tokens into memory allocations
+     * @param memory The memory layout to populate
+     * @param currSection The current section of memory being populated
+     * @param tokenLine The line of tokens to parse
+     */
     void parseLine(MemLayout& memory, MemSection& currSection, const std::vector<Token>& tokenLine);
 
 public:

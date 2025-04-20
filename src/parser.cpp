@@ -22,7 +22,7 @@ void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
 }
 
 
-void Parser::populateLabels(const std::vector<std::vector<Token>>& tokens) {
+void Parser::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
     MemSection currSection = MemSection::TEXT;
     std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
 
@@ -45,19 +45,19 @@ void Parser::populateLabels(const std::vector<std::vector<Token>>& tokens) {
                 memSizes[currSection] += directiveBytes.size();
                 break;
             }
-            case TokenType::INSTRUCTION: {
+            case TokenType::INSTRUCTION:
+                // Get size of instruction from map without parsing
                 memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
                 break;
-            }
             case TokenType::LABEL: {
                 if (labelMap.contains(firstToken.value))
                     throw std::runtime_error("Duplicate label " + firstToken.value);
+                // Assign label to the following byte allocation plus the section offset
                 labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
                 break;
             }
-            default: {
+            default:
                 break;
-            }
         }
     }
 }
@@ -70,6 +70,7 @@ std::vector<uint8_t> Parser::parseDirective(const Token& dirToken, const std::ve
 
     std::vector<uint8_t> bytes = {};
 
+    // Return a byte vector containing each character of the string
     if (dirName == "asciiz") {
         if (args.size() > 1)
             throw std::runtime_error(".asciiz expects exactly one argument");
@@ -77,6 +78,7 @@ std::vector<uint8_t> Parser::parseDirective(const Token& dirToken, const std::ve
             throw std::runtime_error(".asciiz expects a string argument");
         return stringToBytes(args[0].value);
     }
+    // Return a word for each argument given
     if (dirName == "word") {
         for (const Token& arg : args) {
             if (arg.type != TokenType::IMMEDIATE)
@@ -161,11 +163,12 @@ std::vector<uint8_t> Parser::parseSyscallInstruction() { return {0x00, 0x00, 0x0
 std::vector<uint8_t> Parser::parsePseudoInstruction(const uint32_t loc,
                                                     const std::string& instructionName,
                                                     std::vector<Token>& args) {
-
+    // li $t0, imm -> addiu $t0, $zero, imm
     if (instructionName == "li") {
         std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
         return parseInstruction(loc, {TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
     }
+    // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
     if (instructionName == "la") {
         const unsigned int upperBytes = (std::stoi(args[1].value) & 0xFFFF0000) >> 16;
         const unsigned int lowerBytes = std::stoi(args[1].value) & 0x0000FFFF;
@@ -182,6 +185,7 @@ std::vector<uint8_t> Parser::parsePseudoInstruction(const uint32_t loc,
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
+    // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end()) {
         if (instructionName == branchPseudoInstrs[0])
@@ -202,6 +206,7 @@ std::vector<uint8_t> Parser::parseBranchPseudoInstruction(const uint32_t loc, co
                                                           const Token& reg2, const Token& label,
                                                           const bool checkLt, const bool checkEq) {
     std::vector<Token> modifiedArgs;
+    // Swap argument order when checking for less than or greater than relationship
     if (checkLt)
         modifiedArgs = {{TokenType::REGISTER, "at"}, reg1, reg2};
     else
@@ -209,8 +214,10 @@ std::vector<uint8_t> Parser::parseBranchPseudoInstruction(const uint32_t loc, co
 
     std::vector<uint8_t> sltBytes =
             parseInstruction(loc, {TokenType::INSTRUCTION, "slt"}, modifiedArgs);
-    std::vector<uint8_t> branchBytes;
+
     modifiedArgs = {{TokenType::REGISTER, "at"}, {TokenType::REGISTER, "zero"}, label};
+    std::vector<uint8_t> branchBytes;
+    // Swap branch instruction when including equal in comparrison or not
     if (checkEq)
         branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "beq"}, modifiedArgs);
     else
@@ -267,13 +274,10 @@ std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& i
         case InstructionType::SHORT_I_TYPE:
             // Location not needed for short I-Type instructions
             return parseITypeInstruction(0, instructionOp.opFuncCode, argCodes[0], 0, argCodes[1]);
-
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
-
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
-
         case InstructionType::PSEUDO:
             return parsePseudoInstruction(loc, instrToken.value, args);
     }
@@ -285,7 +289,9 @@ std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& i
 
 void Parser::parseLine(MemLayout& memory, MemSection& currSection,
                        const std::vector<Token>& tokenLine) {
+    // Get next open location in memory
     const uint32_t memLoc = memSectionOffset(currSection) + memory[currSection].size();
+
     const Token& firstToken = tokenLine[0];
     const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
     std::vector<Token> args = filterTokenList(unfilteredArgs);
@@ -325,9 +331,10 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
     memory[MemSection::TEXT] = {};
 
     // Resolve all labels before parsing instructions
-    populateLabels(tokens);
+    populateLabelMap(tokens);
 
     for (size_t i = 0; i < tokens.size(); ++i) {
+        // Skip empty lines
         if (tokens[i].empty())
             continue;
 
