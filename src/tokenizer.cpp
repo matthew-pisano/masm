@@ -10,10 +10,14 @@
 #include <vector>
 
 
+/**
+ * An array storing the names of memory directives
+ */
 constexpr std::array<const char*, 10> tokenTypeNames = {
         "UNKNOWN",     "MEMDIRECTIVE", "DIRECTIVE", "LABEL",     "LABELREF",
         "INSTRUCTION", "REGISTER",     "IMMEDIATE", "SEPERATOR", "STRING",
 };
+
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
 
@@ -26,41 +30,48 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& lines) {
+std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines) {
     std::vector<std::vector<Token>> tokenizedFile = {};
 
-    for (size_t i = 0; i < lines.size(); ++i) {
-        const std::string& rawLine = lines[i];
+    for (size_t i = 0; i < rawLines.size(); ++i) {
+        const std::string& rawLine = rawLines[i];
         std::vector<std::vector<Token>> tokenizedLines;
         try {
             tokenizedLines = tokenizeLine(rawLine);
         } catch (const std::runtime_error& e) {
             throw std::runtime_error("Error in line " + std::to_string(i + 1) + ": " + e.what());
         }
+        // Skip empty or comment lines
         if (tokenizedLines.empty())
             continue;
 
-        tokenizedFile.insert(tokenizedFile.end(), tokenizedLines.begin(), tokenizedLines.end());
+        for (std::vector line : tokenizedLines)
+            if (!line.empty())
+                tokenizedFile.push_back(line);
     }
 
     return tokenizedFile;
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line) {
+std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
     std::array<std::string, 2> memDirectives = {"data", "text"};
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
 
-    for (char c : (line + ' ')) {
+    // Append space to ensure all characters are tokenized
+    for (const char c : rawLine + ' ') {
+        // When in a string, gather all characters into a single token
         if (currentType == TokenType::STRING) {
+            // Terminate the string when reaching unescaped quote
             if (c == '"' && prevChar != '\\') {
                 currentType = TokenType::UNKNOWN;
                 tokens[tokens.size() - 1].push_back({TokenType::STRING, currentToken});
                 currentToken.clear();
             } else {
+                // Add character to the string token
                 currentToken += c;
             }
 
@@ -68,15 +79,23 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line)
             continue;
         }
 
+        // Skip remainder of line when reaching a comment
+        if (c == '#') {
+            break;
+        }
+
+        // When reaching a natural token terminator
         if (isspace(c) || c == ',' || c == ':') {
+            // Assign the current token as a label definition if a colon follows
             if (c == ':')
                 currentType = TokenType::LABEL;
 
-            // Set as memory directive if directive is data, text, etc.
+            // Reassign directive as memory directive if directive is data, text, etc.
             if (currentType == TokenType::DIRECTIVE &&
                 std::ranges::find(memDirectives, currentToken) != memDirectives.end())
                 currentType = TokenType::MEMDIRECTIVE;
 
+            // Add the current token to the vector and reset
             if (!currentToken.empty()) {
                 tokens[tokens.size() - 1].push_back({currentType, currentToken});
                 currentToken.clear();
@@ -89,42 +108,45 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& line)
             else if (c == ',')
                 tokens[tokens.size() - 1].push_back({TokenType::SEPERATOR, ","});
 
-            c = '\0';
-        } else if (c == '.' && currentType == TokenType::UNKNOWN) {
+            continue;
+        }
+        // A preceding dot marks the token as a directive
+        if (c == '.' && currentType == TokenType::UNKNOWN) {
             currentType = TokenType::DIRECTIVE;
-            c = '\0';
-        } else if (c == '$' && currentType == TokenType::UNKNOWN) {
+            continue;
+        }
+        // A preceding dollar sign marks the token as a register
+        if (c == '$' && currentType == TokenType::UNKNOWN) {
             currentType = TokenType::REGISTER;
-            c = '\0';
-        } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::IMMEDIATE) &&
-                   (isdigit(c) || (c == '-' && currentToken.empty()) ||
-                    (c == '.' && !currentToken.empty()))) {
+            continue;
+        }
+        // Begin a string at an open quote
+        if (c == '"') {
+            currentType = TokenType::STRING;
+            continue;
+        }
+
+        // Handle Immediates, Instructions, and Label references
+        if ((currentType == TokenType::UNKNOWN || currentType == TokenType::IMMEDIATE) &&
+            (isdigit(c) || (c == '-' && currentToken.empty()) ||
+             (c == '.' && !currentToken.empty()))) {
             currentType = TokenType::IMMEDIATE;
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
+            // Set first token in line as an instruction, otherwise as a label reference
             if (tokens[tokens.size() - 1].empty())
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABELREF;
-        } else if (c == '"') {
-            currentType = TokenType::STRING;
-            continue;
-        } else if (c == '#') {
-            // Handle comments
-            break;
         }
 
-        if (c != '\0') {
-            currentToken += c;
-            prevChar = c;
-        }
+        // Accumulate character into the current token
+        currentToken += c;
+        prevChar = c;
     }
 
     if (!currentToken.empty())
         throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
-
-    if (tokens[tokens.size() - 1].empty())
-        tokens.pop_back();
 
     return tokens;
 }

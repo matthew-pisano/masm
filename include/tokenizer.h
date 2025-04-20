@@ -54,18 +54,20 @@ class Tokenizer {
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
-     * @param lines The lines of source code to tokenize
+     * @param rawLines The lines of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a line
+     * @throw runtime_error When encountering a malformed or early terminating file
      */
     [[nodiscard]] static std::vector<std::vector<Token>>
-    tokenize(const std::vector<std::string>& lines);
+    tokenize(const std::vector<std::string>& rawLines);
 
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
-     * @param line The line of source code to tokenize
+     * @param rawLine The line of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @throw runtime_error When encountering a malformed or early terminating line
      */
-    static std::vector<std::vector<Token>> tokenizeLine(const std::string& line);
+    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 };
 
 #endif // TOKENIZER_H
