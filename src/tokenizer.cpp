@@ -39,7 +39,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::strin
         try {
             tokenizedLines = tokenizeLine(rawLine);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Error in line " + std::to_string(i + 1) + ": " + e.what());
+            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
         }
         // Skip empty or comment lines
         if (tokenizedLines.empty())

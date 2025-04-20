@@ -283,52 +283,58 @@ std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& i
 }
 
 
+void Parser::parseLine(MemLayout& memory, MemSection& currSection,
+                       const std::vector<Token>& tokenLine) {
+    const uint32_t memLoc = memSectionOffset(currSection) + memory[currSection].size();
+    const Token& firstToken = tokenLine[0];
+    const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
+    std::vector<Token> args = filterTokenList(unfilteredArgs);
+
+    switch (firstToken.type) {
+        case TokenType::MEMDIRECTIVE: {
+            currSection = nameToMemSection(firstToken.value);
+            if (!memory.contains(currSection))
+                memory[currSection] = {};
+            break;
+        }
+        case TokenType::DIRECTIVE: {
+            std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
+            memory[currSection].insert(memory[currSection].end(), directiveBytes.begin(),
+                                       directiveBytes.end());
+            break;
+        }
+        case TokenType::INSTRUCTION: {
+            const std::vector<uint8_t> instrBytes = parseInstruction(memLoc, firstToken, args);
+            memory[currSection].insert(memory[currSection].end(), instrBytes.begin(),
+                                       instrBytes.end());
+            break;
+        }
+        case TokenType::LABEL:
+            break;
+        default:
+            throw std::runtime_error("Encountered unknown token type during parsing for token " +
+                                     firstToken.value);
+    }
+}
+
+
 MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
     MemLayout memory;
+
+    MemSection currSection = MemSection::TEXT;
+    memory[MemSection::TEXT] = {};
 
     // Resolve all labels before parsing instructions
     populateLabels(tokens);
 
-    MemSection currSection = MemSection::TEXT;
-    memory[currSection] = {};
-
-    for (const std::vector<Token>& line : tokens) {
-        if (line.empty())
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        if (tokens[i].empty())
             continue;
 
-        const uint32_t memLoc = memSectionOffset(currSection) + memory[currSection].size();
-        const Token& firstToken = line[0];
-        const std::vector unfilteredArgs(line.begin() + 1, line.end());
-        std::vector<Token> args = filterTokenList(unfilteredArgs);
-
-        switch (firstToken.type) {
-            case TokenType::MEMDIRECTIVE: {
-                currSection = nameToMemSection(firstToken.value);
-                if (!memory.contains(currSection))
-                    memory[currSection] = {};
-                break;
-            }
-            case TokenType::DIRECTIVE: {
-                std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
-                memory[currSection].insert(memory[currSection].end(), directiveBytes.begin(),
-                                           directiveBytes.end());
-                break;
-            }
-            case TokenType::INSTRUCTION: {
-                const std::vector<uint8_t> instructionBytes =
-                        parseInstruction(memLoc, firstToken, args);
-                memory[currSection].insert(memory[currSection].end(), instructionBytes.begin(),
-                                           instructionBytes.end());
-                break;
-            }
-            case TokenType::LABEL: {
-                break;
-            }
-            default: {
-                throw std::runtime_error(
-                        "Encountered unknown token type during parsing for token " +
-                        firstToken.value);
-            }
+        try {
+            parseLine(memory, currSection, tokens[i]);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
         }
     }
 

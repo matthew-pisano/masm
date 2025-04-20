@@ -126,6 +126,8 @@ class Parser {
                                                       const Token& reg2, const Token& label,
                                                       bool checkLt, bool checkEq);
 
+    void parseLine(MemLayout& memory, MemSection& currSection, const std::vector<Token>& tokenLine);
+
 public:
     /**
      * Parses a sequence of tokens into memory allocations ready for execution
