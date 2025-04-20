@@ -22,6 +22,47 @@ void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
 }
 
 
+void Parser::populateLabels(const std::vector<std::vector<Token>>& tokens) {
+    MemSection currSection = MemSection::TEXT;
+    std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
+
+    for (const std::vector<Token>& line : tokens) {
+        if (line.empty())
+            continue;
+
+        const Token& firstToken = line[0];
+        const std::vector unfilteredArgs(line.begin() + 1, line.end());
+        std::vector<Token> args = filterTokenList(unfilteredArgs);
+        switch (firstToken.type) {
+            case TokenType::MEMDIRECTIVE: {
+                currSection = nameToMemSection(firstToken.value);
+                if (!memSizes.contains(currSection))
+                    memSizes[currSection] = 0;
+                break;
+            }
+            case TokenType::DIRECTIVE: {
+                std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
+                memSizes[currSection] += directiveBytes.size();
+                break;
+            }
+            case TokenType::INSTRUCTION: {
+                memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
+                break;
+            }
+            case TokenType::LABEL: {
+                if (labelMap.contains(firstToken.value))
+                    throw std::runtime_error("Duplicate label " + firstToken.value);
+                labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+}
+
+
 std::vector<uint8_t> Parser::parseDirective(const Token& dirToken, const std::vector<Token>& args) {
     const std::string dirName = dirToken.value;
     if (args.empty())
@@ -242,48 +283,9 @@ std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& i
 }
 
 
-void Parser::populateLabels(const std::vector<std::vector<Token>>& tokens) {
-    MemSection currSection = MemSection::TEXT;
-    std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
-
-    for (const std::vector<Token>& line : tokens) {
-        if (line.empty())
-            continue;
-
-        const Token& firstToken = line[0];
-        const std::vector unfilteredArgs(line.begin() + 1, line.end());
-        std::vector<Token> args = filterTokenList(unfilteredArgs);
-        switch (firstToken.type) {
-            case TokenType::MEMDIRECTIVE: {
-                currSection = nameToMemSection(firstToken.value);
-                if (!memSizes.contains(currSection))
-                    memSizes[currSection] = 0;
-                break;
-            }
-            case TokenType::DIRECTIVE: {
-                std::vector<uint8_t> directiveBytes = parseDirective(firstToken, args);
-                memSizes[currSection] += directiveBytes.size();
-                break;
-            }
-            case TokenType::INSTRUCTION: {
-                memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
-                break;
-            }
-            case TokenType::LABEL: {
-                if (labelMap.contains(firstToken.value))
-                    throw std::runtime_error("Duplicate label " + firstToken.value);
-                labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-}
-
-
 MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
+    MemLayout memory;
+
     // Resolve all labels before parsing instructions
     populateLabels(tokens);
 
