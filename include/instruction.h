@@ -36,6 +36,7 @@ struct InstructionOp {
  * Fetches the instruction associated with its name
  * @param name The name of the instruction
  * @return The instruction representation
+ * @throw runtime_error When an unknown instruction is named
  */
 InstructionOp nameToInstructionOp(const std::string& name);
 

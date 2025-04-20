@@ -30,12 +30,14 @@ class Parser {
     /**
      * Modifies instruction arguments to replace label references with labeled memory locations
      * @param instructionArgs The instruction arguments to modify
+     * @throw runtime_error When one of the arguments references an unknown label
      */
     void resolveLabels(std::vector<Token>& instructionArgs);
 
     /**
      * Populates the label map prior to processing using static allocations for the given tokens
      * @param tokens The program tokens
+     * @throw runtime_error When a duplicate label definition is detected
      */
     void populateLabels(const std::vector<std::vector<Token>>& tokens);
 
@@ -44,6 +46,7 @@ class Parser {
      * @param dirToken The token for the directive
      * @param args Any argument tokens to pass to the directive
      * @return The memory allocation associated with the directive
+     * @throw runtime_error When the arguments for a directive are malformed
      */
     static std::vector<uint8_t> parseDirective(const Token& dirToken,
                                                const std::vector<Token>& args);
@@ -54,6 +57,7 @@ class Parser {
      * @param instrToken The token containing the instruction
      * @param args The argument tokens for the instruction
      * @return The memory allocation associated with the instruction
+     * @throw runtime_error When an instruction is malformed
      */
     std::vector<uint8_t> parseInstruction(uint32_t loc, const Token& instrToken,
                                           std::vector<Token>& args);
@@ -78,6 +82,7 @@ class Parser {
      * @param rs The index of the rs register
      * @param immediate The immediate value for the instruction
      * @return The memory allocation associated with the instruction
+     * @throw runtime_error When a branch target is out of range
      */
     static std::vector<uint8_t> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
                                                       uint32_t rs, int32_t immediate);
@@ -102,6 +107,7 @@ class Parser {
      * @param instructionName The name of the pseudo instruction
      * @param args The argument tokens for the pseudo instruction
      * @return The memory allocation associated with the pseudo instruction
+     * @throw runtime_error When an unknown pseudo instruction is passed
      */
     std::vector<uint8_t> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
                                                 std::vector<Token>& args);
@@ -125,6 +131,7 @@ public:
      * Parses a sequence of tokens into memory allocations ready for execution
      * @param tokens The program tokens to parse
      * @return The memory allocations associated with the program
+     * @throw runtime_error When an error is encountered during parsing
      */
     MemLayout parse(const std::vector<std::vector<Token>>& tokens);
 };

@@ -12,6 +12,7 @@
  * Loads a file and returns its contents as a vector of strings, where each string is a line in the file.
  * @param fileName The name of the file to load
  * @return A vector of the lines within the given file
+ * @throw runtime_error When a file fails to open
  */
 std::vector<std::string> readFileLines(const std::string& fileName);
 
