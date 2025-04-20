@@ -30,14 +30,10 @@ class Parser {
     static std::vector<uint8_t> parseRTypeInstruction(uint32_t rd, uint32_t rs, uint32_t rt,
                                                       uint32_t shamt, uint32_t funct);
 
-    static std::vector<uint8_t> parseITypeInstruction(uint32_t opcode, uint32_t rs, uint32_t rt,
-                                                      uint32_t immediate);
+    static std::vector<uint8_t> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
+                                                      uint32_t rs, int32_t immediate);
 
-    static std::vector<uint8_t> parseShortITypeInstruction(uint32_t opcode, uint32_t rt,
-                                                           uint32_t immediate);
-
-    static std::vector<uint8_t> parseJTypeInstruction(uint32_t loc, uint32_t opcode,
-                                                      uint32_t address);
+    static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
 
     static std::vector<uint8_t> parseSyscallInstruction();
 

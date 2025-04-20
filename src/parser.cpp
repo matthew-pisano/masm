@@ -69,12 +69,23 @@ std::vector<uint8_t> Parser::parseRTypeInstruction(const uint32_t rd, const uint
 }
 
 
-std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const uint32_t rs,
-                                                   const uint32_t rt, const uint32_t immediate) {
+std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t loc, const uint32_t opcode,
+                                                   const uint32_t rt, const uint32_t rs,
+                                                   int32_t immediate) {
+
+    // Modify immediate values to be relative to the location of the current instruction
+    std::vector<uint32_t> branchOpCodes = {0x04, 0x07, 0x06, 0x05, 0x01};
+    if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
+        // Branch instructions are offset by 4 bytes so divide by 4
+        const int32_t offset = (immediate - loc - 8) / 4;
+        if (offset < -32768 || offset > 32767)
+            throw std::runtime_error("Branch instruction offset out of range");
+        immediate = static_cast<int32_t>(offset);
+    }
 
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
-            (opcode & 0x3F) << 26 | (rt & 0x1F) << 21 | (rs & 0x1F) << 16 | immediate & 0xFFFF;
+            (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | immediate & 0xFFFF;
 
     // Break the instruction into 4 bytes (big-endian)
     std::vector<uint8_t> bytes(4);
@@ -87,15 +98,7 @@ std::vector<uint8_t> Parser::parseITypeInstruction(const uint32_t opcode, const 
 }
 
 
-std::vector<uint8_t> Parser::parseShortITypeInstruction(const uint32_t opcode, const uint32_t rt,
-                                                        const uint32_t immediate) {
-
-    return parseITypeInstruction(opcode, rt, 0, immediate);
-}
-
-
-std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t loc, const uint32_t opcode,
-                                                   const uint32_t address) {
+std::vector<uint8_t> Parser::parseJTypeInstruction(const uint32_t opcode, const uint32_t address) {
 
     // Combine fields into 32-bit instruction code (address shifted by 2 to byte align to 4)
     const uint32_t instruction = (opcode & 0x3F) << 26 | (address & 0x3FFFFFF) >> 2;
@@ -141,13 +144,13 @@ std::vector<uint8_t> Parser::parsePseudoInstruction(const uint32_t loc,
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end()) {
         if (instructionName == branchPseudoInstrs[0])
-            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], true, false);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], true, false);
         if (instructionName == branchPseudoInstrs[1])
-            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], false, false);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], false, false);
         if (instructionName == branchPseudoInstrs[2])
-            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], false, true);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], false, true);
         if (instructionName == branchPseudoInstrs[3])
-            return parseBranchPseudoInstruction(loc, args[0], args[1], args[3], true, true);
+            return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], true, true);
     }
 
     throw std::runtime_error("Unknown pseudo instruction " + instructionName);
@@ -214,13 +217,18 @@ std::vector<uint8_t> Parser::parseInstruction(const uint32_t loc, const Token& i
             return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0,
                                          instructionOp.opFuncCode);
         case InstructionType::I_TYPE:
-            return parseITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1],
+            return parseITypeInstruction(loc, instructionOp.opFuncCode, argCodes[0], argCodes[1],
+                                         argCodes[2]);
+        case InstructionType::SWAPPED_I_TYPE:
+            // Instructions where rs comes before rt in the binary encoding
+            return parseITypeInstruction(loc, instructionOp.opFuncCode, argCodes[1], argCodes[0],
                                          argCodes[2]);
         case InstructionType::SHORT_I_TYPE:
-            return parseShortITypeInstruction(instructionOp.opFuncCode, argCodes[0], argCodes[1]);
+            // Location not needed for short I-Type instructions
+            return parseITypeInstruction(0, instructionOp.opFuncCode, argCodes[0], 0, argCodes[1]);
 
         case InstructionType::J_TYPE:
-            return parseJTypeInstruction(loc, instructionOp.opFuncCode, argCodes[0]);
+            return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
 
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();

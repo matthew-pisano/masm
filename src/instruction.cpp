@@ -43,12 +43,12 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sltiu", {InstructionType::I_TYPE, 0x09, 4}},
 
         // Branch Instructions
-        {"beq", {InstructionType::I_TYPE, 0x04, 4}},
-        {"bgtz", {InstructionType::I_TYPE, 0x07, 4}},
-        {"blez", {InstructionType::I_TYPE, 0x06, 4}},
-        {"bltz", {InstructionType::I_TYPE, 0x07, 4}},
-        {"bgez", {InstructionType::I_TYPE, 0x06, 4}},
-        {"bne", {InstructionType::I_TYPE, 0x05, 4}},
+        {"beq", {InstructionType::SWAPPED_I_TYPE, 0x04, 4}},
+        {"bgtz", {InstructionType::SHORT_I_TYPE, 0x07, 4}},
+        {"blez", {InstructionType::SHORT_I_TYPE, 0x06, 4}},
+        {"bltz", {InstructionType::SHORT_I_TYPE, 0x07, 4}},
+        {"bgez", {InstructionType::SHORT_I_TYPE, 0x01, 4}},
+        {"bne", {InstructionType::SWAPPED_I_TYPE, 0x05, 4}},
 
         // Jump Instructions
         {"j", {InstructionType::J_TYPE, 0x02, 4}},
@@ -100,6 +100,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
+        case InstructionType::SWAPPED_I_TYPE:
         case InstructionType::I_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
