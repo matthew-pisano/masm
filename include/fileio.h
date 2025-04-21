@@ -9,11 +9,21 @@
 #include <vector>
 
 /**
- * Loads a file and returns its contents as a vector of strings, where each string is a line in the file.
+ * Loads a file and returns its contents as a vector of strings, where each string is a line in the
+ * file.
  * @param fileName The name of the file to load
  * @return A vector of the lines within the given file
  * @throw runtime_error When a file fails to open
  */
 std::vector<std::string> readFileLines(const std::string& fileName);
+
+
+/**
+ * Loads a file and returns its contents as a vector of bytes, where each byte is a character in the
+ * file.
+ * @param fileName The name of the file to load
+ * @return A vector of the bytes within the given file
+ */
+std::vector<unsigned char> readFileBytes(const std::string& fileName);
 
 #endif // FILEIO_H

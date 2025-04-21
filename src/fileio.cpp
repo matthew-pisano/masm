@@ -27,3 +27,24 @@ std::vector<std::string> readFileLines(const std::string& fileName) {
 
     return result;
 }
+
+
+std::vector<unsigned char> readFileBytes(const std::string& fileName) {
+    std::ifstream inputFile;
+    std::vector<unsigned char> result;
+
+    inputFile.open(fileName);
+
+    if (!inputFile.is_open())
+        throw std::runtime_error("Could not open file " + fileName);
+
+    // Read data from the file byte by byte
+    char byte;
+    while (inputFile.read(&byte, sizeof(byte)))
+        result.push_back(byte);
+
+    // Close the file
+    inputFile.close();
+
+    return result;
+}
