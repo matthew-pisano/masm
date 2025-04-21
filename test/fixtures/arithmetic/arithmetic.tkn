@@ -1,0 +1,11 @@
+01data
+03small
+02word070
+03large
+02word0765536
+01text
+03main
+05la06t008,04large
+05lw06t108,06t008,070
+05addi06t208,06t108,071024
+05sub06t308,06t208,06t0

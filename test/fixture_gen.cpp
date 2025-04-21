@@ -108,7 +108,7 @@ int main(const int argc, char* argv[]) {
         tokenFile.close();
         parserFile.close();
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
         return 1;
     }
 

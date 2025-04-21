@@ -26,7 +26,7 @@ int main(const int argc, char* argv[]) {
         for (const std::string& line : lines)
             std::cout << "> " << line << std::endl;
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
         return 1;
     }
 
