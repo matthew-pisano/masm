@@ -41,6 +41,7 @@ add_executable(mipscpp-tests
         test/test_tokenizer.cpp
         test/test_utils.cpp
         src/tokenizer.cpp
+        src/fileio.cpp
         src/parser.cpp
         src/utils.cpp
         src/register.cpp
