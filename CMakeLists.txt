@@ -15,6 +15,17 @@ add_executable(mipscpp src/main.cpp
         src/memory.cpp
 )
 
+add_executable(mipscpp-fixture-gen
+        src/fileio.cpp
+        src/tokenizer.cpp
+        src/parser.cpp
+        src/register.cpp
+        src/utils.cpp
+        src/instruction.cpp
+        src/memory.cpp
+        test/fixture_gen.cpp
+)
+
 include(FetchContent)
 FetchContent_Declare(
         cli11
@@ -23,6 +34,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cli11)
 target_link_libraries(mipscpp CLI11::CLI11)
+target_link_libraries(mipscpp-fixture-gen CLI11::CLI11)
 
 find_package(Catch2 3 REQUIRED)
 add_executable(mipscpp-tests
