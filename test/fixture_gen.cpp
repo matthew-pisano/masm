@@ -66,8 +66,8 @@ MemLayout generateParserFile(std::ofstream& parserFile,
 
     for (const std::pair<const MemSection, std::vector<unsigned char>>& pair : memLayout) {
         constexpr unsigned char groupSep = 0x1d;
-        parserFile << std::endl << groupSep << static_cast<int>(pair.first) << std::endl;
-        for (unsigned char byte : pair.second)
+        parserFile << groupSep << static_cast<unsigned char>(pair.first);
+        for (const unsigned char byte : pair.second)
             parserFile << byte;
     }
 
@@ -93,8 +93,12 @@ int main(const int argc, char* argv[]) {
 
         std::ofstream tokenFile;
         tokenFile.open(baseFileName + ".tkn");
+        if (!tokenFile.is_open())
+            throw std::runtime_error("Could not open file " + baseFileName + ".tkn");
         std::ofstream parserFile;
         parserFile.open(baseFileName + ".pse");
+        if (!parserFile.is_open())
+            throw std::runtime_error("Could not open file " + baseFileName + ".pse");
 
         const std::vector<std::string> lines = readFileLines(inputFileName);
 
