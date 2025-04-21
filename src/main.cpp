@@ -10,10 +10,10 @@
 
 int main(const int argc, char* argv[]) {
 
-    std::string inputFile;
+    std::string inputFileName;
 
     CLI::App app{"A CPP MIPS Interpreter", "mipscpp"};
-    app.add_option("input-file", inputFile, "Input file to load")->required();
+    app.add_option("input-file", inputFileName, "Input file to load")->required();
 
     try {
         app.parse(argc, argv);
@@ -22,7 +22,7 @@ int main(const int argc, char* argv[]) {
     }
 
     try {
-        std::vector<std::string> lines = readFileLines(inputFile);
+        std::vector<std::string> lines = readFileLines(inputFileName);
         for (const std::string& line : lines)
             std::cout << "> " << line << std::endl;
     } catch (const std::exception& e) {
