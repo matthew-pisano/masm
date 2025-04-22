@@ -43,34 +43,34 @@ void validateMemLayout(const std::string& sourceFileName, const std::string& par
 }
 
 
-TEST_CASE("Test Hello World") {
+TEST_CASE("Test Parse Hello World") {
     const std::string test_case = "hello_world";
     validateMemLayout("test/fixtures/" + test_case + "/" + test_case + ".asm",
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
-TEST_CASE("Test Load Address") {
+TEST_CASE("Test Parse Load Address") {
     const std::string test_case = "load_address";
     validateMemLayout("test/fixtures/" + test_case + "/" + test_case + ".asm",
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
-TEST_CASE("Test Arithmetic") {
+TEST_CASE("Test Parse Arithmetic") {
     const std::string test_case = "arithmetic";
     validateMemLayout("test/fixtures/" + test_case + "/" + test_case + ".asm",
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
-TEST_CASE("Test Syscall") {
+TEST_CASE("Test Parse Syscall") {
     const std::string test_case = "syscall";
     validateMemLayout("test/fixtures/" + test_case + "/" + test_case + ".asm",
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
-TEST_CASE("Test Loops") {
+TEST_CASE("Test Parse Loops") {
     const std::string test_case = "loops";
     validateMemLayout("test/fixtures/" + test_case + "/" + test_case + ".asm",
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");

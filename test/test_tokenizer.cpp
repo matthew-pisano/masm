@@ -5,7 +5,62 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fileio.h"
 #include "tokenizer.h"
+
+
+/**
+ * Validates the tokenization of a file against the loaded, expected tokens
+ * @param sourceFileName The name of the source file to tokenize
+ * @param tokensFileName The name of the tokenized file to compare against
+ */
+void validateTokens(const std::string& sourceFileName, const std::string& tokensFileName) {
+    const std::vector<std::string> tokenizedLines = readFileLines(tokensFileName);
+
+    constexpr char groupSep = 0x1d;
+    std::vector<std::vector<Token>> expectedTokens = {};
+    for (const std::string& line : tokenizedLines) {
+        if (line.empty())
+            continue;
+        expectedTokens.emplace_back();
+        std::vector<Token>& lastLine = expectedTokens[expectedTokens.size() - 1];
+
+        std::string token;
+        size_t lastToken = -1;
+        std::string tokenType;
+        std::string tokenValue;
+        for (size_t i = 0; i < line.length(); i++) {
+            if (line[i] == groupSep) {
+                lastToken = i;
+                lastLine.push_back({});
+                lastLine[lastLine.size() - 1].type = static_cast<TokenType>(std::stoi(tokenType));
+                lastLine[lastLine.size() - 1].value = tokenValue;
+                tokenType.clear();
+                tokenValue.clear();
+                continue;
+            }
+            if (i - lastToken <= 2) {
+                tokenType += line[i];
+                continue;
+            }
+
+            tokenValue += line[i];
+        }
+    }
+
+    const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
+    const std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(sourceLines);
+    REQUIRE(expectedTokens.size() == actualTokens.size());
+    for (size_t i = 0; i < expectedTokens.size(); ++i)
+        REQUIRE(expectedTokens[i] == actualTokens[i]);
+}
+
+
+TEST_CASE("Test Tokenize Hello World") {
+    const std::string test_case = "hello_world";
+    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+}
 
 TEST_CASE("Test Single Tokens") {
     SECTION("Test Directive") {
