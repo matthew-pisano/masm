@@ -22,6 +22,8 @@ enum class TokenType {
     REGISTER,
     IMMEDIATE,
     SEPERATOR,
+    OPEN_PAREN,
+    CLOSE_PAREN,
     STRING,
 };
 
@@ -51,6 +53,21 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
  */
 class Tokenizer {
 
+    /**
+     * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
+     * addressing mode when a close paren is reached
+     * @param tokenLine The line of tokens to modify
+     */
+    static void processCloseParen(std::vector<Token>& tokenLine);
+
+    /**
+     * A helper function that tokenizes single lines.  Multiple token lines may be produced
+     * @param rawLine The line of source code to tokenize
+     * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @throw runtime_error When encountering a malformed or early terminating line
+     */
+    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
+
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
@@ -60,14 +77,6 @@ public:
      */
     [[nodiscard]] static std::vector<std::vector<Token>>
     tokenize(const std::vector<std::string>& rawLines);
-
-    /**
-     * A helper function that tokenizes single lines.  Multiple token lines may be produced
-     * @param rawLine The line of source code to tokenize
-     * @return A vector of vectors of tokens, where each vector represents a tokenized line
-     * @throw runtime_error When encountering a malformed or early terminating line
-     */
-    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 };
 
 #endif // TOKENIZER_H

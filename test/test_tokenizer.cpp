@@ -123,6 +123,28 @@ TEST_CASE("Test Tokenize Single Tokens") {
                 {{TokenType::STRING, R"('ello \n\"There\")"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
+
+    SECTION("Test Parentheses") {
+        std::vector<std::string> lines = {"lw $t1, 8($t0)"};
+        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
+                                                           {TokenType::REGISTER, "t1"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::REGISTER, "t0"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::IMMEDIATE, "8"}}};
+        REQUIRE(expectedTokens == actualTokens);
+
+        lines = {"lw $t1, ($t0)"};
+        actualTokens = Tokenizer::tokenize(lines);
+        expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
+                           {TokenType::REGISTER, "t1"},
+                           {TokenType::SEPERATOR, ","},
+                           {TokenType::REGISTER, "t0"},
+                           {TokenType::SEPERATOR, ","},
+                           {TokenType::IMMEDIATE, "0"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
 }
 
 

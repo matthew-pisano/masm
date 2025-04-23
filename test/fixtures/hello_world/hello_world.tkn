@@ -1,6 +1,6 @@
 01data
 03out_string
-02asciiz09Hello, World!
+02asciiz11Hello, World!
 01text
 03main
 05addiu06v008,06zero08,074

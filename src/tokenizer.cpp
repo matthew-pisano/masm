@@ -9,13 +9,15 @@
 #include <string>
 #include <vector>
 
+#include "utils.h"
+
 
 /**
  * An array storing the names of memory directives
  */
-constexpr std::array<const char*, 10> tokenTypeNames = {
-        "UNKNOWN",     "MEMDIRECTIVE", "DIRECTIVE", "LABEL",     "LABELREF",
-        "INSTRUCTION", "REGISTER",     "IMMEDIATE", "SEPERATOR", "STRING",
+constexpr std::array<const char*, 12> tokenTypeNames = {
+        "UNKNOWN",  "MEMDIRECTIVE", "DIRECTIVE", "LABEL",      "LABELREF",    "INSTRUCTION",
+        "REGISTER", "IMMEDIATE",    "SEPERATOR", "OPEN_PAREN", "CLOSE_PAREN", "STRING",
 };
 
 
@@ -45,12 +47,42 @@ std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::strin
         if (tokenizedLines.empty())
             continue;
 
-        for (std::vector line : tokenizedLines)
+        for (const std::vector<Token>& line : tokenizedLines)
             if (!line.empty())
                 tokenizedFile.push_back(line);
     }
 
     return tokenizedFile;
+}
+
+
+void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
+    const auto openParen = std::ranges::find(tokenLine, Token{TokenType::OPEN_PAREN, "("});
+    // Ensure there is space before and after the open paren
+    if (openParen == tokenLine.begin() || openParen == tokenLine.end())
+        throw std::runtime_error("Malformed parenthesis expression");
+    if (tokenLine.size() < 3)
+        throw std::runtime_error("Malformed parenthesis expression");
+    // A vector containing the last three elements of tokenLine
+    std::vector<Token> lastThree = {};
+    while (lastThree.size() < 3) {
+        lastThree.insert(lastThree.begin(), tokenLine.back());
+        tokenLine.pop_back();
+    }
+
+    // Insert 0 when no immediate value precedes parentheses
+    if (lastThree[0].type != TokenType::IMMEDIATE) {
+        tokenLine.push_back(lastThree[0]);
+        lastThree[0] = {TokenType::IMMEDIATE, "0"};
+    }
+
+    if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::OPEN_PAREN, TokenType::REGISTER},
+                        lastThree))
+        throw std::runtime_error("Malformed parenthesis expression");
+    // Replace with target pattern
+    tokenLine.push_back(lastThree[2]);
+    tokenLine.push_back({TokenType::SEPERATOR, ","});
+    tokenLine.push_back(lastThree[0]);
 }
 
 
@@ -63,12 +95,13 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
 
     // Append space to ensure all characters are tokenized
     for (const char c : rawLine + ' ') {
+        std::vector<Token>& tokenLine = tokens[tokens.size() - 1];
         // When in a string, gather all characters into a single token
         if (currentType == TokenType::STRING) {
             // Terminate the string when reaching unescaped quote
             if (c == '"' && prevChar != '\\') {
                 currentType = TokenType::UNKNOWN;
-                tokens[tokens.size() - 1].push_back({TokenType::STRING, currentToken});
+                tokenLine.push_back({TokenType::STRING, currentToken});
                 currentToken.clear();
             } else {
                 // Add character to the string token
@@ -85,7 +118,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         }
 
         // When reaching a natural token terminator
-        if (isspace(c) || c == ',' || c == ':') {
+        if (isspace(c) || c == ',' || c == ':' || c == '(' || c == ')') {
             // Assign the current token as a label definition if a colon follows
             if (c == ':')
                 currentType = TokenType::LABEL;
@@ -97,7 +130,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
 
             // Add the current token to the vector and reset
             if (!currentToken.empty()) {
-                tokens[tokens.size() - 1].push_back({currentType, currentToken});
+                tokenLine.push_back({currentType, currentToken});
                 currentToken.clear();
                 currentType = TokenType::UNKNOWN;
             }
@@ -106,8 +139,11 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             if (c == ':')
                 tokens.emplace_back();
             else if (c == ',')
-                tokens[tokens.size() - 1].push_back({TokenType::SEPERATOR, ","});
-
+                tokenLine.push_back({TokenType::SEPERATOR, ","});
+            else if (c == '(')
+                tokenLine.push_back({TokenType::OPEN_PAREN, "("});
+            else if (c == ')')
+                processCloseParen(tokenLine);
             continue;
         }
         // A preceding dot marks the token as a directive
@@ -134,7 +170,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
             // Set first token in line as an instruction, otherwise as a label reference
-            if (tokens[tokens.size() - 1].empty())
+            if (tokenLine.empty())
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABELREF;

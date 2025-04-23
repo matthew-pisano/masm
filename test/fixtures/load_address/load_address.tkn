@@ -1,7 +1,7 @@
 01data
 03label
-02asciiz09hello there
+02asciiz11hello there
 03label2
-02asciiz09hello there
+02asciiz11hello there
 01text
 05la06s108,04label

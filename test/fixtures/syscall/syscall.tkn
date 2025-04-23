@@ -1,6 +1,6 @@
 01data
 03string
-02asciiz09hello
+02asciiz11hello
 01text
 03main
 05li06v008,074
