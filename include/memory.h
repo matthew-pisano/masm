@@ -5,13 +5,33 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 #include <cstdint>
+#include <map>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 
 /**
  * Class representing valid, named sections of memory
  */
 enum class MemSection { DATA, TEXT };
+
+
+/**
+ * A type alias for an object containing memory allocations from the parser
+ */
+using MemLayout = std::map<MemSection, std::vector<uint8_t>>;
+
+
+class Memory {
+    // Map that can store up to ~4G of memory
+    std::unordered_map<uint32_t, int8_t> memory;
+
+public:
+    void loadProgram(const MemLayout& layout);
+
+    uint8_t operator[](int index) const;
+};
 
 
 /**

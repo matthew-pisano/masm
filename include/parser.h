@@ -12,12 +12,6 @@
 
 
 /**
- * A type alias for an object containing memory allocations from the parser
- */
-using MemLayout = std::map<MemSection, std::vector<uint8_t>>;
-
-
-/**
  * Class to parse a sequence of tokens into memory allocations ready for execution
  */
 class Parser {
