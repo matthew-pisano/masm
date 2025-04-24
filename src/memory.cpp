@@ -7,6 +7,13 @@
 #include <stdexcept>
 
 
+void Memory::loadProgram(const MemLayout& layout) {
+    for (const std::pair<MemSection, std::vector<uint8_t>> pair : layout)
+        for (size_t i = 0; i < pair.second.size(); i++)
+            memory[memSectionOffset(pair.first) + i] = pair.second[i];
+}
+
+
 MemSection nameToMemSection(const std::string& name) {
     if (name == "text")
         return MemSection::TEXT;
