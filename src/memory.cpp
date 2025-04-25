@@ -14,7 +14,7 @@ void Memory::loadProgram(const MemLayout& layout) {
 }
 
 
-std::byte Memory::operator[](const uint32_t index) { return memory[index]; }
+std::byte& Memory::operator[](const uint32_t index) { return memory[index]; }
 
 
 MemSection nameToMemSection(const std::string& name) {

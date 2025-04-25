@@ -30,7 +30,7 @@ class Memory {
 public:
     void loadProgram(const MemLayout& layout);
 
-    std::byte operator[](uint32_t index);
+    std::byte& operator[](uint32_t index);
 };
 
 

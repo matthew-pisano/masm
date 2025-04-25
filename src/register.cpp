@@ -16,3 +16,8 @@ int RegisterFile::indexFromName(const std::string& name) {
 
 
 uint32_t RegisterFile::operator[](const int index) const { return registers[index]; }
+uint32_t& RegisterFile::operator[](const int index) {
+    if (index < 0 || index >= 32)
+        throw std::runtime_error("Register index out of bounds: " + std::to_string(index));
+    return registers[index];
+}

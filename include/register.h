@@ -40,6 +40,7 @@ public:
     int indexFromName(const std::string& name);
 
     uint32_t operator[](int index) const;
+    uint32_t& operator[](int index);
 };
 
 #endif // REGISTER_H

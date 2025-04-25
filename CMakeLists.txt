@@ -13,6 +13,7 @@ add_executable(mipscpp src/main.cpp
         src/utils.cpp
         src/instruction.cpp
         src/memory.cpp
+        src/interpreter.cpp
 )
 
 add_executable(mipscpp-fixture-gen
@@ -48,6 +49,7 @@ add_executable(mipscpp-tests
         src/instruction.cpp
         src/memory.cpp
         test/test_parser.cpp
+        src/interpreter.cpp
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
