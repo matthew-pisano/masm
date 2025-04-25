@@ -43,7 +43,10 @@ enum class Register {
     GP,
     SP,
     FP,
-    RA
+    RA,
+    PC,
+    HI,
+    LO
 };
 
 /**
@@ -52,9 +55,9 @@ enum class Register {
 class RegisterFile {
 
     /**
-     * A mapping between register numbers and values stored in the registers
+     * A mapping between register numbers and values stored in the 32 registers + PC, HI, and LO
      */
-    std::array<uint32_t, 32> registers = {};
+    std::array<uint32_t, 35> registers = {};
 
     /**
      * A mapping between the common names of registers and their register numbers
@@ -83,6 +86,9 @@ public:
 
     uint32_t operator[](int index) const;
     uint32_t& operator[](int index);
+
+    uint32_t operator[](Register index) const;
+    uint32_t& operator[](Register index);
 };
 
 #endif // REGISTER_H

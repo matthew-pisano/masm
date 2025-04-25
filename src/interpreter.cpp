@@ -7,7 +7,10 @@
 
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
-    state.registers[]
+    // Initialize PC to the start of the text section
+    state.registers[Register::PC] = memSectionOffset(MemSection::TEXT);
+    state.registers[Register::SP] = 0x7FFFFFFC;
+    state.registers[Register::GP] = 0x10008000;
 
-            return 0;
+    return 0;
 }

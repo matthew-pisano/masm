@@ -21,3 +21,10 @@ uint32_t& RegisterFile::operator[](const int index) {
         throw std::runtime_error("Register index out of bounds: " + std::to_string(index));
     return registers[index];
 }
+
+uint32_t RegisterFile::operator[](const Register index) const {
+    return registers[static_cast<int>(index)];
+}
+uint32_t& RegisterFile::operator[](const Register index) {
+    return registers[static_cast<int>(index)];
+}
