@@ -64,11 +64,11 @@ MemLayout generateParserFile(std::ofstream& parserFile,
     Parser parser{};
     MemLayout memLayout = parser.parse(tokenizedLines);
 
-    for (const std::pair<const MemSection, std::vector<unsigned char>>& pair : memLayout) {
+    for (const std::pair<const MemSection, std::vector<std::byte>>& pair : memLayout) {
         constexpr unsigned char groupSep = 0x1d;
         parserFile << groupSep << static_cast<unsigned char>(pair.first);
-        for (const unsigned char byte : pair.second)
-            parserFile << byte;
+        for (const std::byte byte : pair.second)
+            parserFile << static_cast<unsigned char>(byte);
     }
 
     return memLayout;

@@ -24,6 +24,6 @@ std::vector<std::string> readFileLines(const std::string& fileName);
  * @param fileName The name of the file to load
  * @return A vector of the bytes within the given file
  */
-std::vector<unsigned char> readFileBytes(const std::string& fileName);
+std::vector<std::byte> readFileBytes(const std::string& fileName);
 
 #endif // FILEIO_H

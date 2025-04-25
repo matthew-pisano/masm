@@ -8,10 +8,13 @@
 
 
 void Memory::loadProgram(const MemLayout& layout) {
-    for (const std::pair<MemSection, std::vector<uint8_t>> pair : layout)
+    for (const std::pair<MemSection, std::vector<std::byte>> pair : layout)
         for (size_t i = 0; i < pair.second.size(); i++)
             memory[memSectionOffset(pair.first) + i] = pair.second[i];
 }
+
+
+std::byte Memory::operator[](const uint32_t index) { return memory[index]; }
 
 
 MemSection nameToMemSection(const std::string& name) {

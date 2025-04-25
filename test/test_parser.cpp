@@ -15,14 +15,17 @@
  * @param parsedFileName The name of the parsed file to compare against
  */
 void validateMemLayout(const std::string& sourceFileName, const std::string& parsedFileName) {
-    const std::vector<unsigned char> parsedBytes = readFileBytes(parsedFileName);
+    const std::vector<std::byte> parsedBytes = readFileBytes(parsedFileName);
+
+    std::vector<std::byte> memSecBytes = {static_cast<std::byte>(MemSection::DATA),
+                                          static_cast<std::byte>(MemSection::TEXT)};
 
     MemLayout expectedMem;
     MemSection currSection;
     for (size_t i = 0; i < parsedBytes.size(); ++i) {
-        constexpr unsigned char groupSep = 0x1d;
+        constexpr std::byte groupSep{0x1d};
         if (i < parsedBytes.size() - 1 && parsedBytes[i] == groupSep &&
-            (parsedBytes[i + 1] == 0 || parsedBytes[i + 1] == 1)) {
+            std::ranges::find(memSecBytes, parsedBytes[i + 1]) != memSecBytes.end()) {
             currSection = static_cast<MemSection>(parsedBytes[i + 1]);
             i += 1;
             continue;
@@ -35,7 +38,7 @@ void validateMemLayout(const std::string& sourceFileName, const std::string& par
     Parser parser{};
     MemLayout actualMem = parser.parse(program);
     REQUIRE(expectedMem.size() == actualMem.size());
-    for (const std::pair<const MemSection, std::vector<unsigned char>>& pair : expectedMem) {
+    for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem) {
         REQUIRE(actualMem.contains(pair.first));
 
         REQUIRE(pair.second == actualMem[pair.first]);

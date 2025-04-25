@@ -29,9 +29,9 @@ std::vector<std::string> readFileLines(const std::string& fileName) {
 }
 
 
-std::vector<unsigned char> readFileBytes(const std::string& fileName) {
+std::vector<std::byte> readFileBytes(const std::string& fileName) {
     std::ifstream inputFile;
-    std::vector<unsigned char> result;
+    std::vector<std::byte> result;
 
     inputFile.open(fileName);
 
@@ -41,7 +41,7 @@ std::vector<unsigned char> readFileBytes(const std::string& fileName) {
     // Read data from the file byte by byte
     char byte;
     while (inputFile.read(&byte, sizeof(byte)))
-        result.push_back(byte);
+        result.push_back(static_cast<std::byte>(byte));
 
     // Close the file
     inputFile.close();

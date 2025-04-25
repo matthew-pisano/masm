@@ -23,7 +23,7 @@ bool isSignedInteger(const std::string& str);
  * @param string The string to convert
  * @return The vector of bytes representing the string
  */
-std::vector<uint8_t> stringToBytes(const std::string& string);
+std::vector<std::byte> stringToBytes(const std::string& string);
 
 
 /**
@@ -31,7 +31,7 @@ std::vector<uint8_t> stringToBytes(const std::string& string);
  * @param string The string to convert
  * @return The vector of bytes representing the integer
  */
-std::vector<uint8_t> intStringToBytes(const std::string& string);
+std::vector<std::byte> intStringToBytes(const std::string& string);
 
 
 /**

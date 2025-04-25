@@ -35,13 +35,15 @@ TEST_CASE("Test Is Signed Integer") {
 
 TEST_CASE("Test String to Bytes") {
     SECTION("Test Single Char") {
-        std::vector<uint8_t> expectedBytes = {0x61};
-        std::vector<uint8_t> actualBytes = stringToBytes("a");
+        std::vector expectedBytes = {std::byte{0x61}};
+        std::vector<std::byte> actualBytes = stringToBytes("a");
         REQUIRE(expectedBytes == actualBytes);
     }
     SECTION("Test Multiple Char") {
-        std::vector<uint8_t> expectedBytes = {0x61, 0x20, 0x62, 0x47, 0x2f, 0x3f, 0x2e, 0x31};
-        std::vector<uint8_t> actualBytes = stringToBytes("a bG/?.1");
+        std::vector expectedBytes = {std::byte{0x61}, std::byte{0x20}, std::byte{0x62},
+                                     std::byte{0x47}, std::byte{0x2f}, std::byte{0x3f},
+                                     std::byte{0x2e}, std::byte{0x31}};
+        std::vector<std::byte> actualBytes = stringToBytes("a bG/?.1");
         REQUIRE(expectedBytes == actualBytes);
     }
 }
@@ -49,19 +51,20 @@ TEST_CASE("Test String to Bytes") {
 
 TEST_CASE("Test Integer String to Bytes") {
     SECTION("Test Positive") {
-        std::vector<uint8_t> expectedBytes = {0x00, 0x00, 0x00, 0x00};
-        std::vector<uint8_t> actualBytes = intStringToBytes("0");
+        std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                     std::byte{0x00}};
+        std::vector<std::byte> actualBytes = intStringToBytes("0");
         REQUIRE(expectedBytes == actualBytes);
 
-        expectedBytes = {0x00, 0x00, 0x00, 0x01};
+        expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x01}};
         actualBytes = intStringToBytes("1");
         REQUIRE(expectedBytes == actualBytes);
 
-        expectedBytes = {0x00, 0x05, 0x7c, 0x3a};
+        expectedBytes = {std::byte{0x00}, std::byte{0x05}, std::byte{0x7c}, std::byte{0x3a}};
         actualBytes = intStringToBytes("359482");
         REQUIRE(expectedBytes == actualBytes);
 
-        expectedBytes = {0x7f, 0xff, 0xff, 0xff};
+        expectedBytes = {std::byte{0x7f}, std::byte{0xff}, std::byte{0xff}, std::byte{0xff}};
         actualBytes = intStringToBytes("2147483647");
         REQUIRE(expectedBytes == actualBytes);
 
@@ -69,15 +72,16 @@ TEST_CASE("Test Integer String to Bytes") {
     }
 
     SECTION("Test Negative") {
-        std::vector<uint8_t> expectedBytes = {0xff, 0xff, 0xff, 0xff};
-        std::vector<uint8_t> actualBytes = intStringToBytes("-1");
+        std::vector expectedBytes = {std::byte{0xff}, std::byte{0xff}, std::byte{0xff},
+                                     std::byte{0xff}};
+        std::vector<std::byte> actualBytes = intStringToBytes("-1");
         REQUIRE(expectedBytes == actualBytes);
 
-        expectedBytes = {0xff, 0xfa, 0x83, 0xc6};
+        expectedBytes = {std::byte{0xff}, std::byte{0xfa}, std::byte{0x83}, std::byte{0xc6}};
         actualBytes = intStringToBytes("-359482");
         REQUIRE(expectedBytes == actualBytes);
 
-        expectedBytes = {0x80, 0x00, 0x00, 0x00};
+        expectedBytes = {std::byte{0x80}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
         actualBytes = intStringToBytes("-2147483648");
         REQUIRE(expectedBytes == actualBytes);
 

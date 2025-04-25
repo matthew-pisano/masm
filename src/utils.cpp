@@ -11,26 +11,26 @@ bool isSignedInteger(const std::string& str) {
 }
 
 
-std::vector<uint8_t> stringToBytes(const std::string& string) {
-    std::vector<uint8_t> bytes = {};
+std::vector<std::byte> stringToBytes(const std::string& string) {
+    std::vector<std::byte> bytes = {};
     for (const char c : string)
-        bytes.push_back(static_cast<uint8_t>(c));
+        bytes.push_back(static_cast<std::byte>(c));
     return bytes;
 }
 
 
-std::vector<uint8_t> intStringToBytes(const std::string& string) {
+std::vector<std::byte> intStringToBytes(const std::string& string) {
     if (!isSignedInteger(string))
         throw std::runtime_error("Invalid integer " + string);
 
     const int integer = std::stoi(string);
 
-    std::vector<uint8_t> bytes = {};
+    std::vector<std::byte> bytes = {};
     // Using big endian
-    bytes.push_back(static_cast<uint8_t>(integer >> 24 & 0xFF));
-    bytes.push_back(static_cast<uint8_t>(integer >> 16 & 0xFF));
-    bytes.push_back(static_cast<uint8_t>(integer >> 8 & 0xFF));
-    bytes.push_back(static_cast<uint8_t>(integer & 0xFF));
+    bytes.push_back(static_cast<std::byte>(integer >> 24 & 0xFF));
+    bytes.push_back(static_cast<std::byte>(integer >> 16 & 0xFF));
+    bytes.push_back(static_cast<std::byte>(integer >> 8 & 0xFF));
+    bytes.push_back(static_cast<std::byte>(integer & 0xFF));
     return bytes;
 }
 

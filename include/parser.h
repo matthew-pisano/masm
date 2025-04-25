@@ -42,8 +42,8 @@ class Parser {
      * @return The memory allocation associated with the directive
      * @throw runtime_error When the arguments for a directive are malformed
      */
-    static std::vector<uint8_t> parseDirective(const Token& dirToken,
-                                               const std::vector<Token>& args);
+    static std::vector<std::byte> parseDirective(const Token& dirToken,
+                                                 const std::vector<Token>& args);
 
     /**
      * Parses an instruction and its arguments into bytes that can be allocated to memory
@@ -53,8 +53,8 @@ class Parser {
      * @return The memory allocation associated with the instruction
      * @throw runtime_error When an instruction is malformed
      */
-    std::vector<uint8_t> parseInstruction(uint32_t loc, const Token& instrToken,
-                                          std::vector<Token>& args);
+    std::vector<std::byte> parseInstruction(uint32_t loc, const Token& instrToken,
+                                            std::vector<Token>& args);
 
     /**
      * Parses an R-type instruction into bytes that can be allocated to memory
@@ -65,8 +65,8 @@ class Parser {
      * @param funct The function code for the instruction
      * @return The memory allocation associated with the instruction
      */
-    static std::vector<uint8_t> parseRTypeInstruction(uint32_t rd, uint32_t rs, uint32_t rt,
-                                                      uint32_t shamt, uint32_t funct);
+    static std::vector<std::byte> parseRTypeInstruction(uint32_t rd, uint32_t rs, uint32_t rt,
+                                                        uint32_t shamt, uint32_t funct);
 
     /**
      * Parses an I-type instruction into bytes that can be allocated to memory
@@ -78,8 +78,8 @@ class Parser {
      * @return The memory allocation associated with the instruction
      * @throw runtime_error When a branch target is out of range
      */
-    static std::vector<uint8_t> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
-                                                      uint32_t rs, int32_t immediate);
+    static std::vector<std::byte> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
+                                                        uint32_t rs, int32_t immediate);
 
     /**
      * Parses a J-type instruction into bytes that can be allocated to memory
@@ -87,13 +87,13 @@ class Parser {
      * @param address The address passed into the instruction
      * @return The memory allocation associated with the instruction
      */
-    static std::vector<uint8_t> parseJTypeInstruction(uint32_t opcode, uint32_t address);
+    static std::vector<std::byte> parseJTypeInstruction(uint32_t opcode, uint32_t address);
 
     /**
      * A specialized function to parse the syscall instruction
      * @return The memory allocation associated with the syscall instruction
      */
-    static std::vector<uint8_t> parseSyscallInstruction();
+    static std::vector<std::byte> parseSyscallInstruction();
 
     /**
      * A more generalized function to parse pseudo instructions
@@ -103,8 +103,8 @@ class Parser {
      * @return The memory allocation associated with the pseudo instruction
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
-    std::vector<uint8_t> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
-                                                std::vector<Token>& args);
+    std::vector<std::byte> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
+                                                  std::vector<Token>& args);
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions
@@ -116,17 +116,17 @@ class Parser {
      * @param checkEq Whether the branch equal instruction is used for this branch type
      * @return The memory allocation associated with the branch pseudo instruction
      */
-    std::vector<uint8_t> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
-                                                      const Token& reg2, const Token& label,
-                                                      bool checkLt, bool checkEq);
+    std::vector<std::byte> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
+                                                        const Token& reg2, const Token& label,
+                                                        bool checkLt, bool checkEq);
 
     /**
      * Parse a single line of tokens into memory allocations
-     * @param memory The memory layout to populate
+     * @param layout The memory layout to populate
      * @param currSection The current section of memory being populated
      * @param tokenLine The line of tokens to parse
      */
-    void parseLine(MemLayout& memory, MemSection& currSection, const std::vector<Token>& tokenLine);
+    void parseLine(MemLayout& layout, MemSection& currSection, const std::vector<Token>& tokenLine);
 
 public:
     /**

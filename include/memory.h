@@ -20,17 +20,17 @@ enum class MemSection { DATA, TEXT };
 /**
  * A type alias for an object containing memory allocations from the parser
  */
-using MemLayout = std::map<MemSection, std::vector<uint8_t>>;
+using MemLayout = std::map<MemSection, std::vector<std::byte>>;
 
 
 class Memory {
     // Map that can store up to ~4G of memory
-    std::unordered_map<uint32_t, int8_t> memory;
+    std::unordered_map<uint32_t, std::byte> memory;
 
 public:
     void loadProgram(const MemLayout& layout);
 
-    uint8_t operator[](int index) const;
+    std::byte operator[](uint32_t index);
 };
 
 
