@@ -7,6 +7,41 @@
 #include <stdexcept>
 
 
+uint64_t Memory::dWordAt(const uint32_t index) {
+    if (index % 8 != 0)
+        throw std::runtime_error("Invalid double-word access at " + std::to_string(index));
+
+    return static_cast<uint64_t>(memory[index]) << 56 |
+           static_cast<uint64_t>(memory[index + 1]) << 48 |
+           static_cast<uint64_t>(memory[index + 2]) << 40 |
+           static_cast<uint64_t>(memory[index + 3]) << 32 |
+           static_cast<uint64_t>(memory[index + 4]) << 24 |
+           static_cast<uint64_t>(memory[index + 5]) << 16 |
+           static_cast<uint64_t>(memory[index + 6]) << 8 | static_cast<uint64_t>(memory[index + 7]);
+}
+
+
+uint32_t Memory::wordAt(const uint32_t index) {
+    if (index % 4 != 0)
+        throw std::runtime_error("Invalid word access at " + std::to_string(index));
+
+    return static_cast<uint32_t>(memory[index]) << 24 |
+           static_cast<uint32_t>(memory[index + 1]) << 16 |
+           static_cast<uint32_t>(memory[index + 2]) << 8 | static_cast<uint32_t>(memory[index + 3]);
+}
+
+
+uint16_t Memory::hWordAt(const uint32_t index) {
+    if (index % 2 != 0)
+        throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
+
+    return static_cast<uint16_t>(memory[index]) << 8 | static_cast<uint16_t>(memory[index + 1]);
+}
+
+
+uint8_t Memory::byteAt(const uint32_t index) { return static_cast<uint8_t>(memory[index]); }
+
+
 void Memory::loadProgram(const MemLayout& layout) {
     for (const std::pair<MemSection, std::vector<std::byte>> pair : layout)
         for (size_t i = 0; i < pair.second.size(); i++)

@@ -17,6 +17,13 @@ struct State {
 class Interpreter {
     State state;
 
+    void execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t shamt);
+    void execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
+    void execJType(uint32_t opCode, uint32_t address);
+
+    void syscall();
+    void step();
+
 public:
     int interpret(const MemLayout& layout);
 };
