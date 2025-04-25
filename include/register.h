@@ -10,6 +10,42 @@
 #include <map>
 #include <string>
 
+
+enum class Register {
+    ZERO,
+    AT,
+    V0,
+    V1,
+    A0,
+    A1,
+    A2,
+    A3,
+    T0,
+    T1,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    S0,
+    S1,
+    S2,
+    S3,
+    S4,
+    S5,
+    S6,
+    S7,
+    T8,
+    T9,
+    K0,
+    K1,
+    GP,
+    SP,
+    FP,
+    RA
+};
+
 /**
  * Class representing the state and labels of registers
  */
@@ -23,12 +59,18 @@ class RegisterFile {
     /**
      * A mapping between the common names of registers and their register numbers
      */
-    std::map<std::string, int> nameToIndex = {
-            {"zero", 0}, {"at", 1},  {"v0", 2},  {"v1", 3},  {"a0", 4},  {"a1", 5},  {"a2", 6},
-            {"a3", 7},   {"t0", 8},  {"t1", 9},  {"t2", 10}, {"t3", 11}, {"t4", 12}, {"t5", 13},
-            {"t6", 14},  {"t7", 15}, {"s0", 16}, {"s1", 17}, {"s2", 18}, {"s3", 19}, {"s4", 20},
-            {"s5", 21},  {"s6", 22}, {"s7", 23}, {"t8", 24}, {"t9", 25}, {"k0", 26}, {"k1", 27},
-            {"gp", 28},  {"sp", 29}, {"fp", 30}, {"ra", 31}};
+    std::map<std::string, Register> nameToIndex = {
+            {"zero", Register::ZERO}, {"at", Register::AT}, {"v0", Register::V0},
+            {"v1", Register::V1},     {"a0", Register::A0}, {"a1", Register::A1},
+            {"a2", Register::A2},     {"a3", Register::A3}, {"t0", Register::T0},
+            {"t1", Register::T1},     {"t2", Register::T2}, {"t3", Register::T3},
+            {"t4", Register::T4},     {"t5", Register::T5}, {"t6", Register::T6},
+            {"t7", Register::T7},     {"s0", Register::S0}, {"s1", Register::S1},
+            {"s2", Register::S2},     {"s3", Register::S3}, {"s4", Register::S4},
+            {"s5", Register::S5},     {"s6", Register::S6}, {"s7", Register::S7},
+            {"t8", Register::T8},     {"t9", Register::T9}, {"k0", Register::K0},
+            {"k1", Register::K1},     {"gp", Register::GP}, {"sp", Register::SP},
+            {"fp", Register::FP},     {"ra", Register::RA}};
 
 public:
     /**

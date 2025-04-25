@@ -7,6 +7,7 @@
 
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
+    state.registers[]
 
-    return 0;
+            return 0;
 }

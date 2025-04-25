@@ -11,7 +11,7 @@ int RegisterFile::indexFromName(const std::string& name) {
     if (!nameToIndex.contains(name))
         throw std::runtime_error("Unknown register " + name);
 
-    return nameToIndex[name];
+    return static_cast<int>(nameToIndex[name]);
 }
 
 
