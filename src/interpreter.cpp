@@ -4,6 +4,10 @@
 
 #include "interpreter.h"
 
+#include <stdexcept>
+
+#include "instruction.h"
+
 
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
@@ -60,11 +64,20 @@ void Interpreter::execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t r
 }
 
 
-void Interpreter::execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate) {}
+void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint32_t rt,
+                            const int32_t immediate) {
+    switch (opCode) {
+        case InstructionCode::ADDIU:
+            state.registers[rt] = state.registers[rs] + immediate;
+            break;
+        default:
+            throw std::runtime_error("Unknown I-Type instruction " + std::to_string(opCode));
+    }
+}
 
 
 void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
-    if (opCode == 3)
+    if (opCode == InstructionCode::JAL)
         // Jump and link
         state.registers[Register::RA] = state.registers[Register::PC]; // PC incremented earlier
 

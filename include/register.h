@@ -84,8 +84,8 @@ public:
      */
     int indexFromName(const std::string& name);
 
-    uint32_t operator[](int index) const;
-    uint32_t& operator[](int index);
+    uint32_t operator[](uint32_t index) const;
+    uint32_t& operator[](uint32_t index);
 
     uint32_t operator[](Register index) const;
     uint32_t& operator[](Register index);

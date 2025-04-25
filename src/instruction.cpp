@@ -15,75 +15,80 @@
  */
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
-        {"add", {InstructionType::R_TYPE, 0x20, 4}},
-        {"addu", {InstructionType::R_TYPE, 0x21, 4}},
-        {"addi", {InstructionType::I_TYPE, 0x08, 4}},
-        {"addiu", {InstructionType::I_TYPE, 0x09, 4}},
-        {"and", {InstructionType::R_TYPE, 0x24, 4}},
-        {"andi", {InstructionType::I_TYPE, 0x0C, 4}},
-        {"div", {InstructionType::R_TYPE, 0x1A, 4}},
-        {"divu", {InstructionType::R_TYPE, 0x1B, 4}},
-        {"mult", {InstructionType::R_TYPE, 0x18, 4}},
-        {"multu", {InstructionType::R_TYPE, 0x19, 4}},
-        {"nor", {InstructionType::R_TYPE, 0x27, 4}},
-        {"or", {InstructionType::R_TYPE, 0x25, 4}},
-        {"ori", {InstructionType::I_TYPE, 0x0D, 4}},
-        {"sll", {InstructionType::R_TYPE, 0x00, 4}},
-        {"sllv", {InstructionType::R_TYPE, 0x04, 4}},
-        {"sra", {InstructionType::R_TYPE, 0x03, 4}},
-        {"srav", {InstructionType::R_TYPE, 0x07, 4}},
-        {"srl", {InstructionType::R_TYPE, 0x02, 4}},
-        {"srlv", {InstructionType::R_TYPE, 0x06, 4}},
-        {"sub", {InstructionType::R_TYPE, 0x22, 4}},
-        {"subu", {InstructionType::R_TYPE, 0x23, 4}},
-        {"xor", {InstructionType::R_TYPE, 0x26, 4}},
-        {"xori", {InstructionType::I_TYPE, 0x0E, 4}},
+        {"add", {InstructionType::R_TYPE, InstructionCode::ADD, 4}},
+        {"addu", {InstructionType::R_TYPE, InstructionCode::ADDU, 4}},
+        {"addi", {InstructionType::I_TYPE, InstructionCode::ADDI, 4}},
+        {"addiu", {InstructionType::I_TYPE, InstructionCode::ADDIU, 4}},
+        {"and", {InstructionType::R_TYPE, InstructionCode::AND, 4}},
+        {"andi", {InstructionType::I_TYPE, InstructionCode::ANDI, 4}},
+        {"div", {InstructionType::R_TYPE, InstructionCode::DIV, 4}},
+        {"divu", {InstructionType::R_TYPE, InstructionCode::DIVU, 4}},
+        {"mult", {InstructionType::R_TYPE, InstructionCode::MULT, 4}},
+        {"multu", {InstructionType::R_TYPE, InstructionCode::MULTU, 4}},
+        {"nor", {InstructionType::R_TYPE, InstructionCode::NOR, 4}},
+        {"or", {InstructionType::R_TYPE, InstructionCode::OR, 4}},
+        {"ori", {InstructionType::I_TYPE, InstructionCode::ORI, 4}},
+        {"sll", {InstructionType::R_TYPE, InstructionCode::SLL, 4}},
+        {"sllv", {InstructionType::R_TYPE, InstructionCode::SLLV, 4}},
+        {"sra", {InstructionType::R_TYPE, InstructionCode::SRA, 4}},
+        {"srav", {InstructionType::R_TYPE, InstructionCode::SRAV, 4}},
+        {"srl", {InstructionType::R_TYPE, InstructionCode::SRL, 4}},
+        {"srlv", {InstructionType::R_TYPE, InstructionCode::SRLV, 4}},
+        {"sub", {InstructionType::R_TYPE, InstructionCode::SUB, 4}},
+        {"subu", {InstructionType::R_TYPE, InstructionCode::SUBU, 4}},
+        {"xor", {InstructionType::R_TYPE, InstructionCode::XOR, 4}},
+        {"xori", {InstructionType::I_TYPE, InstructionCode::XORI, 4}},
 
         // Comparison Instructions
-        {"slt", {InstructionType::R_TYPE, 0x2a, 4}},
-        {"sltu", {InstructionType::R_TYPE, 0x29, 4}},
-        {"slti", {InstructionType::I_TYPE, 0x0a, 4}},
-        {"sltiu", {InstructionType::I_TYPE, 0x09, 4}},
+        {"slt", {InstructionType::R_TYPE, InstructionCode::SLT, 4}},
+        {"sltu", {InstructionType::R_TYPE, InstructionCode::SLTU, 4}},
+        {"slti", {InstructionType::I_TYPE, InstructionCode::SLTI, 4}},
+        {"sltiu", {InstructionType::I_TYPE, InstructionCode::SLTIU, 4}},
 
         // Branch Instructions
-        {"beq", {InstructionType::SWAPPED_I_TYPE, 0x04, 4}},
-        {"bgtz", {InstructionType::SHORT_I_TYPE, 0x07, 4}},
-        {"blez", {InstructionType::SHORT_I_TYPE, 0x06, 4}},
-        {"bltz", {InstructionType::SHORT_I_TYPE, 0x07, 4}},
-        {"bgez", {InstructionType::SHORT_I_TYPE, 0x01, 4}},
-        {"bne", {InstructionType::SWAPPED_I_TYPE, 0x05, 4}},
+        {"beq", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BEQ, 4}},
+        {"bgtz", {InstructionType::SHORT_I_TYPE, InstructionCode::BGTZ, 4}},
+        {"blez", {InstructionType::SHORT_I_TYPE, InstructionCode::BLEZ, 4}},
+        {"bltz", {InstructionType::SHORT_I_TYPE, InstructionCode::BLTZ, 4}},
+        {"bgez", {InstructionType::SHORT_I_TYPE, InstructionCode::BGEZ, 4}},
+        {"bne", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BNE, 4}},
 
         // Jump Instructions
-        {"j", {InstructionType::J_TYPE, 0x02, 4}},
-        {"jal", {InstructionType::J_TYPE, 0x03, 4}},
-        {"jalr", {InstructionType::R_TYPE, 0x09, 4}},
-        {"jr", {InstructionType::R_TYPE, 0x08, 4}},
+        {"j", {InstructionType::J_TYPE, InstructionCode::J, 4}},
+        {"jal", {InstructionType::J_TYPE, InstructionCode::JAL, 4}},
+        {"jalr", {InstructionType::R_TYPE, InstructionCode::JALR, 4}},
+        {"jr", {InstructionType::R_TYPE, InstructionCode::JR, 4}},
 
         // Load Instructions
-        {"lb", {InstructionType::I_TYPE, 0x20, 4}},
-        {"lbu", {InstructionType::I_TYPE, 0x24, 4}},
-        {"lh", {InstructionType::I_TYPE, 0x21, 4}},
-        {"lhu", {InstructionType::I_TYPE, 0x25, 4}},
-        {"lw", {InstructionType::I_TYPE, 0x23, 4}},
-        {"lui", {InstructionType::SHORT_I_TYPE, 0x0f, 4}},
+        {"lb", {InstructionType::I_TYPE, InstructionCode::LB, 4}},
+        {"lbu", {InstructionType::I_TYPE, InstructionCode::LBU, 4}},
+        {"lh", {InstructionType::I_TYPE, InstructionCode::LH, 4}},
+        {"lhu", {InstructionType::I_TYPE, InstructionCode::LHU, 4}},
+        {"lw", {InstructionType::I_TYPE, InstructionCode::LW, 4}},
+        {"lui", {InstructionType::SHORT_I_TYPE, InstructionCode::LUI, 4}},
 
         // Store Instructions
-        {"sb", {InstructionType::I_TYPE, 0x28, 4}},
-        {"sh", {InstructionType::I_TYPE, 0x29, 4}},
-        {"sw", {InstructionType::I_TYPE, 0x2B, 4}},
+        {"sb", {InstructionType::I_TYPE, InstructionCode::SB, 4}},
+        {"sh", {InstructionType::I_TYPE, InstructionCode::SH, 4}},
+        {"sw", {InstructionType::I_TYPE, InstructionCode::SW, 4}},
 
         // Syscall
-        {"syscall", {InstructionType::SYSCALL, 0, 4}},
+        {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
 
         // Pseudo Instructions
-        {"li", {InstructionType::PSEUDO, 0, 4}},
-        {"la", {InstructionType::PSEUDO, 0, 8}},
-        {"blt", {InstructionType::PSEUDO, 0, 8}},
-        {"bgt", {InstructionType::PSEUDO, 0, 8}},
-        {"bge", {InstructionType::PSEUDO, 0, 8}},
-        {"ble", {InstructionType::PSEUDO, 0, 8}},
+        {"li", {InstructionType::PSEUDO, InstructionCode::LI, 4}},
+        {"la", {InstructionType::PSEUDO, InstructionCode::LA, 8}},
+        {"blt", {InstructionType::PSEUDO, InstructionCode::BLT, 8}},
+        {"bgt", {InstructionType::PSEUDO, InstructionCode::BGT, 8}},
+        {"bge", {InstructionType::PSEUDO, InstructionCode::BGE, 8}},
+        {"ble", {InstructionType::PSEUDO, InstructionCode::BLE, 8}},
 
 };
+
+
+bool operator==(const uint32_t lhs, InstructionCode code) {
+    return lhs == static_cast<uint32_t>(code);
+}
 
 
 InstructionOp nameToInstructionOp(const std::string& name) {

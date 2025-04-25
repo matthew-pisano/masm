@@ -253,24 +253,24 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
         }
     }
 
+    const uint32_t opFuncCode = static_cast<uint32_t>(instructionOp.opFuncCode);
     // Parse integer arguments into a single instruction word
     switch (instructionOp.type) {
         case InstructionType::R_TYPE:
-            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0,
-                                         instructionOp.opFuncCode);
+            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
         case InstructionType::I_TYPE:
-            return parseITypeInstruction(loc, instructionOp.opFuncCode, argCodes[0], argCodes[1],
+            return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));
         case InstructionType::SWAPPED_I_TYPE:
             // Instructions where rs comes before rt in the binary encoding
-            return parseITypeInstruction(loc, instructionOp.opFuncCode, argCodes[1], argCodes[0],
+            return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
                                          static_cast<int32_t>(argCodes[2]));
         case InstructionType::SHORT_I_TYPE:
             // Location not needed for short I-Type instructions
-            return parseITypeInstruction(0, instructionOp.opFuncCode, argCodes[0], 0,
+            return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
                                          static_cast<int32_t>(argCodes[1]));
         case InstructionType::J_TYPE:
-            return parseJTypeInstruction(instructionOp.opFuncCode, argCodes[0]);
+            return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
         case InstructionType::PSEUDO:

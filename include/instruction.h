@@ -8,6 +8,81 @@
 #include "tokenizer.h"
 
 
+enum class InstructionCode {
+    // Arithmetic and Logical Instructions
+    ADD = 0x20,
+    ADDU = 0x21,
+    ADDI = 0x08,
+    ADDIU = 0x09,
+    AND = 0x24,
+    ANDI = 0x0c,
+    DIV = 0x1a,
+    DIVU = 0x1b,
+    MULT = 0x18,
+    MULTU = 0x19,
+    NOR = 0x27,
+    OR = 0x25,
+    ORI = 0x0d,
+    SLL = 0x00,
+    SLLV = 0x04,
+    SRA = 0x03,
+    SRAV = 0x07,
+    SRL = 0x02,
+    SRLV = 0x06,
+    SUB = 0x22,
+    SUBU = 0x23,
+    XOR = 0x26,
+    XORI = 0x0e,
+
+    // Comparison Instructions
+    SLT = 0x2a,
+    SLTU = 0x29,
+    SLTI = 0x0a,
+    SLTIU = 0x09,
+
+    // Branch Instructions
+    BEQ = 0x04,
+    BGTZ = 0x07,
+    BLEZ = 0x06,
+    BLTZ = 0x07,
+    BGEZ = 0x01,
+    BNE = 0x05,
+
+    // Jump Instructions
+    J = 0x02,
+    JAL = 0x03,
+    JALR = 0x09,
+    JR = 0x08,
+
+    // Load Instructions
+    LB = 0x20,
+    LBU = 0x24,
+    LH = 0x21,
+    LHU = 0x25,
+    LW = 0x23,
+    LUI = 0x0f,
+
+    // Store Instructions
+    SB = 0x28,
+    SH = 0x29,
+    SW = 0x2b,
+
+    // Syscall
+    SYSCALL = 0x00,
+
+    // Pseudo Instructions
+    LI = 0x00,
+    LA = 0x00,
+    BLT = 0x00,
+    BGT = 0x00,
+    BGE = 0x00,
+    BLE = 0x00
+};
+
+
+bool operator==(uint32_t lhs, InstructionCode code);
+
+
 /**
  * Class representing all valid instruction types and sub-types
  */
@@ -27,7 +102,7 @@ enum class InstructionType {
  */
 struct InstructionOp {
     InstructionType type;
-    uint8_t opFuncCode;
+    InstructionCode opFuncCode;
     uint8_t size;
 };
 
