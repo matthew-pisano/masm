@@ -15,16 +15,16 @@ int RegisterFile::indexFromName(const std::string& name) {
 }
 
 
-uint32_t RegisterFile::operator[](const uint32_t index) const { return registers[index]; }
-uint32_t& RegisterFile::operator[](const uint32_t index) {
+int32_t RegisterFile::operator[](const uint32_t index) const { return registers[index]; }
+int32_t& RegisterFile::operator[](const uint32_t index) {
     if (index >= 32)
         throw std::runtime_error("Register index out of bounds: " + std::to_string(index));
     return registers[index];
 }
 
-uint32_t RegisterFile::operator[](const Register index) const {
+int32_t RegisterFile::operator[](const Register index) const {
     return registers[static_cast<int>(index)];
 }
-uint32_t& RegisterFile::operator[](const Register index) {
+int32_t& RegisterFile::operator[](const Register index) {
     return registers[static_cast<int>(index)];
 }

@@ -57,7 +57,7 @@ class RegisterFile {
     /**
      * A mapping between register numbers and values stored in the 32 registers + PC, HI, and LO
      */
-    std::array<uint32_t, 35> registers = {};
+    std::array<int32_t, 35> registers = {};
 
     /**
      * A mapping between the common names of registers and their register numbers
@@ -84,11 +84,11 @@ public:
      */
     int indexFromName(const std::string& name);
 
-    uint32_t operator[](uint32_t index) const;
-    uint32_t& operator[](uint32_t index);
+    int32_t operator[](uint32_t index) const;
+    int32_t& operator[](uint32_t index);
 
-    uint32_t operator[](Register index) const;
-    uint32_t& operator[](Register index);
+    int32_t operator[](Register index) const;
+    int32_t& operator[](Register index);
 };
 
 #endif // REGISTER_H
