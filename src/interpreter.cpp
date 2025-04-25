@@ -63,7 +63,14 @@ void Interpreter::execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t r
 void Interpreter::execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate) {}
 
 
-void Interpreter::execJType(uint32_t opCode, uint32_t address) {}
+void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
+    if (opCode == 3)
+        // Jump and link
+        state.registers[Register::RA] = state.registers[Register::PC]; // PC incremented earlier
+
+    // Jump to the target address
+    state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | (address << 2);
+}
 
 
 void Interpreter::syscall() {}
