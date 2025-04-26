@@ -95,6 +95,7 @@ enum class InstructionType {
     SHIFT_R_TYPE,
     SHORT_R_TYPE,
     SWAPPED_R_TYPE,
+    JUMP_R_TYPE,
     SHORT_I_TYPE,
     SWAPPED_I_TYPE,
     SYSCALL,

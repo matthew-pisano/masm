@@ -280,6 +280,8 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
             return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
         case InstructionType::SHIFT_R_TYPE:
             return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
+        case InstructionType::JUMP_R_TYPE:
+            return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
         case InstructionType::I_TYPE:
             return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));
@@ -292,7 +294,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
             return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
                                          static_cast<int32_t>(argCodes[1]));
         case InstructionType::SHORT_R_TYPE:
-            return parseRTypeInstruction(0, argCodes[1], argCodes[2], 0, opFuncCode);
+            return parseRTypeInstruction(0, argCodes[0], argCodes[1], 0, opFuncCode);
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:

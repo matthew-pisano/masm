@@ -29,11 +29,11 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"or", {InstructionType::R_TYPE, InstructionCode::OR, 4}},
         {"ori", {InstructionType::I_TYPE, InstructionCode::ORI, 4}},
         {"sll", {InstructionType::SHIFT_R_TYPE, InstructionCode::SLL, 4}},
-        {"sllv", {InstructionType::R_TYPE, InstructionCode::SLLV, 4}},
+        {"sllv", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SLLV, 4}},
         {"sra", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRA, 4}},
-        {"srav", {InstructionType::R_TYPE, InstructionCode::SRAV, 4}},
+        {"srav", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SRAV, 4}},
         {"srl", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRL, 4}},
-        {"srlv", {InstructionType::R_TYPE, InstructionCode::SRLV, 4}},
+        {"srlv", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SRLV, 4}},
         {"sub", {InstructionType::R_TYPE, InstructionCode::SUB, 4}},
         {"subu", {InstructionType::R_TYPE, InstructionCode::SUBU, 4}},
         {"xor", {InstructionType::R_TYPE, InstructionCode::XOR, 4}},
@@ -52,8 +52,8 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         // Jump Instructions
         {"j", {InstructionType::J_TYPE, InstructionCode::J, 4}},
         {"jal", {InstructionType::J_TYPE, InstructionCode::JAL, 4}},
-        {"jalr", {InstructionType::R_TYPE, InstructionCode::JALR, 4}},
-        {"jr", {InstructionType::R_TYPE, InstructionCode::JR, 4}},
+        {"jalr", {InstructionType::JUMP_R_TYPE, InstructionCode::JALR, 4}},
+        {"jr", {InstructionType::JUMP_R_TYPE, InstructionCode::JR, 4}},
 
         // Load Instructions
         {"lb", {InstructionType::I_TYPE, InstructionCode::LB, 4}},
@@ -130,6 +130,11 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
             break;
         case InstructionType::SHORT_R_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::JUMP_R_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
