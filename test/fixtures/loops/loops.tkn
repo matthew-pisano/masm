@@ -2,9 +2,18 @@
 05li06t108,0724
 05li06t008,07-1
 03loop
+05addi06a008,06t008,070
+05li06v008,071
+05syscall
+05addi06a008,06zero08,0732
+05li06v008,0711
+05syscall
 05addi06t008,06t008,071
 05bgt06t008,06t108,04exit
 05j04loop
 03exit
+05addi06a008,06zero08,0747
+05li06v008,0711
+05syscall
 05li06v008,0710
 05syscall
