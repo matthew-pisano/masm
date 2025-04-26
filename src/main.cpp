@@ -6,6 +6,8 @@
 
 #include "CLI/CLI.hpp"
 #include "fileio.h"
+#include "interpreter.h"
+#include "parser.h"
 
 
 int main(const int argc, char* argv[]) {
@@ -22,13 +24,18 @@ int main(const int argc, char* argv[]) {
     }
 
     try {
-        std::vector<std::string> lines = readFileLines(inputFileName);
-        for (const std::string& line : lines)
-            std::cout << "> " << line << std::endl;
+        const std::vector<std::string> lines = readFileLines(inputFileName);
+
+        const std::vector<std::vector<Token>> program = Tokenizer::tokenize(lines);
+
+        Parser parser{};
+        const MemLayout layout = parser.parse(program);
+
+        Interpreter interpreter{};
+        const int exitCode = interpreter.interpret(layout);
+        return exitCode;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
-
-    return 0;
 }

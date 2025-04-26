@@ -3,8 +3,8 @@
 02asciiz11Hello, World!
 01text
 03main
-05addiu06v008,06zero08,074
+05li06v008,074
 05la06a008,04out_string
 05syscall
-05addiu06v008,06zero08,0710
+05li06v008,0710
 05syscall
