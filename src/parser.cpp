@@ -276,8 +276,10 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
     switch (instructionOp.type) {
         case InstructionType::R_TYPE:
             return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
+        case InstructionType::SWAPPED_R_TYPE:
+            return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
         case InstructionType::SHIFT_R_TYPE:
-            return parseRTypeInstruction(argCodes[0], argCodes[1], 0, argCodes[2], opFuncCode);
+            return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
         case InstructionType::I_TYPE:
             return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));

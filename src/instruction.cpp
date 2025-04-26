@@ -103,6 +103,7 @@ InstructionOp nameToInstructionOp(const std::string& name) {
 void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
 
     switch (nameToInstructionOp(instruction.value).type) {
+        case InstructionType::SWAPPED_R_TYPE:
         case InstructionType::R_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
                                 args))
