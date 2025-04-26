@@ -4,8 +4,22 @@
 
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
+#include <stdexcept>
+
+
 #include "memory.h"
 #include "register.h"
+
+
+class ExecExit final : public std::runtime_error {
+    int errorCode;
+
+public:
+    explicit ExecExit(const std::string& message, const int code) :
+        std::runtime_error(message), errorCode(code) {}
+
+    [[nodiscard]] int code() const { return errorCode; }
+};
 
 
 struct State {
@@ -21,8 +35,8 @@ class Interpreter {
     void execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
     void execJType(uint32_t opCode, uint32_t address);
 
-    int syscall();
-    int step();
+    void syscall();
+    void step();
 
 public:
     int interpret(const MemLayout& layout);

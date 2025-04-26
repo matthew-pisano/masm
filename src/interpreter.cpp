@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include "instruction.h"
+#include "syscall.h"
 
 
 int Interpreter::interpret(const MemLayout& layout) {
@@ -16,14 +17,17 @@ int Interpreter::interpret(const MemLayout& layout) {
     state.registers[Register::SP] = 0x7FFFFFFC;
     state.registers[Register::GP] = 0x10008000;
 
-    while (!step()) {
+    while (true) {
+        try {
+            step();
+        } catch (ExecExit& e) {
+            return e.code();
+        }
     }
-
-    return 0;
 }
 
 
-int Interpreter::step() {
+void Interpreter::step() {
     const int32_t instruction = state.memory.wordAt(state.registers[Register::PC]);
     if (instruction == 0)
         throw std::runtime_error("Execution terminated (fell off end of program)");
@@ -32,7 +36,8 @@ int Interpreter::step() {
 
     if (instruction == 0x0000000C) {
         // Syscall instruction
-        return syscall();
+        syscall();
+        return;
     }
 
     const uint32_t opCode = instruction >> 26 & 0x3F;
@@ -58,8 +63,6 @@ int Interpreter::step() {
         // Execute I-Type instruction
         execIType(opCode, rs, rt, immediate);
     }
-
-    return 0;
 }
 
 
@@ -284,4 +287,32 @@ void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
 }
 
 
-int Interpreter::syscall() {}
+void Interpreter::syscall() {
+    int32_t syscallCode = state.registers[Register::V0];
+    switch (static_cast<Syscall>(syscallCode)) {
+        case Syscall::PRINT_INT:
+            printIntSyscall(state);
+            break;
+        case Syscall::PRINT_STRING:
+            printStringSyscall(state);
+            break;
+        case Syscall::READ_INT:
+            readIntSyscall(state);
+            break;
+        case Syscall::READ_STRING:
+            readStringSyscall(state);
+            break;
+        case Syscall::EXIT:
+            exitSyscall(state);
+            break;
+        case Syscall::PRINT_CHAR:
+            printCharSyscall(state);
+            break;
+        case Syscall::READ_CHAR:
+            readCharSyscall(state);
+            break;
+        case Syscall::EXIT_VAL:
+            exitValSyscall(state);
+            break;
+    }
+}
