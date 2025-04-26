@@ -125,7 +125,12 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
                                                      int32_t immediate) {
 
     // Modify immediate values to be relative to the location of the current instruction
-    std::vector<uint32_t> branchOpCodes = {0x04, 0x07, 0x06, 0x05, 0x01};
+    std::vector branchOpCodes = {static_cast<uint32_t>(InstructionCode::BEQ),
+                                 static_cast<uint32_t>(InstructionCode::BNE),
+                                 static_cast<uint32_t>(InstructionCode::BGTZ),
+                                 static_cast<uint32_t>(InstructionCode::BGEZ),
+                                 static_cast<uint32_t>(InstructionCode::BLTZ),
+                                 static_cast<uint32_t>(InstructionCode::BLEZ)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
         // Branch instructions are offset by 4 bytes so divide by 4
         const int32_t offset = (immediate - static_cast<int32_t>(loc) - 8) / 4;
