@@ -21,10 +21,10 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"addiu", {InstructionType::I_TYPE, InstructionCode::ADDIU, 4}},
         {"and", {InstructionType::R_TYPE, InstructionCode::AND, 4}},
         {"andi", {InstructionType::I_TYPE, InstructionCode::ANDI, 4}},
-        {"div", {InstructionType::R_TYPE, InstructionCode::DIV, 4}},
-        {"divu", {InstructionType::R_TYPE, InstructionCode::DIVU, 4}},
-        {"mult", {InstructionType::R_TYPE, InstructionCode::MULT, 4}},
-        {"multu", {InstructionType::R_TYPE, InstructionCode::MULTU, 4}},
+        {"div", {InstructionType::SHORT_R_TYPE, InstructionCode::DIV, 4}},
+        {"divu", {InstructionType::SHORT_R_TYPE, InstructionCode::DIVU, 4}},
+        {"mult", {InstructionType::SHORT_R_TYPE, InstructionCode::MULT, 4}},
+        {"multu", {InstructionType::SHORT_R_TYPE, InstructionCode::MULTU, 4}},
         {"nor", {InstructionType::R_TYPE, InstructionCode::NOR, 4}},
         {"or", {InstructionType::R_TYPE, InstructionCode::OR, 4}},
         {"ori", {InstructionType::I_TYPE, InstructionCode::ORI, 4}},
@@ -61,6 +61,7 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"lh", {InstructionType::I_TYPE, InstructionCode::LH, 4}},
         {"lhu", {InstructionType::I_TYPE, InstructionCode::LHU, 4}},
         {"lw", {InstructionType::I_TYPE, InstructionCode::LW, 4}},
+        {"lui", {InstructionType::SHORT_I_TYPE, InstructionCode::LUI, 4}},
 
         // Store Instructions
         {"sb", {InstructionType::I_TYPE, InstructionCode::SB, 4}},
@@ -83,7 +84,6 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
         {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
         {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
-        {"lui", {InstructionType::PSEUDO, InstructionCode::LUI, 4}},
 
 };
 
@@ -120,6 +120,16 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
                 throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::SHORT_I_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::SHORT_R_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
         case InstructionType::J_TYPE:

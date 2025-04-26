@@ -154,20 +154,6 @@ std::vector<std::byte> Parser::parseJTypeInstruction(const uint32_t opcode,
 std::vector<std::byte> Parser::parseSyscallInstruction() { return i32ToBEByte(12); }
 
 
-std::vector<std::byte> Parser::parseLuiInstruction(const Token& reg, const uint32_t immediate) {
-    RegisterFile regFile{};
-    const std::byte regIdx = static_cast<std::byte>(regFile.indexFromName(reg.value));
-
-    std::vector<std::byte> bytes(4);
-    bytes[0] = static_cast<std::byte>(InstructionCode::LUI) << 2;
-    bytes[1] = regIdx;
-    bytes[2] = static_cast<std::byte>(immediate >> 8 & 0xFF);
-    bytes[3] = static_cast<std::byte>(immediate & 0xFF);
-
-    return bytes;
-}
-
-
 std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
                                                       const std::string& instructionName,
                                                       const std::vector<Token>& args) {
@@ -181,19 +167,19 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
         const unsigned int upperBytes = (std::stoi(args[1].value) & 0xFFFF0000) >> 16;
         const unsigned int lowerBytes = std::stoi(args[1].value) & 0x0000FFFF;
 
+        std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "at"},
+                                           {TokenType::IMMEDIATE, std::to_string(upperBytes)}};
         std::vector<std::byte> luiBytes =
-                parseLuiInstruction({TokenType::REGISTER, "at"}, upperBytes);
+                parseInstruction(loc, {TokenType::INSTRUCTION, "lui"}, modifiedArgs);
 
-        std::vector modifiedArgs = {args[0],
-                                    {TokenType::REGISTER, "at"},
-                                    {TokenType::IMMEDIATE, std::to_string(lowerBytes)}};
+        modifiedArgs = {args[0],
+                        {TokenType::REGISTER, "at"},
+                        {TokenType::IMMEDIATE, std::to_string(lowerBytes)}};
         std::vector<std::byte> oriBytes =
                 parseInstruction(loc, {TokenType::INSTRUCTION, "ori"}, modifiedArgs);
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
-    if (instructionName == "lui")
-        return parseLuiInstruction(args[0], std::stoi(args[1].value));
 
     // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
@@ -299,6 +285,12 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
             // Instructions where rs comes before rt in the binary encoding
             return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
                                          static_cast<int32_t>(argCodes[2]));
+        case InstructionType::SHORT_I_TYPE:
+            // Location not needed for short I-Type instructions
+            return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
+                                         static_cast<int32_t>(argCodes[1]));
+        case InstructionType::SHORT_R_TYPE:
+            return parseRTypeInstruction(0, argCodes[1], argCodes[2], 0, opFuncCode);
         case InstructionType::J_TYPE:
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
