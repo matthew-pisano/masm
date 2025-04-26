@@ -14,7 +14,7 @@ add_executable(mipscpp src/main.cpp
         src/instruction.cpp
         src/memory.cpp
         src/interpreter.cpp
-        src/syscall.cpp
+        src/syscalls.cpp
         src/labels.cpp
 )
 
@@ -52,7 +52,7 @@ add_executable(mipscpp-tests
         src/memory.cpp
         test/test_parser.cpp
         src/interpreter.cpp
-        src/syscall.cpp
+        src/syscalls.cpp
         test/test_interpreter.cpp
         src/labels.cpp
 )

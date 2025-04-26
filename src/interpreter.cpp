@@ -7,7 +7,7 @@
 #include <stdexcept>
 
 #include "instruction.h"
-#include "syscall.h"
+#include "syscalls.h"
 
 
 int Interpreter::interpret(const MemLayout& layout) {

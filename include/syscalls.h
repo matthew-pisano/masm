@@ -2,8 +2,8 @@
 // Created by matthew on 4/26/25.
 //
 
-#ifndef SYSCALL_H
-#define SYSCALL_H
+#ifndef SYSCALLS_H
+#define SYSCALLS_H
 
 #include "interpreter.h"
 
@@ -77,4 +77,4 @@ void readCharSyscall(State state, std::istream& istream);
  */
 void exitValSyscall(State state);
 
-#endif // SYSCALL_H
+#endif // SYSCALLS_H
