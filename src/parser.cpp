@@ -129,7 +129,7 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
                                  static_cast<uint32_t>(InstructionCode::BNE)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
         // Branch instructions are offset by 4 bytes so divide by 4
-        const int32_t offset = (immediate - static_cast<int32_t>(loc) - 8) / 4;
+        const int32_t offset = (immediate - static_cast<int32_t>(loc) - 8) >> 2;
         if (offset < -32768 || offset > 32767)
             throw std::runtime_error("Branch instruction offset out of range");
         immediate = static_cast<int32_t>(offset);

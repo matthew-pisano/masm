@@ -125,6 +125,16 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
         case InstructionCode::SW:
             state.memory.wordTo(state.registers[rs] + immediate, state.registers[rt]);
             break;
+        case InstructionCode::BEQ:
+            if (state.registers[rs] == state.registers[rt])
+                state.registers[Register::PC] =
+                        state.registers[Register::PC] + (signExtImmediate << 2);
+            break;
+        case InstructionCode::BNE:
+            if (state.registers[rs] != state.registers[rt])
+                state.registers[Register::PC] =
+                        state.registers[Register::PC] + (signExtImmediate << 2);
+            break;
         default:
             throw std::runtime_error("Unknown I-Type instruction " + std::to_string(opCode));
     }
