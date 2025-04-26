@@ -8,6 +8,9 @@
 #include "tokenizer.h"
 
 
+/**
+ * The Op or Func code associated with an instruction
+ */
 enum class InstructionCode {
     // Arithmetic and Logical Instructions
     ADD = 0x20,

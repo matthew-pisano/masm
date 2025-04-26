@@ -11,6 +11,9 @@
 #include <string>
 
 
+/**
+ * Enum representing the valid register numbers
+ */
 enum class Register {
     ZERO,
     AT,
@@ -49,11 +52,11 @@ enum class Register {
     LO
 };
 
+
 /**
  * Class representing the state and labels of registers
  */
 class RegisterFile {
-
     /**
      * A mapping between register numbers and values stored in the 32 registers + PC, HI, and LO
      */

@@ -7,6 +7,9 @@
 #include "interpreter.h"
 
 
+/**
+ * Enumeration of the system calls available in the MIPS architecture
+ */
 enum class Syscall {
     PRINT_INT = 1,
     PRINT_STRING = 4,
