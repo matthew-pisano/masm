@@ -46,3 +46,17 @@ TEST_CASE("Test Execute Hello World") {
     validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
+
+
+TEST_CASE("Test Execute Arithmetic") {
+    const std::string test_case = "arithmetic";
+    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+}
+
+
+TEST_CASE("Test Execute Syscall") {
+    const std::string test_case = "syscall";
+    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+}
