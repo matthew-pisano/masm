@@ -38,7 +38,7 @@ enum class InstructionCode {
     SLT = 0x2a,
     SLTU = 0x29,
     SLTI = 0x0a,
-    SLTIU = 0x09,
+    SLTIU = 0x0b,
 
     // Branch Instructions
     BEQ = 0x04,

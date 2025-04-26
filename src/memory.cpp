@@ -7,31 +7,17 @@
 #include <stdexcept>
 
 
-uint64_t Memory::dWordAt(const uint32_t index) {
-    if (index % 8 != 0)
-        throw std::runtime_error("Invalid double-word access at " + std::to_string(index));
-
-    return static_cast<uint64_t>(memory[index]) << 56 |
-           static_cast<uint64_t>(memory[index + 1]) << 48 |
-           static_cast<uint64_t>(memory[index + 2]) << 40 |
-           static_cast<uint64_t>(memory[index + 3]) << 32 |
-           static_cast<uint64_t>(memory[index + 4]) << 24 |
-           static_cast<uint64_t>(memory[index + 5]) << 16 |
-           static_cast<uint64_t>(memory[index + 6]) << 8 | static_cast<uint64_t>(memory[index + 7]);
-}
-
-
-uint32_t Memory::wordAt(const uint32_t index) {
+int32_t Memory::wordAt(const uint32_t index) {
     if (index % 4 != 0)
         throw std::runtime_error("Invalid word access at " + std::to_string(index));
 
-    return static_cast<uint32_t>(memory[index]) << 24 |
-           static_cast<uint32_t>(memory[index + 1]) << 16 |
-           static_cast<uint32_t>(memory[index + 2]) << 8 | static_cast<uint32_t>(memory[index + 3]);
+    return static_cast<int32_t>(memory[index]) << 24 |
+           static_cast<int32_t>(memory[index + 1]) << 16 |
+           static_cast<int32_t>(memory[index + 2]) << 8 | static_cast<int32_t>(memory[index + 3]);
 }
 
 
-uint16_t Memory::hWordAt(const uint32_t index) {
+uint16_t Memory::halfAt(const uint32_t index) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
 
@@ -40,6 +26,31 @@ uint16_t Memory::hWordAt(const uint32_t index) {
 
 
 uint8_t Memory::byteAt(const uint32_t index) { return static_cast<uint8_t>(memory[index]); }
+
+
+void Memory::wordTo(const uint32_t index, const int32_t value) {
+    if (index % 4 != 0)
+        throw std::runtime_error("Invalid word access at " + std::to_string(index));
+
+    memory[index] = static_cast<std::byte>(value >> 24);
+    memory[index + 1] = static_cast<std::byte>(value >> 16);
+    memory[index + 2] = static_cast<std::byte>(value >> 8);
+    memory[index + 3] = static_cast<std::byte>(value);
+}
+
+
+void Memory::halfTo(const uint32_t index, const uint16_t value) {
+    if (index % 2 != 0)
+        throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
+
+    memory[index] = static_cast<std::byte>(value >> 8);
+    memory[index + 1] = static_cast<std::byte>(value);
+}
+
+
+void Memory::byteTo(const uint32_t index, const uint8_t value) {
+    memory[index] = static_cast<std::byte>(value);
+}
 
 
 void Memory::loadProgram(const MemLayout& layout) {

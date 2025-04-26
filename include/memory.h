@@ -28,10 +28,13 @@ class Memory {
     std::unordered_map<uint32_t, std::byte> memory;
 
 public:
-    uint64_t dWordAt(uint32_t index);
-    uint32_t wordAt(uint32_t index);
-    uint16_t hWordAt(uint32_t index);
+    int32_t wordAt(uint32_t index);
+    uint16_t halfAt(uint32_t index);
     uint8_t byteAt(uint32_t index);
+
+    void wordTo(uint32_t index, int32_t value);
+    void halfTo(uint32_t index, uint16_t value);
+    void byteTo(uint32_t index, uint8_t value);
 
     void loadProgram(const MemLayout& layout);
 
