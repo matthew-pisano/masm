@@ -56,7 +56,132 @@ void Interpreter::step() {
 }
 
 
-void Interpreter::execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t shamt) {
+void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint32_t rt,
+                            const uint32_t rd, const uint32_t shamt) {
+    switch (static_cast<InstructionCode>(funct)) {
+        case InstructionCode::ADD: {
+            const int64_t extResult = static_cast<int64_t>(state.registers[rs]) +
+                                      static_cast<int64_t>(state.registers[rt]);
+            if (extResult > INT32_MAX || extResult < INT32_MIN)
+                throw std::runtime_error("Integer overflow in ADD instruction");
+            state.registers[rd] = state.registers[rs] + state.registers[rt];
+            break;
+        }
+        case InstructionCode::ADDU:
+            state.registers[rd] = state.registers[rs] + state.registers[rt];
+            break;
+        case InstructionCode::AND:
+            state.registers[rd] = state.registers[rs] & state.registers[rt];
+            break;
+        case InstructionCode::DIV: {
+            if (state.registers[rt] == 0)
+                throw std::runtime_error("Division by zero in DIV instruction");
+            state.registers[Register::LO] = state.registers[rs] / state.registers[rt];
+            state.registers[Register::HI] = state.registers[rs] % state.registers[rt];
+            break;
+        }
+        case InstructionCode::DIVU: {
+            if (state.registers[rt] == 0)
+                throw std::runtime_error("Division by zero in DIVU instruction");
+            state.registers[Register::LO] = static_cast<uint32_t>(state.registers[rs]) /
+                                            static_cast<uint32_t>(state.registers[rt]);
+            state.registers[Register::HI] = static_cast<uint32_t>(state.registers[rs]) %
+                                            static_cast<uint32_t>(state.registers[rt]);
+            break;
+        }
+        case InstructionCode::MULT: {
+            state.registers[Register::LO] = static_cast<int64_t>(state.registers[rs]) *
+                                                    static_cast<int64_t>(state.registers[rt]) &
+                                            0xFFFFFFFF;
+            state.registers[Register::HI] = (static_cast<int64_t>(state.registers[rs]) *
+                                                     static_cast<int64_t>(state.registers[rt]) >>
+                                             32) &
+                                            0xFFFFFFFF;
+            break;
+        }
+        case InstructionCode::MULTU: {
+            state.registers[Register::LO] = static_cast<uint64_t>(state.registers[rs]) *
+                                                    static_cast<uint64_t>(state.registers[rt]) &
+                                            0xFFFFFFFF;
+            state.registers[Register::HI] = (static_cast<uint64_t>(state.registers[rs]) *
+                                                     static_cast<uint64_t>(state.registers[rt]) >>
+                                             32) &
+                                            0xFFFFFFFF;
+            break;
+        }
+        case InstructionCode::NOR:
+            state.registers[rd] = ~(state.registers[rs] | state.registers[rt]);
+            break;
+        case InstructionCode::OR:
+            state.registers[rd] = state.registers[rs] | state.registers[rt];
+            break;
+        case InstructionCode::SLL:
+            state.registers[rd] = state.registers[rt] << shamt;
+            break;
+        case InstructionCode::SLLV:
+            // Shift up to 5 bits (32 places)
+            state.registers[rd] = state.registers[rt] << (state.registers[rs] & 0x1F);
+            break;
+        case InstructionCode::SRA: {
+            // Arithmetic right shift (sign-extended)
+            const bool sign = state.registers[rt] & 0x80000000;
+            state.registers[rd] =
+                    (state.registers[rt] >> shamt) | (sign ? 0xFFFFFFFF << (32 - shamt) : 0);
+            break;
+        }
+        case InstructionCode::SRAV: {
+            // Arithmetic right shift (sign-extended)
+            const bool signShift = state.registers[rt] & 0x80000000;
+            state.registers[rd] =
+                    (state.registers[rt] >> (state.registers[rs] & 0x1F)) |
+                    (signShift ? 0xFFFFFFFF << (32 - (state.registers[rs] & 0x1F)) : 0);
+            break;
+        }
+        case InstructionCode::SRL:
+            // Logical right shift (zero-extended)
+            state.registers[rd] = state.registers[rt] >> shamt;
+            break;
+        case InstructionCode::SRLV:
+            // Logical right shift (zero-extended)
+            state.registers[rd] = state.registers[rt] >> (state.registers[rs] & 0x1F);
+            break;
+        case InstructionCode::SUB: {
+            const int64_t extResult = static_cast<int64_t>(state.registers[rs]) -
+                                      static_cast<int64_t>(state.registers[rt]);
+            if (extResult > INT32_MAX || extResult < INT32_MIN)
+                throw std::runtime_error("Integer overflow in SUB instruction");
+            state.registers[rd] = state.registers[rs] - state.registers[rt];
+            break;
+        }
+        case InstructionCode::SUBU:
+            state.registers[rd] = state.registers[rs] - state.registers[rt];
+            break;
+        case InstructionCode::XOR:
+            state.registers[rd] = state.registers[rs] ^ state.registers[rt];
+            break;
+        case InstructionCode::SLT:
+            state.registers[rd] = state.registers[rs] < state.registers[rt] ? 1 : 0;
+            break;
+        case InstructionCode::SLTU:
+            state.registers[rd] = static_cast<uint32_t>(state.registers[rs]) <
+                                                  static_cast<uint32_t>(state.registers[rt])
+                                          ? 1
+                                          : 0;
+            break;
+        case InstructionCode::JR:
+            // Jump to the address in rs
+            state.registers[Register::PC] = state.registers[rs];
+            break;
+        case InstructionCode::JALR: {
+            // Jump and link
+            state.registers[Register::RA] = state.registers[Register::PC];
+            state.registers[Register::PC] = state.registers[rs];
+            break;
+        }
+
+        default:
+            throw std::runtime_error("Unknown R-Type instruction " + std::to_string(funct));
+    }
 }
 
 
