@@ -96,6 +96,14 @@ class Parser {
     static std::vector<std::byte> parseSyscallInstruction();
 
     /**
+     * Parses a lui instruction into bytes that can be allocated to memory
+     * @param reg The register to store the upper immediate value
+     * @param immediate The immediate value to store in the upper half of the register
+     * @return The memory allocation associated with the lui instruction
+     */
+    static std::vector<std::byte> parseLuiInstruction(const Token& reg, uint32_t immediate);
+
+    /**
      * A more generalized function to parse pseudo instructions
      * @param loc The location in which the instruction will be placed into memory
      * @param instructionName The name of the pseudo instruction
@@ -104,7 +112,7 @@ class Parser {
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
     std::vector<std::byte> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
-                                                  std::vector<Token>& args);
+                                                  const std::vector<Token>& args);
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions

@@ -47,10 +47,6 @@ std::map<std::string, InstructionOp> instructionNameMap = {
 
         // Branch Instructions
         {"beq", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BEQ, 4}},
-        {"bgtz", {InstructionType::SHORT_I_TYPE, InstructionCode::BGTZ, 4}},
-        {"blez", {InstructionType::SHORT_I_TYPE, InstructionCode::BLEZ, 4}},
-        {"bltz", {InstructionType::SHORT_I_TYPE, InstructionCode::BLTZ, 4}},
-        {"bgez", {InstructionType::SHORT_I_TYPE, InstructionCode::BGEZ, 4}},
         {"bne", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BNE, 4}},
 
         // Jump Instructions
@@ -65,7 +61,6 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"lh", {InstructionType::I_TYPE, InstructionCode::LH, 4}},
         {"lhu", {InstructionType::I_TYPE, InstructionCode::LHU, 4}},
         {"lw", {InstructionType::I_TYPE, InstructionCode::LW, 4}},
-        {"lui", {InstructionType::SHORT_I_TYPE, InstructionCode::LUI, 4}},
 
         // Store Instructions
         {"sb", {InstructionType::I_TYPE, InstructionCode::SB, 4}},
@@ -82,6 +77,13 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"bgt", {InstructionType::PSEUDO, InstructionCode::BGT, 8}},
         {"bge", {InstructionType::PSEUDO, InstructionCode::BGE, 8}},
         {"ble", {InstructionType::PSEUDO, InstructionCode::BLE, 8}},
+
+        // Remapped Instructions (real instructions remapped to more simple instructions)
+        {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
+        {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
+        {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
+        {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
+        {"lui", {InstructionType::PSEUDO, InstructionCode::LUI, 4}},
 
 };
 
@@ -119,11 +121,6 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for J-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::SHORT_I_TYPE:
-            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
-                throw std::runtime_error("Invalid format for I-Type instruction " +
-                                         instruction.value);
-            break;
         case InstructionType::SYSCALL:
             if (!tokenTypeMatch({}, args))
                 throw std::runtime_error("Invalid format for Syscall");
@@ -144,6 +141,9 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "la" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "lui" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABELREF}, args))

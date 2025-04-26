@@ -42,10 +42,6 @@ enum class InstructionCode {
 
     // Branch Instructions
     BEQ = 0x04,
-    BGTZ = 0x07,
-    BLEZ = 0x06,
-    BLTZ = 0x07,
-    BGEZ = 0x01,
     BNE = 0x05,
 
     // Jump Instructions
@@ -60,7 +56,6 @@ enum class InstructionCode {
     LH = 0x21,
     LHU = 0x25,
     LW = 0x23,
-    LUI = 0x0f,
 
     // Store Instructions
     SB = 0x28,
@@ -76,7 +71,14 @@ enum class InstructionCode {
     BLT = 0x00,
     BGT = 0x00,
     BGE = 0x00,
-    BLE = 0x00
+    BLE = 0x00,
+
+    // Remapped Instructions
+    BGTZ = 0x07,
+    BLEZ = 0x06,
+    BLTZ = 0x07,
+    BGEZ = 0x01,
+    LUI = 0x0f,
 };
 
 
@@ -86,15 +88,7 @@ bool operator==(uint32_t lhs, InstructionCode code);
 /**
  * Class representing all valid instruction types and sub-types
  */
-enum class InstructionType {
-    R_TYPE,
-    I_TYPE,
-    J_TYPE,
-    SHORT_I_TYPE,
-    SWAPPED_I_TYPE,
-    SYSCALL,
-    PSEUDO
-};
+enum class InstructionType { R_TYPE, I_TYPE, J_TYPE, SWAPPED_I_TYPE, SYSCALL, PSEUDO };
 
 
 /**

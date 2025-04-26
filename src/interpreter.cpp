@@ -69,12 +69,13 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
         signExtImmediate |= 0xFFFF0000;
 
     switch (static_cast<InstructionCode>(opCode)) {
-        case InstructionCode::ADDI:
+        case InstructionCode::ADDI: {
             const int64_t extResult = static_cast<int64_t>(state.registers[rs]) + signExtImmediate;
             if (extResult > INT32_MAX || extResult < INT32_MIN)
                 throw std::runtime_error("Integer overflow in ADDI instruction");
             state.registers[rt] = state.registers[rs] + signExtImmediate;
             break;
+        }
         case InstructionCode::ADDIU:
             state.registers[rt] = state.registers[rs] + signExtImmediate;
             break;
@@ -96,15 +97,13 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
             break;
         case InstructionCode::LB:
             // Convert to signed for sign extension
-            const int32_t byte =
+            state.registers[rt] =
                     static_cast<int8_t>(state.memory.byteAt(state.registers[rs] + immediate));
-            state.registers[rt] = byte;
             break;
         case InstructionCode::LH:
             // Convert to signed for sign extension
-            const int32_t half =
+            state.registers[rt] =
                     static_cast<int16_t>(state.memory.halfAt(state.registers[rs] + immediate));
-            state.registers[rt] = half;
             break;
         case InstructionCode::LW:
             state.registers[rt] = state.memory.wordAt(state.registers[rs] + immediate);
