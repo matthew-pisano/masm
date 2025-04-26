@@ -88,7 +88,15 @@ bool operator==(uint32_t lhs, InstructionCode code);
 /**
  * Class representing all valid instruction types and sub-types
  */
-enum class InstructionType { R_TYPE, I_TYPE, J_TYPE, SWAPPED_I_TYPE, SYSCALL, PSEUDO };
+enum class InstructionType {
+    R_TYPE,
+    I_TYPE,
+    J_TYPE,
+    SHIFT_R_TYPE,
+    SWAPPED_I_TYPE,
+    SYSCALL,
+    PSEUDO
+};
 
 
 /**

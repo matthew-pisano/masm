@@ -28,11 +28,11 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"nor", {InstructionType::R_TYPE, InstructionCode::NOR, 4}},
         {"or", {InstructionType::R_TYPE, InstructionCode::OR, 4}},
         {"ori", {InstructionType::I_TYPE, InstructionCode::ORI, 4}},
-        {"sll", {InstructionType::R_TYPE, InstructionCode::SLL, 4}},
+        {"sll", {InstructionType::SHIFT_R_TYPE, InstructionCode::SLL, 4}},
         {"sllv", {InstructionType::R_TYPE, InstructionCode::SLLV, 4}},
-        {"sra", {InstructionType::R_TYPE, InstructionCode::SRA, 4}},
+        {"sra", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRA, 4}},
         {"srav", {InstructionType::R_TYPE, InstructionCode::SRAV, 4}},
-        {"srl", {InstructionType::R_TYPE, InstructionCode::SRL, 4}},
+        {"srl", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRL, 4}},
         {"srlv", {InstructionType::R_TYPE, InstructionCode::SRLV, 4}},
         {"sub", {InstructionType::R_TYPE, InstructionCode::SUB, 4}},
         {"subu", {InstructionType::R_TYPE, InstructionCode::SUBU, 4}},
@@ -105,6 +105,12 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
     switch (nameToInstructionOp(instruction.value).type) {
         case InstructionType::R_TYPE:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
+                                args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::SHIFT_R_TYPE:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
