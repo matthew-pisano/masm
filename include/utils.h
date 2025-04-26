@@ -4,6 +4,7 @@
 
 #ifndef UTILS_H
 #define UTILS_H
+
 #include <cstdint>
 #include <string>
 #include <tokenizer.h>
@@ -50,5 +51,13 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens);
  * @return True if the tokens match the pattern, false otherwise
  */
 bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Token>& tokens);
+
+
+/**
+ * Converts a 32-bit integer to a vector of bytes in big-endian order
+ * @param i32 The 32-bit integer to convert
+ * @return A vector of bytes representing the integer in big-endian order
+ */
+std::vector<std::byte> i32ToBEByte(uint32_t i32);
 
 #endif // UTILS_H

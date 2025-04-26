@@ -12,68 +12,64 @@
 #include "utils.h"
 
 
-/**
- * Converts a 32-bit integer to a vector of bytes in big-endian order
- * @param i32 The 32-bit integer to convert
- * @return A vector of bytes representing the integer in big-endian order
- */
-std::vector<std::byte> i32ToBEByte(const uint32_t i32) {
-    // Break the instruction into 4 bytes (big-endian)
-    std::vector<std::byte> bytes(4);
-    bytes[0] = static_cast<std::byte>(i32 >> 24 & 0xFF); // Most significant byte
-    bytes[1] = static_cast<std::byte>(i32 >> 16 & 0xFF);
-    bytes[2] = static_cast<std::byte>(i32 >> 8 & 0xFF);
-    bytes[3] = static_cast<std::byte>(i32 & 0xFF); // Least significant byte
-    return bytes;
-}
+MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
+    MemLayout layout;
 
-
-void Parser::resolveLabels(std::vector<Token>& instructionArgs) {
-    for (Token& arg : instructionArgs)
-        if (arg.type == TokenType::LABELREF) {
-            if (!labelMap.contains(arg.value))
-                throw std::runtime_error("Unknown label " + arg.value);
-            arg = {TokenType::IMMEDIATE, std::to_string(labelMap[arg.value])};
-        }
-}
-
-
-void Parser::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
     MemSection currSection = MemSection::TEXT;
-    std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
+    layout[MemSection::TEXT] = {};
 
-    for (const std::vector<Token>& line : tokens) {
-        if (line.empty())
+    // Resolve all labels before parsing instructions
+    labelMap.populateLabelMap(tokens);
+
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        // Skip empty lines
+        if (tokens[i].empty())
             continue;
 
-        const Token& firstToken = line[0];
-        const std::vector unfilteredArgs(line.begin() + 1, line.end());
-        std::vector<Token> args = filterTokenList(unfilteredArgs);
-        switch (firstToken.type) {
-            case TokenType::MEMDIRECTIVE: {
-                currSection = nameToMemSection(firstToken.value);
-                if (!memSizes.contains(currSection))
-                    memSizes[currSection] = 0;
-                break;
-            }
-            case TokenType::DIRECTIVE: {
-                memSizes[currSection] += parseDirective(firstToken, args).size();
-                break;
-            }
-            case TokenType::INSTRUCTION:
-                // Get size of instruction from map without parsing
-                memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
-                break;
-            case TokenType::LABEL: {
-                if (labelMap.contains(firstToken.value))
-                    throw std::runtime_error("Duplicate label " + firstToken.value);
-                // Assign label to the following byte allocation plus the section offset
-                labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
-                break;
-            }
-            default:
-                break;
+        try {
+            parseLine(layout, currSection, tokens[i]);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
         }
+    }
+
+    return layout;
+}
+
+
+void Parser::parseLine(MemLayout& layout, MemSection& currSection,
+                       const std::vector<Token>& tokenLine) {
+    // Get next open location in memory
+    const uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
+
+    const Token& firstToken = tokenLine[0];
+    const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
+    std::vector<Token> args = filterTokenList(unfilteredArgs);
+
+    switch (firstToken.type) {
+        case TokenType::MEMDIRECTIVE: {
+            currSection = nameToMemSection(firstToken.value);
+            if (!layout.contains(currSection))
+                layout[currSection] = {};
+            break;
+        }
+        case TokenType::DIRECTIVE: {
+            std::vector<std::byte> directiveBytes = parseDirective(firstToken, args);
+            layout[currSection].insert(layout[currSection].end(), directiveBytes.begin(),
+                                       directiveBytes.end());
+            break;
+        }
+        case TokenType::INSTRUCTION: {
+            const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
+            layout[currSection].insert(layout[currSection].end(), instrBytes.begin(),
+                                       instrBytes.end());
+            break;
+        }
+        case TokenType::LABEL:
+            break;
+        default:
+            throw std::runtime_error("Encountered unknown token type during parsing for token " +
+                                     firstToken.value);
     }
 }
 
@@ -106,6 +102,75 @@ std::vector<std::byte> Parser::parseDirective(const Token& dirToken,
     }
 
     throw std::runtime_error("Unsupported directive " + dirName);
+}
+
+
+std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
+                                                std::vector<Token>& args) {
+    RegisterFile regFile{};
+
+    // Throw error if pattern for instruction is invalid
+    validateInstruction(instrToken, args);
+
+    // Resolve label references to their computed address values
+    labelMap.resolveLabels(args);
+
+    InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
+    std::vector<uint32_t> argCodes = {};
+    // Parse the instruction argument token values into integers
+    for (const Token& arg : args) {
+        switch (arg.type) {
+            case TokenType::IMMEDIATE:
+                if (!isSignedInteger(arg.value))
+                    throw std::runtime_error("Invalid integer " + arg.value);
+                argCodes.push_back(static_cast<uint32_t>(std::stoi(arg.value)));
+                break;
+            case TokenType::REGISTER:
+                if (isSignedInteger(arg.value) && std::stoi(arg.value) >= 0)
+                    argCodes.push_back(std::stoi(arg.value));
+                else
+                    argCodes.push_back(regFile.indexFromName(arg.value));
+                break;
+            default:
+                throw std::runtime_error("Invalid argument type " +
+                                         std::to_string(static_cast<int>(arg.type)));
+        }
+    }
+
+    const uint32_t opFuncCode = static_cast<uint32_t>(instructionOp.opFuncCode);
+    // Parse integer arguments into a single instruction word
+    switch (instructionOp.type) {
+        case InstructionType::R_TYPE_D_S_T:
+            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
+        case InstructionType::R_TYPE_D_T_S:
+            return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
+        case InstructionType::R_TYPE_D_T_H:
+            return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
+        case InstructionType::R_TYPE_S:
+            return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
+        case InstructionType::I_TYPE_T_S_I:
+            return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
+                                         static_cast<int32_t>(argCodes[2]));
+        case InstructionType::I_TYPE_S_T_I:
+            // Instructions where rs comes before rt in the binary encoding
+            return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
+                                         static_cast<int32_t>(argCodes[2]));
+        case InstructionType::I_TYPE_T_I:
+            // Location not needed for short I-Type instructions
+            return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
+                                         static_cast<int32_t>(argCodes[1]));
+        case InstructionType::R_TYPE_S_T:
+            return parseRTypeInstruction(0, argCodes[0], argCodes[1], 0, opFuncCode);
+        case InstructionType::J_TYPE_L:
+            return parseJTypeInstruction(opFuncCode, argCodes[0]);
+        case InstructionType::SYSCALL:
+            return parseSyscallInstruction();
+        case InstructionType::PSEUDO:
+            return parsePseudoInstruction(loc, instrToken.value, args);
+    }
+    // Should never be reached
+    throw std::runtime_error("Unknown instruction type " +
+                             std::to_string(static_cast<int>(instructionOp.type)));
 }
 
 
@@ -239,132 +304,80 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(const uint32_t loc, 
     return sltBytes;
 }
 
-std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
-                                                std::vector<Token>& args) {
-    RegisterFile regFile{};
 
-    // Throw error if pattern for instruction is invalid
-    validateInstruction(instrToken, args);
+void Parser::validateInstruction(const Token& instruction, const std::vector<Token>& args) {
 
-    // Resolve label references to their computed address values
-    resolveLabels(args);
-
-    InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
-    std::vector<uint32_t> argCodes = {};
-    // Parse the instruction argument token values into integers
-    for (const Token& arg : args) {
-        switch (arg.type) {
-            case TokenType::IMMEDIATE:
-                if (!isSignedInteger(arg.value))
-                    throw std::runtime_error("Invalid integer " + arg.value);
-                argCodes.push_back(static_cast<uint32_t>(std::stoi(arg.value)));
-                break;
-            case TokenType::REGISTER:
-                if (isSignedInteger(arg.value) && std::stoi(arg.value) >= 0)
-                    argCodes.push_back(std::stoi(arg.value));
-                else
-                    argCodes.push_back(regFile.indexFromName(arg.value));
-                break;
-            default:
-                throw std::runtime_error("Invalid argument type " +
-                                         std::to_string(static_cast<int>(arg.type)));
-        }
-    }
-
-    const uint32_t opFuncCode = static_cast<uint32_t>(instructionOp.opFuncCode);
-    // Parse integer arguments into a single instruction word
-    switch (instructionOp.type) {
-        case InstructionType::R_TYPE_D_S_T:
-            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
+    switch (nameToInstructionOp(instruction.value).type) {
         case InstructionType::R_TYPE_D_T_S:
-            return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
+        case InstructionType::R_TYPE_D_S_T:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
+                                args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::R_TYPE_D_T_H:
-            return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
-        case InstructionType::R_TYPE_S:
-            return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
-        case InstructionType::I_TYPE_T_S_I:
-            return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
-                                         static_cast<int32_t>(argCodes[2]));
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
+                                args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::I_TYPE_S_T_I:
-            // Instructions where rs comes before rt in the binary encoding
-            return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
-                                         static_cast<int32_t>(argCodes[2]));
+        case InstructionType::I_TYPE_T_S_I:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
+                                args))
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::I_TYPE_T_I:
-            // Location not needed for short I-Type instructions
-            return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
-                                         static_cast<int32_t>(argCodes[1]));
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::R_TYPE_S_T:
-            return parseRTypeInstruction(0, argCodes[0], argCodes[1], 0, opFuncCode);
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::R_TYPE_S:
+            if (!tokenTypeMatch({TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for R-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::J_TYPE_L:
-            return parseJTypeInstruction(opFuncCode, argCodes[0]);
+            if (!tokenTypeMatch({TokenType::LABELREF}, args))
+                throw std::runtime_error("Invalid format for J-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::SYSCALL:
-            return parseSyscallInstruction();
+            if (!tokenTypeMatch({}, args))
+                throw std::runtime_error("Invalid format for Syscall");
+            break;
         case InstructionType::PSEUDO:
-            return parsePseudoInstruction(loc, instrToken.value, args);
-    }
-    // Should never be reached
-    throw std::runtime_error("Unknown instruction type " +
-                             std::to_string(static_cast<int>(instructionOp.type)));
-}
-
-
-void Parser::parseLine(MemLayout& layout, MemSection& currSection,
-                       const std::vector<Token>& tokenLine) {
-    // Get next open location in memory
-    const uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
-
-    const Token& firstToken = tokenLine[0];
-    const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
-    std::vector<Token> args = filterTokenList(unfilteredArgs);
-
-    switch (firstToken.type) {
-        case TokenType::MEMDIRECTIVE: {
-            currSection = nameToMemSection(firstToken.value);
-            if (!layout.contains(currSection))
-                layout[currSection] = {};
+            validatePseudoInstruction(instruction, args);
             break;
-        }
-        case TokenType::DIRECTIVE: {
-            std::vector<std::byte> directiveBytes = parseDirective(firstToken, args);
-            layout[currSection].insert(layout[currSection].end(), directiveBytes.begin(),
-                                       directiveBytes.end());
-            break;
-        }
-        case TokenType::INSTRUCTION: {
-            const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
-            layout[currSection].insert(layout[currSection].end(), instrBytes.begin(),
-                                       instrBytes.end());
-            break;
-        }
-        case TokenType::LABEL:
-            break;
-        default:
-            throw std::runtime_error("Encountered unknown token type during parsing for token " +
-                                     firstToken.value);
     }
 }
 
 
-MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
-    MemLayout layout;
+void Parser::validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
+    std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
+    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
+    const std::string instructionName = instruction.value;
 
-    MemSection currSection = MemSection::TEXT;
-    layout[MemSection::TEXT] = {};
-
-    // Resolve all labels before parsing instructions
-    populateLabelMap(tokens);
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
-        // Skip empty lines
-        if (tokens[i].empty())
-            continue;
-
-        try {
-            parseLine(layout, currSection, tokens[i]);
-        } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
-        }
-    }
-
-    return layout;
+    if (instructionName == "li" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "la" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "lui" &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
+                branchZeroPseudoInstrs.end() &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }

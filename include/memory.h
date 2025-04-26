@@ -4,6 +4,7 @@
 
 #ifndef MEMORY_H
 #define MEMORY_H
+
 #include <cstdint>
 #include <map>
 #include <string>

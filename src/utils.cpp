@@ -23,15 +23,8 @@ std::vector<std::byte> intStringToBytes(const std::string& string) {
     if (!isSignedInteger(string))
         throw std::runtime_error("Invalid integer " + string);
 
-    const int integer = std::stoi(string);
-
-    std::vector<std::byte> bytes = {};
-    // Using big endian
-    bytes.push_back(static_cast<std::byte>(integer >> 24 & 0xFF));
-    bytes.push_back(static_cast<std::byte>(integer >> 16 & 0xFF));
-    bytes.push_back(static_cast<std::byte>(integer >> 8 & 0xFF));
-    bytes.push_back(static_cast<std::byte>(integer & 0xFF));
-    return bytes;
+    const uint32_t integer = std::stoi(string);
+    return i32ToBEByte(integer);
 }
 
 
@@ -65,4 +58,15 @@ bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Tok
             return false;
 
     return true;
+}
+
+
+std::vector<std::byte> i32ToBEByte(const uint32_t i32) {
+    // Break the instruction into 4 bytes (big-endian)
+    std::vector<std::byte> bytes(4);
+    bytes[0] = static_cast<std::byte>(i32 >> 24 & 0xFF); // Most significant byte
+    bytes[1] = static_cast<std::byte>(i32 >> 16 & 0xFF);
+    bytes[2] = static_cast<std::byte>(i32 >> 8 & 0xFF);
+    bytes[3] = static_cast<std::byte>(i32 & 0xFF); // Least significant byte
+    return bytes;
 }

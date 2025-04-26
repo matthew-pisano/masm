@@ -4,9 +4,11 @@
 
 #ifndef PARSER_H
 #define PARSER_H
+
 #include <cstdint>
 #include <map>
 
+#include "labels.h"
 #include "memory.h"
 #include "tokenizer.h"
 
@@ -17,23 +19,9 @@
 class Parser {
 
     /**
-     * A map between the names of labels and their associated memory addresses
+     * A class to manage the mapping of labels to memory locations
      */
-    std::map<std::string, uint32_t> labelMap;
-
-    /**
-     * Modifies instruction arguments to replace label references with labeled memory locations
-     * @param instructionArgs The instruction arguments to modify
-     * @throw runtime_error When one of the arguments references an unknown label
-     */
-    void resolveLabels(std::vector<Token>& instructionArgs);
-
-    /**
-     * Populates the label map prior to processing using static allocations for the given tokens
-     * @param tokens The program tokens
-     * @throw runtime_error When a duplicate label definition is detected
-     */
-    void populateLabelMap(const std::vector<std::vector<Token>>& tokens);
+    LabelMap labelMap;
 
     /**
      * Parses a directive and its arguments into bytes that can be allocated to memory
@@ -119,6 +107,24 @@ class Parser {
     std::vector<std::byte> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
                                                         const Token& reg2, const Token& label,
                                                         bool checkLt, bool checkEq);
+
+    /**
+     * Ensures that the arguments of an instruction match an expected pattern of token types
+     * @param instruction The instruction token
+     * @param args A list of arguments following the given instruction
+     * @throw runtime_error when the arguments for an instruction do not match its accepted values
+     */
+    static void validateInstruction(const Token& instruction, const std::vector<Token>& args);
+
+
+    /**
+     * Ensures that the arguments of a pseudo instruction match an expected pattern of token types
+     * @param instruction The pseudo instruction token
+     * @param args A list of arguments following the given pseudo instruction
+     * @throw runtime_error when the arguments for a pseudo instruction do not match its accepted
+     * values
+     */
+    static void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args);
 
     /**
      * Parse a single line of tokens into memory allocations
