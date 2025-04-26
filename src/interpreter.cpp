@@ -191,6 +191,7 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
         }
 
         default:
+            // Should never be reached
             throw std::runtime_error("Unknown R-Type instruction " + std::to_string(funct));
     }
 }
@@ -276,6 +277,7 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
                         state.registers[Register::PC] + (signExtImmediate << 2);
             break;
         default:
+            // Should never be reached
             throw std::runtime_error("Unknown I-Type instruction " + std::to_string(opCode));
     }
 }

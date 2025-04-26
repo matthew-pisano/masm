@@ -68,8 +68,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection,
         case TokenType::LABEL:
             break;
         default:
-            throw std::runtime_error("Encountered unknown token type during parsing for token " +
-                                     firstToken.value);
+            throw std::runtime_error("Encountered unexpected token " + firstToken.value);
     }
 }
 
@@ -132,6 +131,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
                     argCodes.push_back(regFile.indexFromName(arg.value));
                 break;
             default:
+                // Should never be reached
                 throw std::runtime_error("Invalid argument type " +
                                          std::to_string(static_cast<int>(arg.type)));
         }
@@ -274,6 +274,7 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
             return parseBranchPseudoInstruction(loc, args[0], regZero, args[1], true, true);
     }
 
+    // Should never be reached
     throw std::runtime_error("Unknown pseudo instruction " + instructionName);
 }
 
