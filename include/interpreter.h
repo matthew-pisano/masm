@@ -31,8 +31,8 @@ struct State {
 
 class Interpreter {
     State state;
-    std::istream<char> istream = std::cin;
-    std::ostream<char> ostream = std::cout;
+    std::istream& istream;
+    std::ostream& ostream;
 
     void execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t shamt);
     void execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
@@ -42,7 +42,7 @@ class Interpreter {
     void step();
 
 public:
-    Interpreter() = default;
+    Interpreter() : istream(std::cin), ostream(std::cout) {}
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     int interpret(const MemLayout& layout);

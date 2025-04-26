@@ -291,25 +291,25 @@ void Interpreter::syscall() {
     int32_t syscallCode = state.registers[Register::V0];
     switch (static_cast<Syscall>(syscallCode)) {
         case Syscall::PRINT_INT:
-            printIntSyscall(state);
+            printIntSyscall(state, ostream);
             break;
         case Syscall::PRINT_STRING:
-            printStringSyscall(state);
+            printStringSyscall(state, ostream);
             break;
         case Syscall::READ_INT:
-            readIntSyscall(state);
+            readIntSyscall(state, istream);
             break;
         case Syscall::READ_STRING:
-            readStringSyscall(state);
+            readStringSyscall(state, istream);
             break;
         case Syscall::EXIT:
-            exitSyscall(state);
+            exitSyscall();
             break;
         case Syscall::PRINT_CHAR:
-            printCharSyscall(state);
+            printCharSyscall(state, ostream);
             break;
         case Syscall::READ_CHAR:
-            readCharSyscall(state);
+            readCharSyscall(state, istream);
             break;
         case Syscall::EXIT_VAL:
             exitValSyscall(state);

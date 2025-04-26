@@ -52,6 +52,7 @@ add_executable(mipscpp-tests
         test/test_parser.cpp
         src/interpreter.cpp
         src/syscall.cpp
+        test/test_interpreter.cpp
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
