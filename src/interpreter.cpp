@@ -250,6 +250,10 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
         case InstructionCode::LHU:
             state.registers[rt] = state.memory.halfAt(state.registers[rs] + immediate);
             break;
+        case InstructionCode::LUI:
+            // Load upper immediate
+            state.registers[rt] = signExtImmediate << 16;
+            break;
         case InstructionCode::SB:
             state.memory.byteTo(state.registers[rs] + immediate,
                                 static_cast<uint8_t>(state.registers[rt]));

@@ -56,6 +56,7 @@ enum class InstructionCode {
     LH = 0x21,
     LHU = 0x25,
     LW = 0x23,
+    LUI = 0x0f,
 
     // Store Instructions
     SB = 0x28,
@@ -78,7 +79,6 @@ enum class InstructionCode {
     BLEZ = 0x06,
     BLTZ = 0x07,
     BGEZ = 0x01,
-    LUI = 0x0f,
 };
 
 
