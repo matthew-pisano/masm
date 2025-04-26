@@ -134,6 +134,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
+    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
     const std::string instructionName = instruction.value;
 
     if (instructionName == "li" &&
@@ -147,5 +148,9 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABELREF}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
+                branchZeroPseudoInstrs.end() &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }

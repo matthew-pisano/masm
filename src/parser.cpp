@@ -126,11 +126,7 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
 
     // Modify immediate values to be relative to the location of the current instruction
     std::vector branchOpCodes = {static_cast<uint32_t>(InstructionCode::BEQ),
-                                 static_cast<uint32_t>(InstructionCode::BNE),
-                                 static_cast<uint32_t>(InstructionCode::BGTZ),
-                                 static_cast<uint32_t>(InstructionCode::BGEZ),
-                                 static_cast<uint32_t>(InstructionCode::BLTZ),
-                                 static_cast<uint32_t>(InstructionCode::BLEZ)};
+                                 static_cast<uint32_t>(InstructionCode::BNE)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
         // Branch instructions are offset by 4 bytes so divide by 4
         const int32_t offset = (immediate - static_cast<int32_t>(loc) - 8) / 4;
@@ -210,6 +206,21 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
             return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], false, true);
         if (instructionName == branchPseudoInstrs[3])
             return parseBranchPseudoInstruction(loc, args[0], args[1], args[2], true, true);
+    }
+
+    // bxxz $tx, label -> slt $at, $zero, $tx; bxx $at, $zero, label
+    const Token regZero = {TokenType::REGISTER, "zero"};
+    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
+    if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
+        branchZeroPseudoInstrs.end()) {
+        if (instructionName == branchZeroPseudoInstrs[0])
+            return parseBranchPseudoInstruction(loc, args[0], regZero, args[1], true, false);
+        if (instructionName == branchZeroPseudoInstrs[1])
+            return parseBranchPseudoInstruction(loc, args[0], regZero, args[1], false, false);
+        if (instructionName == branchZeroPseudoInstrs[2])
+            return parseBranchPseudoInstruction(loc, args[0], regZero, args[1], false, true);
+        if (instructionName == branchZeroPseudoInstrs[3])
+            return parseBranchPseudoInstruction(loc, args[0], regZero, args[1], true, true);
     }
 
     throw std::runtime_error("Unknown pseudo instruction " + instructionName);
