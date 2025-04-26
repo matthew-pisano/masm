@@ -15,58 +15,58 @@
  */
 std::map<std::string, InstructionOp> instructionNameMap = {
         // Arithmetic and Logical Instructions
-        {"add", {InstructionType::R_TYPE, InstructionCode::ADD, 4}},
-        {"addu", {InstructionType::R_TYPE, InstructionCode::ADDU, 4}},
-        {"addi", {InstructionType::I_TYPE, InstructionCode::ADDI, 4}},
-        {"addiu", {InstructionType::I_TYPE, InstructionCode::ADDIU, 4}},
-        {"and", {InstructionType::R_TYPE, InstructionCode::AND, 4}},
-        {"andi", {InstructionType::I_TYPE, InstructionCode::ANDI, 4}},
-        {"div", {InstructionType::SHORT_R_TYPE, InstructionCode::DIV, 4}},
-        {"divu", {InstructionType::SHORT_R_TYPE, InstructionCode::DIVU, 4}},
-        {"mult", {InstructionType::SHORT_R_TYPE, InstructionCode::MULT, 4}},
-        {"multu", {InstructionType::SHORT_R_TYPE, InstructionCode::MULTU, 4}},
-        {"nor", {InstructionType::R_TYPE, InstructionCode::NOR, 4}},
-        {"or", {InstructionType::R_TYPE, InstructionCode::OR, 4}},
-        {"ori", {InstructionType::I_TYPE, InstructionCode::ORI, 4}},
-        {"sll", {InstructionType::SHIFT_R_TYPE, InstructionCode::SLL, 4}},
-        {"sllv", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SLLV, 4}},
-        {"sra", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRA, 4}},
-        {"srav", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SRAV, 4}},
-        {"srl", {InstructionType::SHIFT_R_TYPE, InstructionCode::SRL, 4}},
-        {"srlv", {InstructionType::SWAPPED_R_TYPE, InstructionCode::SRLV, 4}},
-        {"sub", {InstructionType::R_TYPE, InstructionCode::SUB, 4}},
-        {"subu", {InstructionType::R_TYPE, InstructionCode::SUBU, 4}},
-        {"xor", {InstructionType::R_TYPE, InstructionCode::XOR, 4}},
-        {"xori", {InstructionType::I_TYPE, InstructionCode::XORI, 4}},
+        {"add", {InstructionType::R_TYPE_D_S_T, InstructionCode::ADD, 4}},
+        {"addu", {InstructionType::R_TYPE_D_S_T, InstructionCode::ADDU, 4}},
+        {"addi", {InstructionType::I_TYPE_T_S_I, InstructionCode::ADDI, 4}},
+        {"addiu", {InstructionType::I_TYPE_T_S_I, InstructionCode::ADDIU, 4}},
+        {"and", {InstructionType::R_TYPE_D_S_T, InstructionCode::AND, 4}},
+        {"andi", {InstructionType::I_TYPE_T_S_I, InstructionCode::ANDI, 4}},
+        {"div", {InstructionType::R_TYPE_S_T, InstructionCode::DIV, 4}},
+        {"divu", {InstructionType::R_TYPE_S_T, InstructionCode::DIVU, 4}},
+        {"mult", {InstructionType::R_TYPE_S_T, InstructionCode::MULT, 4}},
+        {"multu", {InstructionType::R_TYPE_S_T, InstructionCode::MULTU, 4}},
+        {"nor", {InstructionType::R_TYPE_D_S_T, InstructionCode::NOR, 4}},
+        {"or", {InstructionType::R_TYPE_D_S_T, InstructionCode::OR, 4}},
+        {"ori", {InstructionType::I_TYPE_T_S_I, InstructionCode::ORI, 4}},
+        {"sll", {InstructionType::R_TYPE_D_T_H, InstructionCode::SLL, 4}},
+        {"sllv", {InstructionType::R_TYPE_D_T_S, InstructionCode::SLLV, 4}},
+        {"sra", {InstructionType::R_TYPE_D_T_H, InstructionCode::SRA, 4}},
+        {"srav", {InstructionType::R_TYPE_D_T_S, InstructionCode::SRAV, 4}},
+        {"srl", {InstructionType::R_TYPE_D_T_H, InstructionCode::SRL, 4}},
+        {"srlv", {InstructionType::R_TYPE_D_T_S, InstructionCode::SRLV, 4}},
+        {"sub", {InstructionType::R_TYPE_D_S_T, InstructionCode::SUB, 4}},
+        {"subu", {InstructionType::R_TYPE_D_S_T, InstructionCode::SUBU, 4}},
+        {"xor", {InstructionType::R_TYPE_D_S_T, InstructionCode::XOR, 4}},
+        {"xori", {InstructionType::I_TYPE_T_S_I, InstructionCode::XORI, 4}},
 
         // Comparison Instructions
-        {"slt", {InstructionType::R_TYPE, InstructionCode::SLT, 4}},
-        {"sltu", {InstructionType::R_TYPE, InstructionCode::SLTU, 4}},
-        {"slti", {InstructionType::I_TYPE, InstructionCode::SLTI, 4}},
-        {"sltiu", {InstructionType::I_TYPE, InstructionCode::SLTIU, 4}},
+        {"slt", {InstructionType::R_TYPE_D_S_T, InstructionCode::SLT, 4}},
+        {"sltu", {InstructionType::R_TYPE_D_S_T, InstructionCode::SLTU, 4}},
+        {"slti", {InstructionType::I_TYPE_T_S_I, InstructionCode::SLTI, 4}},
+        {"sltiu", {InstructionType::I_TYPE_T_S_I, InstructionCode::SLTIU, 4}},
 
         // Branch Instructions
-        {"beq", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BEQ, 4}},
-        {"bne", {InstructionType::SWAPPED_I_TYPE, InstructionCode::BNE, 4}},
+        {"beq", {InstructionType::I_TYPE_S_T_I, InstructionCode::BEQ, 4}},
+        {"bne", {InstructionType::I_TYPE_S_T_I, InstructionCode::BNE, 4}},
 
         // Jump Instructions
-        {"j", {InstructionType::J_TYPE, InstructionCode::J, 4}},
-        {"jal", {InstructionType::J_TYPE, InstructionCode::JAL, 4}},
-        {"jalr", {InstructionType::JUMP_R_TYPE, InstructionCode::JALR, 4}},
-        {"jr", {InstructionType::JUMP_R_TYPE, InstructionCode::JR, 4}},
+        {"j", {InstructionType::J_TYPE_L, InstructionCode::J, 4}},
+        {"jal", {InstructionType::J_TYPE_L, InstructionCode::JAL, 4}},
+        {"jalr", {InstructionType::R_TYPE_S, InstructionCode::JALR, 4}},
+        {"jr", {InstructionType::R_TYPE_S, InstructionCode::JR, 4}},
 
         // Load Instructions
-        {"lb", {InstructionType::I_TYPE, InstructionCode::LB, 4}},
-        {"lbu", {InstructionType::I_TYPE, InstructionCode::LBU, 4}},
-        {"lh", {InstructionType::I_TYPE, InstructionCode::LH, 4}},
-        {"lhu", {InstructionType::I_TYPE, InstructionCode::LHU, 4}},
-        {"lw", {InstructionType::I_TYPE, InstructionCode::LW, 4}},
-        {"lui", {InstructionType::SHORT_I_TYPE, InstructionCode::LUI, 4}},
+        {"lb", {InstructionType::I_TYPE_T_S_I, InstructionCode::LB, 4}},
+        {"lbu", {InstructionType::I_TYPE_T_S_I, InstructionCode::LBU, 4}},
+        {"lh", {InstructionType::I_TYPE_T_S_I, InstructionCode::LH, 4}},
+        {"lhu", {InstructionType::I_TYPE_T_S_I, InstructionCode::LHU, 4}},
+        {"lw", {InstructionType::I_TYPE_T_S_I, InstructionCode::LW, 4}},
+        {"lui", {InstructionType::I_TYPE_T_I, InstructionCode::LUI, 4}},
 
         // Store Instructions
-        {"sb", {InstructionType::I_TYPE, InstructionCode::SB, 4}},
-        {"sh", {InstructionType::I_TYPE, InstructionCode::SH, 4}},
-        {"sw", {InstructionType::I_TYPE, InstructionCode::SW, 4}},
+        {"sb", {InstructionType::I_TYPE_T_S_I, InstructionCode::SB, 4}},
+        {"sh", {InstructionType::I_TYPE_T_S_I, InstructionCode::SH, 4}},
+        {"sw", {InstructionType::I_TYPE_T_S_I, InstructionCode::SW, 4}},
 
         // Syscall
         {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
@@ -84,7 +84,6 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
         {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
         {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
-
 };
 
 
@@ -103,42 +102,42 @@ InstructionOp nameToInstructionOp(const std::string& name) {
 void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
 
     switch (nameToInstructionOp(instruction.value).type) {
-        case InstructionType::SWAPPED_R_TYPE:
-        case InstructionType::R_TYPE:
+        case InstructionType::R_TYPE_D_T_S:
+        case InstructionType::R_TYPE_D_S_T:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
                                 args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::SHIFT_R_TYPE:
+        case InstructionType::R_TYPE_D_T_H:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::SWAPPED_I_TYPE:
-        case InstructionType::I_TYPE:
+        case InstructionType::I_TYPE_S_T_I:
+        case InstructionType::I_TYPE_T_S_I:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
                 throw std::runtime_error("Invalid format for I-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::SHORT_I_TYPE:
+        case InstructionType::I_TYPE_T_I:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for I-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::SHORT_R_TYPE:
+        case InstructionType::R_TYPE_S_T:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::JUMP_R_TYPE:
+        case InstructionType::R_TYPE_S:
             if (!tokenTypeMatch({TokenType::REGISTER}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::J_TYPE:
+        case InstructionType::J_TYPE_L:
             if (!tokenTypeMatch({TokenType::LABELREF}, args))
                 throw std::runtime_error("Invalid format for J-Type instruction " +
                                          instruction.value);

@@ -274,28 +274,28 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
     const uint32_t opFuncCode = static_cast<uint32_t>(instructionOp.opFuncCode);
     // Parse integer arguments into a single instruction word
     switch (instructionOp.type) {
-        case InstructionType::R_TYPE:
+        case InstructionType::R_TYPE_D_S_T:
             return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
-        case InstructionType::SWAPPED_R_TYPE:
+        case InstructionType::R_TYPE_D_T_S:
             return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
-        case InstructionType::SHIFT_R_TYPE:
+        case InstructionType::R_TYPE_D_T_H:
             return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
-        case InstructionType::JUMP_R_TYPE:
+        case InstructionType::R_TYPE_S:
             return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
-        case InstructionType::I_TYPE:
+        case InstructionType::I_TYPE_T_S_I:
             return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));
-        case InstructionType::SWAPPED_I_TYPE:
+        case InstructionType::I_TYPE_S_T_I:
             // Instructions where rs comes before rt in the binary encoding
             return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
                                          static_cast<int32_t>(argCodes[2]));
-        case InstructionType::SHORT_I_TYPE:
+        case InstructionType::I_TYPE_T_I:
             // Location not needed for short I-Type instructions
             return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
                                          static_cast<int32_t>(argCodes[1]));
-        case InstructionType::SHORT_R_TYPE:
+        case InstructionType::R_TYPE_S_T:
             return parseRTypeInstruction(0, argCodes[0], argCodes[1], 0, opFuncCode);
-        case InstructionType::J_TYPE:
+        case InstructionType::J_TYPE_L:
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();

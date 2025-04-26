@@ -86,20 +86,20 @@ bool operator==(uint32_t lhs, InstructionCode code);
 
 
 /**
- * Class representing all valid instruction types and sub-types
+ * Class representing all valid instruction types and sub-types (used for mapping arguments)
  */
 enum class InstructionType {
-    R_TYPE,
-    I_TYPE,
-    J_TYPE,
-    SHIFT_R_TYPE,
-    SHORT_R_TYPE,
-    SWAPPED_R_TYPE,
-    JUMP_R_TYPE,
-    SHORT_I_TYPE,
-    SWAPPED_I_TYPE,
-    SYSCALL,
-    PSEUDO
+    R_TYPE_D_S_T, // R-Type
+    R_TYPE_D_T_H, // R-Type with shamt
+    R_TYPE_S_T, // R-Type with 2 source registers
+    R_TYPE_D_T_S, // R-Type with source registers swapped
+    R_TYPE_S, // R-Type with 1 source register
+    I_TYPE_T_S_I, // I-Type
+    I_TYPE_T_I, // I-Type with 1 register
+    I_TYPE_S_T_I, // I-Type with source registers swapped
+    J_TYPE_L, // J-Type
+    SYSCALL, // Syscall
+    PSEUDO // Pseudo instruction
 };
 
 
