@@ -55,6 +55,13 @@ TEST_CASE("Test Execute Arithmetic") {
 }
 
 
+TEST_CASE("Test Execute Load Address") {
+    const std::string test_case = "load_address";
+    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+}
+
+
 TEST_CASE("Test Execute Loops") {
     const std::string test_case = "loops";
     validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
