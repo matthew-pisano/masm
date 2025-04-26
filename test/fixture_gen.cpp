@@ -79,7 +79,7 @@ int main(const int argc, char* argv[]) {
 
     std::string inputFileName;
 
-    CLI::App app{"A MIPS Intermediate Generator", "mipscpp-fixture-gen"};
+    CLI::App app{"masm Intermediate Generator", "masm-fg"};
     app.add_option("input-file", inputFileName, "Input file to load")->required();
 
     try {

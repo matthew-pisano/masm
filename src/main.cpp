@@ -14,7 +14,7 @@ int main(const int argc, char* argv[]) {
 
     std::string inputFileName;
 
-    CLI::App app{"A CPP MIPS Interpreter", "mipscpp"};
+    CLI::App app{"masm - MIPS Interpreter", "masm"};
     app.add_option("input-file", inputFileName, "Input file to load")->required();
 
     try {

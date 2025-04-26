@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.30)
-project(mips_cpp)
+project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
 
 include_directories(include)
 
-add_executable(mipscpp src/main.cpp
+add_executable(masm src/main.cpp
         src/fileio.cpp
         src/tokenizer.cpp
         src/parser.cpp
@@ -18,7 +18,7 @@ add_executable(mipscpp src/main.cpp
         src/labels.cpp
 )
 
-add_executable(mipscpp-fixture-gen test/fixture_gen.cpp
+add_executable(masm-fg test/fixture_gen.cpp
         src/fileio.cpp
         src/tokenizer.cpp
         src/parser.cpp
@@ -36,11 +36,11 @@ FetchContent_Declare(
         GIT_TAG main
 )
 FetchContent_MakeAvailable(cli11)
-target_link_libraries(mipscpp CLI11::CLI11)
-target_link_libraries(mipscpp-fixture-gen CLI11::CLI11)
+target_link_libraries(masm CLI11::CLI11)
+target_link_libraries(masm-fg CLI11::CLI11)
 
 find_package(Catch2 3 REQUIRED)
-add_executable(mipscpp-tests
+add_executable(masm-tests
         test/test_tokenizer.cpp
         test/test_utils.cpp
         src/tokenizer.cpp
@@ -56,7 +56,7 @@ add_executable(mipscpp-tests
         test/test_interpreter.cpp
         src/labels.cpp
 )
-target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
 include(Catch)
-catch_discover_tests(mipscpp-tests)
+catch_discover_tests(masm-tests)
