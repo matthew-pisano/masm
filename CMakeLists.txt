@@ -16,10 +16,9 @@ add_executable(mipscpp src/main.cpp
         src/interpreter.cpp
         src/syscall.cpp
         src/labels.cpp
-        include/labels.h
 )
 
-add_executable(mipscpp-fixture-gen
+add_executable(mipscpp-fixture-gen test/fixture_gen.cpp
         src/fileio.cpp
         src/tokenizer.cpp
         src/parser.cpp
@@ -27,9 +26,7 @@ add_executable(mipscpp-fixture-gen
         src/utils.cpp
         src/instruction.cpp
         src/memory.cpp
-        test/fixture_gen.cpp
         src/labels.cpp
-        include/labels.h
 )
 
 include(FetchContent)
@@ -58,7 +55,6 @@ add_executable(mipscpp-tests
         src/syscall.cpp
         test/test_interpreter.cpp
         src/labels.cpp
-        include/labels.h
 )
 target_link_libraries(mipscpp-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
