@@ -12,32 +12,37 @@
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
     // Initialize PC to the start of the text section
-    state.registers[Register::PC] = memSectionOffset(MemSection::TEXT);
+    state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));
     state.registers[Register::SP] = 0x7FFFFFFC;
     state.registers[Register::GP] = 0x10008000;
+
+    while (!step()) {
+    }
 
     return 0;
 }
 
 
-void Interpreter::step() {
+int Interpreter::step() {
     const int32_t instruction = state.memory.wordAt(state.registers[Register::PC]);
+    if (instruction == 0)
+        throw std::runtime_error("Execution terminated (fell off end of program)");
+
     state.registers[Register::PC] += 4;
 
     if (instruction == 0x0000000C) {
         // Syscall instruction
-        syscall();
-        return;
+        return syscall();
     }
 
-    const uint32_t opCode = (instruction >> 26) & 0x3F;
+    const uint32_t opCode = instruction >> 26 & 0x3F;
     if (opCode == 0) {
         // R-Type instruction
         const uint32_t funct = instruction & 0x3F;
-        const uint32_t rs = (instruction >> 21) & 0x1F;
-        const uint32_t rt = (instruction >> 16) & 0x1F;
-        const uint32_t rd = (instruction >> 11) & 0x1F;
-        const uint32_t shamt = (instruction >> 6) & 0x1F;
+        const uint32_t rs = instruction >> 21 & 0x1F;
+        const uint32_t rt = instruction >> 16 & 0x1F;
+        const uint32_t rd = instruction >> 11 & 0x1F;
+        const uint32_t shamt = instruction >> 6 & 0x1F;
 
         // Execute R-Type instruction
         execRType(funct, rs, rt, rd, shamt);
@@ -46,13 +51,15 @@ void Interpreter::step() {
         execJType(opCode, instruction & 0x3FFFFFF);
     } else {
         // I-Type instruction
-        const uint32_t rs = (instruction >> 21) & 0x1F;
-        const uint32_t rt = (instruction >> 16) & 0x1F;
+        const uint32_t rs = instruction >> 21 & 0x1F;
+        const uint32_t rt = instruction >> 16 & 0x1F;
         const int32_t immediate = instruction & 0xFFFF;
 
         // Execute I-Type instruction
         execIType(opCode, rs, rt, immediate);
     }
+
+    return 0;
 }
 
 
@@ -93,10 +100,11 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             state.registers[Register::LO] = static_cast<int64_t>(state.registers[rs]) *
                                                     static_cast<int64_t>(state.registers[rt]) &
                                             0xFFFFFFFF;
-            state.registers[Register::HI] = (static_cast<int64_t>(state.registers[rs]) *
-                                                     static_cast<int64_t>(state.registers[rt]) >>
-                                             32) &
-                                            0xFFFFFFFF;
+            state.registers[Register::HI] =
+                    static_cast<int64_t>(state.registers[rs]) *
+                                    static_cast<int64_t>(state.registers[rt]) >>
+                            32 &
+                    0xFFFFFFFF;
             break;
         }
         case InstructionCode::MULTU: {
@@ -272,8 +280,8 @@ void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
         state.registers[Register::RA] = state.registers[Register::PC]; // PC incremented earlier
 
     // Jump to the target address
-    state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | (address << 2);
+    state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | address << 2;
 }
 
 
-void Interpreter::syscall() {}
+int Interpreter::syscall() {}

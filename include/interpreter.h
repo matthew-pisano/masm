@@ -21,8 +21,8 @@ class Interpreter {
     void execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
     void execJType(uint32_t opCode, uint32_t address);
 
-    void syscall();
-    void step();
+    int syscall();
+    int step();
 
 public:
     int interpret(const MemLayout& layout);
