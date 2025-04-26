@@ -8,27 +8,27 @@
 #include <ostream>
 
 
-void printIntSyscall(State state) {
+void printIntSyscall(State state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
-    std::cout << value;
+    ostream << value;
 }
 
 
-void printStringSyscall(State state) {
+void printStringSyscall(State state, std::ostream& ostream) {
     int32_t address = state.registers[Register::A0];
     while (true) {
         const char c = state.memory.byteAt(address);
         if (c == '\0')
             break;
-        std::cout << c;
+        ostream << c;
         address++;
     }
 }
 
 
-void readIntSyscall(State state) {
+void readIntSyscall(State state, std::istream& istream) {
     std::string input;
-    std::getline(std::cin, input);
+    std::getline(istream, input);
     try {
         state.registers[Register::V0] = std::stoi(input);
     } catch (const std::invalid_argument&) {
@@ -39,12 +39,12 @@ void readIntSyscall(State state) {
 }
 
 
-void readStringSyscall(State state) {
+void readStringSyscall(State state, std::istream& istream) {
     const int32_t address = state.registers[Register::A0];
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
     while (currLen < length) {
-        const char c = std::cin.get();
+        const char c = istream.get();
         if (c == '\n')
             break;
         state.memory.byteTo(address + currLen, c);
@@ -52,20 +52,18 @@ void readStringSyscall(State state) {
     }
 }
 
-void exitSyscall(State state) {
-    throw ExecExit("Program exited with code " + std::to_string(0), 0);
-}
+void exitSyscall() { throw ExecExit("Program exited with code " + std::to_string(0), 0); }
 
 
-void printCharSyscall(State state) {
+void printCharSyscall(State state, std::ostream& ostream) {
     const char c = static_cast<char>(state.registers[Register::A0]);
-    std::cout << c;
+    ostream << c;
 }
 
 
-void readCharSyscall(State state) {
+void readCharSyscall(State state, std::istream& istream) {
     char c;
-    std::cin.get(c);
+    istream.get(c);
     state.registers[Register::V0] = static_cast<uint32_t>(c);
 }
 

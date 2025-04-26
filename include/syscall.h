@@ -22,45 +22,50 @@ enum class Syscall {
 /**
  * Prints the integer stored in the register $a0 to the console
  * @param state The current state of the interpreter
+ * @param ostream The output stream to print to
  */
-void printIntSyscall(State state);
+void printIntSyscall(State state, std::ostream& ostream);
 
 /**
  * Prints the null-terminated string stored in the memory at the address in $a0 to the console
  * @param state The current state of the interpreter
+ * @param ostream The output stream to print to
  */
-void printStringSyscall(State state);
+void printStringSyscall(State state, std::ostream& ostream);
 
 /**
  * Reads an integer from the console and stores it in the register $v0
  * @param state The current state of the interpreter
+ * @param istream The input stream to read from
  */
-void readIntSyscall(State state);
+void readIntSyscall(State state, std::istream& istream);
 
 /**
  * Reads a string from the console and stores it in the memory at the address in $a0 up to the
  * length in $a1
  * @param state The current state of the interpreter
+ * @param istream The input stream to read from
  */
-void readStringSyscall(State state);
+void readStringSyscall(State state, std::istream& istream);
 
 /**
  * Exits the program with the exit code 0
- * @param state The current state of the interpreter
  */
-void exitSyscall(State state);
+void exitSyscall();
 
 /**
  * Prints the character stored in the register $a0 to the console
  * @param state The current state of the interpreter
+ * @param ostream The output stream to print to
  */
-void printCharSyscall(State state);
+void printCharSyscall(State state, std::ostream& ostream);
 
 /**
  * Reads a character from the console and stores it in the register $v0
  * @param state The current state of the interpreter
+ * @param istream The input stream to read from
  */
-void readCharSyscall(State state);
+void readCharSyscall(State state, std::istream& istream);
 
 /**
  * Exits the program with the exit code stored in $a0
