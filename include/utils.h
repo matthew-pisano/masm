@@ -22,9 +22,10 @@ bool isSignedInteger(const std::string& str);
 /**
  * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
  * @param string The string to convert
+ * @param nullTerminate Whether to null terminate the string
  * @return The vector of bytes representing the string
  */
-std::vector<std::byte> stringToBytes(const std::string& string);
+std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
 
 
 /**

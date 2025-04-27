@@ -11,10 +11,12 @@ bool isSignedInteger(const std::string& str) {
 }
 
 
-std::vector<std::byte> stringToBytes(const std::string& string) {
+std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate) {
     std::vector<std::byte> bytes = {};
     for (const char c : string)
         bytes.push_back(static_cast<std::byte>(c));
+    if (nullTerminate)
+        bytes.push_back(static_cast<std::byte>(0));
     return bytes;
 }
 

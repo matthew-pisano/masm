@@ -87,7 +87,7 @@ std::vector<std::byte> Parser::parseDirective(const Token& dirToken,
             throw std::runtime_error(".asciiz expects exactly one argument");
         if (args[0].type != TokenType::STRING)
             throw std::runtime_error(".asciiz expects a string argument");
-        return stringToBytes(args[0].value);
+        return stringToBytes(args[0].value, true);
     }
     // Return a word for each argument given
     if (dirName == "word") {

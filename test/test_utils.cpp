@@ -36,14 +36,14 @@ TEST_CASE("Test Is Signed Integer") {
 TEST_CASE("Test String to Bytes") {
     SECTION("Test Single Char") {
         std::vector expectedBytes = {std::byte{0x61}};
-        std::vector<std::byte> actualBytes = stringToBytes("a");
+        std::vector<std::byte> actualBytes = stringToBytes("a", true);
         REQUIRE(expectedBytes == actualBytes);
     }
     SECTION("Test Multiple Char") {
         std::vector expectedBytes = {std::byte{0x61}, std::byte{0x20}, std::byte{0x62},
                                      std::byte{0x47}, std::byte{0x2f}, std::byte{0x3f},
                                      std::byte{0x2e}, std::byte{0x31}};
-        std::vector<std::byte> actualBytes = stringToBytes("a bG/?.1");
+        std::vector<std::byte> actualBytes = stringToBytes("a bG/?.1", true);
         REQUIRE(expectedBytes == actualBytes);
     }
 }
