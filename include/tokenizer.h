@@ -54,6 +54,11 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
 class Tokenizer {
 
     /**
+     * All global labels within the file
+     */
+    std::vector<std::string> globals;
+
+    /**
      * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
      * addressing mode when a close paren is reached
      * @param tokenLine The line of tokens to modify
@@ -61,22 +66,31 @@ class Tokenizer {
     static void processCloseParen(std::vector<Token>& tokenLine);
 
     /**
+     * Name mangels tokens in the given line that are not globals
+     * @param lineTokens A line of tokens
+     * @param fileId The name of the file being tokenized
+     * @throw runtime_error When the file ID is empty
+     */
+    void mangleLabels(std::vector<Token>& lineTokens, const std::string& fileId);
+
+    /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
      * @param rawLine The line of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating line
      */
-    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
+    std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
      * @param rawLines The lines of source code to tokenize
-     * @return A vector of vectors of tokens, where each vector represents a line
+     * @param fileName The name of the file being tokenized, used for tracing and name mangling
+     * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    [[nodiscard]] static std::vector<std::vector<Token>>
-    tokenize(const std::vector<std::string>& rawLines);
+    [[nodiscard]] std::vector<std::vector<Token>> tokenize(const std::vector<std::string>& rawLines,
+                                                           const std::string& fileName = "");
 };
 
 #endif // TOKENIZER_H

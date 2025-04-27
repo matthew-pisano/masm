@@ -12,10 +12,12 @@
 
 int main(const int argc, char* argv[]) {
 
-    std::string inputFileName;
+    std::vector<std::string> inputFileNames;
 
     CLI::App app{"masm - MIPS Interpreter", "masm"};
-    app.add_option("input-file", inputFileName, "Input file to load")->required();
+    app.add_option("input-file", inputFileNames, "Input file to load")
+            ->required()
+            ->allow_extra_args();
 
     try {
         app.parse(argc, argv);
@@ -24,9 +26,14 @@ int main(const int argc, char* argv[]) {
     }
 
     try {
-        const std::vector<std::string> lines = readFileLines(inputFileName);
+        std::vector<std::vector<Token>> program;
 
-        const std::vector<std::vector<Token>> program = Tokenizer::tokenize(lines);
+        Tokenizer tokenizer{};
+        for (const std::string& fileName : inputFileNames) {
+            const std::vector<std::string> lines = readFileLines(fileName);
+            const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(lines);
+            program.insert(program.end(), tokenizedLines.begin(), tokenizedLines.end());
+        }
 
         Parser parser{};
         const MemLayout layout = parser.parse(program);

@@ -5,6 +5,7 @@
 #include "tokenizer.h"
 
 #include <ostream>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -32,8 +33,10 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines) {
+std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines,
+                                                    const std::string& fileName) {
     std::vector<std::vector<Token>> tokenizedFile = {};
+    std::string fileId = std::regex_replace(fileName, std::regex(R"([\.-])"), "_");
 
     for (size_t i = 0; i < rawLines.size(); ++i) {
         const std::string& rawLine = rawLines[i];
@@ -47,9 +50,14 @@ std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::strin
         if (tokenizedLines.empty())
             continue;
 
-        for (const std::vector<Token>& line : tokenizedLines)
-            if (!line.empty())
-                tokenizedFile.push_back(line);
+        for (std::vector<Token>& line : tokenizedLines) {
+            if (line.empty())
+                continue;
+
+            if (!fileId.empty())
+                mangleLabels(line, fileId);
+            tokenizedFile.push_back(line);
+        }
     }
 
     return tokenizedFile;
@@ -86,8 +94,24 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 }
 
 
+void Tokenizer::mangleLabels(std::vector<Token>& lineTokens, const std::string& fileId) {
+    if (fileId.empty())
+        throw std::runtime_error("File ID cannot be empty when name mangling");
+
+    for (int i = 0; i < lineTokens.size(); i++)
+        if (lineTokens[i].type == TokenType::LABEL || lineTokens[i].type == TokenType::LABELREF)
+            // If the label is not a global, mangle it
+            if (std::ranges::find(globals, lineTokens[i].value) == globals.end())
+                lineTokens[i].value = lineTokens[i].value + "@" + fileId;
+}
+
+
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
     std::array<std::string, 2> memDirectives = {"data", "text"};
+    const std::string globlDirective = "globl";
+    // If the last token was a global directive and a label is needed
+    bool needsGlobl = false;
+
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
@@ -127,6 +151,21 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             if (currentType == TokenType::DIRECTIVE &&
                 std::ranges::find(memDirectives, currentToken) != memDirectives.end())
                 currentType = TokenType::MEMDIRECTIVE;
+            else if (currentType == TokenType::DIRECTIVE && currentToken == globlDirective) {
+                needsGlobl = true;
+                currentToken.clear();
+                currentType = TokenType::UNKNOWN;
+                continue;
+            }
+
+            // If marking a label as global, skip token and add to globals
+            if (currentType == TokenType::INSTRUCTION && needsGlobl) {
+                globals.push_back(currentToken);
+                needsGlobl = false;
+                currentToken.clear();
+                currentType = TokenType::UNKNOWN;
+                continue;
+            }
 
             // Add the current token to the vector and reset
             if (!currentToken.empty()) {
@@ -183,6 +222,9 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
 
     if (!currentToken.empty())
         throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
+
+    if (needsGlobl)
+        throw std::runtime_error("Global directive must be followed by a label");
 
     return tokens;
 }

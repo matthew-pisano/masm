@@ -49,7 +49,8 @@ void validateTokens(const std::string& sourceFileName, const std::string& tokens
     }
 
     const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
-    const std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(sourceLines);
+    Tokenizer tokenizer{};
+    const std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(sourceLines);
     REQUIRE(expectedTokens.size() == actualTokens.size());
     for (size_t i = 0; i < expectedTokens.size(); ++i)
         REQUIRE(expectedTokens[i] == actualTokens[i]);
@@ -57,68 +58,69 @@ void validateTokens(const std::string& sourceFileName, const std::string& tokens
 
 
 TEST_CASE("Test Tokenize Single Tokens") {
+    Tokenizer tokenizer{};
     SECTION("Test Directive") {
         const std::vector<std::string> lines = {".asciiz"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::DIRECTIVE, "asciiz"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Memory Directive") {
         const std::vector<std::string> lines = {".data"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::MEMDIRECTIVE, "data"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Label Declaration") {
         const std::vector<std::string> lines = {"label:"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::LABEL, "label"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Label Reference") {
         const std::vector<std::string> lines = {"j label"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::LABELREF, "label"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Instruction") {
         const std::vector<std::string> lines = {"addi"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "addi"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Register") {
         const std::vector<std::string> lines = {"$v0"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::REGISTER, "v0"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Immediate") {
         std::vector<std::string> lines = {"42"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::IMMEDIATE, "42"}}};
         REQUIRE(expectedTokens == actualTokens);
 
         lines = {"-42"};
-        actualTokens = Tokenizer::tokenize(lines);
+        actualTokens = tokenizer.tokenize(lines);
         expectedTokens = {{{TokenType::IMMEDIATE, "-42"}}};
         REQUIRE(expectedTokens == actualTokens);
 
         lines = {"-42.0"};
-        actualTokens = Tokenizer::tokenize(lines);
+        actualTokens = tokenizer.tokenize(lines);
         expectedTokens = {{{TokenType::IMMEDIATE, "-42.0"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Seperator") {
         const std::vector<std::string> lines = {","};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::SEPERATOR, ","}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test String") {
         const std::vector<std::string> lines = {R"("'ello \n\"There\"")"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::STRING, R"('ello \n\"There\")"}}};
         REQUIRE(expectedTokens == actualTokens);
@@ -126,7 +128,7 @@ TEST_CASE("Test Tokenize Single Tokens") {
 
     SECTION("Test Parentheses") {
         std::vector<std::string> lines = {"lw $t1, 8($t0)"};
-        std::vector<std::vector<Token>> actualTokens = Tokenizer::tokenize(lines);
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(lines);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
                                                            {TokenType::REGISTER, "t1"},
                                                            {TokenType::SEPERATOR, ","},
@@ -136,7 +138,7 @@ TEST_CASE("Test Tokenize Single Tokens") {
         REQUIRE(expectedTokens == actualTokens);
 
         lines = {"lw $t1, ($t0)"};
-        actualTokens = Tokenizer::tokenize(lines);
+        actualTokens = tokenizer.tokenize(lines);
         expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
                            {TokenType::REGISTER, "t1"},
                            {TokenType::SEPERATOR, ","},
@@ -149,9 +151,10 @@ TEST_CASE("Test Tokenize Single Tokens") {
 
 
 TEST_CASE("Test Tokenize Invalid Syntax") {
+    Tokenizer tokenizer{};
     SECTION("Test Unexpected EOL") {
         const std::vector<std::string> lines = {R"(unterminated: .asciiz "incomplet)"};
-        REQUIRE_THROWS_AS(Tokenizer::tokenize(lines), std::runtime_error);
+        REQUIRE_THROWS_AS(tokenizer.tokenize(lines), std::runtime_error);
     }
 }
 

@@ -21,7 +21,9 @@
 void validateOutput(const std::string& sourceFileName, const std::string& logFileName) {
     const std::vector<std::string> logLines = readFileLines(logFileName);
     const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
-    const std::vector<std::vector<Token>> program = Tokenizer::tokenize(sourceLines);
+
+    Tokenizer tokenizer{};
+    const std::vector<std::vector<Token>> program = tokenizer.tokenize(sourceLines);
 
     Parser parser{};
     const MemLayout layout = parser.parse(program);

@@ -32,11 +32,14 @@ std::string getBaseFileName(const std::string& filePath) {
  * Writes a tokenized representation of the given program lines to the given file handle
  * @param tokenFile The file handle to write to
  * @param lines The lines of the program to write
+ * @param mangleId The ID to mangle the labels with
  * @return The tokenized representation of the program lines as a vector of vectors
  */
 std::vector<std::vector<Token>> genTokenFile(std::ofstream& tokenFile,
-                                             const std::vector<std::string>& lines) {
-    const std::vector<std::vector<Token>> tokenizedLines = Tokenizer::tokenize(lines);
+                                             const std::vector<std::string>& lines,
+                                             const std::string& mangleId) {
+    Tokenizer tokenizer{};
+    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(lines, mangleId);
     for (const std::vector<Token>& tokenLine : tokenizedLines) {
         for (const Token& token : tokenLine) {
             constexpr unsigned char groupSep = 0x1d;
@@ -78,9 +81,12 @@ MemLayout generateParserFile(std::ofstream& parserFile,
 int main(const int argc, char* argv[]) {
 
     std::string inputFileName;
+    std::string mangleId;
 
     CLI::App app{"masm Intermediate Generator", "masm-fg"};
     app.add_option("input-file", inputFileName, "Input file to load")->required();
+    // Allows name mangling
+    app.add_option("--mangle-id", mangleId, "Name mangling ID")->default_str("");
 
     try {
         app.parse(argc, argv);
@@ -102,7 +108,8 @@ int main(const int argc, char* argv[]) {
 
         const std::vector<std::string> lines = readFileLines(inputFileName);
 
-        const std::vector<std::vector<Token>> tokenizedLines = genTokenFile(tokenFile, lines);
+        const std::vector<std::vector<Token>> tokenizedLines =
+                genTokenFile(tokenFile, lines, mangleId);
         MemLayout memLayout = generateParserFile(parserFile, tokenizedLines);
 
         tokenFile.close();
