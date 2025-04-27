@@ -11,10 +11,33 @@ bool isSignedInteger(const std::string& str) {
 }
 
 
-std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate) {
+std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate,
+                                     const bool escape) {
     std::vector<std::byte> bytes = {};
-    for (const char c : string)
+    bool toEscape = false;
+    for (const char c : string) {
+        if (escape && !toEscape && c == '\\') {
+            toEscape = true;
+            continue;
+        }
+
+        if (toEscape) {
+            if (c == 'n')
+                bytes.push_back(static_cast<std::byte>('\n'));
+            else if (c == 't')
+                bytes.push_back(static_cast<std::byte>('\t'));
+            else if (c == '\\')
+                bytes.push_back(static_cast<std::byte>(c));
+            else if (c == '"')
+                bytes.push_back(static_cast<std::byte>(c));
+            else
+                throw std::runtime_error("Invalid escape sequence \\" + std::string(1, c));
+            toEscape = false;
+            continue;
+        }
+
         bytes.push_back(static_cast<std::byte>(c));
+    }
     if (nullTerminate)
         bytes.push_back(static_cast<std::byte>(0));
     return bytes;
