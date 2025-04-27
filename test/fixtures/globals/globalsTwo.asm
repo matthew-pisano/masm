@@ -2,5 +2,6 @@
 .data
 
 global_string: .asciiz "\"Hello\\World!\"\n"
+local_string: .asciiz "Hello, Goodbye world!"
 
-.globl out_string
+.globl global_strings

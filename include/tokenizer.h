@@ -5,6 +5,7 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -66,12 +67,13 @@ class Tokenizer {
     static void processCloseParen(std::vector<Token>& tokenLine);
 
     /**
-     * Name mangels tokens in the given line that are not globals
-     * @param lineTokens A line of tokens
-     * @param fileId The name of the file being tokenized
-     * @throw runtime_error When the file ID is empty
+     * A helper function that mangles labels in the given line of tokens
+     * @param availableLabels The list of available labels to mangle
+     * @param lineTokens The line of tokens to mangle
+     * @param fileId The file ID to append to the label
      */
-    void mangleLabels(std::vector<Token>& lineTokens, const std::string& fileId);
+    void mangleLabelsInLine(std::vector<std::string>& availableLabels,
+                            std::vector<Token>& lineTokens, const std::string& fileId);
 
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
@@ -85,12 +87,18 @@ public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
      * @param rawLines The lines of source code to tokenize
-     * @param fileName The name of the file being tokenized, used for tracing and name mangling
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    [[nodiscard]] std::vector<std::vector<Token>> tokenize(const std::vector<std::string>& rawLines,
-                                                           const std::string& fileName = "");
+    [[nodiscard]] std::vector<std::vector<Token>>
+    tokenize(const std::vector<std::string>& rawLines);
+
+    /**
+     * Name mangels tokens in the given program map by adding the file ID to the label
+     * @param programMap The map of file IDs to their tokenized lines
+     * @throw runtime_error When the file ID is empty
+     */
+    void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
 };
 
 #endif // TOKENIZER_H

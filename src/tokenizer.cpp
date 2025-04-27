@@ -33,10 +33,8 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines,
-                                                    const std::string& fileName) {
+std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines) {
     std::vector<std::vector<Token>> tokenizedFile = {};
-    std::string fileId = std::regex_replace(fileName, std::regex(R"([\.-])"), "_");
 
     for (size_t i = 0; i < rawLines.size(); ++i) {
         const std::string& rawLine = rawLines[i];
@@ -54,8 +52,6 @@ std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::strin
             if (line.empty())
                 continue;
 
-            if (!fileId.empty())
-                mangleLabels(line, fileId);
             tokenizedFile.push_back(line);
         }
     }
@@ -94,15 +90,39 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 }
 
 
-void Tokenizer::mangleLabels(std::vector<Token>& lineTokens, const std::string& fileId) {
-    if (fileId.empty())
-        throw std::runtime_error("File ID cannot be empty when name mangling");
+void Tokenizer::mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap) {
+    // Stores globals that have not yet been matched to declarations
+    std::vector availableLabels(globals);
 
-    for (int i = 0; i < lineTokens.size(); i++)
-        if (lineTokens[i].type == TokenType::LABEL || lineTokens[i].type == TokenType::LABELREF)
-            // If the label is not a global, mangle it
-            if (std::ranges::find(globals, lineTokens[i].value) == globals.end())
-                lineTokens[i].value = lineTokens[i].value + "@" + fileId;
+    for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap) {
+        if (programFile.first.empty())
+            throw std::runtime_error("File ID is empty");
+
+        for (std::vector<Token>& line : programFile.second)
+            // Mangle the labels in the line
+            mangleLabelsInLine(availableLabels, line, programFile.first);
+    }
+
+    // If any globals were declared without a matching label declaration
+    if (!availableLabels.empty())
+        throw std::runtime_error("Global label " + availableLabels[0] +
+                                 " referenced without declaration");
+}
+
+void Tokenizer::mangleLabelsInLine(std::vector<std::string>& availableLabels,
+                                   std::vector<Token>& lineTokens, const std::string& fileId) {
+    for (int i = 0; i < lineTokens.size(); i++) {
+        if (lineTokens[i].type != TokenType::LABEL && lineTokens[i].type != TokenType::LABELREF)
+            continue;
+
+        // If declaring a label, remove it from the remaining available declarations
+        if (lineTokens[i].type == TokenType::LABEL)
+            std::erase(availableLabels, lineTokens[i].value);
+
+        // If the label is not a global, mangle it
+        if (std::ranges::find(globals, lineTokens[i].value) == globals.end())
+            lineTokens[i].value = lineTokens[i].value + "@" + fileId;
+    }
 }
 
 
