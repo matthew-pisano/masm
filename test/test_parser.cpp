@@ -35,7 +35,7 @@ void validateMemLayout(const std::string& sourceFileName, const std::string& par
 
     const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
     Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> program = tokenizer.tokenize(sourceLines);
+    const std::vector<std::vector<Token>> program = tokenizer.tokenize({sourceLines});
     Parser parser{};
     MemLayout actualMem = parser.parse(program);
     REQUIRE(expectedMem.size() == actualMem.size());

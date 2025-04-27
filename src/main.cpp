@@ -27,26 +27,12 @@ int main(const int argc, char* argv[]) {
     }
 
     try {
-        std::map<std::string, std::vector<std::vector<Token>>> programMap;
+        std::vector<std::vector<std::string>> programLines;
+        for (const std::string& fileName : inputFileNames)
+            programLines.push_back(readFileLines(fileName));
+
         Tokenizer tokenizer{};
-        for (const std::string& fileName : inputFileNames) {
-            std::string baseFileName = fileName.contains('/')
-                                               ? fileName.substr(fileName.find_last_of('/') + 1)
-                                               : fileName;
-            baseFileName = std::regex_replace(baseFileName, std::regex(R"([\.-])"), "_");
-
-            const std::vector<std::string> lines = readFileLines(fileName);
-            programMap[baseFileName] = tokenizer.tokenize(lines);
-        }
-
-        // Mangle labels if there is more than one file
-        if (programMap.size() > 1)
-            tokenizer.mangleLabels(programMap);
-
-        std::vector<std::vector<Token>> program;
-        for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile :
-             programMap)
-            program.insert(program.end(), programFile.second.begin(), programFile.second.end());
+        const std::vector<std::vector<Token>> program = tokenizer.tokenize(programLines);
 
         Parser parser{};
         const MemLayout layout = parser.parse(program);

@@ -83,15 +83,23 @@ class Tokenizer {
      */
     std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 
-public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
      * @param rawLines The lines of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
+    std::vector<std::vector<Token>> tokenizeFile(const std::vector<std::string>& rawLines);
+
+public:
+    /**
+     * Tokenizes incoming source code lines from multiple files into parsable tokens
+     * @param rawFilesLines The lines of source code to tokenize
+     * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @throw runtime_error When encountering a malformed or early terminating file
+     */
     [[nodiscard]] std::vector<std::vector<Token>>
-    tokenize(const std::vector<std::string>& rawLines);
+    tokenize(const std::vector<std::vector<std::string>>& rawFilesLines);
 
     /**
      * Name mangels tokens in the given program map by adding the file ID to the label

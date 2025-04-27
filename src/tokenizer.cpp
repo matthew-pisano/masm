@@ -33,7 +33,25 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenize(const std::vector<std::string>& rawLines) {
+std::vector<std::vector<Token>>
+Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFilesLines) {
+    std::map<std::string, std::vector<std::vector<Token>>> programMap;
+    for (int i = 0; i < rawFilesLines.size(); ++i)
+        programMap["masm_mangle_file_" + std::to_string(i)] = tokenizeFile(rawFilesLines[i]);
+
+    // Mangle labels if there is more than one file
+    if (programMap.size() > 1)
+        mangleLabels(programMap);
+
+    std::vector<std::vector<Token>> program;
+    for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap)
+        program.insert(program.end(), programFile.second.begin(), programFile.second.end());
+
+    return program;
+}
+
+
+std::vector<std::vector<Token>> Tokenizer::tokenizeFile(const std::vector<std::string>& rawLines) {
     std::vector<std::vector<Token>> tokenizedFile = {};
 
     for (size_t i = 0; i < rawLines.size(); ++i) {
