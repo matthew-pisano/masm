@@ -32,14 +32,12 @@ std::string getBaseFileName(const std::string& filePath) {
  * Writes a tokenized representation of the given program lines to the given file handle
  * @param tokenFile The file handle to write to
  * @param lines The lines of the program to write
- * @param mangleId The ID to mangle the labels with
  * @return The tokenized representation of the program lines as a vector of vectors
  */
 std::vector<std::vector<Token>> genTokenFile(std::ofstream& tokenFile,
-                                             const std::vector<std::string>& lines,
-                                             const std::string& mangleId) {
+                                             const std::vector<std::string>& lines) {
     Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(lines, mangleId);
+    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(lines);
     for (const std::vector<Token>& tokenLine : tokenizedLines) {
         for (const Token& token : tokenLine) {
             constexpr unsigned char groupSep = 0x1d;
@@ -108,8 +106,7 @@ int main(const int argc, char* argv[]) {
 
         const std::vector<std::string> lines = readFileLines(inputFileName);
 
-        const std::vector<std::vector<Token>> tokenizedLines =
-                genTokenFile(tokenFile, lines, mangleId);
+        const std::vector<std::vector<Token>> tokenizedLines = genTokenFile(tokenFile, lines);
         MemLayout memLayout = generateParserFile(parserFile, tokenizedLines);
 
         tokenFile.close();
