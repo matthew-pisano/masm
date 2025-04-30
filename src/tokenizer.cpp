@@ -129,17 +129,17 @@ void Tokenizer::mangleLabels(std::map<std::string, std::vector<std::vector<Token
 
 void Tokenizer::mangleLabelsInLine(std::vector<std::string>& availableLabels,
                                    std::vector<Token>& lineTokens, const std::string& fileId) {
-    for (int i = 0; i < lineTokens.size(); i++) {
-        if (lineTokens[i].type != TokenType::LABEL && lineTokens[i].type != TokenType::LABELREF)
+    for (Token& lineToken : lineTokens) {
+        if (lineToken.type != TokenType::LABEL && lineToken.type != TokenType::LABELREF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
-        if (lineTokens[i].type == TokenType::LABEL)
-            std::erase(availableLabels, lineTokens[i].value);
+        if (lineToken.type == TokenType::LABEL)
+            std::erase(availableLabels, lineToken.value);
 
         // If the label is not a global, mangle it
-        if (std::ranges::find(globals, lineTokens[i].value) == globals.end())
-            lineTokens[i].value = lineTokens[i].value + "@" + fileId;
+        if (std::ranges::find(globals, lineToken.value) == globals.end())
+            lineToken.value = lineToken.value + "@" + fileId;
     }
 }
 

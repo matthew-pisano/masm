@@ -82,12 +82,12 @@ std::vector<std::byte> Parser::parseDirective(const Token& dirToken,
     std::vector<std::byte> bytes = {};
 
     // Return a byte vector containing each character of the string
-    if (dirName == "asciiz") {
+    if (dirName == "asciiz" || dirName == "ascii") {
         if (args.size() > 1)
-            throw std::runtime_error(".asciiz expects exactly one argument");
+            throw std::runtime_error(dirName + " expects exactly one argument");
         if (args[0].type != TokenType::STRING)
-            throw std::runtime_error(".asciiz expects a string argument");
-        return stringToBytes(args[0].value, true, true);
+            throw std::runtime_error(dirName + " expects a string argument");
+        return stringToBytes(args[0].value, dirName == "asciiz", true);
     }
     // Return a word for each argument given
     if (dirName == "word") {

@@ -45,9 +45,11 @@ void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
                 for (const Token& arg : args) {
                     if (arg.type == TokenType::IMMEDIATE)
                         size += 4;
-                    else if (arg.type == TokenType::STRING)
-                        size += arg.value.size() + 1; // padding for null terminator
-                    else
+                    else if (arg.type == TokenType::STRING) {
+                        size += arg.value.size();
+                        if (firstToken.value == "asciiz")
+                            size++; // padding for null terminator
+                    } else
                         throw std::runtime_error("Invalid argument type for directive " +
                                                  firstToken.value);
                 }
