@@ -24,16 +24,6 @@ class Parser {
     LabelMap labelMap;
 
     /**
-     * Parses a directive and its arguments into bytes that can be allocated to memory
-     * @param dirToken The token for the directive
-     * @param args Any argument tokens to pass to the directive
-     * @return The memory allocation associated with the directive
-     * @throw runtime_error When the arguments for a directive are malformed
-     */
-    static std::vector<std::byte> parseDirective(const Token& dirToken,
-                                                 const std::vector<Token>& args);
-
-    /**
      * Parses an instruction and its arguments into bytes that can be allocated to memory
      * @param loc The location in which the instruction will be placed into memory
      * @param instrToken The token containing the instruction

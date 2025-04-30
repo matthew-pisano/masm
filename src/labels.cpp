@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 
+#include "directive.h"
 #include "instruction.h"
 #include "memory.h"
 #include "utils.h"
@@ -40,27 +41,8 @@ void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::ALLOC_DIRECTIVE: {
-                // Get size of affected memory without parsing
-                if (firstToken.value == "space") {
-                    if (args.size() != 1)
-                        throw std::runtime_error("space directive expects exactly one argument");
-                    memSizes[currSection] += std::stoi(args[0].value);
-                    break;
-                }
-
-                uint32_t size = 0;
-                for (const Token& arg : args) {
-                    if (arg.type == TokenType::IMMEDIATE)
-                        size += 4;
-                    else if (arg.type == TokenType::STRING) {
-                        size += arg.value.size();
-                        if (firstToken.value == "asciiz")
-                            size++; // padding for null terminator
-                    } else
-                        throw std::runtime_error("Invalid argument type for directive " +
-                                                 firstToken.value);
-                }
-                memSizes[currSection] += size;
+                memSizes[currSection] +=
+                        parseAllocDirective(memSizes[currSection], firstToken, args).size();
                 break;
             }
             case TokenType::INSTRUCTION:
