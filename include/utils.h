@@ -33,6 +33,7 @@ std::vector<std::byte> stringToBytes(const std::string& string, bool nullTermina
  * Converts a string representing an integer into a 32-bit big endian representation in bytes
  * @param string The string to convert
  * @return The vector of bytes representing the integer
+ * @throw runtime_error When the string is not a valid signed integer
  */
 std::vector<std::byte> intStringToBytes(const std::string& string);
 

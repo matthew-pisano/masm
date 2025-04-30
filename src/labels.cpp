@@ -41,6 +41,13 @@ void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
             }
             case TokenType::DIRECTIVE: {
                 // Get size of affected memory without parsing
+                if (firstToken.value == "space") {
+                    if (args.size() != 1)
+                        throw std::runtime_error("space directive expects exactly one argument");
+                    memSizes[currSection] += std::stoi(args[0].value);
+                    break;
+                }
+
                 uint32_t size = 0;
                 for (const Token& arg : args) {
                     if (arg.type == TokenType::IMMEDIATE)
