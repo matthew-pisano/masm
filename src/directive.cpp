@@ -45,6 +45,7 @@ std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
 
         for (int i = 0; i < std::stoi(args[0].value); ++i)
             bytes.push_back(static_cast<std::byte>(0));
+        return bytes;
     }
 
     throw std::runtime_error("Unsupported directive " + dirName);
