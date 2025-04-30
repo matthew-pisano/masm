@@ -28,6 +28,7 @@ int main(const int argc, char* argv[]) {
 
     try {
         std::vector<std::vector<std::string>> programLines;
+        programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
         for (const std::string& fileName : inputFileNames)
             programLines.push_back(readFileLines(fileName));
 

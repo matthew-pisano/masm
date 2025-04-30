@@ -31,13 +31,13 @@ std::string getBaseFileName(const std::string& filePath) {
 /**
  * Writes a tokenized representation of the given program lines to the given file handle
  * @param tokenFile The file handle to write to
- * @param lines The lines of the program to write
+ * @param programLines The lines of the program to write
  * @return The tokenized representation of the program lines as a vector of vectors
  */
-std::vector<std::vector<Token>> genTokenFile(std::ofstream& tokenFile,
-                                             const std::vector<std::string>& lines) {
+std::vector<std::vector<Token>>
+genTokenFile(std::ofstream& tokenFile, const std::vector<std::vector<std::string>>& programLines) {
     Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(lines);
+    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(programLines);
     for (const std::vector<Token>& tokenLine : tokenizedLines) {
         for (const Token& token : tokenLine) {
             constexpr unsigned char groupSep = 0x1d;
@@ -78,13 +78,12 @@ MemLayout generateParserFile(std::ofstream& parserFile,
 
 int main(const int argc, char* argv[]) {
 
-    std::string inputFileName;
-    std::string mangleId;
+    std::vector<std::string> inputFileNames;
 
     CLI::App app{"masm Intermediate Generator", "masm-fg"};
-    app.add_option("input-file", inputFileName, "Input file to load")->required();
-    // Allows name mangling
-    app.add_option("--mangle-id", mangleId, "Name mangling ID")->default_str("");
+    app.add_option("input-file", inputFileNames, "Input file to load")
+            ->required()
+            ->allow_extra_args();
 
     try {
         app.parse(argc, argv);
@@ -92,21 +91,27 @@ int main(const int argc, char* argv[]) {
         return app.exit(e);
     }
 
+    const std::string projectName = getBaseFileName(inputFileNames[0]);
+    std::vector<std::vector<std::string>> programLines;
     try {
-        const std::string baseFileName = getBaseFileName(inputFileName);
+        for (const std::string& fileName : inputFileNames) {
+            const std::string baseFileName = getBaseFileName(fileName);
+            const std::vector<std::string> lines = readFileLines(fileName);
+            programLines.push_back(lines);
+        }
 
         std::ofstream tokenFile;
-        tokenFile.open(baseFileName + ".tkn");
+        tokenFile.open(projectName + ".tkn");
         if (!tokenFile.is_open())
-            throw std::runtime_error("Could not open file " + baseFileName + ".tkn");
+            throw std::runtime_error("Could not open file " + projectName + ".tkn");
+        const std::vector<std::vector<Token>> tokenizedLines =
+                genTokenFile(tokenFile, programLines);
+
         std::ofstream parserFile;
-        parserFile.open(baseFileName + ".pse");
+        parserFile.open(projectName + ".pse");
         if (!parserFile.is_open())
-            throw std::runtime_error("Could not open file " + baseFileName + ".pse");
+            throw std::runtime_error("Could not open file " + projectName + ".pse");
 
-        const std::vector<std::string> lines = readFileLines(inputFileName);
-
-        const std::vector<std::vector<Token>> tokenizedLines = genTokenFile(tokenFile, lines);
         MemLayout memLayout = generateParserFile(parserFile, tokenizedLines);
 
         tokenFile.close();
