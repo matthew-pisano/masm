@@ -15,15 +15,20 @@
 
 /**
  * Validates the output of a program versus the expected output
- * @param sourceFileName The name of the source file to execute
+ * @param sourceFileNames The names of the source files to tokenize
  * @param logFileName The name of the output log to compare against
  */
-void validateOutput(const std::string& sourceFileName, const std::string& logFileName) {
+void validateOutput(const std::vector<std::string>& sourceFileNames,
+                    const std::string& logFileName) {
     const std::vector<std::string> logLines = readFileLines(logFileName);
-    const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
+
+    std::vector<std::vector<std::string>> sourceLines;
+    sourceLines.reserve(sourceFileNames.size()); // Preallocate memory for performance
+    for (const std::string& sourceFileName : sourceFileNames)
+        sourceLines.push_back(readFileLines(sourceFileName));
 
     Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> program = tokenizer.tokenize({sourceLines});
+    const std::vector<std::vector<Token>> program = tokenizer.tokenize(sourceLines);
 
     Parser parser{};
     const MemLayout layout = parser.parse(program);
@@ -45,34 +50,41 @@ void validateOutput(const std::string& sourceFileName, const std::string& logFil
 
 TEST_CASE("Test Execute Hello World") {
     const std::string test_case = "hello_world";
-    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Load Address") {
     const std::string test_case = "load_address";
-    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Loops") {
     const std::string test_case = "loops";
-    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Syscall") {
     const std::string test_case = "syscall";
-    validateOutput("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
+}
+
+TEST_CASE("Test Execute Globals") {
+    const std::string test_case = "globals";
+    validateOutput({"test/fixtures/" + test_case + "/globalsOne.asm",
+                    "test/fixtures/" + test_case + "/globalsTwo.asm"},
+                   "test/fixtures/" + test_case + "/globalsOne.txt");
 }

@@ -11,10 +11,11 @@
 
 /**
  * Validates the tokenization of a file against the loaded, expected tokens
- * @param sourceFileName The name of the source file to tokenize
+ * @param sourceFileNames The names of the source files to tokenize
  * @param tokensFileName The name of the tokenized file to compare against
  */
-void validateTokens(const std::string& sourceFileName, const std::string& tokensFileName) {
+void validateTokens(const std::vector<std::string>& sourceFileNames,
+                    const std::string& tokensFileName) {
     const std::vector<std::string> tokenizedLines = readFileLines(tokensFileName);
 
     constexpr char groupSep = 0x1d;
@@ -48,9 +49,13 @@ void validateTokens(const std::string& sourceFileName, const std::string& tokens
         }
     }
 
-    const std::vector<std::string> sourceLines = readFileLines(sourceFileName);
+    std::vector<std::vector<std::string>> sourceLines;
+    sourceLines.reserve(sourceFileNames.size()); // Preallocate memory for performance
+    for (const std::string& sourceFileName : sourceFileNames)
+        sourceLines.push_back(readFileLines(sourceFileName));
+
     Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({sourceLines});
+    const std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize(sourceLines);
     REQUIRE(expectedTokens.size() == actualTokens.size());
     for (size_t i = 0; i < expectedTokens.size(); ++i)
         REQUIRE(expectedTokens[i] == actualTokens[i]);
@@ -161,33 +166,41 @@ TEST_CASE("Test Tokenize Invalid Syntax") {
 
 TEST_CASE("Test Tokenize Hello World") {
     const std::string test_case = "hello_world";
-    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Load Address") {
     const std::string test_case = "load_address";
-    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Syscall") {
     const std::string test_case = "syscall";
-    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 TEST_CASE("Test Tokenize Loops") {
     const std::string test_case = "loops";
-    validateTokens("test/fixtures/" + test_case + "/" + test_case + ".asm",
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+}
+
+
+TEST_CASE("Test Tokenize Globals") {
+    const std::string test_case = "globals";
+    validateTokens({"test/fixtures/" + test_case + "/globalsOne.asm",
+                    "test/fixtures/" + test_case + "/globalsTwo.asm"},
+                   "test/fixtures/" + test_case + "/globalsOne.tkn");
 }
