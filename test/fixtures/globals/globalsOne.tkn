@@ -1,18 +1,18 @@
 01data
-03local_string@masm_mangle_file_0
-02asciiz11Hello, World again!
+04local_string@masm_mangle_file_0
+02asciiz12Hello, World again!
 01text
-03main@masm_mangle_file_0
-05li06v008,074
-05la06a008,04global_string
-05syscall
-05li06v008,074
-05la06a008,04local_string@masm_mangle_file_0
-05syscall
-05li06v008,0710
-05syscall
+04main@masm_mangle_file_0
+06li07v009,084
+06la07a009,05global_string
+06syscall
+06li07v009,084
+06la07a009,05local_string@masm_mangle_file_0
+06syscall
+06li07v009,0810
+06syscall
 01data
-03global_string
-02asciiz11\"Hello\\World!\"\n
-03local_string@masm_mangle_file_1
-02asciiz11Hello, Goodbye world!
+04global_string
+02asciiz12\"Hello\\World!\"\n
+04local_string@masm_mangle_file_1
+02asciiz12Hello, Goodbye world!

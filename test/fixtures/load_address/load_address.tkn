@@ -1,13 +1,13 @@
 01data
-03label
-02asciiz11hello there
-03label2
-02asciiz11hello there
+04label
+02asciiz12hello there
+04label2
+02asciiz12hello there
 01text
-05la06s008,04label
-05lw06s108,06s008,070
-05add06a008,06zero08,06s1
-05li06v008,0711
-05syscall
-05li06v008,0710
-05syscall
+06la07s009,05label
+06lw07s109,07s009,080
+06add07a009,07zero09,07s1
+06li07v009,0811
+06syscall
+06li07v009,0810
+06syscall

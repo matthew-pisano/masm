@@ -1,10 +1,10 @@
 01data
-03string
-02asciiz11hello
+04string
+02asciiz12hello
 01text
-03main
-05li06v008,074
-05la06a008,04string
-05syscall
-05li06v008,0710
-05syscall
+04main
+06li07v009,084
+06la07a009,05string
+06syscall
+06li07v009,0810
+06syscall

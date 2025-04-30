@@ -1,16 +1,16 @@
 01data
-03small
-02word070
-03large
-02word0765536
+04small
+02word080
+04large
+02word0865536
 01text
-03main
-05la06t008,04large
-05lw06t108,06t008,070
-05addi06t208,06t108,071024
-05sub06t308,06t208,06t1
-05addi06a008,06t308,070
-05li06v008,071
-05syscall
-05li06v008,0710
-05syscall
+04main
+06la07t009,05large
+06lw07t109,07t009,080
+06addi07t209,07t109,081024
+06sub07t309,07t209,07t1
+06addi07a009,07t309,080
+06li07v009,081
+06syscall
+06li07v009,0810
+06syscall

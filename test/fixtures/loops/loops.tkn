@@ -1,19 +1,19 @@
-03main
-05li06t108,0724
-05li06t008,07-1
-03loop
-05addi06a008,06t008,070
-05li06v008,071
-05syscall
-05addi06a008,06zero08,0732
-05li06v008,0711
-05syscall
-05addi06t008,06t008,071
-05bgt06t008,06t108,04exit
-05j04loop
-03exit
-05addi06a008,06zero08,0747
-05li06v008,0711
-05syscall
-05li06v008,0710
-05syscall
+04main
+06li07t109,0824
+06li07t009,08-1
+04loop
+06addi07a009,07t009,080
+06li07v009,081
+06syscall
+06addi07a009,07zero09,0832
+06li07v009,0811
+06syscall
+06addi07t009,07t009,081
+06bgt07t009,07t109,05exit
+06j05loop
+04exit
+06addi07a009,07zero09,0847
+06li07v009,0811
+06syscall
+06li07v009,0810
+06syscall
