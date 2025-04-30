@@ -15,10 +15,11 @@
  */
 enum class TokenType {
     UNKNOWN,
-    MEMDIRECTIVE,
-    DIRECTIVE,
-    LABEL,
-    LABELREF,
+    SEC_DIRECTIVE, // Directives that denote the state of a memory section
+    ALLOC_DIRECTIVE, // Directives that allocate memory
+    META_DIRECTIVE, // Directives that affect the structure of the program (globals, macros, etc.)
+    LABEL_DEF,
+    LABEL_REF,
     INSTRUCTION,
     REGISTER,
     IMMEDIATE,

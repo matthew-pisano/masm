@@ -136,9 +136,9 @@ TEST_CASE("Test Token Type Match") {
         tokens = {{TokenType::REGISTER, "reg"}, {TokenType::REGISTER, "reg2"}};
         REQUIRE(tokenTypeMatch(pattern, tokens));
 
-        pattern = {TokenType::REGISTER, TokenType::LABELREF, TokenType::IMMEDIATE};
+        pattern = {TokenType::REGISTER, TokenType::LABEL_REF, TokenType::IMMEDIATE};
         tokens = {{TokenType::REGISTER, "reg"},
-                  {TokenType::LABELREF, "label"},
+                  {TokenType::LABEL_REF, "label"},
                   {TokenType::IMMEDIATE, "42"}};
         REQUIRE(tokenTypeMatch(pattern, tokens));
     }
@@ -153,11 +153,11 @@ TEST_CASE("Test Token Type Match") {
         REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
 
         pattern = {TokenType::REGISTER};
-        tokens = {{TokenType::LABELREF, "label"}};
+        tokens = {{TokenType::LABEL_REF, "label"}};
         REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
 
         pattern = {TokenType::REGISTER};
-        tokens = {{TokenType::REGISTER, "reg"}, {TokenType::LABELREF, "label"}};
+        tokens = {{TokenType::REGISTER, "reg"}, {TokenType::LABEL_REF, "label"}};
         REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
     }
 }

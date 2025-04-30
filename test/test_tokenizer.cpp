@@ -67,26 +67,26 @@ TEST_CASE("Test Tokenize Single Tokens") {
     SECTION("Test Directive") {
         const std::vector<std::string> lines = {".asciiz"};
         std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::DIRECTIVE, "asciiz"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::ALLOC_DIRECTIVE, "asciiz"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Memory Directive") {
         const std::vector<std::string> lines = {".data"};
         std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::MEMDIRECTIVE, "data"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::SEC_DIRECTIVE, "data"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Label Declaration") {
         const std::vector<std::string> lines = {"label:"};
         std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::LABEL, "label"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::LABEL_DEF, "label"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Label Reference") {
         const std::vector<std::string> lines = {"j label"};
         std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
         std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenType::INSTRUCTION, "j"}, {TokenType::LABELREF, "label"}}};
+                {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "label"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
     SECTION("Test Instruction") {

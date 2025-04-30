@@ -16,9 +16,10 @@
 /**
  * An array storing the names of memory directives
  */
-constexpr std::array<const char*, 12> tokenTypeNames = {
-        "UNKNOWN",  "MEMDIRECTIVE", "DIRECTIVE", "LABEL",      "LABELREF",    "INSTRUCTION",
-        "REGISTER", "IMMEDIATE",    "SEPERATOR", "OPEN_PAREN", "CLOSE_PAREN", "STRING",
+constexpr std::array<const char*, 13> tokenTypeNames = {
+        "UNKNOWN",    "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",
+        "LABEL_REF",  "INSTRUCTION",   "REGISTER",        "IMMEDIATE",      "SEPERATOR",
+        "OPEN_PAREN", "CLOSE_PAREN",   "STRING",
 };
 
 
@@ -130,11 +131,11 @@ void Tokenizer::mangleLabels(std::map<std::string, std::vector<std::vector<Token
 void Tokenizer::mangleLabelsInLine(std::vector<std::string>& availableLabels,
                                    std::vector<Token>& lineTokens, const std::string& fileId) {
     for (Token& lineToken : lineTokens) {
-        if (lineToken.type != TokenType::LABEL && lineToken.type != TokenType::LABELREF)
+        if (lineToken.type != TokenType::LABEL_DEF && lineToken.type != TokenType::LABEL_REF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
-        if (lineToken.type == TokenType::LABEL)
+        if (lineToken.type == TokenType::LABEL_DEF)
             std::erase(availableLabels, lineToken.value);
 
         // If the label is not a global, mangle it
@@ -145,7 +146,7 @@ void Tokenizer::mangleLabelsInLine(std::vector<std::string>& availableLabels,
 
 
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
-    std::array<std::string, 2> memDirectives = {"data", "text"};
+    std::array<std::string, 2> secDirectives = {"data", "text"};
     const std::string globlDirective = "globl";
     // If the last token was a global directive and a label is needed
     bool needsGlobl = false;
@@ -183,13 +184,13 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         if (isspace(c) || c == ',' || c == ':' || c == '(' || c == ')') {
             // Assign the current token as a label definition if a colon follows
             if (c == ':')
-                currentType = TokenType::LABEL;
+                currentType = TokenType::LABEL_DEF;
 
             // Reassign directive as memory directive if directive is data, text, etc.
-            if (currentType == TokenType::DIRECTIVE &&
-                std::ranges::find(memDirectives, currentToken) != memDirectives.end())
-                currentType = TokenType::MEMDIRECTIVE;
-            else if (currentType == TokenType::DIRECTIVE && currentToken == globlDirective) {
+            if (currentType == TokenType::ALLOC_DIRECTIVE &&
+                std::ranges::find(secDirectives, currentToken) != secDirectives.end())
+                currentType = TokenType::SEC_DIRECTIVE;
+            else if (currentType == TokenType::ALLOC_DIRECTIVE && currentToken == globlDirective) {
                 needsGlobl = true;
                 currentToken.clear();
                 currentType = TokenType::UNKNOWN;
@@ -225,7 +226,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         }
         // A preceding dot marks the token as a directive
         if (c == '.' && currentType == TokenType::UNKNOWN) {
-            currentType = TokenType::DIRECTIVE;
+            currentType = TokenType::ALLOC_DIRECTIVE;
             continue;
         }
         // A preceding dollar sign marks the token as a register
@@ -250,7 +251,7 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             if (tokenLine.empty())
                 currentType = TokenType::INSTRUCTION;
             else
-                currentType = TokenType::LABELREF;
+                currentType = TokenType::LABEL_REF;
         }
 
         // Accumulate character into the current token

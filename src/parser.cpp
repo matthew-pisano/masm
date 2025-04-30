@@ -47,13 +47,13 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection,
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
     switch (firstToken.type) {
-        case TokenType::MEMDIRECTIVE: {
+        case TokenType::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
             if (!layout.contains(currSection))
                 layout[currSection] = {};
             break;
         }
-        case TokenType::DIRECTIVE: {
+        case TokenType::ALLOC_DIRECTIVE: {
             std::vector<std::byte> directiveBytes = parseDirective(firstToken, args);
             layout[currSection].insert(layout[currSection].end(), directiveBytes.begin(),
                                        directiveBytes.end());
@@ -65,7 +65,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection,
                                        instrBytes.end());
             break;
         }
-        case TokenType::LABEL:
+        case TokenType::LABEL_DEF:
             break;
         default:
             throw std::runtime_error("Encountered unexpected token " + firstToken.value);
@@ -356,7 +356,7 @@ void Parser::validateInstruction(const Token& instruction, const std::vector<Tok
                                          instruction.value);
             break;
         case InstructionType::J_TYPE_L:
-            if (!tokenTypeMatch({TokenType::LABELREF}, args))
+            if (!tokenTypeMatch({TokenType::LABEL_REF}, args))
                 throw std::runtime_error("Invalid format for J-Type instruction " +
                                          instruction.value);
             break;
@@ -380,16 +380,16 @@ void Parser::validatePseudoInstruction(const Token& instruction, const std::vect
         !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "la" &&
-        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "lui" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
-        !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABELREF}, args))
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
                 branchZeroPseudoInstrs.end() &&
-        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABELREF}, args))
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }
