@@ -63,4 +63,19 @@ bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Tok
  */
 std::vector<std::byte> i32ToBEByte(uint32_t i32);
 
+/**
+ * Converts a 32-bit float to a vector of bytes in big-endian order
+ * @param f32 The 32-bit float to convert
+ * @return A vector of bytes representing the float in big-endian order
+ */
+std::vector<std::byte> f32ToBEByte(float f32);
+
+
+/**
+ * Converts a 64-bit float to a vector of bytes in big-endian order
+ * @param f64 The 64-bit float to convert
+ * @return A vector of bytes representing the float in big-endian order
+ */
+std::vector<std::byte> f64ToBEByte(double f64);
+
 #endif // UTILS_H

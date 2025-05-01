@@ -161,3 +161,67 @@ TEST_CASE("Test Token Type Match") {
         REQUIRE_FALSE(tokenTypeMatch(pattern, tokens));
     }
 }
+
+
+TEST_CASE("Test i32 to Bytes") {
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                 std::byte{0x00}};
+    std::vector<std::byte> actualBytes = i32ToBEByte(0);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x01}};
+    actualBytes = i32ToBEByte(1);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x00}, std::byte{0x05}, std::byte{0x7c}, std::byte{0x3a}};
+    actualBytes = i32ToBEByte(359482);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0xff}, std::byte{0xff}, std::byte{0xff}, std::byte{0xff}};
+    actualBytes = i32ToBEByte(-1);
+    REQUIRE(expectedBytes == actualBytes);
+}
+
+
+TEST_CASE("Test f32 to Bytes") {
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                 std::byte{0x00}};
+    std::vector<std::byte> actualBytes = f32ToBEByte(0.0f);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x3f}, std::byte{0x80}, std::byte{0x00}, std::byte{0x00}};
+    actualBytes = f32ToBEByte(1.0f);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x41}, std::byte{0x24}, std::byte{0x00}, std::byte{0x00}};
+    actualBytes = f32ToBEByte(10.25f);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0xbf}, std::byte{0xc5}, std::byte{0x1e}, std::byte{0xb8}};
+    actualBytes = f32ToBEByte(-1.54f);
+    REQUIRE(expectedBytes == actualBytes);
+}
+
+
+TEST_CASE("Test Double to Bytes") {
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                 std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                 std::byte{0x00}, std::byte{0x00}};
+    std::vector<std::byte> actualBytes = f64ToBEByte(0.0);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x3f}, std::byte{0xf8}, std::byte{0x00}, std::byte{0x00},
+                     std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
+    actualBytes = f64ToBEByte(1.5);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0x40}, std::byte{0x24}, std::byte{0x80}, std::byte{0x00},
+                     std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
+    actualBytes = f64ToBEByte(10.25);
+    REQUIRE(expectedBytes == actualBytes);
+
+    expectedBytes = {std::byte{0xbf}, std::byte{0xf8}, std::byte{0xa3}, std::byte{0xd7},
+                     std::byte{0x0a}, std::byte{0x3d}, std::byte{0x70}, std::byte{0xa4}};
+    actualBytes = f64ToBEByte(-1.54);
+    REQUIRE(expectedBytes == actualBytes);
+}
