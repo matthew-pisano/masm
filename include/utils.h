@@ -20,13 +20,20 @@ bool isSignedInteger(const std::string& str);
 
 
 /**
+ * Escapes a string by replacing escape sequences with their corresponding characters
+ * @param string The string to escape
+ * @return The escaped string
+ */
+std::string escapeString(const std::string& string);
+
+
+/**
  * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
  * @param string The string to convert
  * @param nullTerminate Whether to null terminate the string
- * @param escape Whether to escape the string
  * @return The vector of bytes representing the string
  */
-std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate, bool escape);
+std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
 
 
 /**

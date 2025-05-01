@@ -5,39 +5,55 @@
 #include "utils.h"
 #include <regex>
 
+
 bool isSignedInteger(const std::string& str) {
     const std::regex pattern("^[-]?[0-9]+$");
     return std::regex_match(str, pattern);
 }
 
 
-std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate,
-                                     const bool escape) {
-    std::vector<std::byte> bytes = {};
+std::string escapeString(const std::string& string) {
+    std::string escapedString;
     bool toEscape = false;
     for (const char c : string) {
-        if (escape && !toEscape && c == '\\') {
+        if (!toEscape && c == '\\') {
             toEscape = true;
             continue;
         }
 
         if (toEscape) {
             if (c == 'n')
-                bytes.push_back(static_cast<std::byte>('\n'));
+                escapedString += '\n';
+            else if (c == 'r')
+                escapedString += '\r';
+            else if (c == 'b')
+                escapedString += '\b';
+            else if (c == 'f')
+                escapedString += '\f';
+            else if (c == 'a')
+                escapedString += '\a';
+            else if (c == 'v')
+                escapedString += '\v';
             else if (c == 't')
-                bytes.push_back(static_cast<std::byte>('\t'));
-            else if (c == '\\')
-                bytes.push_back(static_cast<std::byte>(c));
-            else if (c == '"')
-                bytes.push_back(static_cast<std::byte>(c));
+                escapedString += '\t';
+            else if (c == '\\' || c == '"')
+                escapedString += c;
             else
                 throw std::runtime_error("Invalid escape sequence \\" + std::string(1, c));
             toEscape = false;
             continue;
         }
 
-        bytes.push_back(static_cast<std::byte>(c));
+        escapedString += c;
     }
+    return escapedString;
+}
+
+
+std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate) {
+    std::vector<std::byte> bytes = {};
+    for (const char c : string)
+        bytes.push_back(static_cast<std::byte>(c));
     if (nullTerminate)
         bytes.push_back(static_cast<std::byte>(0));
     return bytes;
