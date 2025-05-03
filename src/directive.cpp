@@ -23,7 +23,8 @@ std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
             throw std::runtime_error(dirName + " directive expects exactly one argument");
         if (args[0].type != TokenType::STRING)
             throw std::runtime_error(dirName + " directive expects a string argument");
-        return stringToBytes(args[0].value, dirName == "asciiz", true);
+        std::string escapedString = escapeString(args[0].value);
+        return stringToBytes(escapedString, dirName == "asciiz");
     }
     // Return a word for each argument given
     if (dirName == "word") {
@@ -49,4 +50,45 @@ std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
     }
 
     throw std::runtime_error("Unsupported directive " + dirName);
+}
+
+
+std::vector<std::byte> parseAllocBlock(const uint32_t loc, const int blockSize,
+                                       const int blockAlign) {
+    const uint32_t padding = blockAlign - (loc % blockAlign); // Pad to nearest multiple
+    std::vector bytes(padding + blockSize, std::byte{0});
+    return bytes;
+}
+
+
+void populateMemBlock(std::vector<std::byte>& block, const std::string& string,
+                      const bool nullTerminate) {
+    const std::vector<std::byte> bytes = stringToBytes(string, nullTerminate);
+    if (block.size() < bytes.size())
+        throw std::runtime_error("Block size is too small to hold string");
+    block = bytes;
+}
+
+
+void populateMemBlock(std::vector<std::byte>& block, const int integer) {
+    const std::vector<std::byte> bytes = i32ToBEByte(integer);
+    if (block.size() < bytes.size())
+        throw std::runtime_error("Block size is too small to hold integer");
+    block = bytes;
+}
+
+
+void populateMemBlock(std::vector<std::byte>& block, const float decimal) {
+    const std::vector<std::byte> bytes = f32ToBEByte(decimal);
+    if (block.size() < bytes.size())
+        throw std::runtime_error("Block size is too small to hold float");
+    block = bytes;
+}
+
+
+void populateMemBlock(std::vector<std::byte>& block, const double decimal) {
+    const std::vector<std::byte> bytes = f64ToBEByte(decimal);
+    if (block.size() < bytes.size())
+        throw std::runtime_error("Block size is too small to hold double");
+    block = bytes;
 }

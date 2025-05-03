@@ -24,11 +24,12 @@ std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
 
 /**
  * Allocates a block of memory of the given size, aligned to a multiple of the given value
+ * @param loc The location in which the block will be placed into memory
  * @param blockSize The size of the block to allocate
  * @param blockAlign The alignment of the block
  * @return The memory allocation associated with the block
  */
-std::vector<std::byte> parseAllocBlock(int blockSize, int blockAlign);
+std::vector<std::byte> parseAllocBlock(uint32_t loc, int blockSize, int blockAlign);
 
 
 /**
