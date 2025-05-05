@@ -99,24 +99,6 @@ class Parser {
                                                         bool checkLt, bool checkEq);
 
     /**
-     * Ensures that the arguments of an instruction match an expected pattern of token types
-     * @param instruction The instruction token
-     * @param args A list of arguments following the given instruction
-     * @throw runtime_error when the arguments for an instruction do not match its accepted values
-     */
-    static void validateInstruction(const Token& instruction, const std::vector<Token>& args);
-
-
-    /**
-     * Ensures that the arguments of a pseudo instruction match an expected pattern of token types
-     * @param instruction The pseudo instruction token
-     * @param args A list of arguments following the given pseudo instruction
-     * @throw runtime_error when the arguments for a pseudo instruction do not match its accepted
-     * values
-     */
-    static void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args);
-
-    /**
      * Parse a single line of tokens into memory allocations
      * @param layout The memory layout to populate
      * @param currSection The current section of memory being populated
