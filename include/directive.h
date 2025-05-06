@@ -10,6 +10,15 @@
 
 #include "tokenizer.h"
 
+
+/**
+ * Validates the arguments of a directive to ensure they match the expected pattern
+ * @param dirToken The token for the directive
+ * @param args Any argument tokens to pass to the directive
+ * @throw runtime_error When the arguments for a directive are malformed
+ */
+void validateAllocDirective(const Token& dirToken, const std::vector<Token>& args);
+
 /**
  * Parses a directive and its arguments into bytes that can be allocated to memory
  * @param loc The location in which the directive will be placed into memory
@@ -29,7 +38,7 @@ std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
  * @param blockAlign The alignment of the block
  * @return The memory allocation associated with the block
  */
-std::vector<std::byte> parseAllocBlock(uint32_t loc, int blockSize, int blockAlign);
+std::vector<std::byte> parseAllocBlock(uint32_t loc, size_t blockSize, uint32_t blockAlign);
 
 
 /**

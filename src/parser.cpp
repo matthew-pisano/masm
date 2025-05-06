@@ -76,10 +76,11 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection,
 
 std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
                                                 std::vector<Token>& args) {
-    RegisterFile regFile{};
 
     // Throw error if pattern for instruction is invalid
     validateInstruction(instrToken, args);
+
+    RegisterFile regFile{};
 
     // Resolve label references to their computed address values
     labelMap.resolveLabels(args);
