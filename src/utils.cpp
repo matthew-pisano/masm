@@ -12,6 +12,12 @@ bool isSignedInteger(const std::string& str) {
 }
 
 
+bool isSignedFloat(const std::string& str) {
+    const std::regex pattern("^[-]?[0-9]+(\\.[0-9]*)?$");
+    return std::regex_match(str, pattern);
+}
+
+
 std::string escapeString(const std::string& string) {
     std::string escapedString;
     bool toEscape = false;
@@ -113,6 +119,15 @@ std::vector<std::byte> i32ToBEByte(const uint32_t i32) {
 }
 
 
+std::vector<std::byte> i16ToBEByte(const uint16_t i16) {
+    // Break the instruction into 2 bytes (big-endian)
+    std::vector<std::byte> bytes(2);
+    bytes[0] = static_cast<std::byte>(i16 >> 8 & 0xFF); // Most significant byte
+    bytes[1] = static_cast<std::byte>(i16 & 0xFF); // Least significant byte
+    return bytes;
+}
+
+
 std::vector<std::byte> f32ToBEByte(float f32) {
     const uint32_t i32 = *reinterpret_cast<uint32_t*>(&f32);
     return i32ToBEByte(i32);
@@ -121,7 +136,7 @@ std::vector<std::byte> f32ToBEByte(float f32) {
 
 std::vector<std::byte> f64ToBEByte(double f64) {
     const uint64_t i64 = *reinterpret_cast<uint64_t*>(&f64);
-    std::vector<std::byte> upperBytes = i32ToBEByte(i64 >> 32);
+    std::vector<std::byte> upperBytes = i32ToBEByte(i64 >> 32 & 0xFFFFFFFF);
     std::vector<std::byte> lowerBytes = i32ToBEByte(i64 & 0xFFFFFFFF);
     upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
     return upperBytes;

@@ -20,6 +20,14 @@ bool isSignedInteger(const std::string& str);
 
 
 /**
+ * Checks if a string is a value signed float
+ * @param str The string to check
+ * @return True if the string is a signed float, false otherwise
+ */
+bool isSignedFloat(const std::string& str);
+
+
+/**
  * Escapes a string by replacing escape sequences with their corresponding characters
  * @param string The string to escape
  * @return The escaped string
@@ -69,6 +77,14 @@ bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Tok
  * @return A vector of bytes representing the integer in big-endian order
  */
 std::vector<std::byte> i32ToBEByte(uint32_t i32);
+
+
+/**
+ * Converts a 16-bit integer to a vector of bytes in big-endian order
+ * @param i16 The 16-bit integer to convert
+ * @return A vector of bytes representing the integer in big-endian order
+ */
+std::vector<std::byte> i16ToBEByte(uint16_t i16);
 
 /**
  * Converts a 32-bit float to a vector of bytes in big-endian order

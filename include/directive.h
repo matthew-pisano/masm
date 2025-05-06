@@ -51,12 +51,28 @@ void populateMemBlock(std::vector<std::byte>& block, const std::string& string, 
 
 
 /**
- * Populates a given vector of bytes with the given integer
+ * Populates the given byte with the given byte
+ * @param block The byte to populate
+ * @param integer The integer to populate the byte with
+ */
+void populateMemBlock(std::byte& block, uint8_t integer);
+
+
+/**
+ * Populates a given vector of bytes with the given half word
  * @param block The vector of bytes to populate
  * @param integer The integer to populate the vector with
- * @throw runtime_error When the integer is out of range for the bytes within the fector
  */
-void populateMemBlock(std::vector<std::byte>& block, int integer);
+void populateMemBlock(std::vector<std::byte>& block, uint16_t integer);
+
+
+/**
+ * Populates a given vector of bytes with the given word
+ * @param block The vector of bytes to populate
+ * @param integer The integer to populate the vector with
+ * @throw runtime_error When the integer is out of range for the bytes within the vector
+ */
+void populateMemBlock(std::vector<std::byte>& block, uint32_t integer);
 
 
 /**
