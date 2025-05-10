@@ -131,28 +131,6 @@ TEST_CASE("Test Tokenize Single Lines") {
         REQUIRE(expectedTokens == actualTokens);
     }
 
-    SECTION("Test Parentheses") {
-        std::vector<std::string> lines = {"lw $t1, 8($t0)"};
-        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenizeFile(lines);
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
-                                                           {TokenType::REGISTER, "t1"},
-                                                           {TokenType::SEPERATOR, ","},
-                                                           {TokenType::REGISTER, "t0"},
-                                                           {TokenType::SEPERATOR, ","},
-                                                           {TokenType::IMMEDIATE, "8"}}};
-        REQUIRE(expectedTokens == actualTokens);
-
-        lines = {"lw $t1, ($t0)"};
-        actualTokens = tokenizer.tokenizeFile(lines);
-        expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
-                           {TokenType::REGISTER, "t1"},
-                           {TokenType::SEPERATOR, ","},
-                           {TokenType::REGISTER, "t0"},
-                           {TokenType::SEPERATOR, ","},
-                           {TokenType::IMMEDIATE, "0"}}};
-        REQUIRE(expectedTokens == actualTokens);
-    }
-
     SECTION("Test Globl") {
         std::vector<std::string> lines = {".globl label"};
         std::vector<std::vector<Token>> actualTokens = tokenizer.tokenizeFile(lines);
@@ -182,6 +160,30 @@ TEST_CASE("Test Tokenize Invalid Syntax") {
         const std::vector<std::string> lines = {R"(unterminated: .asciiz "incomplet)"};
         REQUIRE_THROWS_AS(tokenizer.tokenize({lines}), std::runtime_error);
     }
+}
+
+
+TEST_CASE("Test Base Addressing") {
+    Tokenizer tokenizer{};
+    std::vector<std::string> lines = {"lw $t1, 8($t0)"};
+    std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
+    std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
+                                                       {TokenType::REGISTER, "t1"},
+                                                       {TokenType::SEPERATOR, ","},
+                                                       {TokenType::REGISTER, "t0"},
+                                                       {TokenType::SEPERATOR, ","},
+                                                       {TokenType::IMMEDIATE, "8"}}};
+    REQUIRE(expectedTokens == actualTokens);
+
+    lines = {"lw $t1, ($t0)"};
+    actualTokens = tokenizer.tokenize({lines});
+    expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
+                       {TokenType::REGISTER, "t1"},
+                       {TokenType::SEPERATOR, ","},
+                       {TokenType::REGISTER, "t0"},
+                       {TokenType::SEPERATOR, ","},
+                       {TokenType::IMMEDIATE, "0"}}};
+    REQUIRE(expectedTokens == actualTokens);
 }
 
 

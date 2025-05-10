@@ -40,6 +40,13 @@ public:
     static void replaceEqv(std::vector<std::vector<Token>>& tokenizedFile);
 
     /**
+     * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
+     * addressing mode when a close paren is reached
+     * @param tokenizedFile The tokenized file to replace base addressing syntax in
+     */
+    static void processBaseAddressing(std::vector<std::vector<Token>>& tokenizedFile);
+
+    /**
      * Name mangels tokens in the given program map by adding the file ID to the label
      * @param programMap The map of file IDs to their tokenized lines
      * @throw runtime_error When the file ID is empty

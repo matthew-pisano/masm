@@ -68,13 +68,6 @@ class Tokenizer {
     const static std::array<std::string, 4> metaDirectives;
 
     /**
-     * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
-     * addressing mode when a close paren is reached
-     * @param tokenLine The line of tokens to modify
-     */
-    static void processCloseParen(std::vector<Token>& tokenLine);
-
-    /**
      * A helper function that terminates the current token and starts a new one
      * @param c The character that terminated the token
      * @param currentType The type of the current token
@@ -103,12 +96,12 @@ public:
 
     /**
      * Tokenizes incoming source code lines from multiple files into parsable tokens
-     * @param rawFilesLines The lines of source code to tokenize
+     * @param rawFiles The lines of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
     [[nodiscard]] static std::vector<std::vector<Token>>
-    tokenize(const std::vector<std::vector<std::string>>& rawFilesLines);
+    tokenize(const std::vector<std::vector<std::string>>& rawFiles);
 };
 
 #endif // TOKENIZER_H

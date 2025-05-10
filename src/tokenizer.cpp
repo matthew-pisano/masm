@@ -41,12 +41,13 @@ const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "m
 
 
 std::vector<std::vector<Token>>
-Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFilesLines) {
+Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
     Postprocessor postprocessor;
-    for (int i = 0; i < rawFilesLines.size(); ++i) {
-        std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFilesLines[i]);
+    for (int i = 0; i < rawFiles.size(); ++i) {
+        std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFiles[i]);
         postprocessor.replaceEqv(fileTokens);
+        postprocessor.processBaseAddressing(fileTokens);
         programMap["masm_mangle_file_" + std::to_string(i)] = fileTokens;
     }
 
@@ -86,36 +87,6 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeFile(const std::vector<std::s
     }
 
     return tokenizedFile;
-}
-
-
-void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
-    const auto openParen = std::ranges::find(tokenLine, Token{TokenType::OPEN_PAREN, "("});
-    // Ensure there is space before and after the open paren
-    if (openParen == tokenLine.begin() || openParen == tokenLine.end())
-        throw std::runtime_error("Malformed parenthesis expression");
-    if (tokenLine.size() < 3)
-        throw std::runtime_error("Malformed parenthesis expression");
-    // A vector containing the last three elements of tokenLine
-    std::vector<Token> lastThree = {};
-    while (lastThree.size() < 3) {
-        lastThree.insert(lastThree.begin(), tokenLine.back());
-        tokenLine.pop_back();
-    }
-
-    // Insert 0 when no immediate value precedes parentheses
-    if (lastThree[0].type != TokenType::IMMEDIATE) {
-        tokenLine.push_back(lastThree[0]);
-        lastThree[0] = {TokenType::IMMEDIATE, "0"};
-    }
-
-    if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::OPEN_PAREN, TokenType::REGISTER},
-                        lastThree))
-        throw std::runtime_error("Malformed parenthesis expression");
-    // Replace with target pattern
-    tokenLine.push_back(lastThree[2]);
-    tokenLine.push_back({TokenType::SEPERATOR, ","});
-    tokenLine.push_back(lastThree[0]);
 }
 
 
@@ -229,5 +200,5 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
     else if (c == '(')
         tokenLine.push_back({TokenType::OPEN_PAREN, "("});
     else if (c == ')')
-        processCloseParen(tokenLine);
+        tokenLine.push_back({TokenType::CLOSE_PAREN, ")"});
 }

@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include "utils.h"
+
 
 void Postprocessor::mangleLabels(
         std::map<std::string, std::vector<std::vector<Token>>>& programMap) {
@@ -93,5 +95,43 @@ void Postprocessor::replaceEqv(std::vector<std::vector<Token>>& tokenizedFile) {
                 j += it->second.size() - 1;
             }
         }
+    }
+}
+
+
+void Postprocessor::processBaseAddressing(std::vector<std::vector<Token>>& tokenizedFile) {
+    for (std::vector<Token>& tokenLine : tokenizedFile) {
+        // Skip instances or parens outside of instructions
+        if (tokenLine[0].type != TokenType::INSTRUCTION ||
+            tokenLine[tokenLine.size() - 1].type != TokenType::CLOSE_PAREN)
+            continue;
+
+        const auto openParen = std::ranges::find(tokenLine, Token{TokenType::OPEN_PAREN, "("});
+        // Ensure there is space before and after the open paren
+        if (openParen == tokenLine.begin() || openParen == tokenLine.end())
+            throw std::runtime_error("Malformed parenthesis expression");
+        if (tokenLine.size() < 4)
+            throw std::runtime_error("Malformed parenthesis expression");
+        // A vector containing the last three elements of tokenLine
+        std::vector<Token> lastFour = {};
+        while (lastFour.size() < 4) {
+            lastFour.insert(lastFour.begin(), tokenLine.back());
+            tokenLine.pop_back();
+        }
+
+        // Insert 0 when no immediate value precedes parentheses
+        if (lastFour[0].type != TokenType::IMMEDIATE) {
+            tokenLine.push_back(lastFour[0]);
+            lastFour[0] = {TokenType::IMMEDIATE, "0"};
+        }
+
+        if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::OPEN_PAREN, TokenType::REGISTER,
+                             TokenType::CLOSE_PAREN},
+                            lastFour))
+            throw std::runtime_error("Malformed parenthesis expression");
+        // Replace with target pattern
+        tokenLine.push_back(lastFour[2]);
+        tokenLine.push_back({TokenType::SEPERATOR, ","});
+        tokenLine.push_back(lastFour[0]);
     }
 }
