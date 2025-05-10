@@ -118,7 +118,7 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
     std::array<std::string, 2> secDirectives = {"data", "text"};
     std::array<std::string, 4> metaDirectives = {"globl", "eqv", "macro", "end_macro"};
-    Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
+    const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
@@ -141,6 +141,14 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             }
 
             prevChar = c;
+            continue;
+        }
+
+        // Begin a string at an open quote
+        if (c == '"') {
+            currentType = TokenType::STRING;
+            if (!currentToken.empty())
+                throw std::runtime_error("Unexpected token " + currentToken);
             continue;
         }
 
@@ -186,40 +194,34 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
                 processCloseParen(tokenLine);
             continue;
         }
+
+        if (currentType != TokenType::UNKNOWN) {
+            // Accumulate character into the current token
+            currentToken += c;
+        }
+
         // A preceding dot marks the token as a directive
-        if (c == '.' && currentType == TokenType::UNKNOWN) {
+        else if (c == '.') {
             currentType = TokenType::ALLOC_DIRECTIVE;
-            continue;
         }
         // A preceding dollar sign marks the token as a register
-        if (c == '$' && currentType == TokenType::UNKNOWN) {
+        else if (c == '$') {
             currentType = TokenType::REGISTER;
-            continue;
-        }
-        // Begin a string at an open quote
-        if (c == '"') {
-            currentType = TokenType::STRING;
-            continue;
         }
 
         // Handle Immediates, Instructions, and Label references
-        if ((currentType == TokenType::UNKNOWN || currentType == TokenType::IMMEDIATE) &&
-            (isdigit(c) || (c == '-' && currentToken.empty()) ||
-             (c == '.' && !currentToken.empty()))) {
+        else if (isdigit(c) || c == '-') {
             currentType = TokenType::IMMEDIATE;
-        } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
-                   isalpha(c)) {
+            currentToken += c;
+        } else {
             // Set first token in line as an instruction, otherwise as a label reference
             // If the third token in an eqv directive line, also set as instruction
             if (tokenLine.empty() || (tokenLine.size() == 2 && tokenLine[0] == eqvToken))
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABEL_REF;
+            currentToken += c;
         }
-
-        // Accumulate character into the current token
-        currentToken += c;
-        prevChar = c;
     }
 
     if (!currentToken.empty())
