@@ -36,6 +36,10 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
+const std::array<std::string, 2> Tokenizer::secDirectives = {"data", "text"};
+const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro"};
+
+
 std::vector<std::vector<Token>>
 Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFilesLines) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
@@ -116,8 +120,6 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 
 
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
-    std::array<std::string, 2> secDirectives = {"data", "text"};
-    std::array<std::string, 4> metaDirectives = {"globl", "eqv", "macro", "end_macro"};
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
     std::vector<std::vector<Token>> tokens = {{}};
@@ -141,65 +143,26 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             }
 
             prevChar = c;
-            continue;
         }
-
         // Begin a string at an open quote
-        if (c == '"') {
+        else if (c == '"') {
             currentType = TokenType::STRING;
             if (!currentToken.empty())
                 throw std::runtime_error("Unexpected token " + currentToken);
-            continue;
         }
-
         // Skip remainder of line when reaching a comment
-        if (c == '#') {
+        else if (c == '#') {
             break;
         }
-
         // When reaching a natural token terminator
-        if (isspace(c) || c == ',' || c == ':' || c == '(' || c == ')') {
-            // Assign the current token as a label definition if a colon follows
-            if (c == ':')
-                currentType = TokenType::LABEL_DEF;
-
-            // Reassign directive as section directive if directive is data, text, etc.
-            if (currentType == TokenType::ALLOC_DIRECTIVE &&
-                std::ranges::find(secDirectives, currentToken) != secDirectives.end())
-                currentType = TokenType::SEC_DIRECTIVE;
-            // Reassign directive as meta directive if directive is .globl, .macro, etc.
-            else if (currentType == TokenType::ALLOC_DIRECTIVE &&
-                     std::ranges::find(metaDirectives, currentToken) != metaDirectives.end())
-                currentType = TokenType::META_DIRECTIVE;
-
-            // Correct for labels put at beginning of line
-            if (currentType == TokenType::INSTRUCTION && !isInstruction(currentToken))
-                currentType = TokenType::LABEL_REF;
-
-            // Add the current token to the vector and reset
-            if (!currentToken.empty()) {
-                tokenLine.push_back({currentType, currentToken});
-                currentToken.clear();
-                currentType = TokenType::UNKNOWN;
-            }
-
-            // Start a new line if a label was given
-            if (c == ':')
-                tokens.emplace_back();
-            else if (c == ',')
-                tokenLine.push_back({TokenType::SEPERATOR, ","});
-            else if (c == '(')
-                tokenLine.push_back({TokenType::OPEN_PAREN, "("});
-            else if (c == ')')
-                processCloseParen(tokenLine);
-            continue;
+        else if (isspace(c) || c == ',' || c == ':' || c == '(' || c == ')') {
+            terminateToken(c, currentType, currentToken, tokens);
         }
-
-        if (currentType != TokenType::UNKNOWN) {
+        // When the token type has already been decided
+        else if (currentType != TokenType::UNKNOWN) {
             // Accumulate character into the current token
             currentToken += c;
         }
-
         // A preceding dot marks the token as a directive
         else if (c == '.') {
             currentType = TokenType::ALLOC_DIRECTIVE;
@@ -208,7 +171,6 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         else if (c == '$') {
             currentType = TokenType::REGISTER;
         }
-
         // Handle Immediates, Instructions, and Label references
         else if (isdigit(c) || c == '-') {
             currentType = TokenType::IMMEDIATE;
@@ -228,4 +190,44 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
 
     return tokens;
+}
+
+
+void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string& currentToken,
+                               std::vector<std::vector<Token>>& tokens) {
+    std::vector<Token>& tokenLine = tokens[tokens.size() - 1];
+
+    // Assign the current token as a label definition if a colon follows
+    if (c == ':')
+        currentType = TokenType::LABEL_DEF;
+
+    // Reassign directive as section directive if directive is data, text, etc.
+    if (currentType == TokenType::ALLOC_DIRECTIVE &&
+        std::ranges::find(secDirectives, currentToken) != secDirectives.end())
+        currentType = TokenType::SEC_DIRECTIVE;
+    // Reassign directive as meta directive if directive is .globl, .macro, etc.
+    else if (currentType == TokenType::ALLOC_DIRECTIVE &&
+             std::ranges::find(metaDirectives, currentToken) != metaDirectives.end())
+        currentType = TokenType::META_DIRECTIVE;
+
+    // Correct for labels put at beginning of line
+    if (currentType == TokenType::INSTRUCTION && !isInstruction(currentToken))
+        currentType = TokenType::LABEL_REF;
+
+    // Add the current token to the vector and reset
+    if (!currentToken.empty()) {
+        tokenLine.push_back({currentType, currentToken});
+        currentToken.clear();
+        currentType = TokenType::UNKNOWN;
+    }
+
+    // Start a new line if a label was given
+    if (c == ':')
+        tokens.emplace_back();
+    else if (c == ',')
+        tokenLine.push_back({TokenType::SEPERATOR, ","});
+    else if (c == '(')
+        tokenLine.push_back({TokenType::OPEN_PAREN, "("});
+    else if (c == ')')
+        processCloseParen(tokenLine);
 }

@@ -5,6 +5,7 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
@@ -63,12 +64,25 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
  */
 class Tokenizer {
 
+    const static std::array<std::string, 2> secDirectives;
+    const static std::array<std::string, 4> metaDirectives;
+
     /**
      * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
      * addressing mode when a close paren is reached
      * @param tokenLine The line of tokens to modify
      */
     static void processCloseParen(std::vector<Token>& tokenLine);
+
+    /**
+     * A helper function that terminates the current token and starts a new one
+     * @param c The character that terminated the token
+     * @param currentType The type of the current token
+     * @param currentToken The current token to terminate
+     * @param tokens The vector of tokens to add the current token to
+     */
+    static void terminateToken(char c, TokenType& currentType, std::string& currentToken,
+                               std::vector<std::vector<Token>>& tokens);
 
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
