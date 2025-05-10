@@ -93,6 +93,78 @@ TEST_CASE("Test Directive Allocation") {
                                      {Token{TokenType::IMMEDIATE, "3"}});
         REQUIRE(expected == actual);
     }
+
+    SECTION("Test Ascii") {
+        std::vector<std::byte> expected = {};
+        std::vector<std::byte> actual = parseAllocDirective(
+                1, Token{TokenType::ALLOC_DIRECTIVE, "ascii"}, {Token{TokenType::STRING, ""}});
+        REQUIRE(expected == actual);
+
+        expected = intVec2ByteVec({'h', 'e', 'l', 'l', 'o'});
+        actual = parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "ascii"},
+                                     {Token{TokenType::STRING, "hello"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Asciiz") {
+        std::vector<std::byte> expected = intVec2ByteVec({0});
+        std::vector<std::byte> actual = parseAllocDirective(
+                1, Token{TokenType::ALLOC_DIRECTIVE, "asciiz"}, {Token{TokenType::STRING, ""}});
+        REQUIRE(expected == actual);
+
+        expected = intVec2ByteVec({'h', 'e', 'l', 'l', 'o', 0});
+        actual = parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "asciiz"},
+                                     {Token{TokenType::STRING, "hello"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Byte") {
+        std::vector<std::byte> expected = intVec2ByteVec({69});
+        std::vector<std::byte> actual = parseAllocDirective(
+                1, Token{TokenType::ALLOC_DIRECTIVE, "byte"}, {Token{TokenType::IMMEDIATE, "69"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Double") {
+        std::vector<std::byte> expected =
+                intVec2ByteVec({0x00, 0x00, 0x00, 0xbf, 0xf8, 0xa3, 0xd7, 0x0a, 0x3d, 0x70, 0xa4});
+        std::vector<std::byte> actual =
+                parseAllocDirective(5, Token{TokenType::ALLOC_DIRECTIVE, "double"},
+                                    {Token{TokenType::IMMEDIATE, "-1.54"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Float") {
+        std::vector<std::byte> expected =
+                intVec2ByteVec({0x00, 0x00, 0x00, 0xbf, 0xc5, 0x1e, 0xb8});
+        std::vector<std::byte> actual =
+                parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "float"},
+                                    {Token{TokenType::IMMEDIATE, "-1.54"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Half") {
+        std::vector<std::byte> expected = intVec2ByteVec({0x00, 0x01, 0xa4});
+        std::vector<std::byte> actual = parseAllocDirective(
+                3, Token{TokenType::ALLOC_DIRECTIVE, "half"}, {Token{TokenType::IMMEDIATE, "420"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Space") {
+        std::vector<std::byte> expected = intVec2ByteVec({0, 0, 0, 0, 0, 0, 0, 0, 0});
+        std::vector<std::byte> actual = parseAllocDirective(
+                3, Token{TokenType::ALLOC_DIRECTIVE, "space"}, {Token{TokenType::IMMEDIATE, "9"}});
+        REQUIRE(expected == actual);
+    }
+
+    SECTION("Test Word") {
+        std::vector<std::byte> expected =
+                intVec2ByteVec({0x00, 0x00, 0x00, 0x00, 0xbc, 0x61, 0x4e});
+        std::vector<std::byte> actual =
+                parseAllocDirective(5, Token{TokenType::ALLOC_DIRECTIVE, "word"},
+                                    {Token{TokenType::IMMEDIATE, "12345678"}});
+        REQUIRE(expected == actual);
+    }
 }
 
 

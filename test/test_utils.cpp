@@ -212,7 +212,7 @@ TEST_CASE("Test f32 to Bytes") {
 }
 
 
-TEST_CASE("Test Double to Bytes") {
+TEST_CASE("Test f64 to Bytes") {
     std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
                                  std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
                                  std::byte{0x00}, std::byte{0x00}};
