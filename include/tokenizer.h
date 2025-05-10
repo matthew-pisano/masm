@@ -56,11 +56,6 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
 class Tokenizer {
 
     /**
-     * All global labels within the file
-     */
-    std::vector<std::string> globals;
-
-    /**
      * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
      * addressing mode when a close paren is reached
      * @param tokenLine The line of tokens to modify
@@ -68,21 +63,12 @@ class Tokenizer {
     static void processCloseParen(std::vector<Token>& tokenLine);
 
     /**
-     * A helper function that mangles labels in the given line of tokens
-     * @param availableLabels The list of available labels to mangle
-     * @param lineTokens The line of tokens to mangle
-     * @param fileId The file ID to append to the label
-     */
-    void mangleLabelsInLine(std::vector<std::string>& availableLabels,
-                            std::vector<Token>& lineTokens, const std::string& fileId);
-
-    /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
      * @param rawLine The line of source code to tokenize
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating line
      */
-    std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
+    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 
     /**
      * Tokenizes incoming source code lines into parsable tokens
@@ -90,7 +76,7 @@ class Tokenizer {
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    std::vector<std::vector<Token>> tokenizeFile(const std::vector<std::string>& rawLines);
+    static std::vector<std::vector<Token>> tokenizeFile(const std::vector<std::string>& rawLines);
 
 public:
     /**
@@ -99,15 +85,8 @@ public:
      * @return A vector of vectors of tokens, where each vector represents a tokenized line
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    [[nodiscard]] std::vector<std::vector<Token>>
+    [[nodiscard]] static std::vector<std::vector<Token>>
     tokenize(const std::vector<std::vector<std::string>>& rawFilesLines);
-
-    /**
-     * Name mangels tokens in the given program map by adding the file ID to the label
-     * @param programMap The map of file IDs to their tokenized lines
-     * @throw runtime_error When the file ID is empty
-     */
-    void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
 };
 
 #endif // TOKENIZER_H

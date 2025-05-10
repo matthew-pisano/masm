@@ -17,6 +17,7 @@ add_executable(masm src/main.cpp
         src/syscalls.cpp
         src/labels.cpp
         src/directive.cpp
+        src/postprocessor.cpp
 )
 
 add_executable(masm-fg test/fixture_gen.cpp
@@ -29,6 +30,7 @@ add_executable(masm-fg test/fixture_gen.cpp
         src/memory.cpp
         src/labels.cpp
         src/directive.cpp
+        src/postprocessor.cpp
 )
 
 include(FetchContent)
@@ -58,6 +60,7 @@ add_executable(masm-tests
         test/test_interpreter.cpp
         src/labels.cpp
         src/directive.cpp
+        src/postprocessor.cpp
 )
 target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)

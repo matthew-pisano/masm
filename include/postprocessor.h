@@ -1,0 +1,44 @@
+//
+// Created by matthew on 5/9/25.
+//
+
+#ifndef POSTPROCESSOR_H
+#define POSTPROCESSOR_H
+#include <string>
+#include <vector>
+
+#include "tokenizer.h"
+
+
+class Postprocessor {
+
+    /**
+     * All global labels within the file
+     */
+    std::vector<std::string> globals;
+
+    /**
+     * Adds all global declarations to the globals vector and removes declarations from file
+     * @param tokenizedFile The tokenized file to collect and prune globals from
+     */
+    void collectGlobals(std::vector<std::vector<Token>>& tokenizedFile);
+
+    /**
+     * A helper function that mangles labels in the given line of tokens
+     * @param availableLabels The list of available labels to mangle
+     * @param lineTokens The line of tokens to mangle
+     * @param fileId The file ID to append to the label
+     */
+    void mangleLabelsInLine(std::vector<std::string>& availableLabels,
+                            std::vector<Token>& lineTokens, const std::string& fileId);
+
+public:
+    /**
+     * Name mangels tokens in the given program map by adding the file ID to the label
+     * @param programMap The map of file IDs to their tokenized lines
+     * @throw runtime_error When the file ID is empty
+     */
+    void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
+};
+
+#endif // POSTPROCESSOR_H

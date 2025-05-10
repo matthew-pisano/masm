@@ -152,6 +152,14 @@ TEST_CASE("Test Tokenize Single Tokens") {
                            {TokenType::IMMEDIATE, "0"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
+
+    SECTION("Test Globl") {
+        std::vector<std::string> lines = {".globl label"};
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
+        std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenType::META_DIRECTIVE, "globl"}, {TokenType::LABEL_REF, "label"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
 }
 
 

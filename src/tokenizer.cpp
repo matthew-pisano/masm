@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "postprocessor.h"
 #include "utils.h"
 
 
@@ -37,12 +38,13 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 std::vector<std::vector<Token>>
 Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFilesLines) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
+    Postprocessor postprocessor;
     for (int i = 0; i < rawFilesLines.size(); ++i)
         programMap["masm_mangle_file_" + std::to_string(i)] = tokenizeFile(rawFilesLines[i]);
 
     // Mangle labels if there is more than one file
     if (programMap.size() > 1)
-        mangleLabels(programMap);
+        postprocessor.mangleLabels(programMap);
 
     std::vector<std::vector<Token>> program;
     for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap)
@@ -109,47 +111,9 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 }
 
 
-void Tokenizer::mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap) {
-    // Stores globals that have not yet been matched to declarations
-    std::vector availableLabels(globals);
-
-    for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap) {
-        if (programFile.first.empty())
-            throw std::runtime_error("File ID is empty");
-
-        for (std::vector<Token>& line : programFile.second)
-            // Mangle the labels in the line
-            mangleLabelsInLine(availableLabels, line, programFile.first);
-    }
-
-    // If any globals were declared without a matching label declaration
-    if (!availableLabels.empty())
-        throw std::runtime_error("Global label " + availableLabels[0] +
-                                 " referenced without declaration");
-}
-
-void Tokenizer::mangleLabelsInLine(std::vector<std::string>& availableLabels,
-                                   std::vector<Token>& lineTokens, const std::string& fileId) {
-    for (Token& lineToken : lineTokens) {
-        if (lineToken.type != TokenType::LABEL_DEF && lineToken.type != TokenType::LABEL_REF)
-            continue;
-
-        // If declaring a label, remove it from the remaining available declarations
-        if (lineToken.type == TokenType::LABEL_DEF)
-            std::erase(availableLabels, lineToken.value);
-
-        // If the label is not a global, mangle it
-        if (std::ranges::find(globals, lineToken.value) == globals.end())
-            lineToken.value = lineToken.value + "@" + fileId;
-    }
-}
-
-
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
     std::array<std::string, 2> secDirectives = {"data", "text"};
-    const std::string globlDirective = "globl";
-    // If the last token was a global directive and a label is needed
-    bool needsGlobl = false;
+    std::array<std::string, 4> metaDirectives = {"globl", "eqv", "macro", "end_macro"};
 
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
@@ -186,25 +150,14 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
             if (c == ':')
                 currentType = TokenType::LABEL_DEF;
 
-            // Reassign directive as memory directive if directive is data, text, etc.
+            // Reassign directive as section directive if directive is data, text, etc.
             if (currentType == TokenType::ALLOC_DIRECTIVE &&
                 std::ranges::find(secDirectives, currentToken) != secDirectives.end())
                 currentType = TokenType::SEC_DIRECTIVE;
-            else if (currentType == TokenType::ALLOC_DIRECTIVE && currentToken == globlDirective) {
-                needsGlobl = true;
-                currentToken.clear();
-                currentType = TokenType::UNKNOWN;
-                continue;
-            }
-
-            // If marking a label as global, skip token and add to globals
-            if (currentType == TokenType::INSTRUCTION && needsGlobl) {
-                globals.push_back(currentToken);
-                needsGlobl = false;
-                currentToken.clear();
-                currentType = TokenType::UNKNOWN;
-                continue;
-            }
+            // Reassign directive as meta directive if directive is .globl, .macro, etc.
+            else if (currentType == TokenType::ALLOC_DIRECTIVE &&
+                     std::ranges::find(metaDirectives, currentToken) != metaDirectives.end())
+                currentType = TokenType::META_DIRECTIVE;
 
             // Add the current token to the vector and reset
             if (!currentToken.empty()) {
@@ -261,9 +214,6 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
 
     if (!currentToken.empty())
         throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
-
-    if (needsGlobl)
-        throw std::runtime_error("Global directive must be followed by a label");
 
     return tokens;
 }
