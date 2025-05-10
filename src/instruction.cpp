@@ -175,3 +175,6 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         !tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }
+
+
+bool isInstruction(const std::string& token) { return instructionNameMap.contains(token); }

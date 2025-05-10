@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "instruction.h"
 #include "postprocessor.h"
 #include "utils.h"
 
@@ -39,8 +40,11 @@ std::vector<std::vector<Token>>
 Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFilesLines) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
     Postprocessor postprocessor;
-    for (int i = 0; i < rawFilesLines.size(); ++i)
-        programMap["masm_mangle_file_" + std::to_string(i)] = tokenizeFile(rawFilesLines[i]);
+    for (int i = 0; i < rawFilesLines.size(); ++i) {
+        std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFilesLines[i]);
+        postprocessor.replaceEqv(fileTokens);
+        programMap["masm_mangle_file_" + std::to_string(i)] = fileTokens;
+    }
 
     // Mangle labels if there is more than one file
     if (programMap.size() > 1)
@@ -114,6 +118,7 @@ void Tokenizer::processCloseParen(std::vector<Token>& tokenLine) {
 std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
     std::array<std::string, 2> secDirectives = {"data", "text"};
     std::array<std::string, 4> metaDirectives = {"globl", "eqv", "macro", "end_macro"};
+    Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
     std::vector<std::vector<Token>> tokens = {{}};
     std::string currentToken;
@@ -159,6 +164,10 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
                      std::ranges::find(metaDirectives, currentToken) != metaDirectives.end())
                 currentType = TokenType::META_DIRECTIVE;
 
+            // Correct for labels put at beginning of line
+            if (currentType == TokenType::INSTRUCTION && !isInstruction(currentToken))
+                currentType = TokenType::LABEL_REF;
+
             // Add the current token to the vector and reset
             if (!currentToken.empty()) {
                 tokenLine.push_back({currentType, currentToken});
@@ -201,7 +210,8 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         } else if ((currentType == TokenType::UNKNOWN || currentType == TokenType::INSTRUCTION) &&
                    isalpha(c)) {
             // Set first token in line as an instruction, otherwise as a label reference
-            if (tokenLine.empty())
+            // If the third token in an eqv directive line, also set as instruction
+            if (tokenLine.empty() || (tokenLine.size() == 2 && tokenLine[0] == eqvToken))
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABEL_REF;

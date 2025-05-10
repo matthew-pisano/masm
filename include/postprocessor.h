@@ -34,6 +34,12 @@ class Postprocessor {
 
 public:
     /**
+     * Replaces all eqv directives with the corresponding value
+     * @param tokenizedFile The tokenized file to replace eqv directives in
+     */
+    static void replaceEqv(std::vector<std::vector<Token>>& tokenizedFile);
+
+    /**
      * Name mangels tokens in the given program map by adding the file ID to the label
      * @param programMap The map of file IDs to their tokenized lines
      * @throw runtime_error When the file ID is empty

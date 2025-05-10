@@ -44,6 +44,14 @@ std::string tokenTypeToString(TokenType t);
 struct Token {
     TokenType type;
     std::string value;
+
+    struct HashFunction {
+        size_t operator()(const Token& token) const {
+            const size_t typeHash = std::hash<int>()(static_cast<int>(token.type));
+            const size_t valueHash = std::hash<std::string>()(token.value) << 1;
+            return typeHash ^ valueHash;
+        }
+    };
 };
 
 bool operator==(const Token& lhs, const Token& rhs);
@@ -70,6 +78,7 @@ class Tokenizer {
      */
     static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
 
+public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
      * @param rawLines The lines of source code to tokenize
@@ -78,7 +87,6 @@ class Tokenizer {
      */
     static std::vector<std::vector<Token>> tokenizeFile(const std::vector<std::string>& rawLines);
 
-public:
     /**
      * Tokenizes incoming source code lines from multiple files into parsable tokens
      * @param rawFilesLines The lines of source code to tokenize

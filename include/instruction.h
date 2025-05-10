@@ -145,4 +145,12 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args);
 
 
+/**
+ * Checks if the given token is an instruction name
+ * @param token The token to check
+ * @return True if the token is an instruction name, false otherwise
+ */
+bool isInstruction(const std::string& token);
+
+
 #endif // INSTRUCTION_H

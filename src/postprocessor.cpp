@@ -5,6 +5,7 @@
 #include "postprocessor.h"
 
 #include <stdexcept>
+#include <unordered_map>
 
 
 void Postprocessor::mangleLabels(
@@ -52,15 +53,45 @@ void Postprocessor::mangleLabelsInLine(std::vector<std::string>& availableLabels
 void Postprocessor::collectGlobals(std::vector<std::vector<Token>>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
     for (int i = 0; i < tokenizedFile.size(); i++) {
-
-        if (tokenizedFile[i][0] != globlToken)
+        std::vector<Token>& line = tokenizedFile[i];
+        if (line[0] != globlToken)
             continue;
 
-        if (tokenizedFile[i].size() != 2 || tokenizedFile[i][1].type != TokenType::LABEL_REF)
+        if (line.size() != 2 || line[1].type != TokenType::LABEL_REF)
             throw std::runtime_error("Invalid global label declaration");
 
-        globals.push_back(tokenizedFile[i][1].value);
+        globals.push_back(line[1].value);
         tokenizedFile.erase(tokenizedFile.begin() + i);
         i--;
+    }
+}
+
+
+void Postprocessor::replaceEqv(std::vector<std::vector<Token>>& tokenizedFile) {
+    const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
+    std::unordered_map<Token, std::vector<Token>, Token::HashFunction> eqvMapping;
+    for (int i = 0; i < tokenizedFile.size(); i++) {
+        std::vector<Token>& line = tokenizedFile[i];
+        if (line[0] == eqvToken) {
+            if (line.size() < 3 || line[1].type != TokenType::LABEL_REF)
+                throw std::runtime_error("Invalid eqv declaration");
+
+            eqvMapping[line[1]] = std::vector(line.begin() + 2, line.end());
+            tokenizedFile.erase(tokenizedFile.begin() + i);
+            i--;
+            continue;
+        }
+
+        for (int j = 0; j < line.size(); j++) {
+            if (line[j].type != TokenType::LABEL_REF)
+                continue;
+
+            auto it = eqvMapping.find(line[j]);
+            if (it != eqvMapping.end()) {
+                line.erase(line.begin() + j);
+                line.insert(line.begin() + j, it->second.begin(), it->second.end());
+                j += it->second.size() - 1;
+            }
+        }
     }
 }
