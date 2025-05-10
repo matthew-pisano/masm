@@ -58,7 +58,7 @@ std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirT
 
     // Insert padding to align next allocation
     if (dirName == "align") {
-        bytes = parseAllocBlock(loc, 0, 2 << std::stoi(args[0].value));
+        bytes = parseAllocBlock(loc, 0, 1 << std::stoi(args[0].value));
     }
     // Insert a string
     else if (dirName == "asciiz" || dirName == "ascii") {

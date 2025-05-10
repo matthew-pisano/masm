@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "directive.h"
 #include "fileio.h"
 #include "parser.h"
 
@@ -48,6 +49,49 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
         REQUIRE(actualMem.contains(pair.first));
 
         REQUIRE(pair.second == actualMem[pair.first]);
+    }
+}
+
+
+/**
+ * Converts a vector of integers to a vector of bytes
+ * @param intVec The vector of integers to convert
+ * @return The vector of bytes
+ */
+std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
+    std::vector<std::byte> byteVec(intVec.size());
+    for (size_t i = 0; i < intVec.size(); ++i)
+        byteVec[i] = static_cast<std::byte>(intVec[i]);
+    return byteVec;
+}
+
+
+TEST_CASE("Test Directive Allocation") {
+    SECTION("Test Align") {
+        std::vector<std::byte> expected = {};
+        std::vector<std::byte> actual = parseAllocDirective(
+                1, Token{TokenType::ALLOC_DIRECTIVE, "align"}, {Token{TokenType::IMMEDIATE, "0"}});
+        REQUIRE(expected == actual);
+
+        expected = intVec2ByteVec({0});
+        actual = parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "align"},
+                                     {Token{TokenType::IMMEDIATE, "1"}});
+        REQUIRE(expected == actual);
+
+        expected = intVec2ByteVec({0, 0, 0});
+        actual = parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "align"},
+                                     {Token{TokenType::IMMEDIATE, "2"}});
+        REQUIRE(expected == actual);
+
+        expected = intVec2ByteVec({0, 0, 0, 0, 0, 0, 0});
+        actual = parseAllocDirective(1, Token{TokenType::ALLOC_DIRECTIVE, "align"},
+                                     {Token{TokenType::IMMEDIATE, "3"}});
+        REQUIRE(expected == actual);
+
+        expected = {};
+        actual = parseAllocDirective(8, Token{TokenType::ALLOC_DIRECTIVE, "align"},
+                                     {Token{TokenType::IMMEDIATE, "3"}});
+        REQUIRE(expected == actual);
     }
 }
 
