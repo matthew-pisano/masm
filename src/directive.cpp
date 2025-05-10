@@ -15,7 +15,7 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
     if (args.empty())
         throw std::runtime_error("Directive " + dirName + " expects at least one argument");
 
-    constexpr std::vector<std::string> singleArgDirectives = {"asciiz", "ascii", "space", "align"};
+    const std::vector<std::string> singleArgDirectives = {"asciiz", "ascii", "space", "align"};
     if (std::ranges::find(singleArgDirectives, dirName) != singleArgDirectives.end() &&
         args.size() != 1)
         throw std::runtime_error(dirName + " directive expects exactly one argument");
@@ -63,7 +63,9 @@ std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirT
     // Insert a string
     else if (dirName == "asciiz" || dirName == "ascii") {
         const std::string escapedString = escapeString(args[0].value);
-        bytes = parseAllocBlock(loc, escapedString.length(), 1);
+        // Add extra byte if null terminating
+        const size_t blockSize = escapedString.length() + (dirName == "asciiz" ? 1 : 0);
+        bytes = parseAllocBlock(loc, blockSize, 1);
         populateMemBlock(bytes, escapedString, dirName == "asciiz");
     }
     // Insert a byte
@@ -121,7 +123,9 @@ std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSiz
     if (blockAlign == 0)
         throw std::runtime_error("Block alignment cannot be zero");
 
-    const uint32_t padding = blockAlign - (loc % blockAlign); // Pad to nearest multiple
+    uint32_t padding = blockAlign - (loc % blockAlign); // Pad to nearest multiple
+    if (padding == blockAlign)
+        padding = 0;
     std::vector bytes(padding + blockSize, std::byte{0});
     return bytes;
 }
@@ -130,9 +134,8 @@ std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSiz
 void populateMemBlock(std::vector<std::byte>& block, const std::string& string,
                       const bool nullTerminate) {
     const std::vector<std::byte> bytes = stringToBytes(string, nullTerminate);
-    if (block.size() != bytes.size())
-        throw std::runtime_error("Block size does not match string size");
-    block = bytes;
+    const long offset = static_cast<long>(block.size() - bytes.size());
+    std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
@@ -143,31 +146,27 @@ void populateMemBlock(std::byte& block, const uint8_t integer) {
 
 void populateMemBlock(std::vector<std::byte>& block, const uint16_t integer) {
     const std::vector<std::byte> bytes = i16ToBEByte(integer);
-    if (block.size() != bytes.size())
-        throw std::runtime_error("Block size does not match half size");
-    block = bytes;
+    const long offset = static_cast<long>(block.size() - bytes.size());
+    std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
 void populateMemBlock(std::vector<std::byte>& block, const uint32_t integer) {
     const std::vector<std::byte> bytes = i32ToBEByte(integer);
-    if (block.size() != bytes.size())
-        throw std::runtime_error("Block size does not match integer size");
-    block = bytes;
+    const long offset = static_cast<long>(block.size() - bytes.size());
+    std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
 void populateMemBlock(std::vector<std::byte>& block, const float decimal) {
     const std::vector<std::byte> bytes = f32ToBEByte(decimal);
-    if (block.size() != bytes.size())
-        throw std::runtime_error("Block size does not match float size");
-    block = bytes;
+    const long offset = static_cast<long>(block.size() - bytes.size());
+    std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
 void populateMemBlock(std::vector<std::byte>& block, const double decimal) {
     const std::vector<std::byte> bytes = f64ToBEByte(decimal);
-    if (block.size() != bytes.size())
-        throw std::runtime_error("Block size does not match double size");
-    block = bytes;
+    const long offset = static_cast<long>(block.size() - bytes.size());
+    std::ranges::copy(bytes, block.begin() + offset);
 }
