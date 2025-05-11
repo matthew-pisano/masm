@@ -23,8 +23,8 @@ int32_t& RegisterFile::operator[](const uint32_t index) {
 }
 
 int32_t RegisterFile::operator[](const Register index) const {
-    return registers[static_cast<int>(index)];
+    return registers[static_cast<size_t>(index)];
 }
 int32_t& RegisterFile::operator[](const Register index) {
-    return registers[static_cast<int>(index)];
+    return registers[static_cast<size_t>(index)];
 }

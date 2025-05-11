@@ -41,7 +41,7 @@ const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "m
 std::vector<std::vector<Token>>
 Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
-    for (int i = 0; i < rawFiles.size(); ++i) {
+    for (size_t i = 0; i < rawFiles.size(); ++i) {
         std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFiles[i]);
         Postprocessor::replaceEqv(fileTokens);
         Postprocessor::processBaseAddressing(fileTokens);

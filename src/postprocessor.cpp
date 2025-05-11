@@ -65,7 +65,7 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 void Postprocessor::collectGlobals(std::vector<std::string>& globals,
                                    std::vector<std::vector<Token>>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
-    for (int i = 0; i < tokenizedFile.size(); i++) {
+    for (size_t i = 0; i < tokenizedFile.size(); i++) {
         std::vector<Token>& line = tokenizedFile[i];
         if (line[0] != globlToken)
             continue;
@@ -83,7 +83,7 @@ void Postprocessor::collectGlobals(std::vector<std::string>& globals,
 void Postprocessor::replaceEqv(std::vector<std::vector<Token>>& tokenizedFile) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
     std::unordered_map<Token, std::vector<Token>, Token::HashFunction> eqvMapping;
-    for (int i = 0; i < tokenizedFile.size(); i++) {
+    for (size_t i = 0; i < tokenizedFile.size(); i++) {
         std::vector<Token>& line = tokenizedFile[i];
         if (line[0] == eqvToken) {
             if (line.size() < 3 || line[1].type != TokenType::LABEL_REF)
@@ -95,7 +95,7 @@ void Postprocessor::replaceEqv(std::vector<std::vector<Token>>& tokenizedFile) {
             continue;
         }
 
-        for (int j = 0; j < line.size(); j++) {
+        for (size_t j = 0; j < line.size(); j++) {
             if (line[j].type != TokenType::LABEL_REF)
                 continue;
 
@@ -164,7 +164,7 @@ std::vector<Token> Postprocessor::parseMacroParams(const std::vector<Token>& lin
 }
 
 
-void Postprocessor::expandMacro(const Macro& macro, int& i,
+void Postprocessor::expandMacro(const Macro& macro, size_t& i,
                                 std::vector<std::vector<Token>>& tokenizedFile) {
     std::vector<Token> macroArgs;
     if (tokenizedFile[i].size() > 1)
@@ -197,14 +197,14 @@ void Postprocessor::expandMacro(const Macro& macro, int& i,
 
 void Postprocessor::processMacros(std::vector<std::vector<Token>>& tokenizedFile) {
     std::unordered_map<std::string, Macro> macroMap;
-    for (int i = 0; i < tokenizedFile.size(); i++) {
+    for (size_t i = 0; i < tokenizedFile.size(); i++) {
         std::vector<Token>& line = tokenizedFile[i];
         if (line[0].type == TokenType::META_DIRECTIVE && line[0].value == "macro") {
             const int macroStart = i;
             if (line.size() < 2 || line[1].type != TokenType::LABEL_REF)
                 throw std::runtime_error("Invalid macro declaration");
 
-            Macro macro = {line[1].value};
+            Macro macro = {line[1].value, {}, {}};
             macro.params = parseMacroParams(line);
             while (true) {
                 i++;

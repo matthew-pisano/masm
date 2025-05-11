@@ -229,8 +229,10 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
             state.registers[rt] = (state.registers[rs] < signExtImmediate) ? 1 : 0;
             break;
         case InstructionCode::SLTIU:
-            state.registers[rt] =
-                    (state.registers[rs] < static_cast<uint32_t>(signExtImmediate)) ? 1 : 0;
+            state.registers[rt] = (static_cast<uint32_t>(state.registers[rs]) <
+                                   static_cast<uint32_t>(signExtImmediate))
+                                          ? 1
+                                          : 0;
             break;
         case InstructionCode::LB:
             // Convert to signed for sign extension

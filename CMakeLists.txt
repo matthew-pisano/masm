@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
+add_compile_options(-Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
 
 include_directories(include)
 

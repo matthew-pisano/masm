@@ -47,7 +47,7 @@ class Postprocessor {
         std::vector<std::vector<Token>> body;
     };
 
-    static void expandMacro(const Macro& macro, int& i,
+    static void expandMacro(const Macro& macro, size_t& i,
                             std::vector<std::vector<Token>>& tokenizedFile);
 
 public:
