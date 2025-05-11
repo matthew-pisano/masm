@@ -91,8 +91,8 @@ int main(const int argc, char* argv[]) {
     }
 
     const std::string projectName = getBaseFileName(inputFileNames[0]);
-    std::vector<std::vector<std::string>> programLines;
     try {
+        std::vector<std::vector<std::string>> programLines;
         for (const std::string& fileName : inputFileNames) {
             const std::string baseFileName = getBaseFileName(fileName);
             const std::vector<std::string> lines = readFileLines(fileName);
