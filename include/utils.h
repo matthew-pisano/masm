@@ -56,10 +56,12 @@ std::vector<std::byte> intStringToBytes(const std::string& string);
 /**
  * Validates a comma seperated list of tokens, returning the list with commas stripped out
  * @param listTokens The list of tokens to filter
+ * @param validElems The only valid token types to include in the filtered list
  * @return The filtered list of tokens
- * @throw runtime_error When the list is malformed
+ * @throw runtime_error When the list is malformed or contains invalid tokens
  */
-std::vector<Token> filterTokenList(const std::vector<Token>& listTokens);
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
+                                   const std::vector<TokenType>& validElems = {});
 
 
 /**

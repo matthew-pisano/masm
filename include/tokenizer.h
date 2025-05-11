@@ -28,6 +28,7 @@ enum class TokenType {
     OPEN_PAREN,
     CLOSE_PAREN,
     STRING,
+    MACRO_PARAM
 };
 
 

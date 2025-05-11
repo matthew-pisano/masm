@@ -75,7 +75,8 @@ std::vector<std::byte> intStringToBytes(const std::string& string) {
 }
 
 
-std::vector<Token> filterTokenList(const std::vector<Token>& listTokens) {
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
+                                   const std::vector<TokenType>& validElems) {
     std::vector<Token> elements = {};
 
     for (size_t i = 0; i < listTokens.size(); i++) {
@@ -88,6 +89,11 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens) {
 
         if (listTokens[i].type == TokenType::SEPERATOR)
             continue;
+
+        if (!validElems.empty() &&
+            std::ranges::find(validElems, listTokens[i].type) == validElems.end())
+            throw std::runtime_error("Invalid token " + listTokens[i].value + " of type " +
+                                     tokenTypeToString(listTokens[i].type));
         // Only push non seperator elements
         elements.push_back(listTokens[i]);
     }

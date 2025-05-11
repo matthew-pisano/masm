@@ -32,6 +32,25 @@ class Postprocessor {
     void mangleLabelsInLine(std::vector<std::string>& availableLabels,
                             std::vector<Token>& lineTokens, const std::string& fileId);
 
+    /**
+     * A helper function that parses the parameters of a macro into a smaller vector of tokens
+     * @param line The macro declaration line of tokens to parse
+     * @return The parsed macro parameters
+     */
+    static std::vector<Token> parseMacroParams(const std::vector<Token>& line);
+
+    /**
+     * A struct representing a macro
+     */
+    struct Macro {
+        std::string name;
+        std::vector<Token> params;
+        std::vector<std::vector<Token>> body;
+    };
+
+    static void expandMacro(const Macro& macro, int& i,
+                            std::vector<std::vector<Token>>& tokenizedFile);
+
 public:
     /**
      * Replaces all eqv directives with the corresponding value
@@ -45,6 +64,12 @@ public:
      * @param tokenizedFile The tokenized file to replace base addressing syntax in
      */
     static void processBaseAddressing(std::vector<std::vector<Token>>& tokenizedFile);
+
+    /**
+     * Expands macros in the given tokenized file
+     * @param tokenizedFile The tokenized file to expand macros in
+     */
+    static void processMacros(std::vector<std::vector<Token>>& tokenizedFile);
 
     /**
      * Name mangels tokens in the given program map by adding the file ID to the label

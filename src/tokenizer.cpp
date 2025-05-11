@@ -18,11 +18,10 @@
 /**
  * An array storing the names of memory directives
  */
-constexpr std::array<const char*, 13> tokenTypeNames = {
+constexpr std::array<const char*, 14> tokenTypeNames = {
         "UNKNOWN",    "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",
         "LABEL_REF",  "INSTRUCTION",   "REGISTER",        "IMMEDIATE",      "SEPERATOR",
-        "OPEN_PAREN", "CLOSE_PAREN",   "STRING",
-};
+        "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
 
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
@@ -48,6 +47,7 @@ Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
         std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFiles[i]);
         postprocessor.replaceEqv(fileTokens);
         postprocessor.processBaseAddressing(fileTokens);
+        postprocessor.processMacros(fileTokens);
         programMap["masm_mangle_file_" + std::to_string(i)] = fileTokens;
     }
 
@@ -141,6 +141,10 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         // A preceding dollar sign marks the token as a register
         else if (c == '$') {
             currentType = TokenType::REGISTER;
+        }
+        // A preceding percentage sign marks the token as a macro parameter
+        else if (c == '%') {
+            currentType = TokenType::MACRO_PARAM;
         }
         // Handle Immediates, Instructions, and Label references
         else if (isdigit(c) || c == '-') {

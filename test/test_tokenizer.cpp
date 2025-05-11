@@ -151,6 +151,19 @@ TEST_CASE("Test Tokenize Single Lines") {
                                                           {{TokenType::LABEL_REF, "exit"}}};
         REQUIRE(expectedTokens == actualTokens);
     }
+
+    SECTION("Test Macro Parameters") {
+        const std::vector<std::string> lines = {".macro foobar(%foo, %bar)"};
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenizeFile(lines);
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::META_DIRECTIVE, "macro"},
+                                                           {TokenType::LABEL_REF, "foobar"},
+                                                           {TokenType::OPEN_PAREN, "("},
+                                                           {TokenType::MACRO_PARAM, "foo"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::MACRO_PARAM, "bar"},
+                                                           {TokenType::CLOSE_PAREN, ")"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
 }
 
 
@@ -196,6 +209,42 @@ TEST_CASE("Test Tokenize Eqv") {
                                                        {TokenType::SEPERATOR, ","},
                                                        {TokenType::IMMEDIATE, "10"}}};
     REQUIRE(expectedTokens == actualTokens);
+}
+
+
+TEST_CASE("Test Tokenize Macro") {
+    Tokenizer tokenizer{};
+    SECTION("Test Macro without Parameters") {
+        const std::vector<std::string> lines = {".macro done", "li $v0, 10", "syscall",
+                                                ".end_macro", "done"};
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
+                                                           {TokenType::REGISTER, "v0"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::IMMEDIATE, "10"}},
+                                                          {{TokenType::INSTRUCTION, "syscall"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
+
+    SECTION("Test Macro with Parameters") {
+        const std::vector<std::string> lines = {".macro terminate(%termination_value)",
+                                                "li $a0, %termination_value",
+                                                "li $v0, 17",
+                                                "syscall",
+                                                ".end_macro",
+                                                "terminate(1)"};
+        std::vector<std::vector<Token>> actualTokens = tokenizer.tokenize({lines});
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
+                                                           {TokenType::REGISTER, "a0"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::IMMEDIATE, "1"}},
+                                                          {{TokenType::INSTRUCTION, "li"},
+                                                           {TokenType::REGISTER, "v0"},
+                                                           {TokenType::SEPERATOR, ","},
+                                                           {TokenType::IMMEDIATE, "17"}},
+                                                          {{TokenType::INSTRUCTION, "syscall"}}};
+        REQUIRE(expectedTokens == actualTokens);
+    }
 }
 
 

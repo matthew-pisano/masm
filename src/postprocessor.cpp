@@ -4,6 +4,7 @@
 
 #include "postprocessor.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -133,5 +134,83 @@ void Postprocessor::processBaseAddressing(std::vector<std::vector<Token>>& token
         tokenLine.push_back(lastFour[2]);
         tokenLine.push_back({TokenType::SEPERATOR, ","});
         tokenLine.push_back(lastFour[0]);
+    }
+}
+
+
+std::vector<Token> Postprocessor::parseMacroParams(const std::vector<Token>& line) {
+    // If the macro has no parameters
+    if (line.size() < 3)
+        return {};
+
+    if (line[2].type != TokenType::OPEN_PAREN)
+        throw std::runtime_error("Malformed macro parameter declaration");
+    if (line[line.size() - 1].type != TokenType::CLOSE_PAREN)
+        throw std::runtime_error("Malformed macro parameter declaration");
+
+    const std::vector rawParams(line.begin() + 3, line.end() - 1);
+    std::vector<Token> params = filterTokenList(rawParams, {TokenType::MACRO_PARAM});
+    return params;
+}
+
+
+void Postprocessor::expandMacro(const Macro& macro, int& i,
+                                std::vector<std::vector<Token>>& tokenizedFile) {
+    std::vector<Token> macroArgs;
+    if (tokenizedFile[i].size() > 1)
+        macroArgs = filterTokenList(
+                std::vector(tokenizedFile[i].begin() + 2, tokenizedFile[i].end() - 1));
+
+    if (macroArgs.size() != macro.params.size())
+        throw std::runtime_error("Invalid number of macro arguments");
+
+    tokenizedFile.erase(tokenizedFile.begin() + i);
+    tokenizedFile.insert(tokenizedFile.begin() + i, macro.body.begin(), macro.body.end());
+
+    const size_t macroEndIdx = i + macro.body.size();
+    // Replace macro parameters with arguments
+    while (i < macroEndIdx) {
+        for (auto& token : tokenizedFile[i]) {
+            if (token.type != TokenType::MACRO_PARAM)
+                continue;
+            const auto it = std::ranges::find(macro.params, token);
+            if (it == macro.params.end())
+                throw std::runtime_error("Invalid macro parameter " + token.value);
+            const size_t paramIdx = std::distance(macro.params.begin(), it);
+            // Replace token with argument
+            token = macroArgs[paramIdx];
+        }
+        i++;
+    }
+}
+
+
+void Postprocessor::processMacros(std::vector<std::vector<Token>>& tokenizedFile) {
+    std::unordered_map<std::string, Macro> macroMap;
+    for (int i = 0; i < tokenizedFile.size(); i++) {
+        std::vector<Token>& line = tokenizedFile[i];
+        if (line[0].type == TokenType::META_DIRECTIVE && line[0].value == "macro") {
+            const int macroStart = i;
+            if (line.size() < 2 || line[1].type != TokenType::LABEL_REF)
+                throw std::runtime_error("Invalid macro declaration");
+
+            Macro macro = {line[1].value};
+            macro.params = parseMacroParams(line);
+            while (true) {
+                i++;
+                if (i >= tokenizedFile.size())
+                    throw std::runtime_error("Unmatched macro declaration");
+
+                if (tokenizedFile[i][0].type == TokenType::META_DIRECTIVE &&
+                    tokenizedFile[i][0].value == "end_macro")
+                    break;
+                macro.body.push_back(tokenizedFile[i]);
+            }
+            macroMap[macro.name] = macro;
+            tokenizedFile.erase(tokenizedFile.begin() + macroStart, tokenizedFile.begin() + i + 1);
+            i = macroStart - 1;
+        } else if (line[0].type == TokenType::LABEL_REF && macroMap.contains(line[0].value)) {
+            expandMacro(macroMap[line[0].value], i, tokenizedFile);
+        }
     }
 }

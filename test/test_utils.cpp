@@ -101,6 +101,8 @@ TEST_CASE("Test Integer String to Bytes") {
 
 TEST_CASE("Test Filter Token List") {
     Token reg = {TokenType::REGISTER, "reg"};
+    Token label = {TokenType::LABEL_REF, "label"};
+    Token param = {TokenType::MACRO_PARAM, "param"};
     Token sep = {TokenType::SEPERATOR, ","};
 
     SECTION("Test Valid Token Lists") {
@@ -127,6 +129,21 @@ TEST_CASE("Test Filter Token List") {
 
         tokens = {reg, sep, reg, sep};
         REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+    }
+
+    SECTION("Test Invalid Elements") {
+        std::vector tokens = {reg, sep, reg};
+        REQUIRE_NOTHROW(filterTokenList(tokens, {TokenType::REGISTER}));
+
+        tokens = {reg, sep, label};
+        REQUIRE_NOTHROW(filterTokenList(tokens, {TokenType::REGISTER, TokenType::LABEL_REF}));
+
+        tokens = {reg, sep, label};
+        REQUIRE_THROWS_AS(filterTokenList(tokens, {TokenType::REGISTER}), std::runtime_error);
+
+        tokens = {reg, sep, label, sep, param};
+        REQUIRE_THROWS_AS(filterTokenList(tokens, {TokenType::REGISTER, TokenType::LABEL_REF}),
+                          std::runtime_error);
     }
 }
 
