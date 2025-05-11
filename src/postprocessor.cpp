@@ -174,12 +174,12 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& i,
     if (macroArgs.size() != macro.params.size())
         throw std::runtime_error("Invalid number of macro arguments");
 
-    tokenizedFile.erase(tokenizedFile.begin() + i);
     tokenizedFile.insert(tokenizedFile.begin() + i, macro.body.begin(), macro.body.end());
+    tokenizedFile.erase(tokenizedFile.begin() + i + macro.body.size());
 
     const size_t macroEndIdx = i + macro.body.size();
     // Replace macro parameters with arguments
-    while (i < macroEndIdx) {
+    while (i < macroEndIdx - 1) {
         for (auto& token : tokenizedFile[i]) {
             if (token.type != TokenType::MACRO_PARAM)
                 continue;
@@ -214,13 +214,17 @@ void Postprocessor::processMacros(std::vector<std::vector<Token>>& tokenizedFile
                 if (tokenizedFile[i][0].type == TokenType::META_DIRECTIVE &&
                     tokenizedFile[i][0].value == "end_macro")
                     break;
-                macro.body.push_back(tokenizedFile[i]);
+
+                if (tokenizedFile[i][0].type == TokenType::LABEL_REF &&
+                    macroMap.contains(tokenizedFile[i][0].value))
+                    expandMacro(macroMap[tokenizedFile[i][0].value], i, tokenizedFile);
+                else
+                    macro.body.push_back(tokenizedFile[i]);
             }
             macroMap[macro.name] = macro;
             tokenizedFile.erase(tokenizedFile.begin() + macroStart, tokenizedFile.begin() + i + 1);
             i = macroStart - 1;
-        } else if (line[0].type == TokenType::LABEL_REF && macroMap.contains(line[0].value)) {
+        } else if (line[0].type == TokenType::LABEL_REF && macroMap.contains(line[0].value))
             expandMacro(macroMap[line[0].value], i, tokenizedFile);
-        }
     }
 }
