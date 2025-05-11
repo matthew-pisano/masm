@@ -14,46 +14,56 @@
 void Postprocessor::mangleLabels(
         std::map<std::string, std::vector<std::vector<Token>>>& programMap) {
 
+    // Stores globals that have not yet been matched to declarations
+    std::vector<std::string> globals;
     for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap) {
         if (programFile.first.empty())
             throw std::runtime_error("File ID is empty");
-        collectGlobals(programFile.second);
+        collectGlobals(globals, programFile.second);
     }
 
-    // Stores globals that have not yet been matched to declarations
-    std::vector availableLabels(globals);
+    std::vector undeclaredGlobals(globals);
     // Mangle labels and resolve globals
     for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap) {
-        for (std::vector<Token>& line : programFile.second)
+        for (std::vector<Token>& line : programFile.second) {
             // Mangle the labels in the line
-            mangleLabelsInLine(availableLabels, line, programFile.first);
+            std::string lineDeclaration = mangleLabelsInLine(globals, line, programFile.first);
+            // If a label was declared, add it to the list of found declarations
+            if (!lineDeclaration.empty())
+                std::erase(undeclaredGlobals, lineDeclaration);
+        }
     }
 
     // If any globals were declared without a matching label declaration
-    if (!availableLabels.empty())
-        throw std::runtime_error("Global label " + availableLabels[0] +
+    if (!undeclaredGlobals.empty())
+        throw std::runtime_error("Global label " + undeclaredGlobals[0] +
                                  " referenced without declaration");
 }
 
 
-void Postprocessor::mangleLabelsInLine(std::vector<std::string>& availableLabels,
-                                       std::vector<Token>& lineTokens, const std::string& fileId) {
+std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
+                                              std::vector<Token>& lineTokens,
+                                              const std::string& fileId) {
+    std::string lineDeclaration;
     for (Token& lineToken : lineTokens) {
         if (lineToken.type != TokenType::LABEL_DEF && lineToken.type != TokenType::LABEL_REF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
         if (lineToken.type == TokenType::LABEL_DEF)
-            std::erase(availableLabels, lineToken.value);
+            lineDeclaration = lineToken.value;
 
         // If the label is not a global, mangle it
         if (std::ranges::find(globals, lineToken.value) == globals.end())
             lineToken.value = lineToken.value + "@" + fileId;
     }
+
+    return lineDeclaration;
 }
 
 
-void Postprocessor::collectGlobals(std::vector<std::vector<Token>>& tokenizedFile) {
+void Postprocessor::collectGlobals(std::vector<std::string>& globals,
+                                   std::vector<std::vector<Token>>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
     for (int i = 0; i < tokenizedFile.size(); i++) {
         std::vector<Token>& line = tokenizedFile[i];

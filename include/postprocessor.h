@@ -13,24 +13,23 @@
 class Postprocessor {
 
     /**
-     * All global labels within the file
-     */
-    std::vector<std::string> globals;
-
-    /**
      * Adds all global declarations to the globals vector and removes declarations from file
+     * @param globals The vector to add global declarations to
      * @param tokenizedFile The tokenized file to collect and prune globals from
      */
-    void collectGlobals(std::vector<std::vector<Token>>& tokenizedFile);
+    static void collectGlobals(std::vector<std::string>& globals,
+                               std::vector<std::vector<Token>>& tokenizedFile);
 
     /**
      * A helper function that mangles labels in the given line of tokens
-     * @param availableLabels The list of available labels to mangle
+     * @param globals The vector of global labels to check against
      * @param lineTokens The line of tokens to mangle
      * @param fileId The file ID to append to the label
+     * @return The label declaration found, if any
      */
-    void mangleLabelsInLine(std::vector<std::string>& availableLabels,
-                            std::vector<Token>& lineTokens, const std::string& fileId);
+    static std::string mangleLabelsInLine(std::vector<std::string>& globals,
+                                          std::vector<Token>& lineTokens,
+                                          const std::string& fileId);
 
     /**
      * A helper function that parses the parameters of a macro into a smaller vector of tokens
@@ -76,7 +75,7 @@ public:
      * @param programMap The map of file IDs to their tokenized lines
      * @throw runtime_error When the file ID is empty
      */
-    void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
+    static void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
 };
 
 #endif // POSTPROCESSOR_H

@@ -36,8 +36,7 @@ std::string getBaseFileName(const std::string& filePath) {
  */
 std::vector<std::vector<Token>>
 genTokenFile(std::ofstream& tokenFile, const std::vector<std::vector<std::string>>& programLines) {
-    Tokenizer tokenizer{};
-    const std::vector<std::vector<Token>> tokenizedLines = tokenizer.tokenize(programLines);
+    const std::vector<std::vector<Token>> tokenizedLines = Tokenizer::tokenize(programLines);
     for (const std::vector<Token>& tokenLine : tokenizedLines) {
         for (const Token& token : tokenLine) {
             constexpr unsigned char groupSep = 0x1d;

@@ -12,7 +12,6 @@
 
 #include "instruction.h"
 #include "postprocessor.h"
-#include "utils.h"
 
 
 /**
@@ -42,18 +41,17 @@ const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "m
 std::vector<std::vector<Token>>
 Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
     std::map<std::string, std::vector<std::vector<Token>>> programMap;
-    Postprocessor postprocessor;
     for (int i = 0; i < rawFiles.size(); ++i) {
         std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFiles[i]);
-        postprocessor.replaceEqv(fileTokens);
-        postprocessor.processBaseAddressing(fileTokens);
-        postprocessor.processMacros(fileTokens);
+        Postprocessor::replaceEqv(fileTokens);
+        Postprocessor::processBaseAddressing(fileTokens);
+        Postprocessor::processMacros(fileTokens);
         programMap["masm_mangle_file_" + std::to_string(i)] = fileTokens;
     }
 
     // Mangle labels if there is more than one file
     if (programMap.size() > 1)
-        postprocessor.mangleLabels(programMap);
+        Postprocessor::mangleLabels(programMap);
 
     std::vector<std::vector<Token>> program;
     for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap)
