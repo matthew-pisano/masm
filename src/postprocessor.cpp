@@ -164,23 +164,49 @@ std::vector<Token> Postprocessor::parseMacroParams(const std::vector<Token>& lin
 }
 
 
-void Postprocessor::expandMacro(const Macro& macro, size_t& i,
+Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const size_t pos) {
+    Macro mangledMacro(macro);
+    std::vector<Token> macroLabelDefs;
+    const std::string posStr = std::to_string(pos);
+
+    for (std::vector<Token>& bodyLine : mangledMacro.body) {
+        for (Token& bodyToken : bodyLine) {
+            if (bodyToken.type == TokenType::LABEL_DEF)
+                macroLabelDefs.emplace_back(TokenType::LABEL_REF, bodyToken.value);
+            else if (bodyToken.type == TokenType::LABEL_REF) {
+                auto it = std::ranges::find(macroLabelDefs, bodyToken);
+                if (it == macroLabelDefs.end())
+                    continue;
+
+                bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
+            }
+        }
+    }
+
+    return mangledMacro;
+}
+
+
+void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                                 std::vector<std::vector<Token>>& tokenizedFile) {
     std::vector<Token> macroArgs;
-    if (tokenizedFile[i].size() > 1)
+    if (tokenizedFile[pos].size() > 1)
         macroArgs = filterTokenList(
-                std::vector(tokenizedFile[i].begin() + 2, tokenizedFile[i].end() - 1));
+                std::vector(tokenizedFile[pos].begin() + 2, tokenizedFile[pos].end() - 1));
 
     if (macroArgs.size() != macro.params.size())
         throw std::runtime_error("Invalid number of macro arguments");
 
-    tokenizedFile.insert(tokenizedFile.begin() + i, macro.body.begin(), macro.body.end());
-    tokenizedFile.erase(tokenizedFile.begin() + i + macro.body.size());
+    const size_t macroEndIdx = pos + macro.body.size();
 
-    const size_t macroEndIdx = i + macro.body.size();
+    Macro mangledMacro = mangleMacroLabels(macro, pos);
+    tokenizedFile.insert(tokenizedFile.begin() + pos, mangledMacro.body.begin(),
+                         mangledMacro.body.end());
+    tokenizedFile.erase(tokenizedFile.begin() + pos + mangledMacro.body.size());
+
     // Replace macro parameters with arguments
-    while (i < macroEndIdx - 1) {
-        for (auto& token : tokenizedFile[i]) {
+    while (pos < macroEndIdx - 1) {
+        for (auto& token : tokenizedFile[pos]) {
             if (token.type != TokenType::MACRO_PARAM)
                 continue;
             const auto it = std::ranges::find(macro.params, token);
@@ -190,7 +216,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& i,
             // Replace token with argument
             token = macroArgs[paramIdx];
         }
-        i++;
+        pos++;
     }
 }
 
@@ -200,7 +226,7 @@ void Postprocessor::processMacros(std::vector<std::vector<Token>>& tokenizedFile
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         std::vector<Token>& line = tokenizedFile[i];
         if (line[0].type == TokenType::META_DIRECTIVE && line[0].value == "macro") {
-            const int macroStart = i;
+            const size_t macroStart = i;
             if (line.size() < 2 || line[1].type != TokenType::LABEL_REF)
                 throw std::runtime_error("Invalid macro declaration");
 

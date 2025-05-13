@@ -5,6 +5,7 @@
 #ifndef POSTPROCESSOR_H
 #define POSTPROCESSOR_H
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "tokenizer.h"
@@ -47,8 +48,22 @@ class Postprocessor {
         std::vector<std::vector<Token>> body;
     };
 
-    static void expandMacro(const Macro& macro, size_t& i,
+    /**
+     * A helper function that expands a macro in the given tokenized file
+     * @param macro The macro to expand
+     * @param pos The position in the tokenized file to expand the macro at
+     * @param tokenizedFile The tokenized file to expand the macro in
+     */
+    static void expandMacro(const Macro& macro, size_t& pos,
                             std::vector<std::vector<Token>>& tokenizedFile);
+
+    /**
+     * A helper function that mangles the labels in a macro
+     * @param macro The macro to mangle
+     * @param pos The position in the tokenized file to mangle the macro at
+     * @return A new macro with mangled labels
+     */
+    static Macro mangleMacroLabels(const Macro& macro, size_t pos);
 
 public:
     /**
