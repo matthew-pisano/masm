@@ -171,9 +171,10 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
 
     for (std::vector<Token>& bodyLine : mangledMacro.body) {
         for (Token& bodyToken : bodyLine) {
-            if (bodyToken.type == TokenType::LABEL_DEF)
+            if (bodyToken.type == TokenType::LABEL_DEF) {
                 macroLabelDefs.emplace_back(TokenType::LABEL_REF, bodyToken.value);
-            else if (bodyToken.type == TokenType::LABEL_REF) {
+                bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
+            } else if (bodyToken.type == TokenType::LABEL_REF) {
                 auto it = std::ranges::find(macroLabelDefs, bodyToken);
                 if (it == macroLabelDefs.end())
                     continue;
