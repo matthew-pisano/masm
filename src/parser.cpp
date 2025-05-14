@@ -122,7 +122,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
         case InstructionType::I_TYPE_T_S_I:
             return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));
-        case InstructionType::I_TYPE_S_T_I:
+        case InstructionType::I_TYPE_S_T_L:
             // Instructions where rs comes before rt in the binary encoding
             return parseITypeInstruction(loc, opFuncCode, argCodes[1], argCodes[0],
                                          static_cast<int32_t>(argCodes[2]));

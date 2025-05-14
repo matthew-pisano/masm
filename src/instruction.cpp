@@ -46,8 +46,8 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sltiu", {InstructionType::I_TYPE_T_S_I, InstructionCode::SLTIU, 4}},
 
         // Branch Instructions
-        {"beq", {InstructionType::I_TYPE_S_T_I, InstructionCode::BEQ, 4}},
-        {"bne", {InstructionType::I_TYPE_S_T_I, InstructionCode::BNE, 4}},
+        {"beq", {InstructionType::I_TYPE_S_T_L, InstructionCode::BEQ, 4}},
+        {"bne", {InstructionType::I_TYPE_S_T_L, InstructionCode::BNE, 4}},
 
         // Jump Instructions
         {"j", {InstructionType::J_TYPE_L, InstructionCode::J, 4}},
@@ -115,7 +115,12 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
-        case InstructionType::I_TYPE_S_T_I:
+        case InstructionType::I_TYPE_S_T_L:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABEL_REF},
+                                args))
+                throw std::runtime_error("Invalid format for I-Type instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::I_TYPE_T_S_I:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::IMMEDIATE},
                                 args))
