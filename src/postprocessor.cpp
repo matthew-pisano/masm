@@ -169,20 +169,25 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
     std::vector<Token> macroLabelDefs;
     const std::string posStr = std::to_string(pos);
 
-    for (std::vector<Token>& bodyLine : mangledMacro.body) {
-        for (Token& bodyToken : bodyLine) {
+    // Gather and mangle label definitions first
+    for (std::vector<Token>& bodyLine : mangledMacro.body)
+        for (Token& bodyToken : bodyLine)
             if (bodyToken.type == TokenType::LABEL_DEF) {
                 macroLabelDefs.emplace_back(TokenType::LABEL_REF, bodyToken.value);
                 bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
-            } else if (bodyToken.type == TokenType::LABEL_REF) {
+            }
+
+    // Next mangle label references
+    for (std::vector<Token>& bodyLine : mangledMacro.body)
+        for (Token& bodyToken : bodyLine)
+            if (bodyToken.type == TokenType::LABEL_REF) {
                 auto it = std::ranges::find(macroLabelDefs, bodyToken);
+                // If label is from outside macro
                 if (it == macroLabelDefs.end())
                     continue;
 
                 bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
             }
-        }
-    }
 
     return mangledMacro;
 }
