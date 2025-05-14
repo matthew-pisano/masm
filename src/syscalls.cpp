@@ -64,7 +64,7 @@ void printCharSyscall(State state, std::ostream& ostream) {
 void readCharSyscall(State state, std::istream& istream) {
     char c;
     istream.get(c);
-    state.registers[Register::V0] = static_cast<uint32_t>(c);
+    state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }
 
 
