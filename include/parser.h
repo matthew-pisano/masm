@@ -31,7 +31,7 @@ class Parser {
      * @return The memory allocation associated with the instruction
      * @throw runtime_error When an instruction is malformed
      */
-    std::vector<std::byte> parseInstruction(uint32_t loc, const Token& instrToken,
+    std::vector<std::byte> parseInstruction(uint32_t& loc, const Token& instrToken,
                                             std::vector<Token>& args);
 
     /**
@@ -81,7 +81,7 @@ class Parser {
      * @return The memory allocation associated with the pseudo instruction
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
-    std::vector<std::byte> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
+    std::vector<std::byte> parsePseudoInstruction(uint32_t& loc, const std::string& instructionName,
                                                   const std::vector<Token>& args);
 
     /**
@@ -94,7 +94,7 @@ class Parser {
      * @param checkEq Whether the branch equal instruction is used for this branch type
      * @return The memory allocation associated with the branch pseudo instruction
      */
-    std::vector<std::byte> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
+    std::vector<std::byte> parseBranchPseudoInstruction(uint32_t& loc, const Token& reg1,
                                                         const Token& reg2, const Token& labelAddr,
                                                         bool checkLt, bool checkEq);
 

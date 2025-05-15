@@ -41,7 +41,7 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
 void Parser::parseLine(MemLayout& layout, MemSection& currSection,
                        const std::vector<Token>& tokenLine) {
     // Get next open location in memory
-    const uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
+    uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
 
     const Token& firstToken = tokenLine[0];
     const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
@@ -74,7 +74,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection,
 }
 
 
-std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
+std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& instrToken,
                                                 std::vector<Token>& args) {
 
     // Throw error if pattern for instruction is invalid
@@ -165,7 +165,7 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
                                  static_cast<uint32_t>(InstructionCode::BNE)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
         // Branch instructions are offset by 4 bytes so divide by 4
-        const int32_t offset = (immediate - static_cast<int32_t>(loc) - 8) >> 2;
+        const int32_t offset = (immediate - static_cast<int32_t>(loc) - 4) >> 2;
         if (offset < -32768 || offset > 32767)
             throw std::runtime_error("Branch instruction offset out of range");
         immediate = static_cast<int32_t>(offset);
@@ -190,7 +190,7 @@ std::vector<std::byte> Parser::parseJTypeInstruction(const uint32_t opcode,
 std::vector<std::byte> Parser::parseSyscallInstruction() { return i32ToBEByte(12); }
 
 
-std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
+std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
                                                       const std::string& instructionName,
                                                       const std::vector<Token>& args) {
     // li $t0, imm -> addiu $t0, $zero, imm
@@ -207,6 +207,8 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
                                            {TokenType::IMMEDIATE, std::to_string(upperBytes)}};
         std::vector<std::byte> luiBytes =
                 parseInstruction(loc, {TokenType::INSTRUCTION, "lui"}, modifiedArgs);
+
+        loc += 4; // Increment location since we have added an instruction
 
         modifiedArgs = {args[0],
                         {TokenType::REGISTER, "at"},
@@ -250,7 +252,7 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
 }
 
 
-std::vector<std::byte> Parser::parseBranchPseudoInstruction(const uint32_t loc, const Token& reg1,
+std::vector<std::byte> Parser::parseBranchPseudoInstruction(uint32_t& loc, const Token& reg1,
                                                             const Token& reg2,
                                                             const Token& labelAddr,
                                                             const bool checkLt,
@@ -264,6 +266,8 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(const uint32_t loc, 
 
     std::vector<std::byte> sltBytes =
             parseInstruction(loc, {TokenType::INSTRUCTION, "slt"}, modifiedArgs);
+
+    loc += 4; // Increment location since we have added an instruction
 
     // Recover address from parsed label
     const std::string labelName = labelMap.lookupLabel(std::stoi(labelAddr.value));
