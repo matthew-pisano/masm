@@ -7,25 +7,29 @@
 #include <stdexcept>
 
 
-int32_t Memory::wordAt(const uint32_t index) {
+int32_t Memory::wordAt(const uint32_t index) const {
     if (index % 4 != 0)
         throw std::runtime_error("Invalid word access at " + std::to_string(index));
 
-    return static_cast<int32_t>(memory[index]) << 24 |
-           static_cast<int32_t>(memory[index + 1]) << 16 |
-           static_cast<int32_t>(memory[index + 2]) << 8 | static_cast<int32_t>(memory[index + 3]);
+    return static_cast<int32_t>(memory.at(index)) << 24 |
+           static_cast<int32_t>(memory.at(index + 1)) << 16 |
+           static_cast<int32_t>(memory.at(index + 2)) << 8 |
+           static_cast<int32_t>(memory.at(index + 3));
 }
 
 
-uint16_t Memory::halfAt(const uint32_t index) {
+uint16_t Memory::halfAt(const uint32_t index) const {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
 
-    return static_cast<uint16_t>(memory[index]) << 8 | static_cast<uint16_t>(memory[index + 1]);
+    return static_cast<uint16_t>(memory.at(index)) << 8 |
+           static_cast<uint16_t>(memory.at(index + 1));
 }
 
 
-uint8_t Memory::byteAt(const uint32_t index) { return static_cast<uint8_t>(memory[index]); }
+uint8_t Memory::byteAt(const uint32_t index) const {
+    return static_cast<uint8_t>(memory.at(index));
+}
 
 
 void Memory::wordTo(const uint32_t index, const int32_t value) {

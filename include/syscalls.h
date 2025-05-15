@@ -28,21 +28,21 @@ enum class Syscall {
  * @param state The current state of the interpreter
  * @param ostream The output stream to print to
  */
-void printIntSyscall(State state, std::ostream& ostream);
+void printIntSyscall(const State& state, std::ostream& ostream);
 
 /**
  * Prints the null-terminated string stored in the memory at the address in $a0 to the console
  * @param state The current state of the interpreter
  * @param ostream The output stream to print to
  */
-void printStringSyscall(State state, std::ostream& ostream);
+void printStringSyscall(const State& state, std::ostream& ostream);
 
 /**
  * Reads an integer from the console and stores it in the register $v0
  * @param state The current state of the interpreter
  * @param istream The input stream to read from
  */
-void readIntSyscall(State state, std::istream& istream);
+void readIntSyscall(State& state, std::istream& istream);
 
 /**
  * Reads a string from the console and stores it in the memory at the address in $a0 up to the
@@ -50,7 +50,7 @@ void readIntSyscall(State state, std::istream& istream);
  * @param state The current state of the interpreter
  * @param istream The input stream to read from
  */
-void readStringSyscall(State state, std::istream& istream);
+void readStringSyscall(State& state, std::istream& istream);
 
 /**
  * Exits the program with the exit code 0
@@ -62,19 +62,19 @@ void exitSyscall();
  * @param state The current state of the interpreter
  * @param ostream The output stream to print to
  */
-void printCharSyscall(State state, std::ostream& ostream);
+void printCharSyscall(const State& state, std::ostream& ostream);
 
 /**
  * Reads a character from the console and stores it in the register $v0
  * @param state The current state of the interpreter
  * @param istream The input stream to read from
  */
-void readCharSyscall(State state, std::istream& istream);
+void readCharSyscall(State& state, std::istream& istream);
 
 /**
  * Exits the program with the exit code stored in $a0
  * @param state The current state of the interpreter
  */
-void exitValSyscall(State state);
+void exitValSyscall(const State& state);
 
 #endif // SYSCALLS_H

@@ -1,13 +1,38 @@
-
-
 #include <iostream>
 #include <string>
+#include <termios.h>
+#include <unistd.h>
 #include <vector>
 
 #include "CLI/CLI.hpp"
 #include "fileio.h"
 #include "interpreter.h"
 #include "parser.h"
+
+
+// Function to change terminal settings
+void enableRawMode() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+    // Turn off canonical mode and echo mode
+    term.c_lflag &= ~(ICANON);
+    // Set minimum number of input bytes and timeout
+    term.c_cc[VMIN] = 1; // Wait for at least one byte
+    term.c_cc[VTIME] = 0; // No timeout
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
+}
+
+
+// Function to restore terminal settings
+void disableRawMode() {
+    termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
+    // Restore canonical mode and echo mode
+    term.c_lflag |= (ICANON);
+
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
+}
 
 
 int main(const int argc, char* argv[]) {
@@ -25,6 +50,10 @@ int main(const int argc, char* argv[]) {
         return app.exit(e);
     }
 
+    // Set terminal to raw mode
+    enableRawMode();
+
+    int exitCode = 1;
     try {
         std::vector<std::vector<std::string>> programLines;
         programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
@@ -37,10 +66,13 @@ int main(const int argc, char* argv[]) {
         const MemLayout layout = parser.parse(program);
 
         Interpreter interpreter{};
-        const int exitCode = interpreter.interpret(layout);
-        return exitCode;
+        exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
-        return 1;
     }
+
+    // Restore terminal settings
+    disableRawMode();
+
+    return exitCode;
 }

@@ -39,21 +39,21 @@ public:
      * @param index The word-aligned address to read from
      * @return The word stored at the given address
      */
-    int32_t wordAt(uint32_t index);
+    int32_t wordAt(uint32_t index) const;
 
     /**
      * Gets the halfword stored at the given halfword-aligned memory address
      * @param index The halfword-aligned address to read from
      * @return The halfword stored at the given address
      */
-    uint16_t halfAt(uint32_t index);
+    uint16_t halfAt(uint32_t index) const;
 
     /**
      * Gets the byte stored at the given byte-aligned memory address
      * @param index The byte-aligned address to read from
      * @return The byte stored at the given address
      */
-    uint8_t byteAt(uint32_t index);
+    uint8_t byteAt(uint32_t index) const;
 
     /**
      * Sets the word at the given word-aligned memory address

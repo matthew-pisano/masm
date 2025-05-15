@@ -6,15 +6,16 @@
 
 #include <iostream>
 #include <ostream>
+#include <unistd.h>
 
 
-void printIntSyscall(State state, std::ostream& ostream) {
+void printIntSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     ostream << value;
 }
 
 
-void printStringSyscall(State state, std::ostream& ostream) {
+void printStringSyscall(const State& state, std::ostream& ostream) {
     int32_t address = state.registers[Register::A0];
     while (true) {
         const char c = state.memory.byteAt(address);
@@ -23,10 +24,11 @@ void printStringSyscall(State state, std::ostream& ostream) {
         ostream << c;
         address++;
     }
+    ostream.flush();
 }
 
 
-void readIntSyscall(State state, std::istream& istream) {
+void readIntSyscall(State& state, std::istream& istream) {
     std::string input;
     std::getline(istream, input);
     try {
@@ -39,7 +41,7 @@ void readIntSyscall(State state, std::istream& istream) {
 }
 
 
-void readStringSyscall(State state, std::istream& istream) {
+void readStringSyscall(State& state, std::istream& istream) {
     const int32_t address = state.registers[Register::A0];
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
@@ -52,23 +54,29 @@ void readStringSyscall(State state, std::istream& istream) {
     }
 }
 
+
 void exitSyscall() { throw ExecExit("Program exited with code " + std::to_string(0), 0); }
 
 
-void printCharSyscall(State state, std::ostream& ostream) {
+void printCharSyscall(const State& state, std::ostream& ostream) {
     const char c = static_cast<char>(state.registers[Register::A0]);
     ostream << c;
 }
 
 
-void readCharSyscall(State state, std::istream& istream) {
+void readCharSyscall(State& state, std::istream& istream) {
     char c;
-    istream.get(c);
+    if (&istream != &std::cin)
+        istream.get(c);
+    else {
+        read(STDIN_FILENO, &c, 1);
+        std::cout.flush();
+    }
     state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }
 
 
-void exitValSyscall(State state) {
+void exitValSyscall(const State& state) {
     const int32_t exitCode = state.registers[Register::A0];
     throw ExecExit("Program exited with code " + std::to_string(exitCode), exitCode);
 }
