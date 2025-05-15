@@ -89,13 +89,13 @@ class Parser {
      * @param loc The location in which the instruction will be placed into memory
      * @param reg1 The first register token
      * @param reg2 The second register token
-     * @param label The label token for the branch
+     * @param labelAddr The label address token for the branch
      * @param checkLt Whether the set less than instruction is used for this branch type
      * @param checkEq Whether the branch equal instruction is used for this branch type
      * @return The memory allocation associated with the branch pseudo instruction
      */
     std::vector<std::byte> parseBranchPseudoInstruction(uint32_t loc, const Token& reg1,
-                                                        const Token& reg2, const Token& label,
+                                                        const Token& reg2, const Token& labelAddr,
                                                         bool checkLt, bool checkEq);
 
     /**

@@ -22,6 +22,15 @@ void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
 }
 
 
+std::string LabelMap::lookupLabel(const uint32_t address) const {
+    for (const std::pair<const std::string, uint32_t>& pair : labelMap) {
+        if (pair.second == address)
+            return pair.first;
+    }
+    throw std::runtime_error("No label found for address " + std::to_string(address));
+}
+
+
 void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
     MemSection currSection = MemSection::TEXT;
     std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};

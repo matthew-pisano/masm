@@ -251,7 +251,8 @@ std::vector<std::byte> Parser::parsePseudoInstruction(const uint32_t loc,
 
 
 std::vector<std::byte> Parser::parseBranchPseudoInstruction(const uint32_t loc, const Token& reg1,
-                                                            const Token& reg2, const Token& label,
+                                                            const Token& reg2,
+                                                            const Token& labelAddr,
                                                             const bool checkLt,
                                                             const bool checkEq) {
     std::vector<Token> modifiedArgs;
@@ -264,7 +265,11 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(const uint32_t loc, 
     std::vector<std::byte> sltBytes =
             parseInstruction(loc, {TokenType::INSTRUCTION, "slt"}, modifiedArgs);
 
-    modifiedArgs = {{TokenType::REGISTER, "at"}, {TokenType::REGISTER, "zero"}, label};
+    // Recover address from parsed label
+    const std::string labelName = labelMap.lookupLabel(std::stoi(labelAddr.value));
+    modifiedArgs = {{TokenType::REGISTER, "at"},
+                    {TokenType::REGISTER, "zero"},
+                    {TokenType::LABEL_REF, labelName}};
     std::vector<std::byte> branchBytes;
     // Swap branch instruction when including equal in comparrison or not
     if (checkEq)

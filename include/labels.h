@@ -30,6 +30,14 @@ public:
     void resolveLabels(std::vector<Token>& instructionArgs);
 
     /**
+     * Looks up the first label corresponding to an address
+     * @param address The address to look up
+     * @return The label corresponding to the address
+     * @throw runtime_error When no label is found for the address
+     */
+    [[nodiscard]] std::string lookupLabel(uint32_t address) const;
+
+    /**
      * Populates the label map prior to processing using static allocations for the given tokens
      * @param tokens The program tokens
      * @throw runtime_error When a duplicate label definition is detected
