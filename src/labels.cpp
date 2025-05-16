@@ -4,6 +4,7 @@
 
 #include "labels.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 #include "directive.h"
@@ -34,6 +35,7 @@ std::string LabelMap::lookupLabel(const uint32_t address) const {
 void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
     MemSection currSection = MemSection::TEXT;
     std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
+    std::vector<std::string> pendingLabels;
 
     for (const std::vector<Token>& line : tokens) {
         if (line.empty())
@@ -50,19 +52,29 @@ void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::ALLOC_DIRECTIVE: {
-                memSizes[currSection] +=
-                        parseAllocDirective(memSizes[currSection], firstToken, args).size();
+                const AlignedAllocation alloc =
+                        parsePaddedAllocDirective(memSizes[currSection], firstToken, args);
+                // Assign labels to the following byte allocation plus the section offset
+                for (const std::string& label : pendingLabels)
+                    labelMap[label] =
+                            memSectionOffset(currSection) + memSizes[currSection] + alloc.padding;
+                pendingLabels.clear();
+                memSizes[currSection] += alloc.mem.size();
                 break;
             }
             case TokenType::INSTRUCTION:
+                // Assign labels to the following byte allocation plus the section offset
+                for (const std::string& label : pendingLabels)
+                    labelMap[label] = memSectionOffset(currSection) + memSizes[currSection];
+                pendingLabels.clear();
                 // Get size of instruction from map without parsing
                 memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
                 break;
             case TokenType::LABEL_DEF: {
-                if (labelMap.contains(firstToken.value))
+                if (labelMap.contains(firstToken.value) ||
+                    std::ranges::find(pendingLabels, firstToken.value) != pendingLabels.end())
                     throw std::runtime_error("Duplicate label " + firstToken.value);
-                // Assign label to the following byte allocation plus the section offset
-                labelMap[firstToken.value] = memSectionOffset(currSection) + memSizes[currSection];
+                pendingLabels.push_back(firstToken.value);
                 break;
             }
             default:

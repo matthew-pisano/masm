@@ -47,14 +47,16 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
 }
 
 
-std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken,
-                                           const std::vector<Token>& args) {
+AlignedAllocation parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
+                                            const std::vector<Token>& args) {
 
     // Throw error if pattern for directive is invalid
     validateAllocDirective(dirToken, args);
 
     const std::string dirName = dirToken.value;
     std::vector<std::byte> bytes = {};
+    // Keep track of padding before real allocation
+    size_t padding = 0;
 
     // Insert padding to align next allocation
     if (dirName == "align") {
@@ -80,6 +82,7 @@ std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirT
     else if (dirName == "double") {
         for (const Token& arg : args) {
             std::vector<std::byte> doubleBytes = parseAllocBlock(loc, 8, 8);
+            padding = doubleBytes.size() - 8;
             populateMemBlock(doubleBytes, std::stod(arg.value));
             bytes.insert(bytes.end(), doubleBytes.begin(), doubleBytes.end());
         }
@@ -87,15 +90,17 @@ std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirT
     // Insert a float
     else if (dirName == "float") {
         for (const Token& arg : args) {
-            std::vector<std::byte> doubleBytes = parseAllocBlock(loc, 4, 4);
-            populateMemBlock(doubleBytes, std::stof(arg.value));
-            bytes.insert(bytes.end(), doubleBytes.begin(), doubleBytes.end());
+            std::vector<std::byte> floatBytes = parseAllocBlock(loc, 4, 4);
+            padding = floatBytes.size() - 4;
+            populateMemBlock(floatBytes, std::stof(arg.value));
+            bytes.insert(bytes.end(), floatBytes.begin(), floatBytes.end());
         }
     }
     // Insert a half word
     else if (dirName == "half") {
         for (const Token& arg : args) {
             std::vector<std::byte> halfBytes = parseAllocBlock(loc, 2, 2);
+            padding = halfBytes.size() - 2;
             populateMemBlock(halfBytes, static_cast<uint16_t>(std::stoi(arg.value)));
             bytes.insert(bytes.end(), halfBytes.begin(), halfBytes.end());
         }
@@ -108,13 +113,20 @@ std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirT
     else if (dirName == "word") {
         for (const Token& arg : args) {
             std::vector<std::byte> wordBytes = parseAllocBlock(loc, 4, 4);
+            padding = wordBytes.size() - 4;
             populateMemBlock(wordBytes, static_cast<uint32_t>(std::stoi(arg.value)));
             bytes.insert(bytes.end(), wordBytes.begin(), wordBytes.end());
         }
     } else
         throw std::runtime_error("Unsupported directive " + dirName);
 
-    return bytes;
+    return {bytes, padding};
+}
+
+
+std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken,
+                                           const std::vector<Token>& args) {
+    return parsePaddedAllocDirective(loc, dirToken, args).mem;
 }
 
 

@@ -1,5 +1,6 @@
 .data
 
+.space 2
 small: .word 0
 large: .word 65536
 
