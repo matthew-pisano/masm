@@ -322,5 +322,7 @@ void Interpreter::syscall() {
         case Syscall::EXIT_VAL:
             exitValSyscall(state);
             break;
+        default:
+            throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
     }
 }
