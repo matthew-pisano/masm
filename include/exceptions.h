@@ -12,8 +12,12 @@
  * A base class for all MASM exceptions
  */
 class MasmException : public std::runtime_error {
+    size_t lineno;
+
+    explicit MasmException(const std::string& message, const size_t lineno) :
+        std::runtime_error(message), lineno(lineno) {}
+
 public:
-    explicit MasmException(const std::string& message) : std::runtime_error(message) {}
     [[nodiscard]] const char* what() const noexcept override { return std::runtime_error::what(); }
 };
 
@@ -23,7 +27,8 @@ public:
  */
 class MasmSyntaxError final : public MasmException {
 public:
-    explicit MasmSyntaxError(const std::string& message) : MasmException(message) {}
+    explicit MasmSyntaxError(const std::string& message, const size_t lineno) :
+        MasmException(message, lineno) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 
@@ -33,7 +38,8 @@ public:
  */
 class MasmRuntimeError final : public MasmException {
 public:
-    explicit MasmRuntimeError(const std::string& message) : MasmException(message) {}
+    explicit MasmRuntimeError(const std::string& message, const size_t lineno) :
+        MasmException(message, lineno) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 
