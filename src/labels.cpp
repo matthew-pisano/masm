@@ -52,14 +52,14 @@ void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
                 break;
             }
             case TokenType::ALLOC_DIRECTIVE: {
-                const AlignedAllocation alloc =
+                const std::tuple<std::vector<std::byte>, size_t> alloc =
                         parsePaddedAllocDirective(memSizes[currSection], firstToken, args);
                 // Assign labels to the following byte allocation plus the section offset
                 for (const std::string& label : pendingLabels)
-                    labelMap[label] =
-                            memSectionOffset(currSection) + memSizes[currSection] + alloc.padding;
+                    labelMap[label] = memSectionOffset(currSection) + memSizes[currSection] +
+                                      std::get<1>(alloc);
                 pendingLabels.clear();
-                memSizes[currSection] += alloc.mem.size();
+                memSizes[currSection] += std::get<0>(alloc).size();
                 break;
             }
             case TokenType::INSTRUCTION:

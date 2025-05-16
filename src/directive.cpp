@@ -47,8 +47,9 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
 }
 
 
-AlignedAllocation parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
-                                            const std::vector<Token>& args) {
+std::tuple<std::vector<std::byte>, size_t>
+parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
+                          const std::vector<Token>& args) {
 
     // Throw error if pattern for directive is invalid
     validateAllocDirective(dirToken, args);
@@ -126,7 +127,7 @@ AlignedAllocation parsePaddedAllocDirective(const uint32_t loc, const Token& dir
 
 std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken,
                                            const std::vector<Token>& args) {
-    return parsePaddedAllocDirective(loc, dirToken, args).mem;
+    return std::get<0>(parsePaddedAllocDirective(loc, dirToken, args));
 }
 
 

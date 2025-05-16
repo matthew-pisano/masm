@@ -12,15 +12,6 @@
 
 
 /**
- * Class that represents a memory allocation and specifies any left-padding
- */
-struct AlignedAllocation {
-    std::vector<std::byte> mem;
-    size_t padding;
-};
-
-
-/**
  * Validates the arguments of a directive to ensure they match the expected pattern
  * @param dirToken The token for the directive
  * @param args Any argument tokens to pass to the directive
@@ -35,11 +26,11 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
  * @param loc The location in which the directive will be placed into memory
  * @param dirToken The token for the directive
  * @param args Any argument tokens to pass to the directive
- * @return A struct containing the memory allocation associated with the directive and any padding
+ * @return A tuple containing the memory allocation associated with the directive and any padding
  * @throw runtime_error When the arguments for a directive are malformed
  */
-AlignedAllocation parsePaddedAllocDirective(uint32_t loc, const Token& dirToken,
-                                            const std::vector<Token>& args);
+std::tuple<std::vector<std::byte>, size_t>
+parsePaddedAllocDirective(uint32_t loc, const Token& dirToken, const std::vector<Token>& args);
 
 /**
  * Parses a directive and its arguments into bytes that can be allocated to memory
