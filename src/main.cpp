@@ -10,9 +10,11 @@
 #include "parser.h"
 
 
-// Function to change terminal settings
+/**
+ * Enable raw mode for terminal input to get single characters without newline
+ */
 void enableRawMode() {
-    termios term;
+    termios term{};
     tcgetattr(STDIN_FILENO, &term);
     // Turn off canonical mode and echo mode
     term.c_lflag &= ~(ICANON);
@@ -23,20 +25,19 @@ void enableRawMode() {
 }
 
 
-// Function to restore terminal settings
+/**
+ * Disable raw mode for terminal input to restore default behavior
+ */
 void disableRawMode() {
-    termios term;
+    termios term{};
     tcgetattr(STDIN_FILENO, &term);
-
     // Restore canonical mode and echo mode
     term.c_lflag |= (ICANON);
-
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
 }
 
 
 int main(const int argc, char* argv[]) {
-
     std::vector<std::string> inputFileNames;
 
     CLI::App app{"masm - MIPS Interpreter", "masm"};
