@@ -104,7 +104,7 @@ class Parser {
      * @param currSection The current section of memory being populated
      * @param tokenLine The line of tokens to parse
      */
-    void parseLine(MemLayout& layout, MemSection& currSection, const std::vector<Token>& tokenLine);
+    void parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine);
 
 public:
     /**
@@ -113,7 +113,7 @@ public:
      * @return The memory allocations associated with the program
      * @throw runtime_error When an error is encountered during parsing
      */
-    MemLayout parse(const std::vector<std::vector<Token>>& tokens);
+    MemLayout parse(const std::vector<SourceLine>& tokens);
 };
 
 #endif // PARSER_H

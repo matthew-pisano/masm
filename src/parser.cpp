@@ -13,7 +13,7 @@
 #include "utils.h"
 
 
-MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
+MemLayout Parser::parse(const std::vector<SourceLine>& tokens) {
     MemLayout layout;
 
     MemSection currSection = MemSection::TEXT;
@@ -24,7 +24,7 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
 
     for (size_t i = 0; i < tokens.size(); ++i) {
         // Skip empty lines
-        if (tokens[i].empty())
+        if (tokens[i].tokens.empty())
             continue;
 
         try {
@@ -38,13 +38,12 @@ MemLayout Parser::parse(const std::vector<std::vector<Token>>& tokens) {
 }
 
 
-void Parser::parseLine(MemLayout& layout, MemSection& currSection,
-                       const std::vector<Token>& tokenLine) {
+void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine) {
     // Get next open location in memory
     uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
 
-    const Token& firstToken = tokenLine[0];
-    const std::vector unfilteredArgs(tokenLine.begin() + 1, tokenLine.end());
+    const Token& firstToken = tokenLine.tokens[0];
+    const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
     switch (firstToken.type) {

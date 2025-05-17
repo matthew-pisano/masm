@@ -42,7 +42,7 @@ public:
      * @param tokens The program tokens
      * @throw runtime_error When a duplicate label definition is detected
      */
-    void populateLabelMap(const std::vector<std::vector<Token>>& tokens);
+    void populateLabelMap(const std::vector<SourceLine>& tokens);
 };
 
 #endif // LABELS_H

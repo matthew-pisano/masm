@@ -32,17 +32,17 @@ std::string LabelMap::lookupLabel(const uint32_t address) const {
 }
 
 
-void LabelMap::populateLabelMap(const std::vector<std::vector<Token>>& tokens) {
+void LabelMap::populateLabelMap(const std::vector<SourceLine>& tokens) {
     MemSection currSection = MemSection::TEXT;
     std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
     std::vector<std::string> pendingLabels;
 
-    for (const std::vector<Token>& line : tokens) {
-        if (line.empty())
+    for (const SourceLine& line : tokens) {
+        if (line.tokens.empty())
             continue;
 
-        const Token& firstToken = line[0];
-        const std::vector unfilteredArgs(line.begin() + 1, line.end());
+        const Token& firstToken = line.tokens[0];
+        const std::vector unfilteredArgs(line.tokens.begin() + 1, line.tokens.end());
         std::vector<Token> args = filterTokenList(unfilteredArgs);
         switch (firstToken.type) {
             case TokenType::SEC_DIRECTIVE: {
