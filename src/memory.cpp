@@ -43,7 +43,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
 }
 
 
-void Memory::halfTo(const uint32_t index, const uint16_t value) {
+void Memory::halfTo(const uint32_t index, const int16_t value) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
 
@@ -52,7 +52,7 @@ void Memory::halfTo(const uint32_t index, const uint16_t value) {
 }
 
 
-void Memory::byteTo(const uint32_t index, const uint8_t value) {
+void Memory::byteTo(const uint32_t index, const int8_t value) {
     memory[index] = static_cast<std::byte>(value);
 }
 

@@ -8,6 +8,8 @@
 #include <ostream>
 #include <unistd.h>
 
+#include "exceptions.h"
+
 
 void printIntSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];

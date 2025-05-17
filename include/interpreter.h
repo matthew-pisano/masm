@@ -14,24 +14,6 @@
 
 
 /**
- * Execution to indicate that the program has terminated successfully eith the given code
- */
-class ExecExit final : public std::runtime_error {
-    int errorCode;
-
-public:
-    explicit ExecExit(const std::string& message, const int code) :
-        std::runtime_error(message), errorCode(code) {}
-
-    /**
-     * Get the error code of the exception
-     * @return The error code
-     */
-    [[nodiscard]] int code() const { return errorCode; }
-};
-
-
-/**
  * The state of the interpreter, which includes the register file and memory
  */
 struct State {

@@ -67,14 +67,14 @@ public:
      * @param index The halfword-aligned address to write to
      * @param value The halfword to write
      */
-    void halfTo(uint32_t index, uint16_t value);
+    void halfTo(uint32_t index, int16_t value);
 
     /**
      * Sets the byte at the given byte-aligned memory address
      * @param index The byte-aligned address to write to
      * @param value The byte to write
      */
-    void byteTo(uint32_t index, uint8_t value);
+    void byteTo(uint32_t index, int8_t value);
 
     /**
      * Loads a program and initial static data into memory

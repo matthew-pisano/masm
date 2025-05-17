@@ -67,7 +67,7 @@ std::vector<SourceLine> Tokenizer::tokenizeFile(const std::vector<std::string>& 
     for (size_t i = 0; i < rawLines.size(); ++i) {
         const std::string& rawLine = rawLines[i];
         std::vector<SourceLine> tokenizedLines;
-        tokenizedLines = tokenizeLine(rawLine, i);
+        tokenizedLines = tokenizeLine(rawLine, i + 1);
         // Skip empty or comment lines
         if (tokenizedLines.empty())
             continue;
