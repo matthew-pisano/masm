@@ -67,11 +67,6 @@ class Interpreter {
      */
     void execJType(uint32_t opCode, uint32_t address);
 
-    /**
-     * Executes a syscall based on the value in $v0
-     */
-    void syscall();
-
 public:
     Interpreter() : istream(std::cin), ostream(std::cout) {}
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}

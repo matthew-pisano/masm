@@ -24,6 +24,15 @@ enum class Syscall {
 
 
 /**
+ * Executes the system call based on the value in the $v0 register
+ * @param state The current state of the interpreter
+ * @param istream The input stream to read from
+ * @param ostream The output stream to print to
+ */
+void execSyscall(State& state, std::istream& istream, std::ostream& ostream);
+
+
+/**
  * Prints the integer stored in the register $a0 to the console
  * @param state The current state of the interpreter
  * @param ostream The output stream to print to

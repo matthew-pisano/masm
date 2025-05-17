@@ -11,6 +11,39 @@
 #include "exceptions.h"
 
 
+void execSyscall(State& state, std::istream& istream, std::ostream& ostream) {
+    int32_t syscallCode = state.registers[Register::V0];
+    switch (static_cast<Syscall>(syscallCode)) {
+        case Syscall::PRINT_INT:
+            printIntSyscall(state, ostream);
+            break;
+        case Syscall::PRINT_STRING:
+            printStringSyscall(state, ostream);
+            break;
+        case Syscall::READ_INT:
+            readIntSyscall(state, istream);
+            break;
+        case Syscall::READ_STRING:
+            readStringSyscall(state, istream);
+            break;
+        case Syscall::EXIT:
+            exitSyscall();
+            break;
+        case Syscall::PRINT_CHAR:
+            printCharSyscall(state, ostream);
+            break;
+        case Syscall::READ_CHAR:
+            readCharSyscall(state, istream);
+            break;
+        case Syscall::EXIT_VAL:
+            exitValSyscall(state);
+            break;
+        default:
+            throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
+    }
+}
+
+
 void printIntSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     ostream << value;

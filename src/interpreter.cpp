@@ -38,7 +38,7 @@ void Interpreter::step() {
     try {
         if (instruction == 0x0000000C) {
             // Syscall instruction
-            syscall();
+            execSyscall(state, istream, ostream);
             return;
         }
 
@@ -286,37 +286,4 @@ void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
 
     // Jump to the target address
     state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | address << 2;
-}
-
-
-void Interpreter::syscall() {
-    int32_t syscallCode = state.registers[Register::V0];
-    switch (static_cast<Syscall>(syscallCode)) {
-        case Syscall::PRINT_INT:
-            printIntSyscall(state, ostream);
-            break;
-        case Syscall::PRINT_STRING:
-            printStringSyscall(state, ostream);
-            break;
-        case Syscall::READ_INT:
-            readIntSyscall(state, istream);
-            break;
-        case Syscall::READ_STRING:
-            readStringSyscall(state, istream);
-            break;
-        case Syscall::EXIT:
-            exitSyscall();
-            break;
-        case Syscall::PRINT_CHAR:
-            printCharSyscall(state, ostream);
-            break;
-        case Syscall::READ_CHAR:
-            readCharSyscall(state, istream);
-            break;
-        case Syscall::EXIT_VAL:
-            exitValSyscall(state);
-            break;
-        default:
-            throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
-    }
 }
