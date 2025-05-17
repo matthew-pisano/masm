@@ -20,7 +20,7 @@ void printIntSyscall(const State& state, std::ostream& ostream) {
 void printStringSyscall(const State& state, std::ostream& ostream) {
     int32_t address = state.registers[Register::A0];
     while (true) {
-        const char c = state.memory.byteAt(address);
+        const unsigned char c = state.memory.byteAt(address);
         if (c == '\0')
             break;
         ostream << c;
