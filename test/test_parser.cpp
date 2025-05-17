@@ -40,14 +40,9 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
     for (const std::string& sourceFileName : sourceFileNames)
         sourceLines.push_back(readFileLines(sourceFileName));
     const std::vector<SourceLine> program = Tokenizer::tokenize(sourceLines);
-    std::vector<std::vector<Token>> vecProgram;
-    vecProgram.reserve(program.size());
-    for (const SourceLine& line : program) {
-        vecProgram.push_back(line.tokens);
-    }
 
     Parser parser{};
-    MemLayout actualMem = parser.parse(vecProgram);
+    MemLayout actualMem = parser.parse(program);
     REQUIRE(expectedMem.size() == actualMem.size());
     for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem) {
         REQUIRE(actualMem.contains(pair.first));

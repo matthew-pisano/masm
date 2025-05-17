@@ -9,28 +9,31 @@
 #include <stdexcept>
 
 #include "directive.h"
+#include "exceptions.h"
 #include "instruction.h"
 #include "utils.h"
 
 
-MemLayout Parser::parse(const std::vector<SourceLine>& tokens) {
+MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
     MemLayout layout;
 
     MemSection currSection = MemSection::TEXT;
     layout[MemSection::TEXT] = {};
+    try {
+        // Resolve all labels before parsing instructions
+        labelMap.populateLabelMap(tokenLines);
+    } catch (const std::runtime_error& e) {
+        throw MasmSyntaxError(std::string(e.what()));
+    }
 
-    // Resolve all labels before parsing instructions
-    labelMap.populateLabelMap(tokens);
-
-    for (size_t i = 0; i < tokens.size(); ++i) {
+    for (const auto& tokenLine : tokenLines) {
         // Skip empty lines
-        if (tokens[i].tokens.empty())
+        if (tokenLine.tokens.empty())
             continue;
-
         try {
-            parseLine(layout, currSection, tokens[i]);
+            parseLine(layout, currSection, tokenLine);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
+            throw MasmSyntaxError(e.what(), tokenLine.lineno);
         }
     }
 
