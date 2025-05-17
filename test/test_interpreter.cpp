@@ -27,10 +27,16 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
     for (const std::string& sourceFileName : sourceFileNames)
         sourceLines.push_back(readFileLines(sourceFileName));
 
-    const std::vector<std::vector<Token>> program = Tokenizer::tokenize(sourceLines);
+    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceLines);
+
+    std::vector<std::vector<Token>> vecProgram;
+    vecProgram.reserve(program.size());
+    for (const SourceLine& line : program) {
+        vecProgram.push_back(line.tokens);
+    }
 
     Parser parser{};
-    const MemLayout layout = parser.parse(program);
+    const MemLayout layout = parser.parse(vecProgram);
 
     std::ostringstream oss;
     Interpreter interpreter{std::cin, oss};

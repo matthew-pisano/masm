@@ -61,6 +61,15 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
 
 
 /**
+ * Class to represent a line of source code
+ */
+struct SourceLine {
+    size_t lineno;
+    std::vector<Token> tokens;
+};
+
+
+/**
  * Class to tokenize incoming source code lines into parsable tokens
  */
 class Tokenizer {
@@ -73,35 +82,35 @@ class Tokenizer {
      * @param c The character that terminated the token
      * @param currentType The type of the current token
      * @param currentToken The current token to terminate
-     * @param tokens The vector of tokens to add the current token to
+     * @param tokens The vector of source code lines to add the current token to
      */
     static void terminateToken(char c, TokenType& currentType, std::string& currentToken,
-                               std::vector<std::vector<Token>>& tokens);
+                               std::vector<SourceLine>& tokens);
 
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
      * @param rawLine The line of source code to tokenize
-     * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @return A vector of source code lines
      * @throw runtime_error When encountering a malformed or early terminating line
      */
-    static std::vector<std::vector<Token>> tokenizeLine(const std::string& rawLine);
+    static std::vector<SourceLine> tokenizeLine(const std::string& rawLine);
 
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
      * @param rawLines The lines of source code to tokenize
-     * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @return A vector of source code lines
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    static std::vector<std::vector<Token>> tokenizeFile(const std::vector<std::string>& rawLines);
+    static std::vector<SourceLine> tokenizeFile(const std::vector<std::string>& rawLines);
 
     /**
      * Tokenizes incoming source code lines from multiple files into parsable tokens
      * @param rawFiles The lines of source code to tokenize
-     * @return A vector of vectors of tokens, where each vector represents a tokenized line
+     * @return A vector of source code lines
      * @throw runtime_error When encountering a malformed or early terminating file
      */
-    [[nodiscard]] static std::vector<std::vector<Token>>
+    [[nodiscard]] static std::vector<SourceLine>
     tokenize(const std::vector<std::vector<std::string>>& rawFiles);
 };
 

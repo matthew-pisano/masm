@@ -19,7 +19,7 @@ class Postprocessor {
      * @param tokenizedFile The tokenized file to collect and prune globals from
      */
     static void collectGlobals(std::vector<std::string>& globals,
-                               std::vector<std::vector<Token>>& tokenizedFile);
+                               std::vector<SourceLine>& tokenizedFile);
 
     /**
      * A helper function that mangles labels in the given line of tokens
@@ -28,8 +28,7 @@ class Postprocessor {
      * @param fileId The file ID to append to the label
      * @return The label declaration found, if any
      */
-    static std::string mangleLabelsInLine(std::vector<std::string>& globals,
-                                          std::vector<Token>& lineTokens,
+    static std::string mangleLabelsInLine(std::vector<std::string>& globals, SourceLine& lineTokens,
                                           const std::string& fileId);
 
     /**
@@ -37,7 +36,7 @@ class Postprocessor {
      * @param line The macro declaration line of tokens to parse
      * @return The parsed macro parameters
      */
-    static std::vector<Token> parseMacroParams(const std::vector<Token>& line);
+    static std::vector<Token> parseMacroParams(const SourceLine& line);
 
     /**
      * A struct representing a macro
@@ -45,7 +44,7 @@ class Postprocessor {
     struct Macro {
         std::string name;
         std::vector<Token> params;
-        std::vector<std::vector<Token>> body;
+        std::vector<SourceLine> body;
     };
 
     /**
@@ -55,7 +54,7 @@ class Postprocessor {
      * @param tokenizedFile The tokenized file to expand the macro in
      */
     static void expandMacro(const Macro& macro, size_t& pos,
-                            std::vector<std::vector<Token>>& tokenizedFile);
+                            std::vector<SourceLine>& tokenizedFile);
 
     /**
      * A helper function that mangles the labels in a macro
@@ -70,27 +69,27 @@ public:
      * Replaces all eqv directives with the corresponding value
      * @param tokenizedFile The tokenized file to replace eqv directives in
      */
-    static void replaceEqv(std::vector<std::vector<Token>>& tokenizedFile);
+    static void replaceEqv(std::vector<SourceLine>& tokenizedFile);
 
     /**
      * Modifies the give token line to replace the pattern of y($xx) with $xx, y to match MIPS
      * addressing mode when a close paren is reached
      * @param tokenizedFile The tokenized file to replace base addressing syntax in
      */
-    static void processBaseAddressing(std::vector<std::vector<Token>>& tokenizedFile);
+    static void processBaseAddressing(std::vector<SourceLine>& tokenizedFile);
 
     /**
      * Expands macros in the given tokenized file
      * @param tokenizedFile The tokenized file to expand macros in
      */
-    static void processMacros(std::vector<std::vector<Token>>& tokenizedFile);
+    static void processMacros(std::vector<SourceLine>& tokenizedFile);
 
     /**
      * Name mangels tokens in the given program map by adding the file ID to the label
      * @param programMap The map of file IDs to their tokenized lines
      * @throw runtime_error When the file ID is empty
      */
-    static void mangleLabels(std::map<std::string, std::vector<std::vector<Token>>>& programMap);
+    static void mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap);
 };
 
 #endif // POSTPROCESSOR_H

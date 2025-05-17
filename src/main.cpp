@@ -61,7 +61,7 @@ int main(const int argc, char* argv[]) {
         for (const std::string& fileName : inputFileNames)
             programLines.push_back(readFileLines(fileName));
 
-        const std::vector<std::vector<Token>> program = Tokenizer::tokenize(programLines);
+        const std::vector<SourceLine> program = Tokenizer::tokenize(programLines);
 
         Parser parser{};
         const MemLayout layout = parser.parse(program);

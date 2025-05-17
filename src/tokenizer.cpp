@@ -38,11 +38,10 @@ const std::array<std::string, 2> Tokenizer::secDirectives = {"data", "text"};
 const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro"};
 
 
-std::vector<std::vector<Token>>
-Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
-    std::map<std::string, std::vector<std::vector<Token>>> programMap;
+std::vector<SourceLine> Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
+    std::map<std::string, std::vector<SourceLine>> programMap;
     for (size_t i = 0; i < rawFiles.size(); ++i) {
-        std::vector<std::vector<Token>> fileTokens = tokenizeFile(rawFiles[i]);
+        std::vector<SourceLine> fileTokens = tokenizeFile(rawFiles[i]);
         Postprocessor::replaceEqv(fileTokens);
         Postprocessor::processBaseAddressing(fileTokens);
         Postprocessor::processMacros(fileTokens);
@@ -53,20 +52,20 @@ Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
     if (programMap.size() > 1)
         Postprocessor::mangleLabels(programMap);
 
-    std::vector<std::vector<Token>> program;
-    for (std::pair<const std::string, std::vector<std::vector<Token>>>& programFile : programMap)
+    std::vector<SourceLine> program;
+    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
         program.insert(program.end(), programFile.second.begin(), programFile.second.end());
 
     return program;
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenizeFile(const std::vector<std::string>& rawLines) {
-    std::vector<std::vector<Token>> tokenizedFile = {};
+std::vector<SourceLine> Tokenizer::tokenizeFile(const std::vector<std::string>& rawLines) {
+    std::vector<SourceLine> tokenizedFile = {};
 
     for (size_t i = 0; i < rawLines.size(); ++i) {
         const std::string& rawLine = rawLines[i];
-        std::vector<std::vector<Token>> tokenizedLines;
+        std::vector<SourceLine> tokenizedLines;
         try {
             tokenizedLines = tokenizeLine(rawLine);
         } catch (const std::runtime_error& e) {
@@ -76,8 +75,8 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeFile(const std::vector<std::s
         if (tokenizedLines.empty())
             continue;
 
-        for (std::vector<Token>& line : tokenizedLines) {
-            if (line.empty())
+        for (SourceLine& line : tokenizedLines) {
+            if (line.tokens.empty())
                 continue;
 
             tokenizedFile.push_back(line);
@@ -88,23 +87,23 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeFile(const std::vector<std::s
 }
 
 
-std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLine) {
+std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
-    std::vector<std::vector<Token>> tokens = {{}};
+    std::vector<SourceLine> tokens = {{}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
 
     // Append space to ensure all characters are tokenized
     for (const char c : rawLine + ' ') {
-        std::vector<Token>& tokenLine = tokens[tokens.size() - 1];
+        SourceLine& tokenLine = tokens[tokens.size() - 1];
         // When in a string, gather all characters into a single token
         if (currentType == TokenType::STRING) {
             // Terminate the string when reaching unescaped quote
             if (c == '"' && prevChar != '\\') {
                 currentType = TokenType::UNKNOWN;
-                tokenLine.push_back({TokenType::STRING, currentToken});
+                tokenLine.tokens.push_back({TokenType::STRING, currentToken});
                 currentToken.clear();
             } else {
                 // Add character to the string token
@@ -151,7 +150,8 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
         } else {
             // Set first token in line as an instruction, otherwise as a label reference
             // If the third token in an eqv directive line, also set as instruction
-            if (tokenLine.empty() || (tokenLine.size() == 2 && tokenLine[0] == eqvToken))
+            if (tokenLine.tokens.empty() ||
+                (tokenLine.tokens.size() == 2 && tokenLine.tokens[0] == eqvToken))
                 currentType = TokenType::INSTRUCTION;
             else
                 currentType = TokenType::LABEL_REF;
@@ -167,8 +167,8 @@ std::vector<std::vector<Token>> Tokenizer::tokenizeLine(const std::string& rawLi
 
 
 void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string& currentToken,
-                               std::vector<std::vector<Token>>& tokens) {
-    std::vector<Token>& tokenLine = tokens[tokens.size() - 1];
+                               std::vector<SourceLine>& tokens) {
+    SourceLine& tokenLine = tokens[tokens.size() - 1];
 
     // Assign the current token as a label definition if a colon follows
     if (c == ':')
@@ -189,7 +189,7 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
 
     // Add the current token to the vector and reset
     if (!currentToken.empty()) {
-        tokenLine.push_back({currentType, currentToken});
+        tokenLine.tokens.push_back({currentType, currentToken});
         currentToken.clear();
         currentType = TokenType::UNKNOWN;
     }
@@ -198,9 +198,9 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
     if (c == ':')
         tokens.emplace_back();
     else if (c == ',')
-        tokenLine.push_back({TokenType::SEPERATOR, ","});
+        tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
     else if (c == '(')
-        tokenLine.push_back({TokenType::OPEN_PAREN, "("});
+        tokenLine.tokens.push_back({TokenType::OPEN_PAREN, "("});
     else if (c == ')')
-        tokenLine.push_back({TokenType::CLOSE_PAREN, ")"});
+        tokenLine.tokens.push_back({TokenType::CLOSE_PAREN, ")"});
 }
