@@ -87,7 +87,7 @@ public:
     /**
      * Name mangels tokens in the given program map by adding the file ID to the label
      * @param programMap The map of file IDs to their tokenized lines
-     * @throw runtime_error When the file ID is empty
+     * @throw MasmSyntaxError When the file ID is empty
      */
     static void mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap);
 };

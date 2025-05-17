@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include "exceptions.h"
 #include "utils.h"
 
 
@@ -17,7 +18,7 @@ void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>&
     std::vector<std::string> globals;
     for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap) {
         if (programFile.first.empty())
-            throw std::runtime_error("File ID is empty");
+            throw MasmSyntaxError("File ID is empty");
         collectGlobals(globals, programFile.second);
     }
 
@@ -35,8 +36,8 @@ void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>&
 
     // If any globals were declared without a matching label declaration
     if (!undeclaredGlobals.empty())
-        throw std::runtime_error("Global label " + undeclaredGlobals[0] +
-                                 " referenced without declaration");
+        throw MasmSyntaxError("Global label " + undeclaredGlobals[0] +
+                              " referenced without declaration");
 }
 
 
@@ -69,7 +70,7 @@ void Postprocessor::collectGlobals(std::vector<std::string>& globals,
             continue;
 
         if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::LABEL_REF)
-            throw std::runtime_error("Invalid global label declaration");
+            throw MasmSyntaxError("Invalid global label declaration", line.lineno);
 
         globals.push_back(line.tokens[1].value);
         tokenizedFile.erase(tokenizedFile.begin() + i);
@@ -85,7 +86,7 @@ void Postprocessor::replaceEqv(std::vector<SourceLine>& tokenizedFile) {
         SourceLine& line = tokenizedFile[i];
         if (line.tokens[0] == eqvToken) {
             if (line.tokens.size() < 3 || line.tokens[1].type != TokenType::LABEL_REF)
-                throw std::runtime_error("Invalid eqv declaration");
+                throw MasmSyntaxError("Invalid eqv declaration", line.lineno);
 
             const std::vector eqvValue(line.tokens.begin() + 2, line.tokens.end());
             eqvMapping[line.tokens[1]] = {line.lineno, eqvValue};
@@ -120,10 +121,9 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
         const auto openParen =
                 std::ranges::find(tokenLine.tokens, Token{TokenType::OPEN_PAREN, "("});
         // Ensure there is space before and after the open paren
-        if (openParen == tokenLine.tokens.begin() || openParen == tokenLine.tokens.end())
-            throw std::runtime_error("Malformed parenthesis expression");
-        if (tokenLine.tokens.size() < 4)
-            throw std::runtime_error("Malformed parenthesis expression");
+        if (openParen == tokenLine.tokens.begin() || openParen == tokenLine.tokens.end() ||
+            tokenLine.tokens.size() < 4)
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
         // A vector containing the last three elements of tokenLine
         std::vector<Token> lastFour = {};
         while (lastFour.size() < 4) {
@@ -140,7 +140,7 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
         if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::OPEN_PAREN, TokenType::REGISTER,
                              TokenType::CLOSE_PAREN},
                             lastFour))
-            throw std::runtime_error("Malformed parenthesis expression");
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
         // Replace with target pattern
         tokenLine.tokens.push_back(lastFour[2]);
         tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
@@ -154,10 +154,9 @@ std::vector<Token> Postprocessor::parseMacroParams(const SourceLine& line) {
     if (line.tokens.size() < 3)
         return {};
 
-    if (line.tokens[2].type != TokenType::OPEN_PAREN)
-        throw std::runtime_error("Malformed macro parameter declaration");
-    if (line.tokens[line.tokens.size() - 1].type != TokenType::CLOSE_PAREN)
-        throw std::runtime_error("Malformed macro parameter declaration");
+    if (line.tokens[2].type != TokenType::OPEN_PAREN ||
+        line.tokens[line.tokens.size() - 1].type != TokenType::CLOSE_PAREN)
+        throw MasmSyntaxError("Malformed macro parameter declaration", line.lineno);
 
     const std::vector rawParams(line.tokens.begin() + 3, line.tokens.end() - 1);
     std::vector<Token> params = filterTokenList(rawParams, {TokenType::MACRO_PARAM});
@@ -202,7 +201,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                                                 tokenizedFile[pos].tokens.end() - 1));
 
     if (macroArgs.size() != macro.params.size())
-        throw std::runtime_error("Invalid number of macro arguments");
+        throw MasmSyntaxError("Invalid number of macro arguments", tokenizedFile[pos].lineno);
 
     const size_t macroEndIdx = pos + macro.body.size();
 
@@ -218,7 +217,8 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                 continue;
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
-                throw std::runtime_error("Invalid macro parameter " + token.value);
+                throw MasmSyntaxError("Invalid macro parameter " + token.value,
+                                      tokenizedFile[pos].lineno);
             const size_t paramIdx = std::distance(macro.params.begin(), it);
             // Replace token with argument
             token = macroArgs[paramIdx];
@@ -235,14 +235,14 @@ void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
         if (line.tokens[0].type == TokenType::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].type != TokenType::LABEL_REF)
-                throw std::runtime_error("Invalid macro declaration");
+                throw MasmSyntaxError("Invalid macro declaration", line.lineno);
 
             Macro macro = {line.tokens[1].value, {}, {}};
             macro.params = parseMacroParams(line);
             while (true) {
                 i++;
                 if (i >= tokenizedFile.size())
-                    throw std::runtime_error("Unmatched macro declaration");
+                    throw MasmSyntaxError("Unmatched macro declaration", tokenizedFile[i].lineno);
 
                 if (tokenizedFile[i].tokens[0].type == TokenType::META_DIRECTIVE &&
                     tokenizedFile[i].tokens[0].value == "end_macro")

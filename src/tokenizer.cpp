@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "exceptions.h"
 #include "instruction.h"
 #include "postprocessor.h"
 
@@ -66,11 +67,7 @@ std::vector<SourceLine> Tokenizer::tokenizeFile(const std::vector<std::string>& 
     for (size_t i = 0; i < rawLines.size(); ++i) {
         const std::string& rawLine = rawLines[i];
         std::vector<SourceLine> tokenizedLines;
-        try {
-            tokenizedLines = tokenizeLine(rawLine);
-        } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Error near line " + std::to_string(i + 1) + ": " + e.what());
-        }
+        tokenizedLines = tokenizeLine(rawLine, i);
         // Skip empty or comment lines
         if (tokenizedLines.empty())
             continue;
@@ -87,10 +84,10 @@ std::vector<SourceLine> Tokenizer::tokenizeFile(const std::vector<std::string>& 
 }
 
 
-std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine) {
+std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, const size_t lineno) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
-    std::vector<SourceLine> tokens = {{}};
+    std::vector<SourceLine> tokens = {{lineno, {}}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
@@ -116,7 +113,7 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine) {
         else if (c == '"') {
             currentType = TokenType::STRING;
             if (!currentToken.empty())
-                throw std::runtime_error("Unexpected token " + currentToken);
+                throw MasmSyntaxError("Unexpected token " + currentToken, lineno);
         }
         // Skip remainder of line when reaching a comment
         else if (c == '#') {
@@ -160,7 +157,7 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine) {
     }
 
     if (!currentToken.empty())
-        throw std::runtime_error("Unexpected EOL while parsing token " + currentToken);
+        throw MasmSyntaxError("Unexpected EOL while parsing token " + currentToken, lineno);
 
     return tokens;
 }
