@@ -208,20 +208,20 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
 
     // Replace macro parameters with arguments
     while (pos < macroEndIdx) {
-        for (auto& token : tokenizedFile[pos].tokens) {
+        for (auto& token : tokenizedFile.at(pos).tokens) {
             if (token.type != TokenType::MACRO_PARAM)
                 continue;
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
                 throw MasmSyntaxError("Invalid macro parameter " + token.value,
-                                      tokenizedFile[pos].lineno);
+                                      tokenizedFile.at(pos).lineno);
             const size_t paramIdx = std::distance(macro.params.begin(), it);
             // Replace token with argument
             token = macroArgs[paramIdx];
         }
         pos++;
     }
-    pos--;
+    pos--; // Adjust for the increment at the end of the loop
 }
 
 

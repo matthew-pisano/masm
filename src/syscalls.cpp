@@ -81,7 +81,7 @@ void readStringSyscall(State& state, std::istream& istream) {
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
     while (currLen < length) {
-        const char c = istream.get();
+        const char c = static_cast<char>(istream.get());
         if (c == '\n')
             break;
         state.memory.byteTo(address + currLen, c);

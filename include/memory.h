@@ -82,6 +82,7 @@ public:
      */
     void loadProgram(const MemLayout& layout);
 
+    std::byte operator[](uint32_t index) const;
     std::byte& operator[](uint32_t index);
 };
 
