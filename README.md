@@ -19,3 +19,18 @@ masm prog.asm
 Similar to other *MIPS* simulators like [MARS](https://dpetersanderson.github.io/) and [SPIM](https://spimsimulator.sourceforge.net/), `masm` implements a subset of the full MIPS instruction set architecture and executes instructions within an emulated environment. Here, instructions and data are stored in memory in a *big endian* format, similar to the original *MIPS* specification.
 
 This program uses a 32 element array composed of 32-bit integers to represent its register file and an unordered map that can accommodate up to 4GiB of memory. The CPU is implemented within the interpreter, which keeps the current state of the register file and memory to load and operate on instructions.
+
+## Implemented Features
+
+- [x] MIPS ISA Instructions
+- [x] MIPS Pseudo Instructions
+- [X] Basic Memory Directives (`.data`, `.text`)
+- [X] Allocation directives (`.word`, `.space`, etc.)
+- [ ] Kernal Memory Directives (`.ktext`, `.kdata`)
+- [ ] Include Directive
+- [X] Macros/Eqv Directives
+- [X] Keyboard/Display Syscalls
+- [ ] Extended Syscalls
+- [ ] Interrupts
+- [ ] Keyboard/Display MMIO
+- [ ] Floating Point Coprocessor
