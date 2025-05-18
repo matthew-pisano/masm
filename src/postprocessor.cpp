@@ -13,14 +13,10 @@
 
 
 void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap) {
-
     // Stores globals that have not yet been matched to declarations
     std::vector<std::string> globals;
-    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap) {
-        if (programFile.first.empty())
-            throw MasmSyntaxError("File ID is empty");
+    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
         collectGlobals(globals, programFile.second);
-    }
 
     std::vector undeclaredGlobals(globals);
     // Mangle labels and resolve globals
@@ -137,9 +133,9 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
             lastFour[0] = {TokenType::IMMEDIATE, "0"};
         }
 
-        if (!tokenTypeMatch({TokenType::IMMEDIATE, TokenType::OPEN_PAREN, TokenType::REGISTER,
-                             TokenType::CLOSE_PAREN},
-                            lastFour))
+        const std::vector pattern = {TokenType::IMMEDIATE, TokenType::OPEN_PAREN,
+                                     TokenType::REGISTER, TokenType::CLOSE_PAREN};
+        if (!tokenTypeMatch(pattern, lastFour))
             throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
         // Replace with target pattern
         tokenLine.tokens.push_back(lastFour[2]);
@@ -211,7 +207,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
     tokenizedFile.erase(tokenizedFile.begin() + pos + mangledMacro.body.size());
 
     // Replace macro parameters with arguments
-    while (pos < macroEndIdx - 1) {
+    while (pos < macroEndIdx) {
         for (auto& token : tokenizedFile[pos].tokens) {
             if (token.type != TokenType::MACRO_PARAM)
                 continue;
@@ -242,7 +238,7 @@ void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
             while (true) {
                 i++;
                 if (i >= tokenizedFile.size())
-                    throw MasmSyntaxError("Unmatched macro declaration", tokenizedFile[i].lineno);
+                    throw MasmSyntaxError("Unmatched macro declaration", line.lineno);
 
                 if (tokenizedFile[i].tokens[0].type == TokenType::META_DIRECTIVE &&
                     tokenizedFile[i].tokens[0].value == "end_macro")

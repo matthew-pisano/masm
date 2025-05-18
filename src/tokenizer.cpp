@@ -6,7 +6,6 @@
 
 #include <ostream>
 #include <regex>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -166,6 +165,9 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
 void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string& currentToken,
                                std::vector<SourceLine>& tokens) {
     SourceLine& tokenLine = tokens[tokens.size() - 1];
+
+    if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
+        throw MasmSyntaxError("Unexpected token " + std::string(1, c), tokenLine.lineno);
 
     // Assign the current token as a label definition if a colon follows
     if (c == ':')

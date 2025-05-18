@@ -5,6 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "exceptions.h"
 #include "fileio.h"
 #include "tokenizer.h"
 
@@ -124,9 +125,10 @@ TEST_CASE("Test Tokenize Single Lines") {
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Seperator") {
-        const std::vector<std::string> lines = {","};
+        const std::vector<std::string> lines = {"j ,"};
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile(lines);
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::SEPERATOR, ","}}};
+        std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenType::INSTRUCTION, "j"}, {TokenType::SEPERATOR, ","}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
@@ -256,6 +258,96 @@ TEST_CASE("Test Tokenize Macro") {
                                                           {{TokenType::INSTRUCTION, "syscall"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    }
+}
+
+
+TEST_CASE("Test Syntax Errors") {
+    SECTION("Test Misplaced Quote") {
+        const std::vector<std::string> lines = {R"(g"hello")"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Unclosed Quote") {
+        const std::vector<std::string> lines = {R"("hello)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Unexpected First Token") {
+        std::vector<std::string> lines = {R"(,)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+
+        lines = {R"(()"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+
+        lines = {R"())"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+
+        lines = {R"(:)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Undeclared Global Label") {
+        const std::vector<std::string> lines = {R"(.globl invalid)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Invalid Global Label") {
+        std::vector<std::string> lines = {R"(.globl)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+
+        lines = {R"(.globl 1)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({{}, lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Invalid Eqv") {
+        std::vector<std::string> lines = {R"(.eqv)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {R"(.eqv hello)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {R"(.eqv 1 1)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Base Addressing") {
+        std::vector<std::string> lines = {R"(($t0))"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {R"("lw $s1 2($t0)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {R"("lw $s1 2())"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Malformed Macro Params") {
+        std::vector<std::string> lines = {R"(.macro macro %arg)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {R"(".macro macro (%arg)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Malformed Macro Call") {
+        std::vector<std::string> lines = {".macro macro(%arg)", "addi $t0, $zero, %arg",
+                                          ".end_macro", "macro(0, 1)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {".macro macro(%arg)", "addi $t0, $zero, %bargg", ".end_macro", "macro(0)"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+    }
+
+    SECTION("Test Malformed Macro Declaration") {
+        std::vector<std::string> lines = {".macro"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {".macro 1"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
+
+        lines = {".macro macro(%arg)", "addi $t0, $zero, %bargg"};
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);
     }
 }
 
