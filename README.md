@@ -26,7 +26,7 @@ This program uses a 32 element array composed of 32-bit integers to represent it
 - [x] MIPS Pseudo Instructions
 - [X] Basic Memory Directives (`.data`, `.text`)
 - [X] Allocation directives (`.word`, `.space`, etc.)
-- [ ] Kernal Memory Directives (`.ktext`, `.kdata`)
+- [ ] Kernel Memory Directives (`.ktext`, `.kdata`)
 - [ ] Include Directive
 - [X] Macros/Eqv Directives
 - [X] Keyboard/Display Syscalls
