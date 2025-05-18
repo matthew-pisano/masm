@@ -94,7 +94,7 @@ public:
      * Processes the includes in the given program map by replacing them with the corresponding file
      * @param rawProgramMap The map of file IDs to their tokenized lines
      */
-    static void processIncludes(std::map<std::string, std::vector<SourceLine>> rawProgramMap);
+    static void processIncludes(std::map<std::string, std::vector<SourceLine>>& rawProgramMap);
 };
 
 #endif // POSTPROCESSOR_H

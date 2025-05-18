@@ -269,6 +269,20 @@ TEST_CASE("Test Tokenize Macro") {
 }
 
 
+TEST_CASE("Test Tokenize Include") {
+    const std::vector<RawFile> rawFile = {{"a.asm", {"jr $t0", R"(.include "b.asm")", "jr $t2"}},
+                                          {"b.asm", {"label:", "jr $t1"}}};
+    std::vector<SourceLine> actualTokens = Tokenizer::tokenize(rawFile);
+    std::vector<std::vector<Token>> expectedTokens = {
+            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t0"}},
+            {{TokenType::LABEL_DEF, "label@masm_mangle_file_a.asm"}},
+            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t1"}},
+            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t2"}}};
+    for (size_t i = 0; i < expectedTokens.size(); ++i)
+        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+}
+
+
 TEST_CASE("Test Tokenizer Syntax Errors") {
     SECTION("Test Misplaced Quote") {
         const RawFile rawFile = wrapLines({R"(g"hello")"});
@@ -355,6 +369,14 @@ TEST_CASE("Test Tokenizer Syntax Errors") {
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
         rawFile = wrapLines({".macro macro(%arg)", "addi $t0, $zero, %bargg"});
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
+    }
+
+    SECTION("Test Invalid Include") {
+        RawFile rawFile = wrapLines({".include"});
+        REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
+
+        rawFile = wrapLines({".include 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 }
