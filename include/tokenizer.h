@@ -40,6 +40,12 @@ enum class TokenType {
 std::string tokenTypeToString(TokenType t);
 
 
+struct RawFile {
+    std::string name;
+    std::vector<std::string> lines;
+};
+
+
 /**
  * Class containing the type and text value of a token
  */
@@ -111,8 +117,7 @@ public:
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
      */
-    [[nodiscard]] static std::vector<SourceLine>
-    tokenize(const std::vector<std::vector<std::string>>& rawFiles);
+    [[nodiscard]] static std::vector<SourceLine> tokenize(const std::vector<RawFile>& rawFiles);
 };
 
 #endif // TOKENIZER_H

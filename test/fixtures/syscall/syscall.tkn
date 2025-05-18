@@ -1,10 +1,10 @@
 01data
-04string
+04string@masm_mangle_file_syscall
 02asciiz12hello
 01text
-04main
+04main@masm_mangle_file_syscall
 06li07v009,084
-06la07a009,05string
+06la07a009,05string@masm_mangle_file_syscall
 06syscall
 06li07v009,0810
 06syscall

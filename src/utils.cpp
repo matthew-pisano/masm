@@ -3,7 +3,19 @@
 //
 
 #include "utils.h"
+
+#include <filesystem>
 #include <regex>
+
+
+std::string getFileBasename(const std::string& path) {
+    // Find the last occurrence of the directory separator (slash or backslash)
+    const size_t sepPos = path.find_last_of(std::filesystem::path::preferred_separator);
+    const std::string baseFile = sepPos == std::string::npos ? path : path.substr(sepPos + 1);
+    // Find the last occurrence of the dot, marking the extension
+    const std::string fileName = baseFile.substr(0, baseFile.find_last_of('.'));
+    return fileName;
+}
 
 
 bool isSignedInteger(const std::string& str) {

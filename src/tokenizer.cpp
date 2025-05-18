@@ -38,19 +38,23 @@ const std::array<std::string, 2> Tokenizer::secDirectives = {"data", "text"};
 const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro"};
 
 
-std::vector<SourceLine> Tokenizer::tokenize(const std::vector<std::vector<std::string>>& rawFiles) {
-    std::map<std::string, std::vector<SourceLine>> programMap;
-    for (size_t i = 0; i < rawFiles.size(); ++i) {
-        std::vector<SourceLine> fileTokens = tokenizeFile(rawFiles[i]);
-        Postprocessor::replaceEqv(fileTokens);
+std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles) {
+    std::map<std::string, std::vector<SourceLine>> rawProgramMap;
+    for (const auto& rawFile : rawFiles) {
+        std::vector<SourceLine> fileTokens = tokenizeFile(rawFile.lines);
         Postprocessor::processBaseAddressing(fileTokens);
-        Postprocessor::processMacros(fileTokens);
-        programMap["masm_mangle_file_" + std::to_string(i)] = fileTokens;
+        rawProgramMap[rawFile.name] = fileTokens;
     }
 
-    // Mangle labels if there is more than one file
-    if (programMap.size() > 1)
-        Postprocessor::mangleLabels(programMap);
+    std::map<std::string, std::vector<SourceLine>> programMap;
+    for (std::pair<const std::string, std::vector<SourceLine>>& fileTokens : rawProgramMap) {
+        Postprocessor::replaceEqv(fileTokens.second);
+        Postprocessor::processMacros(fileTokens.second);
+        programMap["masm_mangle_file_" + fileTokens.first] = fileTokens.second;
+    }
+
+    // Mangle labels in files
+    Postprocessor::mangleLabels(programMap);
 
     std::vector<SourceLine> program;
     for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)

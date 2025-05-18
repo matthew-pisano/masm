@@ -12,6 +12,14 @@
 
 
 /**
+ * Gets the basename of a file path
+ * @param path The file path to get the basename of
+ * @return The basename of the file path
+ */
+std::string getFileBasename(const std::string& path);
+
+
+/**
  * Checks if a string is a value signed integer
  * @param str The string to check
  * @return True if the string is a signed integer, false otherwise

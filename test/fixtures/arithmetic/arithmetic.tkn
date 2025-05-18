@@ -1,12 +1,12 @@
 01data
 02space082
-04small
+04small@masm_mangle_file_arithmetic
 02word080
-04large
+04large@masm_mangle_file_arithmetic
 02word0865536
 01text
-04main
-06la07t009,05large
+04main@masm_mangle_file_arithmetic
+06la07t009,05large@masm_mangle_file_arithmetic
 06lw07t109,07t009,080
 06addi07t209,07t109,081024
 06sub07t309,07t209,07t1

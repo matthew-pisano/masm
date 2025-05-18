@@ -11,6 +11,7 @@
 #include "interpreter.h"
 #include "parser.h"
 #include "tokenizer.h"
+#include "utils.h"
 
 
 /**
@@ -22,10 +23,10 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
                     const std::string& logFileName) {
     const std::vector<std::string> logLines = readFileLines(logFileName);
 
-    std::vector<std::vector<std::string>> sourceLines;
+    std::vector<RawFile> sourceLines;
     sourceLines.reserve(sourceFileNames.size()); // Preallocate memory for performance
-    for (const std::string& sourceFileName : sourceFileNames)
-        sourceLines.push_back(readFileLines(sourceFileName));
+    for (const std::string& fileName : sourceFileNames)
+        sourceLines.push_back({getFileBasename(fileName), readFileLines(fileName)});
 
     const std::vector<SourceLine> program = Tokenizer::tokenize(sourceLines);
 

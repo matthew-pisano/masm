@@ -8,6 +8,7 @@
 #include "fileio.h"
 #include "interpreter.h"
 #include "parser.h"
+#include "utils.h"
 
 
 /**
@@ -56,10 +57,10 @@ int main(const int argc, char* argv[]) {
 
     int exitCode = 1;
     try {
-        std::vector<std::vector<std::string>> programLines;
+        std::vector<RawFile> programLines;
         programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
         for (const std::string& fileName : inputFileNames)
-            programLines.push_back(readFileLines(fileName));
+            programLines.push_back({getFileBasename(fileName), readFileLines(fileName)});
 
         const std::vector<SourceLine> program = Tokenizer::tokenize(programLines);
 

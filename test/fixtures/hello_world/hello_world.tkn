@@ -1,10 +1,10 @@
 01data
-04out_string
+04out_string@masm_mangle_file_hello_world
 02asciiz12Hello, World!
 01text
-04main
+04main@masm_mangle_file_hello_world
 06li07v009,084
-06la07a009,05out_string
+06la07a009,05out_string@masm_mangle_file_hello_world
 06syscall
 06li07v009,0810
 06syscall
