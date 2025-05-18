@@ -41,7 +41,7 @@ const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "m
 std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles) {
     std::map<std::string, std::vector<SourceLine>> rawProgramMap;
     for (const auto& rawFile : rawFiles) {
-        std::vector<SourceLine> fileTokens = tokenizeFile(rawFile.lines);
+        std::vector<SourceLine> fileTokens = tokenizeFile(rawFile);
         Postprocessor::processBaseAddressing(fileTokens);
         rawProgramMap[rawFile.name] = fileTokens;
     }
@@ -64,11 +64,11 @@ std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles
 }
 
 
-std::vector<SourceLine> Tokenizer::tokenizeFile(const std::vector<std::string>& rawLines) {
+std::vector<SourceLine> Tokenizer::tokenizeFile(const RawFile& rawFile) {
     std::vector<SourceLine> tokenizedFile = {};
 
-    for (size_t i = 0; i < rawLines.size(); ++i) {
-        const std::string& rawLine = rawLines[i];
+    for (size_t i = 0; i < rawFile.lines.size(); ++i) {
+        const std::string& rawLine = rawFile.lines[i];
         std::vector<SourceLine> tokenizedLines;
         tokenizedLines = tokenizeLine(rawLine, i + 1);
         // Skip empty or comment lines

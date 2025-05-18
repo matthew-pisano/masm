@@ -105,11 +105,11 @@ class Tokenizer {
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
-     * @param rawLines The lines of source code to tokenize
+     * @param rawFile The lines of source code to tokenize
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
      */
-    static std::vector<SourceLine> tokenizeFile(const std::vector<std::string>& rawLines);
+    static std::vector<SourceLine> tokenizeFile(const RawFile& rawFile);
 
     /**
      * Tokenizes incoming source code lines from multiple files into parsable tokens
