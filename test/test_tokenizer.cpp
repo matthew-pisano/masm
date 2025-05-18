@@ -262,7 +262,7 @@ TEST_CASE("Test Tokenize Macro") {
 }
 
 
-TEST_CASE("Test Syntax Errors") {
+TEST_CASE("Test Tokenizer Syntax Errors") {
     SECTION("Test Misplaced Quote") {
         const std::vector<std::string> lines = {R"(g"hello")"};
         REQUIRE_THROWS_AS(Tokenizer::tokenize({lines}), MasmSyntaxError);

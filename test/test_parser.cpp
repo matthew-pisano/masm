@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "directive.h"
+#include "exceptions.h"
 #include "fileio.h"
 #include "parser.h"
 
@@ -163,6 +164,36 @@ TEST_CASE("Test Directive Allocation") {
                 parseAllocDirective(5, Token{TokenType::ALLOC_DIRECTIVE, "word"},
                                     {Token{TokenType::IMMEDIATE, "12345678"}});
         REQUIRE(expected == actual);
+    }
+}
+
+
+TEST_CASE("Test Parser Syntax Errors") {
+    SECTION("Test Unknown Label Reference") {
+        Parser parser{};
+        const std::vector<SourceLine> program = {
+                {0, {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "ref"}}}};
+        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+    }
+
+    SECTION("Test Unknown Duplicate Label") {
+        Parser parser{};
+        const std::vector<SourceLine> program = {{0, {{TokenType::LABEL_DEF, "label"}}},
+                                                 {0, {{TokenType::LABEL_DEF, "label"}}}};
+        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+    }
+
+    SECTION("Test Empty Allocation Directive") {
+        Parser parser{};
+        const std::vector<SourceLine> program = {{0, {{TokenType::ALLOC_DIRECTIVE, "word"}}}};
+        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+    }
+
+    SECTION("Test Unsupported Directive") {
+        Parser parser{};
+        const std::vector<SourceLine> program = {
+                {0, {{TokenType::ALLOC_DIRECTIVE, "eeby"}, {TokenType::IMMEDIATE, "1"}}}};
+        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
     }
 }
 

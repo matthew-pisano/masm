@@ -118,7 +118,9 @@ parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
             populateMemBlock(wordBytes, static_cast<uint32_t>(std::stoi(arg.value)));
             bytes.insert(bytes.end(), wordBytes.begin(), wordBytes.end());
         }
-    } else
+    }
+    // Should have already thrown in validate
+    else
         throw std::runtime_error("Unsupported directive " + dirName);
 
     return {bytes, padding};
