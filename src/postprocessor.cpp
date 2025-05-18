@@ -109,16 +109,16 @@ void Postprocessor::replaceEqv(std::vector<SourceLine>& tokenizedFile) {
 
 void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile) {
     for (SourceLine& tokenLine : tokenizedFile) {
-        // Skip instances or parens outside of instructions
-        if (tokenLine.tokens[0].type != TokenType::INSTRUCTION ||
-            tokenLine.tokens[tokenLine.tokens.size() - 1].type != TokenType::CLOSE_PAREN)
-            continue;
-
         const auto openParen =
                 std::ranges::find(tokenLine.tokens, Token{TokenType::OPEN_PAREN, "("});
+
+        // Skip instances or parens outside of instructions
+        if (tokenLine.tokens[0].type != TokenType::INSTRUCTION ||
+            openParen == tokenLine.tokens.end())
+            continue;
+
         // Ensure there is space before and after the open paren
-        if (openParen == tokenLine.tokens.begin() || openParen == tokenLine.tokens.end() ||
-            tokenLine.tokens.size() < 4)
+        if (openParen == tokenLine.tokens.begin() || tokenLine.tokens.size() < 4)
             throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
         // A vector containing the last three elements of tokenLine
         std::vector<Token> lastFour = {};
