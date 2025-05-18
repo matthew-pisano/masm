@@ -221,6 +221,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
         }
         pos++;
     }
+    pos--;
 }
 
 

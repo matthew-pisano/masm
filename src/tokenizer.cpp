@@ -195,7 +195,7 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
 
     // Start a new line if a label was given
     if (c == ':')
-        tokens.emplace_back();
+        tokens.push_back({tokenLine.lineno, {}});
     else if (c == ',')
         tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
     else if (c == '(')
