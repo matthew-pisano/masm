@@ -281,59 +281,59 @@ TEST_CASE("Test Tokenizer Syntax Errors") {
     }
 
     SECTION("Test Unexpected First Token") {
-        RawFile rawFile = wrapLines({R"(,)"});
+        RawFile rawFile = wrapLines({","});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(()"});
+        rawFile = wrapLines({"("});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"())"});
+        rawFile = wrapLines({")"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(:)"});
+        rawFile = wrapLines({":"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Undeclared Global Label") {
-        const RawFile rawFile = wrapLines({R"(.globl invalid)"});
+        const RawFile rawFile = wrapLines({".globl invalid"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Invalid Global Label") {
-        RawFile rawFile = wrapLines({R"(.globl)"});
+        RawFile rawFile = wrapLines({".globl"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(.globl 1)"});
+        rawFile = wrapLines({".globl 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Invalid Eqv") {
-        RawFile rawFile = wrapLines({R"(.eqv)"});
+        RawFile rawFile = wrapLines({".eqv"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(.eqv hello)"});
+        rawFile = wrapLines({".eqv hello"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(.eqv 1 1)"});
+        rawFile = wrapLines({".eqv 1 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Base Addressing") {
-        RawFile rawFile = wrapLines({R"(($t0))"});
+        RawFile rawFile = wrapLines({"($t0)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"("lw $s1 2($t0)"});
+        rawFile = wrapLines({"lw $s1 2($t0"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"("lw $s1 2())"});
+        rawFile = wrapLines({"lw $s1 2()"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Malformed Macro Params") {
-        RawFile rawFile = wrapLines({R"(.macro macro %arg)"});
+        RawFile rawFile = wrapLines({".macro macro %arg"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({R"(".macro macro (%arg)"});
+        rawFile = wrapLines({".macro macro (%arg"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
