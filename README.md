@@ -23,14 +23,22 @@ This program uses a 32 element array composed of 32-bit integers to represent it
 ## Implemented Features
 
 - [x] MIPS ISA Instructions
-- [x] MIPS Pseudo Instructions
+    - [x] MIPS Pseudo Instructions
+- [ ] Syscalls
+    - [X] Keyboard/Display Syscalls
+    - [ ] MARS Extended Syscalls
+    - [ ] Heap Allocation Syscalls
 - [X] Basic Memory Directives (`.data`, `.text`)
 - [X] Allocation directives (`.word`, `.space`, etc.)
-- [ ] Kernel Memory Directives (`.ktext`, `.kdata`)
-- [X] Include Directive
-- [X] Macros/Eqv Directives
-- [X] Keyboard/Display Syscalls
-- [ ] Extended Syscalls
-- [ ] Interrupts
+- [X] Kernel Memory Directives (`.ktext`, `.kdata`)
+    - [ ] Custom Addresses for Memory Sections
+- [X] Macro Directives
+    - [X] Include Directive
+    - [X] Macros/Eqv Directives
+- [X] Syntax and Runtime Errors
 - [ ] Keyboard/Display MMIO
+- [ ] Interrupts
+    - [ ] MMIO Interrupts
+    - [ ] Exceptions
 - [ ] Floating Point Coprocessor
+    - [ ] Floating Point Syscalls
