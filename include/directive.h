@@ -103,4 +103,5 @@ void populateMemBlock(std::vector<std::byte>& block, float decimal);
  */
 void populateMemBlock(std::vector<std::byte>& block, double decimal);
 
+
 #endif // DIRECTIVE_H

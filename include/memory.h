@@ -15,7 +15,7 @@
 /**
  * Class representing valid, named sections of memory
  */
-enum class MemSection { DATA, TEXT };
+enum class MemSection { DATA, TEXT, KTEXT, KDATA };
 
 
 /**

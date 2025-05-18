@@ -73,6 +73,10 @@ MemSection nameToMemSection(const std::string& name) {
         return MemSection::TEXT;
     if (name == "data")
         return MemSection::DATA;
+    if (name == "ktext")
+        return MemSection::KTEXT;
+    if (name == "kdata")
+        return MemSection::KDATA;
     // Should never be reached
     throw std::runtime_error("Unknown memory directive " + name);
 }
@@ -84,6 +88,10 @@ uint32_t memSectionOffset(const MemSection section) {
             return 0x10010000;
         case MemSection::TEXT:
             return 0x00400000;
+        case MemSection::KDATA:
+            return 0x90000000;
+        case MemSection::KTEXT:
+            return 0x80000000;
     }
     // Should never be reached
     throw std::runtime_error("Unknown memory section " + std::to_string(static_cast<int>(section)));

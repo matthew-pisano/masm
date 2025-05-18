@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-const std::array<std::string, 2> Tokenizer::secDirectives = {"data", "text"};
+const std::array<std::string, 4> Tokenizer::secDirectives = {"data", "text", "kdata", "ktext"};
 const std::array<std::string, 5> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro",
                                                               "include"};
 
