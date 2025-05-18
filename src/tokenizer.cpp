@@ -35,7 +35,8 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 
 
 const std::array<std::string, 2> Tokenizer::secDirectives = {"data", "text"};
-const std::array<std::string, 4> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro"};
+const std::array<std::string, 5> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro",
+                                                              "include"};
 
 
 std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles) {
@@ -45,6 +46,9 @@ std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles
         Postprocessor::processBaseAddressing(fileTokens);
         rawProgramMap[rawFile.name] = fileTokens;
     }
+
+    // Process file inclusions
+    Postprocessor::processIncludes(rawProgramMap);
 
     std::map<std::string, std::vector<SourceLine>> programMap;
     for (std::pair<const std::string, std::vector<SourceLine>>& fileTokens : rawProgramMap) {

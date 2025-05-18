@@ -27,7 +27,7 @@ This program uses a 32 element array composed of 32-bit integers to represent it
 - [X] Basic Memory Directives (`.data`, `.text`)
 - [X] Allocation directives (`.word`, `.space`, etc.)
 - [ ] Kernel Memory Directives (`.ktext`, `.kdata`)
-- [ ] Include Directive
+- [X] Include Directive
 - [X] Macros/Eqv Directives
 - [X] Keyboard/Display Syscalls
 - [ ] Extended Syscalls

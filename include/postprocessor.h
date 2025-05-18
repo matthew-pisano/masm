@@ -5,7 +5,6 @@
 #ifndef POSTPROCESSOR_H
 #define POSTPROCESSOR_H
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "tokenizer.h"
@@ -90,6 +89,12 @@ public:
      * @throw MasmSyntaxError When the file ID is empty
      */
     static void mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap);
+
+    /**
+     * Processes the includes in the given program map by replacing them with the corresponding file
+     * @param rawProgramMap The map of file IDs to their tokenized lines
+     */
+    static void processIncludes(std::map<std::string, std::vector<SourceLine>> rawProgramMap);
 };
 
 #endif // POSTPROCESSOR_H

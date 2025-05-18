@@ -259,3 +259,25 @@ void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
             expandMacro(macroMap[line.tokens[0].value], i, tokenizedFile);
     }
 }
+
+
+void Postprocessor::processIncludes(std::map<std::string, std::vector<SourceLine>> rawProgramMap) {
+    const Token includeToken = {TokenType::META_DIRECTIVE, "include"};
+
+    for (auto& [fileName, tokenizedFile] : rawProgramMap) {
+        for (size_t i = 0; i < tokenizedFile.size(); i++) {
+            SourceLine& line = tokenizedFile[i];
+            if (line.tokens[0] != includeToken)
+                continue;
+            if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::STRING)
+                throw MasmSyntaxError("Invalid include directive", line.lineno);
+
+            std::string includeName = line.tokens[1].value;
+            const std::vector<SourceLine>& includeFile = rawProgramMap[fileName];
+            // Insert contents of included file into location at including file
+            tokenizedFile.insert(tokenizedFile.begin() + i, includeFile.begin(), includeFile.end());
+            // Remove the include line
+            tokenizedFile.erase(tokenizedFile.begin() + i + includeFile.size());
+        }
+    }
+}

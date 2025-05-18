@@ -81,7 +81,7 @@ struct SourceLine {
 class Tokenizer {
 
     const static std::array<std::string, 2> secDirectives;
-    const static std::array<std::string, 4> metaDirectives;
+    const static std::array<std::string, 5> metaDirectives;
 
     /**
      * A helper function that terminates the current token and starts a new one
