@@ -12,6 +12,7 @@
  * Enumeration of the system calls available in the MIPS architecture
  */
 enum class Syscall {
+    // Keyboard/Display Syscalls
     PRINT_INT = 1,
     PRINT_STRING = 4,
     READ_INT = 5,
@@ -19,7 +20,19 @@ enum class Syscall {
     EXIT = 10,
     PRINT_CHAR = 11,
     READ_CHAR = 12,
-    EXIT_VAL = 17
+    EXIT_VAL = 17,
+
+    // MARS Extended Syscalls
+    TIME = 30,
+    MIDI = 31,
+    SLEEP = 32,
+    MIDI_SYNC = 33,
+    PRINT_INT_HEX = 34,
+    PRINT_INT_BIN = 35,
+    PRINT_UINT = 36,
+    SET_SEED = 40,
+    RAND_INT = 41,
+    RAND_INT_RANGE = 42
 };
 
 
