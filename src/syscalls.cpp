@@ -4,11 +4,15 @@
 
 #include "syscalls.h"
 
+#include <chrono>
 #include <iostream>
 #include <ostream>
 #include <unistd.h>
 
 #include "exceptions.h"
+
+
+std::map<size_t, RandomGenerator> rngMap = {};
 
 
 void execSyscall(State& state, std::istream& istream, std::ostream& ostream) {
@@ -114,4 +118,64 @@ void readCharSyscall(State& state, std::istream& istream) {
 void exitValSyscall(const State& state) {
     const int32_t exitCode = state.registers[Register::A0];
     throw ExecExit("Program exited with code " + std::to_string(exitCode), exitCode);
+}
+
+
+void timeSyscall(State& state) {
+    // Get the current time in milliseconds since the epoch
+    const auto now = std::chrono::system_clock::now();
+    const auto duration = now.time_since_epoch();
+    const long milliseconds =
+            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+
+    // Store high bits in $a1 and low bits in $a0
+    state.registers[Register::A0] = static_cast<int32_t>(milliseconds & 0xFFFFFFFF);
+    state.registers[Register::A1] = static_cast<int32_t>(milliseconds >> 32 & 0xFFFFFFFF);
+}
+
+
+void sleepSyscall(State& state) {
+    const int32_t milliseconds = state.registers[Register::A0];
+    usleep(milliseconds * 1000);
+}
+
+
+void printIntHexSyscall(const State& state, std::ostream& ostream) {
+    const int32_t value = state.registers[Register::A0];
+    ostream << std::hex << value;
+    ostream.flush();
+}
+
+void printIntBinSyscall(const State& state, std::ostream& ostream) {
+    const int32_t value = state.registers[Register::A0];
+    for (int i = 31; i >= 0; --i)
+        ostream << (value >> i & 1);
+    ostream.flush();
+}
+
+void printUIntSyscall(const State& state, std::ostream& ostream) {
+    const uint32_t value = state.registers[Register::A0];
+    ostream << value;
+    ostream.flush();
+}
+
+void setRandSeedSyscall(State& state) {
+    const int32_t id = state.registers[Register::A0];
+    const int32_t seed = state.registers[Register::A1];
+    rngMap[id] = RandomGenerator(seed);
+}
+
+void randIntSyscall(State& state) {
+    const int32_t id = state.registers[Register::A0];
+    if (!rngMap.contains(id))
+        rngMap[id] = RandomGenerator();
+    state.registers[Register::A0] = rngMap[id].getRandomInt();
+}
+
+void randIntRangeSyscall(State& state) {
+    const int32_t id = state.registers[Register::A0];
+    const int32_t max = state.registers[Register::A1];
+    if (!rngMap.contains(id))
+        rngMap[id] = RandomGenerator();
+    state.registers[Register::A0] = rngMap[id].getRandomInt(max);
 }
