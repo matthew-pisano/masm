@@ -26,7 +26,7 @@ This program uses a 32 element array composed of 32-bit integers to represent it
     - [x] MIPS Pseudo Instructions
 - [ ] Syscalls
     - [X] Keyboard/Display Syscalls
-    - [ ] MARS Extended Syscalls
+    - [X] MARS Extended Syscalls
     - [ ] Heap Allocation Syscalls
 - [X] Basic Memory Directives (`.data`, `.text`)
 - [X] Allocation directives (`.word`, `.space`, etc.)

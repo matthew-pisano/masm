@@ -62,6 +62,7 @@ add_executable(masm-tests
         src/labels.cpp
         src/directive.cpp
         src/postprocessor.cpp
+        test/test_syscall.cpp
 )
 target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)

@@ -42,6 +42,30 @@ void execSyscall(State& state, std::istream& istream, std::ostream& ostream) {
         case Syscall::EXIT_VAL:
             exitValSyscall(state);
             break;
+        case Syscall::TIME:
+            timeSyscall(state);
+            break;
+        case Syscall::SLEEP:
+            sleepSyscall(state);
+            break;
+        case Syscall::PRINT_INT_HEX:
+            printIntHexSyscall(state, ostream);
+            break;
+        case Syscall::PRINT_INT_BIN:
+            printIntBinSyscall(state, ostream);
+            break;
+        case Syscall::PRINT_UINT:
+            printUIntSyscall(state, ostream);
+            break;
+        case Syscall::SET_SEED:
+            setRandSeedSyscall(state);
+            break;
+        case Syscall::RAND_INT:
+            randIntSyscall(state);
+            break;
+        case Syscall::RAND_INT_RANGE:
+            randIntRangeSyscall(state);
+            break;
         default:
             throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
     }
@@ -136,13 +160,16 @@ void timeSyscall(State& state) {
 
 void sleepSyscall(State& state) {
     const int32_t milliseconds = state.registers[Register::A0];
+    if (milliseconds < 0)
+        throw MasmRuntimeError("Negative sleep time: " + std::to_string(milliseconds));
+
     usleep(milliseconds * 1000);
 }
 
 
 void printIntHexSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
-    ostream << std::hex << value;
+    ostream << std::hex << std::setw(8) << std::setfill('0') << value;
     ostream.flush();
 }
 
@@ -169,7 +196,7 @@ void randIntSyscall(State& state) {
     const int32_t id = state.registers[Register::A0];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();
-    state.registers[Register::A0] = rngMap[id].getRandomInt();
+    state.registers[Register::A0] = static_cast<int32_t>(rngMap[id].getRandomInt());
 }
 
 void randIntRangeSyscall(State& state) {
@@ -177,5 +204,5 @@ void randIntRangeSyscall(State& state) {
     const int32_t max = state.registers[Register::A1];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();
-    state.registers[Register::A0] = rngMap[id].getRandomInt(max);
+    state.registers[Register::A0] = static_cast<int32_t>(rngMap[id].getRandomInt(max));
 }
