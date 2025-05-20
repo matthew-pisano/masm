@@ -30,6 +30,9 @@ void execSyscall(State& state, std::istream& istream, std::ostream& ostream) {
         case Syscall::READ_STRING:
             readStringSyscall(state, istream);
             break;
+        case Syscall::HEAP_ALLOC:
+            heapAllocSyscall(state);
+            break;
         case Syscall::EXIT:
             exitSyscall();
             break;
