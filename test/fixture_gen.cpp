@@ -23,7 +23,7 @@ std::vector<SourceLine> genTokenFile(std::ofstream& tokenFile,
                                      const std::vector<RawFile>& programLines) {
     const std::vector<SourceLine> tokenizedLines = Tokenizer::tokenize(programLines);
     for (const SourceLine& tokenLine : tokenizedLines) {
-        for (const Token& token : tokenLine) {
+        for (const Token& token : tokenLine.tokens) {
             constexpr unsigned char groupSep = 0x1d;
             std::string tokenType = std::to_string(static_cast<int>(token.type));
             if (static_cast<int>(token.type) < 10)
