@@ -15,14 +15,12 @@ constexpr uint32_t HEAP_SIZE = 0xfd00000; // 253 MiB
  * Class representing a simple heap allocator
  */
 class HeapAllocator {
-    uint32_t heapHead;
+    std::vector<uint32_t> blockAddresses;
+    std::vector<uint32_t> blockSizes;
+
+    [[nodiscard]] uint32_t nextFree(uint32_t size) const;
 
 public:
-    /**
-     * Constructor for the heap allocator
-     */
-    HeapAllocator() : heapHead(HEAP_BASE) {}
-
     /**
      * Allocates a block of memory of the given size
      * @param size The size of the block to allocate

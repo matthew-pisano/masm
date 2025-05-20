@@ -66,17 +66,22 @@ TEST_CASE("Test Read String Syscall") {
 
 
 TEST_CASE("Test Heap Allocation Syscall") {
-    constexpr uint32_t size = 100;
     State state;
-    state.registers[Register::A0] = size;
 
+    state.registers[Register::A0] = 100;
     heapAllocSyscall(state);
     uint32_t address = state.registers[Register::V0];
     REQUIRE(address == HEAP_BASE);
 
+    state.registers[Register::A0] = 50;
     heapAllocSyscall(state);
     address = state.registers[Register::V0];
-    REQUIRE(address == HEAP_BASE + size);
+    REQUIRE(address == HEAP_BASE + 100);
+
+    state.registers[Register::A0] = 200;
+    heapAllocSyscall(state);
+    address = state.registers[Register::V0];
+    REQUIRE(address == HEAP_BASE + 150);
 }
 
 
