@@ -48,6 +48,7 @@ enum class Syscall {
     PRINT_STRING = 4,
     READ_INT = 5,
     READ_STRING = 8,
+    HEAP_ALLOC = 9,
     EXIT = 10,
     PRINT_CHAR = 11,
     READ_CHAR = 12,
@@ -102,6 +103,12 @@ void readIntSyscall(State& state, std::istream& istream);
  * @param istream The input stream to read from
  */
 void readStringSyscall(State& state, std::istream& istream);
+
+/**
+ * Allocates a block of memory of the size in $a0 and stores the address in $v0
+ * @param state The current state of the interpreter
+ */
+void heapAllocSyscall(State& state);
 
 /**
  * Exits the program with the exit code 0

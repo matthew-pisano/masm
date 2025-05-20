@@ -73,6 +73,8 @@ MemSection nameToMemSection(const std::string& name) {
         return MemSection::TEXT;
     if (name == "data")
         return MemSection::DATA;
+    if (name == "heap")
+        return MemSection::HEAP;
     if (name == "ktext")
         return MemSection::KTEXT;
     if (name == "kdata")
@@ -86,6 +88,8 @@ uint32_t memSectionOffset(const MemSection section) {
     switch (section) {
         case MemSection::DATA:
             return 0x10010000;
+        case MemSection::HEAP:
+            return 0x10040000;
         case MemSection::TEXT:
             return 0x00400000;
         case MemSection::KDATA:

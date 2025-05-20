@@ -118,6 +118,13 @@ void readStringSyscall(State& state, std::istream& istream) {
 }
 
 
+void heapAllocSyscall(State& state) {
+    const int32_t size = state.registers[Register::A0];
+    const int32_t ptr = static_cast<int32_t>(state.heapAllocator.allocate(size));
+    state.registers[Register::V0] = ptr;
+}
+
+
 void exitSyscall() { throw ExecExit("Program exited with code " + std::to_string(0), 0); }
 
 
