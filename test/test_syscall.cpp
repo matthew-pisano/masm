@@ -65,6 +65,21 @@ TEST_CASE("Test Read String Syscall") {
 }
 
 
+TEST_CASE("Test Heap Allocation Syscall") {
+    constexpr uint32_t size = 100;
+    State state;
+    state.registers[Register::A0] = size;
+
+    heapAllocSyscall(state);
+    uint32_t address = state.registers[Register::V0];
+    REQUIRE(address == HEAP_BASE);
+
+    heapAllocSyscall(state);
+    address = state.registers[Register::V0];
+    REQUIRE(address == HEAP_BASE + size);
+}
+
+
 TEST_CASE("Test Exit Syscall") { REQUIRE_THROWS_AS(exitSyscall(), ExecExit); }
 
 
