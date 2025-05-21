@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "consoleio.h"
 #include "fileio.h"
 #include "interpreter.h"
 #include "parser.h"
@@ -33,9 +34,22 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
     Parser parser{};
     const MemLayout layout = parser.parse(program);
 
+    int exitCode = 0;
     std::ostringstream oss;
-    Interpreter interpreter{std::cin, oss};
-    const int exitCode = interpreter.interpret(layout);
+
+    // Set terminal to raw mode
+    enableRawConsoleMode();
+    try {
+        Interpreter interpreter{std::cin, oss};
+        exitCode = interpreter.interpret(layout);
+    } catch (std::runtime_error&) {
+        // Restore terminal settings
+        disableRawConsoleMode();
+        throw;
+    }
+
+    // Restore terminal settings
+    disableRawConsoleMode();
 
     REQUIRE(exitCode == 0);
 
