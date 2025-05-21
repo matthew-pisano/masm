@@ -70,9 +70,8 @@ class Interpreter {
     void execJType(uint32_t opCode, uint32_t address);
 
 public:
-    Interpreter() : state(), istream(std::cin), ostream(std::cout) {}
-    Interpreter(std::istream& input, std::ostream& output) :
-        state(), istream(input), ostream(output) {}
+    Interpreter() : istream(std::cin), ostream(std::cout) {}
+    Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     /**
      * Executes a single program instruction at the current program state
