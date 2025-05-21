@@ -74,6 +74,16 @@ public:
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     /**
+     * Reads from the input stream and updates the MMIO ready bit and data word
+     */
+    void readMMIO();
+
+    /**
+     * Writes the MMIO data word to output stream
+     */
+    void writeMMIO();
+
+    /**
      * Executes a single program instruction at the current program state
      */
     void step();

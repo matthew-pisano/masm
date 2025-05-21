@@ -1,41 +1,13 @@
 #include <iostream>
 #include <string>
-#include <termios.h>
-#include <unistd.h>
 #include <vector>
 
 #include "CLI/CLI.hpp"
+#include "consoleio.h"
 #include "fileio.h"
 #include "interpreter.h"
 #include "parser.h"
 #include "utils.h"
-
-
-/**
- * Enable raw mode for terminal input to get single characters without newline
- */
-void enableRawMode() {
-    termios term{};
-    tcgetattr(STDIN_FILENO, &term);
-    // Turn off canonical mode and echo mode
-    term.c_lflag &= ~(ICANON);
-    // Set minimum number of input bytes and timeout
-    term.c_cc[VMIN] = 1; // Wait for at least one byte
-    term.c_cc[VTIME] = 0; // No timeout
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
-}
-
-
-/**
- * Disable raw mode for terminal input to restore default behavior
- */
-void disableRawMode() {
-    termios term{};
-    tcgetattr(STDIN_FILENO, &term);
-    // Restore canonical mode and echo mode
-    term.c_lflag |= (ICANON);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
-}
 
 
 int main(const int argc, char* argv[]) {
@@ -53,7 +25,7 @@ int main(const int argc, char* argv[]) {
     }
 
     // Set terminal to raw mode
-    enableRawMode();
+    enableRawConsoleMode();
 
     int exitCode = 1;
     try {
@@ -74,7 +46,7 @@ int main(const int argc, char* argv[]) {
     }
 
     // Restore terminal settings
-    disableRawMode();
+    disableRawConsoleMode();
 
     return exitCode;
 }

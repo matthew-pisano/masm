@@ -15,7 +15,7 @@
 /**
  * Class representing valid, named sections of memory
  */
-enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA };
+enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA, MMIO };
 
 
 /**
@@ -33,27 +33,40 @@ class Memory {
      */
     std::unordered_map<uint32_t, std::byte> memory;
 
+    /**
+     * Gets the byte at the given address or zero if not allocated
+     * @param index The address to read from
+     * @return The byte stored at the given address or zero if not allocated
+     */
+    std::byte memAt(uint32_t index) const;
+
+    /**
+     * Processes any side effects from reading from an address, such as updating the MMIO ready bit
+     * @param index The address to read from
+     */
+    void readSideEffect(uint32_t index);
+
 public:
     /**
      * Gets the word stored at the given word-aligned memory address
      * @param index The word-aligned address to read from
      * @return The word stored at the given address
      */
-    int32_t wordAt(uint32_t index) const;
+    int32_t wordAt(uint32_t index);
 
     /**
      * Gets the halfword stored at the given halfword-aligned memory address
      * @param index The halfword-aligned address to read from
      * @return The halfword stored at the given address
      */
-    uint16_t halfAt(uint32_t index) const;
+    uint16_t halfAt(uint32_t index);
 
     /**
      * Gets the byte stored at the given byte-aligned memory address
      * @param index The byte-aligned address to read from
      * @return The byte stored at the given address
      */
-    uint8_t byteAt(uint32_t index) const;
+    uint8_t byteAt(uint32_t index);
 
     /**
      * Sets the word at the given word-aligned memory address

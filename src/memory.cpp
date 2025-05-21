@@ -7,28 +7,45 @@
 #include <stdexcept>
 
 
-int32_t Memory::wordAt(const uint32_t index) const {
+std::byte Memory::memAt(const uint32_t index) const {
+    if (!memory.contains(index))
+        return static_cast<std::byte>(0);
+    return memory.at(index);
+}
+
+
+void Memory::readSideEffect(const uint32_t index) {
+    const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
+    const uint32_t input_data = input_ready + 4;
+
+    if (index == input_data)
+        // Reset ready bit
+        wordTo(input_ready, 0);
+}
+
+
+int32_t Memory::wordAt(const uint32_t index) {
     if (index % 4 != 0)
         throw std::runtime_error("Invalid word access at " + std::to_string(index));
 
-    return static_cast<int32_t>(memory.at(index)) << 24 |
-           static_cast<int32_t>(memory.at(index + 1)) << 16 |
-           static_cast<int32_t>(memory.at(index + 2)) << 8 |
-           static_cast<int32_t>(memory.at(index + 3));
+    readSideEffect(index);
+    return static_cast<int32_t>(memAt(index)) << 24 | static_cast<int32_t>(memAt(index + 1)) << 16 |
+           static_cast<int32_t>(memAt(index + 2)) << 8 | static_cast<int32_t>(memAt(index + 3));
 }
 
 
-uint16_t Memory::halfAt(const uint32_t index) const {
+uint16_t Memory::halfAt(const uint32_t index) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
 
-    return static_cast<uint16_t>(memory.at(index)) << 8 |
-           static_cast<uint16_t>(memory.at(index + 1));
+    readSideEffect(index);
+    return static_cast<uint16_t>(memAt(index)) << 8 | static_cast<uint16_t>(memAt(index + 1));
 }
 
 
-uint8_t Memory::byteAt(const uint32_t index) const {
-    return static_cast<uint8_t>(memory.at(index));
+uint8_t Memory::byteAt(const uint32_t index) {
+    readSideEffect(index);
+    return static_cast<uint8_t>(memAt(index));
 }
 
 
@@ -79,6 +96,8 @@ MemSection nameToMemSection(const std::string& name) {
         return MemSection::KTEXT;
     if (name == "kdata")
         return MemSection::KDATA;
+    if (name == "mmio")
+        return MemSection::MMIO;
     // Should never be reached
     throw std::runtime_error("Unknown memory directive " + name);
 }
@@ -96,6 +115,8 @@ uint32_t memSectionOffset(const MemSection section) {
             return 0x90000000;
         case MemSection::KTEXT:
             return 0x80000000;
+        case MemSection::MMIO:
+            return 0xffff0000;
     }
     // Should never be reached
     throw std::runtime_error("Unknown memory section " + std::to_string(static_cast<int>(section)));

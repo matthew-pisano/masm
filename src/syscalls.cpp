@@ -9,6 +9,7 @@
 #include <ostream>
 #include <unistd.h>
 
+#include "consoleio.h"
 #include "exceptions.h"
 
 
@@ -81,7 +82,7 @@ void printIntSyscall(const State& state, std::ostream& ostream) {
 }
 
 
-void printStringSyscall(const State& state, std::ostream& ostream) {
+void printStringSyscall(State& state, std::ostream& ostream) {
     int32_t address = state.registers[Register::A0];
     while (true) {
         const unsigned char c = state.memory.byteAt(address);
@@ -142,8 +143,10 @@ void readCharSyscall(State& state, std::istream& istream) {
     if (&istream != &std::cin)
         istream.get(c);
     else {
-        read(STDIN_FILENO, &c, 1);
-        std::cout.flush();
+        while (!consoleHasChar())
+            usleep(1000); // Sleep for 1 ms
+
+        c = consoleGetChar();
     }
     state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }

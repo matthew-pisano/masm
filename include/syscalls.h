@@ -87,7 +87,7 @@ void printIntSyscall(const State& state, std::ostream& ostream);
  * @param state The current state of the interpreter
  * @param ostream The output stream to print to
  */
-void printStringSyscall(const State& state, std::ostream& ostream);
+void printStringSyscall(State& state, std::ostream& ostream);
 
 /**
  * Reads an integer from the console and stores it in the register $v0

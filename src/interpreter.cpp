@@ -6,6 +6,7 @@
 
 #include <stdexcept>
 
+#include "consoleio.h"
 #include "exceptions.h"
 #include "instruction.h"
 #include "syscalls.h"
@@ -20,12 +21,35 @@ int Interpreter::interpret(const MemLayout& layout) {
 
     while (true) {
         try {
+            readMMIO();
             step();
+            writeMMIO();
         } catch (ExecExit& e) {
             return e.code();
         }
     }
 }
+
+
+void Interpreter::readMMIO() {
+    const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
+    const uint32_t input_data = input_ready + 4;
+
+    char c = 0;
+    // Check if the input stream has characters to read
+    if (&istream == &std::cin && consoleHasChar()) {
+        c = consoleGetChar();
+    } else if (istream.peek() != std::char_traits<char>::eof())
+        istream.get(c);
+
+    if (c) {
+        state.memory.wordTo(input_ready, 1);
+        state.memory.wordTo(input_data, c);
+    }
+}
+
+
+void Interpreter::writeMMIO() {}
 
 
 void Interpreter::step() {
