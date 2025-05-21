@@ -18,6 +18,8 @@ int Interpreter::interpret(const MemLayout& layout) {
     state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));
     state.registers[Register::SP] = 0x7FFFFFFC;
     state.registers[Register::GP] = 0x10008000;
+    // Set MMIO output ready bit to 1
+    state.memory.wordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
 
     while (true) {
         try {
@@ -49,7 +51,18 @@ void Interpreter::readMMIO() {
 }
 
 
-void Interpreter::writeMMIO() {}
+void Interpreter::writeMMIO() {
+    const uint32_t output_ready = memSectionOffset(MemSection::MMIO);
+    const uint32_t output_data = output_ready + 4;
+
+    // Check if the output stream is ready to write
+    if (state.memory.wordAt(output_ready) == 0 || state.memory.wordAt(output_data) == 0)
+        return;
+
+    const char c = static_cast<char>(state.memory.wordAt(output_data));
+    ostream << c;
+    ostream.flush();
+}
 
 
 void Interpreter::step() {

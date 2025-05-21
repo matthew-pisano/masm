@@ -6,7 +6,6 @@
 #define INTERPRETER_H
 
 #include <iostream>
-#include <stdexcept>
 
 
 #include "heap.h"
@@ -74,12 +73,12 @@ public:
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     /**
-     * Reads from the input stream and updates the MMIO ready bit and data word
+     * Reads from the input stream and updates the MMIO input ready bit and data word
      */
     void readMMIO();
 
     /**
-     * Writes the MMIO data word to output stream
+     * Writes the MMIO output data word to output stream
      */
     void writeMMIO();
 
