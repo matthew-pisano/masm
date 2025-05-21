@@ -74,7 +74,6 @@ enum class Syscall {
  */
 void execSyscall(State& state, std::istream& istream, std::ostream& ostream);
 
-
 /**
  * Prints the integer stored in the register $a0 to the console
  * @param state The current state of the interpreter

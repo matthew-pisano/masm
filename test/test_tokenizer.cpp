@@ -133,6 +133,12 @@ TEST_CASE("Test Tokenize Single Lines") {
         expectedTokens = {{{TokenType::IMMEDIATE, "-42.0"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+
+        rawFile = wrapLines({"0x1a"});
+        actualTokens = Tokenizer::tokenizeFile({rawFile});
+        expectedTokens = {{{TokenType::IMMEDIATE, "26"}}};
+        for (size_t i = 0; i < expectedTokens.size(); ++i)
+            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Seperator") {
         const RawFile rawFile = wrapLines({"j ,"});

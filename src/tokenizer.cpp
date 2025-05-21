@@ -12,6 +12,7 @@
 #include "exceptions.h"
 #include "instruction.h"
 #include "postprocessor.h"
+#include "utils.h"
 
 
 /**
@@ -148,7 +149,8 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
             currentType = TokenType::MACRO_PARAM;
         }
         // Handle Immediates, Instructions, and Label references
-        else if (isdigit(c) || c == '-') {
+        else if (isdigit(c) || c == '-' ||
+                 (c == 'x' && currentToken.size() == 1 && currentToken[0] == '0')) {
             currentType = TokenType::IMMEDIATE;
             currentToken += c;
         } else {
@@ -176,6 +178,9 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
 
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
         throw MasmSyntaxError("Unexpected token " + std::string(1, c), tokenLine.lineno);
+
+    if (currentType == TokenType::IMMEDIATE && currentToken.starts_with("0x"))
+        currentToken = hexToInt(currentToken);
 
     // Assign the current token as a label definition if a colon follows
     if (c == ':')

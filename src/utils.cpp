@@ -159,3 +159,13 @@ std::vector<std::byte> f64ToBEByte(double f64) {
     upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
     return upperBytes;
 }
+
+
+std::string hexToInt(std::string hex) {
+    const std::regex pattern("^[-]?0x[0-9a-fA-F]+$");
+    if (!std::regex_match(hex, pattern))
+        throw std::runtime_error("Invalid hex integer " + hex);
+
+    hex = hex.substr(2);
+    return std::to_string(std::stoi(hex, nullptr, 16));
+}

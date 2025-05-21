@@ -111,4 +111,7 @@ std::vector<std::byte> f32ToBEByte(float f32);
  */
 std::vector<std::byte> f64ToBEByte(double f64);
 
+
+std::string hexToInt(std::string hex);
+
 #endif // UTILS_H
