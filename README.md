@@ -36,7 +36,7 @@ This program uses a 32 element array composed of 32-bit integers to represent it
     - [X] Include Directive
     - [X] Macros/Eqv Directives
 - [X] Syntax and Runtime Errors
-- [ ] Keyboard/Display MMIO
+- [X] Keyboard/Display MMIO
 - [ ] Interrupts
     - [ ] MMIO Interrupts
     - [ ] Exceptions
