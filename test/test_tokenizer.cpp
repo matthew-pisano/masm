@@ -256,7 +256,10 @@ TEST_CASE("Test Tokenize Include") {
             {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t0"}},
             {{TokenType::LABEL_DEF, "label@masm_mangle_file_a.asm"}},
             {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t1"}},
-            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t2"}}};
+            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t2"}},
+            {{TokenType::LABEL_DEF, "label@masm_mangle_file_b.asm"}},
+            {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t1"}},
+    };
     REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 }
 
