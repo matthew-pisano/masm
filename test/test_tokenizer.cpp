@@ -63,38 +63,30 @@ void validateTokens(const std::vector<std::string>& sourceFileNames,
 }
 
 
-/**
- * Wraps a series of lines into a raw files
- * @param lines The lines to wrap
- * @return A raw file containing the lines
- */
-RawFile wrapLines(const std::vector<std::string>& lines) { return {"a.asm", lines}; }
-
-
 TEST_CASE("Test Tokenize Single Lines") {
     SECTION("Test Directive") {
-        const RawFile rawFile = wrapLines({".asciiz"});
+        const RawFile rawFile = makeRawFile({".asciiz"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile(rawFile);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::ALLOC_DIRECTIVE, "asciiz"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Memory Directive") {
-        const RawFile rawFile = wrapLines({".data"});
+        const RawFile rawFile = makeRawFile({".data"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::SEC_DIRECTIVE, "data"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Label Declaration") {
-        const RawFile rawFile = wrapLines({"label:"});
+        const RawFile rawFile = makeRawFile({"label:"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::LABEL_DEF, "label"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Label Reference") {
-        const RawFile rawFile = wrapLines({"j label"});
+        const RawFile rawFile = makeRawFile({"j label"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "label"}}};
@@ -102,46 +94,46 @@ TEST_CASE("Test Tokenize Single Lines") {
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Instruction") {
-        const RawFile rawFile = wrapLines({"addi"});
+        const RawFile rawFile = makeRawFile({"addi"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "addi"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Register") {
-        const RawFile rawFile = wrapLines({"$v0"});
+        const RawFile rawFile = makeRawFile({"$v0"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::REGISTER, "v0"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Immediate") {
-        RawFile rawFile = wrapLines({"42"});
+        RawFile rawFile = makeRawFile({"42"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::IMMEDIATE, "42"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
 
-        rawFile = wrapLines({"-42"});
+        rawFile = makeRawFile({"-42"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "-42"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
 
-        rawFile = wrapLines({"-42.0"});
+        rawFile = makeRawFile({"-42.0"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "-42.0"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
 
-        rawFile = wrapLines({"0x1a"});
+        rawFile = makeRawFile({"0x1a"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "26"}}};
         for (size_t i = 0; i < expectedTokens.size(); ++i)
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test Seperator") {
-        const RawFile rawFile = wrapLines({"j ,"});
+        const RawFile rawFile = makeRawFile({"j ,"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::SEPERATOR, ","}}};
@@ -149,7 +141,7 @@ TEST_CASE("Test Tokenize Single Lines") {
             REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
     }
     SECTION("Test String") {
-        const RawFile rawFile = wrapLines({R"("'ello \n\"There\"")"});
+        const RawFile rawFile = makeRawFile({R"("'ello \n\"There\"")"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::STRING, R"('ello \n\"There\")"}}};
@@ -158,7 +150,7 @@ TEST_CASE("Test Tokenize Single Lines") {
     }
 
     SECTION("Test Globl") {
-        const RawFile rawFile = wrapLines({".globl label"});
+        const RawFile rawFile = makeRawFile({".globl label"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::META_DIRECTIVE, "globl"}, {TokenType::LABEL_REF, "label"}}};
@@ -167,7 +159,7 @@ TEST_CASE("Test Tokenize Single Lines") {
     }
 
     SECTION("Test Eqv") {
-        const RawFile rawFile = wrapLines({".eqv exit li $v0, 10", "exit"});
+        const RawFile rawFile = makeRawFile({".eqv exit li $v0, 10", "exit"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::META_DIRECTIVE, "eqv"},
                                                            {TokenType::LABEL_REF, "exit"},
@@ -181,7 +173,7 @@ TEST_CASE("Test Tokenize Single Lines") {
     }
 
     SECTION("Test Macro Parameters") {
-        const RawFile rawFile = wrapLines({".macro foobar(%foo, %bar)"});
+        const RawFile rawFile = makeRawFile({".macro foobar(%foo, %bar)"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::META_DIRECTIVE, "macro"},
                                                            {TokenType::LABEL_REF, "foobar"},
@@ -198,14 +190,14 @@ TEST_CASE("Test Tokenize Single Lines") {
 
 TEST_CASE("Test Tokenize Invalid Syntax") {
     SECTION("Test Unexpected EOL") {
-        const RawFile rawFile = wrapLines({R"(unterminated: .asciiz "incomplet)"});
+        const RawFile rawFile = makeRawFile({R"(unterminated: .asciiz "incomplet)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), std::runtime_error);
     }
 }
 
 
 TEST_CASE("Test Base Addressing") {
-    RawFile rawFile = wrapLines({"lw $t1, 8($t0)"});
+    RawFile rawFile = makeRawFile({"lw $t1, 8($t0)"});
     std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
     std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
                                                        {TokenType::REGISTER, "t1"},
@@ -216,7 +208,7 @@ TEST_CASE("Test Base Addressing") {
     for (size_t i = 0; i < expectedTokens.size(); ++i)
         REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
 
-    rawFile = wrapLines({"lw $t1, ($t0)"});
+    rawFile = makeRawFile({"lw $t1, ($t0)"});
     actualTokens = Tokenizer::tokenize({rawFile});
     expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
                        {TokenType::REGISTER, "t1"},
@@ -230,7 +222,7 @@ TEST_CASE("Test Base Addressing") {
 
 
 TEST_CASE("Test Tokenize Eqv") {
-    const RawFile rawFile = wrapLines({".eqv exit li $v0, 10", "exit"});
+    const RawFile rawFile = makeRawFile({".eqv exit li $v0, 10", "exit"});
     std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
     std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
                                                        {TokenType::REGISTER, "v0"},
@@ -244,7 +236,7 @@ TEST_CASE("Test Tokenize Eqv") {
 TEST_CASE("Test Tokenize Macro") {
     SECTION("Test Macro without Parameters") {
         const RawFile rawFile =
-                wrapLines({".macro done", "li $v0, 10", "syscall", ".end_macro", "done"});
+                makeRawFile({".macro done", "li $v0, 10", "syscall", ".end_macro", "done"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
                                                            {TokenType::REGISTER, "v0"},
@@ -257,8 +249,8 @@ TEST_CASE("Test Tokenize Macro") {
 
     SECTION("Test Macro with Parameters") {
         const RawFile rawFile =
-                wrapLines({".macro terminate(%termination_value)", "li $a0, %termination_value",
-                           "li $v0, 17", "syscall", ".end_macro", "terminate(1)"});
+                makeRawFile({".macro terminate(%termination_value)", "li $a0, %termination_value",
+                             "li $v0, 17", "syscall", ".end_macro", "terminate(1)"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
                                                            {TokenType::REGISTER, "a0"},
@@ -291,98 +283,98 @@ TEST_CASE("Test Tokenize Include") {
 
 TEST_CASE("Test Tokenizer Syntax Errors") {
     SECTION("Test Misplaced Quote") {
-        const RawFile rawFile = wrapLines({R"(g"hello")"});
+        const RawFile rawFile = makeRawFile({R"(g"hello")"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Unclosed Quote") {
-        const RawFile rawFile = wrapLines({R"("hello)"});
+        const RawFile rawFile = makeRawFile({R"("hello)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Unexpected First Token") {
-        RawFile rawFile = wrapLines({","});
+        RawFile rawFile = makeRawFile({","});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({"("});
+        rawFile = makeRawFile({"("});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({")"});
+        rawFile = makeRawFile({")"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({":"});
+        rawFile = makeRawFile({":"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Undeclared Global Label") {
-        const RawFile rawFile = wrapLines({".globl invalid"});
+        const RawFile rawFile = makeRawFile({".globl invalid"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Invalid Global Label") {
-        RawFile rawFile = wrapLines({".globl"});
+        RawFile rawFile = makeRawFile({".globl"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".globl 1"});
+        rawFile = makeRawFile({".globl 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Invalid Eqv") {
-        RawFile rawFile = wrapLines({".eqv"});
+        RawFile rawFile = makeRawFile({".eqv"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".eqv hello"});
+        rawFile = makeRawFile({".eqv hello"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".eqv 1 1"});
+        rawFile = makeRawFile({".eqv 1 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Base Addressing") {
-        RawFile rawFile = wrapLines({"($t0)"});
+        RawFile rawFile = makeRawFile({"($t0)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({"lw $s1 2($t0"});
+        rawFile = makeRawFile({"lw $s1 2($t0"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({"lw $s1 2()"});
+        rawFile = makeRawFile({"lw $s1 2()"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Malformed Macro Params") {
-        RawFile rawFile = wrapLines({".macro macro %arg"});
+        RawFile rawFile = makeRawFile({".macro macro %arg"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".macro macro (%arg"});
+        rawFile = makeRawFile({".macro macro (%arg"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Malformed Macro Call") {
-        RawFile rawFile = wrapLines(
+        RawFile rawFile = makeRawFile(
                 {".macro macro(%arg)", "addi $t0, $zero, %arg", ".end_macro", "macro(0, 1)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines(
+        rawFile = makeRawFile(
                 {".macro macro(%arg)", "addi $t0, $zero, %bargg", ".end_macro", "macro(0)"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Malformed Macro Declaration") {
-        RawFile rawFile = wrapLines({".macro"});
+        RawFile rawFile = makeRawFile({".macro"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".macro 1"});
+        rawFile = makeRawFile({".macro 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".macro macro(%arg)", "addi $t0, $zero, %bargg"});
+        rawFile = makeRawFile({".macro macro(%arg)", "addi $t0, $zero, %bargg"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 
     SECTION("Test Invalid Include") {
-        RawFile rawFile = wrapLines({".include"});
+        RawFile rawFile = makeRawFile({".include"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
 
-        rawFile = wrapLines({".include 1"});
+        rawFile = makeRawFile({".include 1"});
         REQUIRE_THROWS_AS(Tokenizer::tokenize({rawFile}), MasmSyntaxError);
     }
 }

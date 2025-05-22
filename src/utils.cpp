@@ -169,3 +169,14 @@ std::string hexToInt(std::string hex) {
     hex = hex.substr(2);
     return std::to_string(std::stoi(hex, nullptr, 16));
 }
+
+
+std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
+    std::vector<std::byte> byteVec(intVec.size());
+    for (size_t i = 0; i < intVec.size(); ++i)
+        byteVec[i] = static_cast<std::byte>(intVec[i]);
+    return byteVec;
+}
+
+
+RawFile makeRawFile(const std::vector<std::string>& lines) { return {"a.asm", lines}; }

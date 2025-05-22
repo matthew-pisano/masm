@@ -55,19 +55,6 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
 }
 
 
-/**
- * Converts a vector of integers to a vector of bytes
- * @param intVec The vector of integers to convert
- * @return The vector of bytes
- */
-std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
-    std::vector<std::byte> byteVec(intVec.size());
-    for (size_t i = 0; i < intVec.size(); ++i)
-        byteVec[i] = static_cast<std::byte>(intVec[i]);
-    return byteVec;
-}
-
-
 TEST_CASE("Test Directive Allocation") {
     SECTION("Test Align") {
         std::vector<std::byte> expected = {};

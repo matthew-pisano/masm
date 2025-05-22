@@ -112,6 +112,27 @@ std::vector<std::byte> f32ToBEByte(float f32);
 std::vector<std::byte> f64ToBEByte(double f64);
 
 
+/**
+ * Converts a hexadecimal string to an integer string
+ * @param hex The hexadecimal string to convert
+ * @return The integer string value of the hexadecimal string
+ */
 std::string hexToInt(std::string hex);
+
+
+/**
+ * Converts a vector of integers to a vector of bytes
+ * @param intVec The vector of integers to convert
+ * @return The vector of bytes
+ */
+std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec);
+
+
+/**
+ * Wraps a series of lines into a raw files
+ * @param lines The lines to wrap
+ * @return A raw file containing the lines
+ */
+RawFile makeRawFile(const std::vector<std::string>& lines);
 
 #endif // UTILS_H
