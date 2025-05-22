@@ -9,6 +9,7 @@
 #include "exceptions.h"
 #include "fileio.h"
 #include "parser.h"
+#include "testing_utilities.h"
 #include "utils.h"
 
 

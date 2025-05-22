@@ -7,6 +7,7 @@
 
 #include "exceptions.h"
 #include "fileio.h"
+#include "testing_utilities.h"
 #include "tokenizer.h"
 #include "utils.h"
 
@@ -57,9 +58,7 @@ void validateTokens(const std::vector<std::string>& sourceFileNames,
         sourceLines.push_back({getFileBasename(fileName), readFileLines(fileName)});
 
     const std::vector<SourceLine> actualTokens = Tokenizer::tokenize(sourceLines);
-    REQUIRE(expectedTokens.size() == actualTokens.size());
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
-        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 }
 
 
@@ -68,85 +67,73 @@ TEST_CASE("Test Tokenize Single Lines") {
         const RawFile rawFile = makeRawFile({".asciiz"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile(rawFile);
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::ALLOC_DIRECTIVE, "asciiz"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Memory Directive") {
         const RawFile rawFile = makeRawFile({".data"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::SEC_DIRECTIVE, "data"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Label Declaration") {
         const RawFile rawFile = makeRawFile({"label:"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::LABEL_DEF, "label"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Label Reference") {
         const RawFile rawFile = makeRawFile({"j label"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "label"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Instruction") {
         const RawFile rawFile = makeRawFile({"addi"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "addi"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Register") {
         const RawFile rawFile = makeRawFile({"$v0"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::REGISTER, "v0"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Immediate") {
         RawFile rawFile = makeRawFile({"42"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {{{TokenType::IMMEDIATE, "42"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 
         rawFile = makeRawFile({"-42"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "-42"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 
         rawFile = makeRawFile({"-42.0"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "-42.0"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 
         rawFile = makeRawFile({"0x1a"});
         actualTokens = Tokenizer::tokenizeFile({rawFile});
         expectedTokens = {{{TokenType::IMMEDIATE, "26"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Seperator") {
         const RawFile rawFile = makeRawFile({"j ,"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::SEPERATOR, ","}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test String") {
         const RawFile rawFile = makeRawFile({R"("'ello \n\"There\"")"});
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::STRING, R"('ello \n\"There\")"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     SECTION("Test Globl") {
@@ -154,8 +141,7 @@ TEST_CASE("Test Tokenize Single Lines") {
         std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
         std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::META_DIRECTIVE, "globl"}, {TokenType::LABEL_REF, "label"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     SECTION("Test Eqv") {
@@ -168,8 +154,7 @@ TEST_CASE("Test Tokenize Single Lines") {
                                                            {TokenType::SEPERATOR, ","},
                                                            {TokenType::IMMEDIATE, "10"}},
                                                           {{TokenType::LABEL_REF, "exit"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     SECTION("Test Macro Parameters") {
@@ -182,8 +167,7 @@ TEST_CASE("Test Tokenize Single Lines") {
                                                            {TokenType::SEPERATOR, ","},
                                                            {TokenType::MACRO_PARAM, "bar"},
                                                            {TokenType::CLOSE_PAREN, ")"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 }
 
@@ -205,8 +189,7 @@ TEST_CASE("Test Base Addressing") {
                                                        {TokenType::REGISTER, "t0"},
                                                        {TokenType::SEPERATOR, ","},
                                                        {TokenType::IMMEDIATE, "8"}}};
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
-        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 
     rawFile = makeRawFile({"lw $t1, ($t0)"});
     actualTokens = Tokenizer::tokenize({rawFile});
@@ -216,20 +199,18 @@ TEST_CASE("Test Base Addressing") {
                        {TokenType::REGISTER, "t0"},
                        {TokenType::SEPERATOR, ","},
                        {TokenType::IMMEDIATE, "0"}}};
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
-        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 }
 
 
 TEST_CASE("Test Tokenize Eqv") {
     const RawFile rawFile = makeRawFile({".eqv exit li $v0, 10", "exit"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
-    std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
-                                                       {TokenType::REGISTER, "v0"},
-                                                       {TokenType::SEPERATOR, ","},
-                                                       {TokenType::IMMEDIATE, "10"}}};
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
-        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    const std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
+    const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
+                                                             {TokenType::REGISTER, "v0"},
+                                                             {TokenType::SEPERATOR, ","},
+                                                             {TokenType::IMMEDIATE, "10"}}};
+    REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 }
 
 
@@ -237,32 +218,32 @@ TEST_CASE("Test Tokenize Macro") {
     SECTION("Test Macro without Parameters") {
         const RawFile rawFile =
                 makeRawFile({".macro done", "li $v0, 10", "syscall", ".end_macro", "done"});
-        std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
-                                                           {TokenType::REGISTER, "v0"},
-                                                           {TokenType::SEPERATOR, ","},
-                                                           {TokenType::IMMEDIATE, "10"}},
-                                                          {{TokenType::INSTRUCTION, "syscall"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        const std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenType::INSTRUCTION, "li"},
+                 {TokenType::REGISTER, "v0"},
+                 {TokenType::SEPERATOR, ","},
+                 {TokenType::IMMEDIATE, "10"}},
+                {{TokenType::INSTRUCTION, "syscall"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     SECTION("Test Macro with Parameters") {
         const RawFile rawFile =
                 makeRawFile({".macro terminate(%termination_value)", "li $a0, %termination_value",
                              "li $v0, 17", "syscall", ".end_macro", "terminate(1)"});
-        std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
-                                                           {TokenType::REGISTER, "a0"},
-                                                           {TokenType::SEPERATOR, ","},
-                                                           {TokenType::IMMEDIATE, "1"}},
-                                                          {{TokenType::INSTRUCTION, "li"},
-                                                           {TokenType::REGISTER, "v0"},
-                                                           {TokenType::SEPERATOR, ","},
-                                                           {TokenType::IMMEDIATE, "17"}},
-                                                          {{TokenType::INSTRUCTION, "syscall"}}};
-        for (size_t i = 0; i < expectedTokens.size(); ++i)
-            REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+        const std::vector<SourceLine> actualTokens = Tokenizer::tokenize({rawFile});
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenType::INSTRUCTION, "li"},
+                 {TokenType::REGISTER, "a0"},
+                 {TokenType::SEPERATOR, ","},
+                 {TokenType::IMMEDIATE, "1"}},
+                {{TokenType::INSTRUCTION, "li"},
+                 {TokenType::REGISTER, "v0"},
+                 {TokenType::SEPERATOR, ","},
+                 {TokenType::IMMEDIATE, "17"}},
+                {{TokenType::INSTRUCTION, "syscall"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 }
 
@@ -270,14 +251,13 @@ TEST_CASE("Test Tokenize Macro") {
 TEST_CASE("Test Tokenize Include") {
     const std::vector<RawFile> rawFile = {{"a.asm", {"jr $t0", R"(.include "b.asm")", "jr $t2"}},
                                           {"b.asm", {"label:", "jr $t1"}}};
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenize(rawFile);
-    std::vector<std::vector<Token>> expectedTokens = {
+    const std::vector<SourceLine> actualTokens = Tokenizer::tokenize(rawFile);
+    const std::vector<std::vector<Token>> expectedTokens = {
             {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t0"}},
             {{TokenType::LABEL_DEF, "label@masm_mangle_file_a.asm"}},
             {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t1"}},
             {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t2"}}};
-    for (size_t i = 0; i < expectedTokens.size(); ++i)
-        REQUIRE(expectedTokens[i] == actualTokens[i].tokens);
+    REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
 }
 
 
