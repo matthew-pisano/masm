@@ -70,20 +70,14 @@ enum class InstructionCode {
     // Syscall
     SYSCALL = 0x00,
 
-    // Pseudo Instructions
-    LI = 0x00,
-    LA = 0x00,
-    MOVE = 0x00,
-    BLT = 0x00,
-    BGT = 0x00,
-    BGE = 0x00,
-    BLE = 0x00,
-
     // Remapped Instructions
     BGTZ = 0x07,
     BLEZ = 0x06,
     BLTZ = 0x07,
     BGEZ = 0x01,
+
+    // Instruction Code for Pseudo Instructions
+    PSEUDO = 0x00,
 };
 
 
