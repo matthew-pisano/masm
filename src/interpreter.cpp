@@ -143,6 +143,22 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             state.registers[Register::HI] = static_cast<int32_t>(rsVal % rtVal);
             break;
         }
+        case InstructionCode::MFHI: {
+            state.registers[rd] = state.registers[Register::HI];
+            break;
+        }
+        case InstructionCode::MFLO: {
+            state.registers[rd] = state.registers[Register::LO];
+            break;
+        }
+        case InstructionCode::MTHI: {
+            state.registers[Register::HI] = state.registers[rs];
+            break;
+        }
+        case InstructionCode::MTLO: {
+            state.registers[Register::LO] = state.registers[rs];
+            break;
+        }
         case InstructionCode::MULT: {
             const int64_t rsVal = state.registers[rs];
             const int64_t rtVal = state.registers[rt];

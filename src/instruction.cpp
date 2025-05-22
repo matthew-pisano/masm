@@ -23,6 +23,10 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"andi", {InstructionType::I_TYPE_T_S_I, InstructionCode::ANDI, 4}},
         {"div", {InstructionType::R_TYPE_S_T, InstructionCode::DIV, 4}},
         {"divu", {InstructionType::R_TYPE_S_T, InstructionCode::DIVU, 4}},
+        {"mfhi", {InstructionType::R_TYPE_D, InstructionCode::MFHI, 4}},
+        {"mthi", {InstructionType::R_TYPE_S, InstructionCode::MTHI, 4}},
+        {"mflo", {InstructionType::R_TYPE_S, InstructionCode::MFLO, 4}},
+        {"mtlo", {InstructionType::R_TYPE_D, InstructionCode::MTLO, 4}},
         {"mult", {InstructionType::R_TYPE_S_T, InstructionCode::MULT, 4}},
         {"multu", {InstructionType::R_TYPE_S_T, InstructionCode::MULTU, 4}},
         {"nor", {InstructionType::R_TYPE_D_S_T, InstructionCode::NOR, 4}},
@@ -138,6 +142,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for R-Type instruction " +
                                          instruction.value);
             break;
+        case InstructionType::R_TYPE_D:
         case InstructionType::R_TYPE_S:
             if (!tokenTypeMatch({TokenType::REGISTER}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction " +

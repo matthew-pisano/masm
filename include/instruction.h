@@ -22,6 +22,10 @@ enum class InstructionCode {
     ANDI = 0x0c,
     DIV = 0x1a,
     DIVU = 0x1b,
+    MFHI = 0x10,
+    MFLO = 0x12,
+    MTHI = 0x11,
+    MTLO = 0x13,
     MULT = 0x18,
     MULTU = 0x19,
     NOR = 0x27,
@@ -90,6 +94,7 @@ bool operator==(uint32_t lhs, InstructionCode code);
 enum class InstructionType {
     R_TYPE_D_S_T, // R-Type
     R_TYPE_D_T_H, // R-Type with shamt
+    R_TYPE_D, // R-Type with only destination register
     R_TYPE_S_T, // R-Type with 2 source registers
     R_TYPE_D_T_S, // R-Type with source registers swapped
     R_TYPE_S, // R-Type with 1 source register

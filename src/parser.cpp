@@ -119,6 +119,8 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
             return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
         case InstructionType::R_TYPE_D_T_H:
             return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
+        case InstructionType::R_TYPE_D:
+            return parseRTypeInstruction(argCodes[0], 0, 0, 0, opFuncCode);
         case InstructionType::R_TYPE_S:
             return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
         case InstructionType::I_TYPE_T_S_I:
