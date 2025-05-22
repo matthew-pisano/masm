@@ -43,6 +43,11 @@ class Interpreter {
     std::ostream& ostream;
 
     /**
+     * Whether to update the MMIO output ready bits and data words
+     */
+    bool updateMMIO = true;
+
+    /**
      * Executes the given R-Type instruction
      * @param funct The function code of the instruction
      * @param rs The first source register
@@ -86,6 +91,18 @@ public:
      * Executes a single program instruction at the current program state
      */
     void step();
+
+    /**
+     * Gets the current state of the interpreter
+     * @return The current state of the interpreter
+     */
+    State& getState();
+
+    /**
+     * Sets whether to update the MMIO output ready bits and data words
+     * @param update Whether to update the MMIO output ready bits and data words
+     */
+    void setUpdateMMIO(bool update);
 
     /**
      * Executes the program until an exit syscall or exception occurs

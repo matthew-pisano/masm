@@ -69,6 +69,9 @@ add_executable(masm-tests
         test/test_syscall.cpp
         src/heap.cpp
         src/consoleio.cpp
+        test/test_instructions.cpp
+        test/testing_utilities.cpp
+        test/testing_utilities.h
 )
 target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)

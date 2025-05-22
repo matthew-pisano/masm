@@ -37,19 +37,9 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
     int exitCode = 0;
     std::ostringstream oss;
 
-    // Set terminal to raw mode
-    enableRawConsoleMode();
-    try {
-        Interpreter interpreter{std::cin, oss};
-        exitCode = interpreter.interpret(layout);
-    } catch (std::runtime_error&) {
-        // Restore terminal settings
-        disableRawConsoleMode();
-        throw;
-    }
-
-    // Restore terminal settings
-    disableRawConsoleMode();
+    Interpreter interpreter{std::cin, oss};
+    interpreter.setUpdateMMIO(false);
+    exitCode = interpreter.interpret(layout);
 
     REQUIRE(exitCode == 0);
 
