@@ -73,6 +73,7 @@ enum class InstructionCode {
     // Pseudo Instructions
     LI = 0x00,
     LA = 0x00,
+    MOVE = 0x00,
     BLT = 0x00,
     BGT = 0x00,
     BGE = 0x00,

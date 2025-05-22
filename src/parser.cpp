@@ -220,6 +220,10 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
+    if (instructionName == "move") {
+        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
+        return parseInstruction(loc, {TokenType::INSTRUCTION, "addu"}, modifiedArgs);
+    }
 
     // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
