@@ -79,6 +79,7 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"la", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"move", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
+        {"nop", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"blt", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"bgt", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"bge", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
@@ -180,6 +181,8 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "move" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "nop" && !tokenTypeMatch({}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::LABEL_REF}, args))

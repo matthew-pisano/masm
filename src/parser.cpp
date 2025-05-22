@@ -226,6 +226,12 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
         std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
         return parseInstruction(loc, {TokenType::INSTRUCTION, "addu"}, modifiedArgs);
     }
+    if (instructionName == "nop") {
+        std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "zero"},
+                                           {TokenType::REGISTER, "zero"},
+                                           {TokenType::IMMEDIATE, "0"}};
+        return parseInstruction(loc, {TokenType::INSTRUCTION, "sll"}, modifiedArgs);
+    }
 
     // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
