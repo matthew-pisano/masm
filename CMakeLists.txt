@@ -36,7 +36,6 @@ add_executable(masm-fg test/fixture_gen.cpp
         src/postprocessor.cpp
         src/heap.cpp
         src/consoleio.cpp
-        test/test_memory_instructions.cpp
 )
 
 include(FetchContent)
