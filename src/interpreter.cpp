@@ -295,14 +295,18 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
             state.registers[rt] = rsVal < uSignExtImm ? 1 : 0;
             break;
         }
-        case InstructionCode::LB:
+        case InstructionCode::LB: {
             // Convert to signed for sign extension
-            state.registers[rt] = state.memory.byteAt(state.registers[rs] + immediate);
+            const int8_t result = state.memory.byteAt(state.registers[rs] + immediate);
+            state.registers[rt] = result;
             break;
-        case InstructionCode::LH:
+        }
+        case InstructionCode::LH: {
             // Convert to signed for sign extension
-            state.registers[rt] = state.memory.halfAt(state.registers[rs] + immediate);
+            const int16_t result = state.memory.halfAt(state.registers[rs] + immediate);
+            state.registers[rt] = result;
             break;
+        }
         case InstructionCode::LW:
             state.registers[rt] = state.memory.wordAt(state.registers[rs] + immediate);
             break;
