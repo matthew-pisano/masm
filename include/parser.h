@@ -19,11 +19,6 @@
 class Parser {
 
     /**
-     * A class to manage the mapping of labels to memory locations
-     */
-    LabelMap labelMap;
-
-    /**
      * Parses an instruction and its arguments into bytes that can be allocated to memory
      * @param loc The location in which the instruction will be placed into memory
      * @param instrToken The token containing the instruction
@@ -107,14 +102,13 @@ class Parser {
      */
     void parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine);
 
-public:
+protected:
     /**
-     * Fetches the label map associated with this parser
-     * @return The label map associated with this parser
+     * A class to manage the mapping of labels to memory locations
      */
-    LabelMap& getLabels();
+    LabelMap labelMap;
 
-
+public:
     /**
      * Parses a sequence of tokens into memory allocations ready for execution
      * @param tokenLines The program tokens to parse

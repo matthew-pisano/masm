@@ -6,7 +6,39 @@
 #define TESTING_UTILITIES_H
 #include <vector>
 
+#include "interpreter.h"
+#include "parser.h"
 #include "tokenizer.h"
+
+class DebugParser : public Parser {
+
+public:
+    /**
+     * Fetches the label map associated with this parser
+     * @return The label map associated with this parser
+     */
+    LabelMap& getLabels();
+};
+
+
+class DebugInterpreter : public Interpreter {
+
+public:
+    DebugInterpreter() {}
+    DebugInterpreter(std::istream& input, std::ostream& output) : Interpreter(input, output) {}
+
+    /**
+     * Gets the current state of the interpreter
+     * @return The current state of the interpreter
+     */
+    State& getState();
+
+    /**
+     * Sets whether to update the MMIO output ready bits and data words
+     * @param update Whether to update the MMIO output ready bits and data words
+     */
+    void setUpdateMMIO(bool update);
+};
 
 
 /**

@@ -13,9 +13,6 @@
 #include "utils.h"
 
 
-std::map<std::string, uint32_t>& LabelMap::getLabelMap() { return labelMap; }
-
-
 void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
     for (Token& arg : instructionArgs)
         if (arg.type == TokenType::LABEL_REF) {

@@ -11,6 +11,7 @@
 #include "fileio.h"
 #include "interpreter.h"
 #include "parser.h"
+#include "testing_utilities.h"
 #include "tokenizer.h"
 #include "utils.h"
 
@@ -37,7 +38,7 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
     int exitCode = 0;
     std::ostringstream oss;
 
-    Interpreter interpreter{std::cin, oss};
+    DebugInterpreter interpreter{std::cin, oss};
     interpreter.setUpdateMMIO(false);
     exitCode = interpreter.interpret(layout);
 

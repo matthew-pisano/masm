@@ -16,18 +16,12 @@
  * Class to manage the mapping of labels to memory locations
  */
 class LabelMap {
+
+public:
     /**
      * A map between the names of labels and their associated memory addresses
      */
     std::map<std::string, uint32_t> labelMap;
-
-public:
-    /**
-     * Fetches the label map associated with this parser
-     * @return The label map associated with this parser
-     */
-    std::map<std::string, uint32_t>& getLabelMap();
-
 
     /**
      * Modifies instruction arguments to replace label references with labeled memory locations

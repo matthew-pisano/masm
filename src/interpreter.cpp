@@ -12,12 +12,6 @@
 #include "syscalls.h"
 
 
-void Interpreter::setUpdateMMIO(const bool update) { updateMMIO = update; }
-
-
-State& Interpreter::getState() { return state; }
-
-
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
     // Initialize PC to the start of the text section

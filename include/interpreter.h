@@ -27,10 +27,6 @@ struct State {
  * The interpreter class, which is responsible for executing MIPS instructions
  */
 class Interpreter {
-    /**
-     * The current state of program memory and registers
-     */
-    State state;
 
     /**
      * The input stream for the program to use
@@ -41,11 +37,6 @@ class Interpreter {
      * The output stream for the program to use
      */
     std::ostream& ostream;
-
-    /**
-     * Whether to update the MMIO output ready bits and data words
-     */
-    bool updateMMIO = true;
 
     /**
      * Executes the given R-Type instruction
@@ -73,10 +64,6 @@ class Interpreter {
      */
     void execJType(uint32_t opCode, uint32_t address);
 
-public:
-    Interpreter() : istream(std::cin), ostream(std::cout) {}
-    Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
-
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      */
@@ -87,22 +74,26 @@ public:
      */
     void writeMMIO();
 
+
+protected:
+    /**
+     * The current state of program memory and registers
+     */
+    State state;
+
+    /**
+     * Whether to update the MMIO output ready bits and data words
+     */
+    bool updateMMIO = true;
+
+public:
+    Interpreter() : istream(std::cin), ostream(std::cout) {}
+    Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
+
     /**
      * Executes a single program instruction at the current program state
      */
     void step();
-
-    /**
-     * Gets the current state of the interpreter
-     * @return The current state of the interpreter
-     */
-    State& getState();
-
-    /**
-     * Sets whether to update the MMIO output ready bits and data words
-     * @param update Whether to update the MMIO output ready bits and data words
-     */
-    void setUpdateMMIO(bool update);
 
     /**
      * Executes the program until an exit syscall or exception occurs

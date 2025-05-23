@@ -25,7 +25,7 @@ TEST_CASE("Test add Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x20});
@@ -33,7 +33,7 @@ TEST_CASE("Test add Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.getState().registers[Register::T2] = 2;
@@ -59,7 +59,7 @@ TEST_CASE("Test addu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x21});
@@ -67,7 +67,7 @@ TEST_CASE("Test addu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.getState().registers[Register::T2] = 2;
@@ -93,7 +93,7 @@ TEST_CASE("Test addi Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x21, 0x28, 0xff, 0xfe});
@@ -101,7 +101,7 @@ TEST_CASE("Test addi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.interpret(actualLayout);
@@ -126,7 +126,7 @@ TEST_CASE("Test addiu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x25, 0x28, 0xff, 0xfe});
@@ -134,7 +134,7 @@ TEST_CASE("Test addiu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.interpret(actualLayout);
@@ -159,7 +159,7 @@ TEST_CASE("Test and Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x24});
@@ -167,7 +167,7 @@ TEST_CASE("Test and Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
@@ -193,7 +193,7 @@ TEST_CASE("Test andi Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x31, 0x28, 0x00, 0xff});
@@ -201,7 +201,7 @@ TEST_CASE("Test andi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -224,7 +224,7 @@ TEST_CASE("Test div Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x00, 0x1a});
@@ -232,7 +232,7 @@ TEST_CASE("Test div Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 17;
     interpreter.getState().registers[Register::T2] = 5;
@@ -260,7 +260,7 @@ TEST_CASE("Test divu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x00, 0x1b});
@@ -268,7 +268,7 @@ TEST_CASE("Test divu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     interpreter.getState().registers[Register::T2] = 3;
@@ -294,7 +294,7 @@ TEST_CASE("Test mfhi Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x00, 0x00, 0x40, 0x10});
@@ -302,7 +302,7 @@ TEST_CASE("Test mfhi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::HI] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -323,7 +323,7 @@ TEST_CASE("Test mflo Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x00, 0x00, 0x40, 0x12});
@@ -331,7 +331,7 @@ TEST_CASE("Test mflo Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::LO] = 0x87654321;
     interpreter.interpret(actualLayout);
@@ -352,7 +352,7 @@ TEST_CASE("Test mthi Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x20, 0x00, 0x11});
@@ -360,7 +360,7 @@ TEST_CASE("Test mthi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -381,7 +381,7 @@ TEST_CASE("Test mtlo Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x20, 0x00, 0x13});
@@ -389,7 +389,7 @@ TEST_CASE("Test mtlo Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x87654321;
     interpreter.interpret(actualLayout);
@@ -412,7 +412,7 @@ TEST_CASE("Test mult Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x00, 0x18});
@@ -420,7 +420,7 @@ TEST_CASE("Test mult Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 2;
@@ -449,7 +449,7 @@ TEST_CASE("Test multu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x00, 0x19});
@@ -457,7 +457,7 @@ TEST_CASE("Test multu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     interpreter.getState().registers[Register::T2] = 2;
@@ -487,7 +487,7 @@ TEST_CASE("Test nor Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x27});
@@ -495,7 +495,7 @@ TEST_CASE("Test nor Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
@@ -521,7 +521,7 @@ TEST_CASE("Test or Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x25});
@@ -529,7 +529,7 @@ TEST_CASE("Test or Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
@@ -555,7 +555,7 @@ TEST_CASE("Test ori Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x35, 0x28, 0x00, 0xff});
@@ -563,7 +563,7 @@ TEST_CASE("Test ori Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345600;
     interpreter.interpret(actualLayout);
@@ -588,7 +588,7 @@ TEST_CASE("Test sll Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x00, 0x09, 0x41, 0x00});
@@ -596,7 +596,7 @@ TEST_CASE("Test sll Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -621,7 +621,7 @@ TEST_CASE("Test srl Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x00, 0x09, 0x41, 0x02});
@@ -629,7 +629,7 @@ TEST_CASE("Test srl Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -654,7 +654,7 @@ TEST_CASE("Test sra Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x00, 0x09, 0x41, 0x03});
@@ -662,7 +662,7 @@ TEST_CASE("Test sra Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x80000000; // Negative number
     interpreter.interpret(actualLayout);
@@ -687,7 +687,7 @@ TEST_CASE("Test sllv Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x49, 0x40, 0x04});
@@ -695,7 +695,7 @@ TEST_CASE("Test sllv Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 4;
@@ -721,7 +721,7 @@ TEST_CASE("Test srlv Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x49, 0x40, 0x06});
@@ -729,7 +729,7 @@ TEST_CASE("Test srlv Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 4;
@@ -755,7 +755,7 @@ TEST_CASE("Test srav Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x49, 0x40, 0x07});
@@ -763,7 +763,7 @@ TEST_CASE("Test srav Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x80000000; // Negative number
     interpreter.getState().registers[Register::T2] = 4;
@@ -789,7 +789,7 @@ TEST_CASE("Test sub Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x22});
@@ -797,7 +797,7 @@ TEST_CASE("Test sub Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 5;
     interpreter.getState().registers[Register::T2] = 3;
@@ -823,7 +823,7 @@ TEST_CASE("Test subu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x23});
@@ -831,7 +831,7 @@ TEST_CASE("Test subu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 5;
     interpreter.getState().registers[Register::T2] = 3;
@@ -857,7 +857,7 @@ TEST_CASE("Test xor Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x2a, 0x40, 0x26});
@@ -865,7 +865,7 @@ TEST_CASE("Test xor Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0xAAAAAAAA;
     interpreter.getState().registers[Register::T2] = 0x55555555;
@@ -891,7 +891,7 @@ TEST_CASE("Test xori Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    Parser parser{};
+    DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x39, 0x28, 0xff, 0xff});
@@ -899,7 +899,7 @@ TEST_CASE("Test xori Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    Interpreter interpreter{std::cin, std::cout};
+    DebugInterpreter interpreter{std::cin, std::cout};
     interpreter.setUpdateMMIO(false);
     interpreter.getState().registers[Register::T1] = 0x12340000;
     interpreter.interpret(actualLayout);
