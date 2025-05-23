@@ -23,6 +23,13 @@ class LabelMap {
 
 public:
     /**
+     * Fetches the label map associated with this parser
+     * @return The label map associated with this parser
+     */
+    std::map<std::string, uint32_t>& getLabelMap();
+
+
+    /**
      * Modifies instruction arguments to replace label references with labeled memory locations
      * @param instructionArgs The instruction arguments to modify
      * @throw runtime_error When one of the arguments references an unknown label

@@ -109,6 +109,13 @@ class Parser {
 
 public:
     /**
+     * Fetches the label map associated with this parser
+     * @return The label map associated with this parser
+     */
+    LabelMap& getLabels();
+
+
+    /**
      * Parses a sequence of tokens into memory allocations ready for execution
      * @param tokenLines The program tokens to parse
      * @return The memory allocations associated with the program
