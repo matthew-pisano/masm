@@ -170,15 +170,17 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
         case InstructionCode::MULT: {
             const int64_t rsVal = state.registers[rs];
             const int64_t rtVal = state.registers[rt];
-            state.registers[Register::LO] = static_cast<int32_t>(rsVal * rtVal & 0xFFFFFFFF);
-            state.registers[Register::HI] = static_cast<int32_t>(rsVal * rtVal >> 32 & 0xFFFFFFFF);
+            const int64_t result = rsVal * rtVal;
+            state.registers[Register::LO] = static_cast<int32_t>(result & 0xFFFFFFFF);
+            state.registers[Register::HI] = static_cast<int32_t>(result >> 32 & 0xFFFFFFFF);
             break;
         }
         case InstructionCode::MULTU: {
-            const uint64_t rsVal = state.registers[rs];
-            const uint64_t rtVal = state.registers[rt];
-            state.registers[Register::LO] = static_cast<int32_t>(rsVal * rtVal & 0xFFFFFFFF);
-            state.registers[Register::HI] = static_cast<int32_t>(rsVal * rtVal >> 32 & 0xFFFFFFFF);
+            const uint64_t rsVal = static_cast<uint32_t>(state.registers[rs]);
+            const uint64_t rtVal = static_cast<uint32_t>(state.registers[rt]);
+            const uint64_t result = rsVal * rtVal;
+            state.registers[Register::LO] = static_cast<int32_t>(result & 0xFFFFFFFF);
+            state.registers[Register::HI] = static_cast<int32_t>(result >> 32 & 0xFFFFFFFF);
             break;
         }
         case InstructionCode::NOR:
