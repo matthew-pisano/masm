@@ -36,6 +36,7 @@ add_executable(masm-fg test/fixture_gen.cpp
         src/postprocessor.cpp
         src/heap.cpp
         src/consoleio.cpp
+        test/test_memory_instructions.cpp
 )
 
 include(FetchContent)
@@ -69,9 +70,13 @@ add_executable(masm-tests
         test/test_syscall.cpp
         src/heap.cpp
         src/consoleio.cpp
-        test/test_instructions.cpp
         test/testing_utilities.cpp
         test/testing_utilities.h
+        test/test_arithmetic_instructions.cpp
+        test/test_comparison_instructions.cpp
+        test/test_control_instructions.cpp
+        test/test_memory_instructions.cpp
+        test/test_pseudo_instructions.cpp
 )
 target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 include(CTest)
