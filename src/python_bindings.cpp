@@ -3,7 +3,6 @@
 //
 
 
-#include <cstddef> // for std::byte
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -28,7 +27,7 @@ class InterpreterWrapper {
     std::unique_ptr<Interpreter> obj_;
 
 public:
-    InterpreterWrapper(py::object istream, py::object ostream) :
+    InterpreterWrapper(const py::object& istream, const py::object& ostream) :
         ibuf_(std::make_unique<PyBytesIOBuf>(istream)),
         obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
         istream_(std::make_shared<std::istream>(ibuf_.get())),
@@ -36,7 +35,7 @@ public:
         obj_(std::make_unique<Interpreter>(*istream_, *ostream_)) {}
 
     void step() const { obj_->step(); }
-    int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
+    [[nodiscard]] int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
 };
 
 
