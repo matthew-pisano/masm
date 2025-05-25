@@ -3,6 +3,7 @@
 //
 
 
+#include <cstddef> // for std::byte
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -75,7 +76,15 @@ PYBIND11_MODULE(pymasm, m) {
             .def(py::init<size_t, const std::vector<Token>&>(), py::arg("lineno"),
                  py::arg("tokens"))
             .def_readwrite("lineno", &SourceLine::lineno)
-            .def_readwrite("tokens", &SourceLine::tokens);
+            .def_readwrite("tokens", &SourceLine::tokens)
+            .def("__repr__", [](const SourceLine& sl) {
+                std::string concatLine;
+                for (const Token& token : sl.tokens)
+                    concatLine += token.value + " ";
+
+                return "<SourceLine(lineno=" + std::to_string(sl.lineno) + ", tokens='" +
+                       concatLine + "')>";
+            });
 
     // Binding for the Tokenizer class
     py::class_<Tokenizer>(tokenizer_module, "Tokenizer")
