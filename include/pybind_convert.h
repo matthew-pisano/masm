@@ -2,6 +2,9 @@
 // Created by matthew on 5/25/25.
 //
 
+#ifndef PYBIND_CONVERT_H
+#define PYBIND_CONVERT_H
+
 
 #include <pybind11/cast.h>
 #include <vector>
@@ -58,3 +61,5 @@ public:
                                          static_cast<Py_ssize_t>(src.size()));
     }
 };
+
+#endif // PYBIND_CONVERT_H
