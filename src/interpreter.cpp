@@ -13,13 +13,6 @@
 #include "syscalls.h"
 
 
-std::string Interpreter::out() const {
-    std::stringstream ss;
-    ss << ostream.rdbuf();
-    return ss.str();
-}
-
-
 int Interpreter::interpret(const MemLayout& layout) {
     state.memory.loadProgram(layout);
     // Initialize PC to the start of the text section

@@ -37,7 +37,6 @@ public:
 
     void step() const { obj_->step(); }
     int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
-    std::string out() const { return obj_->out(); }
 };
 
 
@@ -144,7 +143,6 @@ PYBIND11_MODULE(pymasm, m) {
     py::class_<InterpreterWrapper>(interpreter_module, "Interpreter")
             // Constructor that accepts Python file-like objects
             .def(py::init<py::object, py::object>())
-            .def("out", [](const InterpreterWrapper& self) { return self.out(); })
             .def("step", &InterpreterWrapper::step, "Executes a single instruction")
             .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
