@@ -24,7 +24,7 @@ classifiers = [
 packages = ["pymasm"]
 
 [tool.setuptools.package-data]
-pymasm = ["*.pyi", "py.typed"]
+pymasm = ["*.so", "*.pyd", "*.pyi", "py.typed"]
 
 # If you need custom build configuration
 [tool.pybind11.options]
