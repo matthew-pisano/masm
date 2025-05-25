@@ -1,0 +1,31 @@
+[build-system]
+requires = ["pybind11>=2.6.0", "setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymasm"
+version = "0.1.0"
+description = "MIPS Assembly Interpreter Library"
+authors = [{ name = "Matthew Pisano", email = "matthewpisano14@gmail.com" }]
+license = "BSD-3-Clause"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C++",
+]
+
+[tool.setuptools]
+packages = ["pymasm"]
+
+[tool.setuptools.package-data]
+pymasm = ["*.pyi", "py.typed"]
+
+# If you need custom build configuration
+[tool.pybind11.options]
+cpp_std = 23

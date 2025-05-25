@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
-add_compile_options(-Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
+add_compile_options(-fPIC -Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
 
 find_package(pybind11 REQUIRED)
 
@@ -24,12 +24,14 @@ add_library(masm STATIC
         src/consoleio.cpp
 )
 
-pybind11_add_module(pybind_masm
+pybind11_add_module(pymasm
         src/python_bindings.cpp
 )
 
 # Link the Python module with our library
-target_link_libraries(pybind_masm PRIVATE masm)
+target_link_libraries(pymasm PRIVATE masm)
+
+target_compile_definitions(pymasm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
 add_executable(masm-exec src/main.cpp
         src/fileio.cpp

@@ -30,6 +30,10 @@ bool operator==(const Token& lhs, const Token& rhs) {
     return lhs.type == rhs.type && lhs.value == rhs.value;
 }
 
+bool operator!=(const Token& lhs, const Token& rhs) {
+    return !(lhs == rhs);
+}
+
 std::ostream& operator<<(std::ostream& os, const Token& t) {
     return os << "<" << tokenTypeToString(t.type) << ", \"" << t.value << "\">";
 }
