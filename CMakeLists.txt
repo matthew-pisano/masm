@@ -24,6 +24,13 @@ add_library(masm STATIC
         src/consoleio.cpp
 )
 
+pybind11_add_module(pybind_masm
+        src/python_bindings.cpp
+)
+
+# Link the Python module with our library
+target_link_libraries(pybind_masm PRIVATE masm)
+
 add_executable(masm-exec src/main.cpp
         src/fileio.cpp
 )
