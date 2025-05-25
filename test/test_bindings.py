@@ -22,9 +22,9 @@ class TestBindings:
         layout = parser.parse(program)
 
         istream = BytesIO()
-        interpreter = pymasm.interpreter.Interpreter(istream)
+        ostream = BytesIO()
+        interpreter = pymasm.interpreter.Interpreter(istream, ostream)
         exitCode = interpreter.interpret(layout)
-        output = interpreter.out()
 
-        print("Out:", output)
+        print("Out:", ostream.getvalue())
         print("Exit:", exitCode)

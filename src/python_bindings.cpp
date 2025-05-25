@@ -8,6 +8,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
+
+#include "pybind_buffer.h"
 #include "pybind_convert.h"
 
 #include "interpreter.h"
@@ -16,6 +18,27 @@
 #include "tokenizer.h"
 
 namespace py = pybind11;
+
+
+class InterpreterWrapper {
+    std::unique_ptr<PyBytesIOBuf> ibuf_;
+    std::unique_ptr<PyBytesIOBuf> obuf_;
+    std::shared_ptr<std::istream> istream_;
+    std::unique_ptr<std::ostream> ostream_;
+    std::unique_ptr<Interpreter> obj_;
+
+public:
+    InterpreterWrapper(py::object istream, py::object ostream) :
+        ibuf_(std::make_unique<PyBytesIOBuf>(istream)),
+        obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
+        istream_(std::make_shared<std::istream>(ibuf_.get())),
+        ostream_(std::make_unique<std::ostream>(obuf_.get())),
+        obj_(std::make_unique<Interpreter>(*istream_, *ostream_)) {}
+
+    void step() const { obj_->step(); }
+    int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
+    std::string out() const { return obj_->out(); }
+};
 
 
 PYBIND11_MODULE(pymasm, m) {
@@ -118,22 +141,11 @@ PYBIND11_MODULE(pymasm, m) {
     // Interpreter Bindings //
 
     // Bindings for the Interpreter class
-    py::class_<Interpreter>(interpreter_module, "Interpreter")
+    py::class_<InterpreterWrapper>(interpreter_module, "Interpreter")
             // Constructor that accepts Python file-like objects
-            .def(py::init([](const py::object& istream) {
-                     // Create C++ string streams from Python objects
-                     // Read from input object (BytesIO/StringIO)
-                     const py::object data = istream.attr("read")();
-                     std::string input_data = data.cast<std::string>();
-                     const auto input_stream = std::make_shared<std::istringstream>(input_data);
-                     const auto output_stream = std::make_shared<std::ostringstream>();
-                     return std::make_unique<Interpreter>(*input_stream, *output_stream);
-                 }),
-                 py::arg("istream"))
-
-            // Method to write output back to the BytesIO object
-            .def("out", [](const Interpreter& self) { return self.out(); })
-            .def("step", &Interpreter::step, "Executes a single instruction")
-            .def("interpret", &Interpreter::interpret, py::arg("layout"),
+            .def(py::init<py::object, py::object>())
+            .def("out", [](const InterpreterWrapper& self) { return self.out(); })
+            .def("step", &InterpreterWrapper::step, "Executes a single instruction")
+            .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
 }
