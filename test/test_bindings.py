@@ -26,5 +26,5 @@ class TestBindings:
         interpreter = pymasm.interpreter.Interpreter(istream, ostream)
         exitCode = interpreter.interpret(layout)
 
-        print("Out:", ostream.getvalue())
-        print("Exit:", exitCode)
+        assert exitCode == 0
+        assert ostream.getvalue() == b"hello"
