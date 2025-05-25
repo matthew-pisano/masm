@@ -91,6 +91,12 @@ public:
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     /**
+     * Gets the string output of the program held within the ostream
+     * @return The output of the program
+     */
+    std::string out() const;
+
+    /**
      * Executes a single program instruction at the current program state
      */
     void step();

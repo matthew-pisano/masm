@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import pytest
 
 import pymasm
@@ -12,14 +14,17 @@ def syscall_asm():
 class TestBindings:
 
     def test_syscall(self, syscall_asm: str):
-        raw_lines = syscall_asm.split()
+        raw_lines = syscall_asm.split("\n")
         raw_file = pymasm.tokenizer.RawFile("syscall.asm", raw_lines)
-        program = pymasm.tokenizer.Tokenizer.tokenize(raw_file)
+        program = pymasm.tokenizer.Tokenizer.tokenize([raw_file])
 
         parser = pymasm.parser.Parser()
         layout = parser.parse(program)
 
-        interpreter = pymasm.interpreter.Interpreter()
+        istream = BytesIO()
+        interpreter = pymasm.interpreter.Interpreter(istream)
         exitCode = interpreter.interpret(layout)
+        output = interpreter.out()
 
-        print(exitCode)
+        print("Out:", output)
+        print("Exit:", exitCode)

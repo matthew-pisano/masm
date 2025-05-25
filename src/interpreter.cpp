@@ -4,12 +4,20 @@
 
 #include "interpreter.h"
 
+#include <sstream>
 #include <stdexcept>
 
 #include "consoleio.h"
 #include "exceptions.h"
 #include "instruction.h"
 #include "syscalls.h"
+
+
+std::string Interpreter::out() const {
+    std::stringstream ss;
+    ss << ostream.rdbuf();
+    return ss.str();
+}
 
 
 int Interpreter::interpret(const MemLayout& layout) {
