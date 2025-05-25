@@ -104,6 +104,10 @@ PYBIND11_MODULE(pymasm, m) {
                 for (const Token& token : sl.tokens)
                     concatLine += token.value + " ";
 
+                // Remove trailing space
+                if (!concatLine.empty())
+                    concatLine.pop_back();
+
                 return "<SourceLine(lineno=" + std::to_string(sl.lineno) + ", tokens='" +
                        concatLine + "')>";
             });
