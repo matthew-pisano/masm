@@ -31,12 +31,12 @@ class InterpreterWrapper {
     std::unique_ptr<Interpreter> obj_;
 
 public:
-    InterpreterWrapper(const py::object& istream, const py::object& ostream) :
+    InterpreterWrapper(const IOMode ioMode, const py::object& istream, const py::object& ostream) :
         ibuf_(std::make_unique<PyBytesIOBuf>(istream)),
         obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
         istream_(std::make_shared<std::istream>(ibuf_.get())),
         ostream_(std::make_unique<std::ostream>(obuf_.get())),
-        obj_(std::make_unique<Interpreter>(*istream_, *ostream_)) {}
+        obj_(std::make_unique<Interpreter>(ioMode, *istream_, *ostream_)) {}
 
     void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
@@ -148,10 +148,15 @@ PYBIND11_MODULE(pymasm, m) {
 
     // Interpreter Bindings //
 
+    // Binding for the IO Mode enum
+    py::enum_<IOMode>(interpreter_module, "IOMode")
+            .value("SYSCALL", IOMode::SYSCALL)
+            .value("MMIO", IOMode::MMIO);
+
     // Bindings for the Interpreter class
     py::class_<InterpreterWrapper>(interpreter_module, "Interpreter")
             // Constructor that accepts Python file-like objects
-            .def(py::init<py::object, py::object>())
+            .def(py::init<IOMode, py::object, py::object>())
             .def("step", &InterpreterWrapper::step, "Executes a single instruction")
             .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
