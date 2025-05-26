@@ -167,5 +167,13 @@ std::string hexToInt(std::string hex) {
         throw std::runtime_error("Invalid hex integer " + hex);
 
     hex = hex.substr(2);
-    return std::to_string(std::stoi(hex, nullptr, 16));
+    uint32_t hexInt;
+    try {
+        hexInt = std::stoull(hex, nullptr, 16);
+    } catch (const std::out_of_range& e) {
+        throw std::runtime_error("Hex integer out of range: " + hex);
+    } catch (const std::invalid_argument& e) {
+        throw std::runtime_error("Invalid hex integer: " + hex);
+    }
+    return std::to_string(hexInt);
 }
