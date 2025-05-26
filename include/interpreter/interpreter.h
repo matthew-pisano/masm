@@ -89,7 +89,7 @@ public:
      * Initializes the program in the interpreter with the given memory layout
      * @param layout The initial memory layout to use for loading in the program and data
      */
-    void Interpreter::initProgram(const MemLayout& layout);
+    void initProgram(const MemLayout& layout);
 
     /**
      * Executes a single program instruction at the current program state
