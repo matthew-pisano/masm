@@ -29,11 +29,9 @@ int Interpreter::interpret(const MemLayout& layout) {
 
     while (true) {
         try {
-            if (updateMMIO)
-                readMMIO();
+            readMMIO();
             step();
-            if (updateMMIO)
-                writeMMIO();
+            writeMMIO();
         } catch (ExecExit& e) {
             return e.code();
         }

@@ -81,11 +81,6 @@ protected:
      */
     State state;
 
-    /**
-     * Whether to update the MMIO output ready bits and data words
-     */
-    bool updateMMIO = true;
-
 public:
     Interpreter() : istream(std::cin), ostream(std::cout) {}
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
