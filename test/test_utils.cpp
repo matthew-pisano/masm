@@ -58,47 +58,6 @@ TEST_CASE("Test String to Bytes") {
 }
 
 
-TEST_CASE("Test Integer String to Bytes") {
-    SECTION("Test Positive") {
-        std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
-                                     std::byte{0x00}};
-        std::vector<std::byte> actualBytes = intStringToBytes("0");
-        REQUIRE(expectedBytes == actualBytes);
-
-        expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x01}};
-        actualBytes = intStringToBytes("1");
-        REQUIRE(expectedBytes == actualBytes);
-
-        expectedBytes = {std::byte{0x00}, std::byte{0x05}, std::byte{0x7c}, std::byte{0x3a}};
-        actualBytes = intStringToBytes("359482");
-        REQUIRE(expectedBytes == actualBytes);
-
-        expectedBytes = {std::byte{0x7f}, std::byte{0xff}, std::byte{0xff}, std::byte{0xff}};
-        actualBytes = intStringToBytes("2147483647");
-        REQUIRE(expectedBytes == actualBytes);
-
-        REQUIRE_THROWS(intStringToBytes("2147483648"));
-    }
-
-    SECTION("Test Negative") {
-        std::vector expectedBytes = {std::byte{0xff}, std::byte{0xff}, std::byte{0xff},
-                                     std::byte{0xff}};
-        std::vector<std::byte> actualBytes = intStringToBytes("-1");
-        REQUIRE(expectedBytes == actualBytes);
-
-        expectedBytes = {std::byte{0xff}, std::byte{0xfa}, std::byte{0x83}, std::byte{0xc6}};
-        actualBytes = intStringToBytes("-359482");
-        REQUIRE(expectedBytes == actualBytes);
-
-        expectedBytes = {std::byte{0x80}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
-        actualBytes = intStringToBytes("-2147483648");
-        REQUIRE(expectedBytes == actualBytes);
-
-        REQUIRE_THROWS(intStringToBytes("-2147483649"));
-    }
-}
-
-
 TEST_CASE("Test Filter Token List") {
     Token reg = {TokenType::REGISTER, "reg"};
     Token label = {TokenType::LABEL_REF, "label"};

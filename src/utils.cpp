@@ -78,15 +78,6 @@ std::vector<std::byte> stringToBytes(const std::string& string, const bool nullT
 }
 
 
-std::vector<std::byte> intStringToBytes(const std::string& string) {
-    if (!isSignedInteger(string))
-        throw std::runtime_error("Invalid integer " + string);
-
-    const uint32_t integer = std::stoi(string);
-    return i32ToBEByte(integer);
-}
-
-
 std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
                                    const std::vector<TokenType>& validElems) {
     std::vector<Token> elements = {};
