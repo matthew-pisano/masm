@@ -34,6 +34,7 @@ public:
         ostream_(std::make_unique<std::ostream>(obuf_.get())),
         obj_(std::make_unique<Interpreter>(*istream_, *ostream_)) {}
 
+    void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
     [[nodiscard]] int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
 };

@@ -91,12 +91,18 @@ public:
     Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
 
     /**
+     * Initializes the program in the interpreter with the given memory layout
+     * @param layout The initial memory layout to use for loading in the program and data
+     */
+    void Interpreter::initProgram(const MemLayout& layout);
+
+    /**
      * Executes a single program instruction at the current program state
      */
     void step();
 
     /**
-     * Executes the program until an exit syscall or exception occurs
+     * Initializes a program and executes until an exit syscall or exception occurs
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */

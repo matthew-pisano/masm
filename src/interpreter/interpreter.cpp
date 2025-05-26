@@ -7,13 +7,13 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "exceptions.h"
 #include "interpreter/syscalls.h"
 #include "io/consoleio.h"
 #include "parser/instruction.h"
-#include "exceptions.h"
 
 
-int Interpreter::interpret(const MemLayout& layout) {
+void Interpreter::initProgram(const MemLayout& layout) {
     state.memory.loadProgram(layout);
     // Initialize PC to the start of the text section
     state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));
@@ -21,6 +21,11 @@ int Interpreter::interpret(const MemLayout& layout) {
     state.registers[Register::GP] = 0x10008000;
     // Set MMIO output ready bit to 1
     state.memory.wordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
+}
+
+
+int Interpreter::interpret(const MemLayout& layout) {
+    initProgram(layout);
 
     while (true) {
         try {
