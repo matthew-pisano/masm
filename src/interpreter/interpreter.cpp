@@ -58,7 +58,7 @@ void Interpreter::readMMIO() {
 
 
 void Interpreter::writeMMIO() {
-    const uint32_t output_ready = memSectionOffset(MemSection::MMIO);
+    const uint32_t output_ready = memSectionOffset(MemSection::MMIO) + 8;
     const uint32_t output_data = output_ready + 4;
 
     // Check if the output stream is ready to write
