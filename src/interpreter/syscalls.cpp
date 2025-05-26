@@ -9,11 +9,29 @@
 #include <ostream>
 #include <unistd.h>
 
-#include "io/consoleio.h"
 #include "exceptions.h"
+#include "io/consoleio.h"
 
 
 std::map<size_t, RandomGenerator> rngMap = {};
+
+
+/**
+ * Reads (blocking) a character from the input stream, handling both console and file streams.
+ * @param istream The input stream to read from, can be std::cin or any other input stream
+ * @return The character read from the input stream
+ */
+char getStreamChar(std::istream& istream) {
+    char c;
+    if (&istream != &std::cin)
+        istream.get(c);
+    else {
+        while (!consoleHasChar())
+            usleep(1000); // Sleep for 1 ms
+        c = consoleGetChar();
+    }
+    return c;
+}
 
 
 void execSyscall(State& state, std::istream& istream, std::ostream& ostream) {
@@ -97,7 +115,12 @@ void printStringSyscall(State& state, std::ostream& ostream) {
 
 void readIntSyscall(State& state, std::istream& istream) {
     std::string input;
-    std::getline(istream, input);
+    while (true) {
+        const char c = getStreamChar(istream);
+        if (c == '\n')
+            break;
+        input += c;
+    }
     try {
         state.registers[Register::V0] = std::stoi(input);
     } catch (const std::invalid_argument&) {
@@ -113,7 +136,7 @@ void readStringSyscall(State& state, std::istream& istream) {
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
     while (currLen < length) {
-        const char c = static_cast<char>(istream.get());
+        const char c = getStreamChar(istream);
         if (c == '\n')
             break;
         state.memory.byteTo(address + currLen, c);
@@ -139,15 +162,7 @@ void printCharSyscall(const State& state, std::ostream& ostream) {
 
 
 void readCharSyscall(State& state, std::istream& istream) {
-    char c;
-    if (&istream != &std::cin)
-        istream.get(c);
-    else {
-        while (!consoleHasChar())
-            usleep(1000); // Sleep for 1 ms
-
-        c = consoleGetChar();
-    }
+    const char c = getStreamChar(istream);
     state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }
 
