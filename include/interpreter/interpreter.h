@@ -37,6 +37,9 @@ struct State {
  */
 class Interpreter {
 
+    /**
+     * The I/O mode of the interpreter, which determines how input/output is handled
+     */
     IOMode ioMode;
 
     /**
