@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "io/fileio.h"
+#include "parser/parser.h"
+#include "tokenizer/tokenizer.h"
 #include "CLI/CLI.hpp"
-#include "fileio.h"
-#include "parser.h"
-#include "tokenizer.h"
 #include "utils.h"
 
 

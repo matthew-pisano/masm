@@ -6,9 +6,9 @@
 #define TESTING_UTILITIES_H
 #include <vector>
 
-#include "interpreter.h"
-#include "parser.h"
-#include "tokenizer.h"
+#include "interpreter/interpreter.h"
+#include "parser/parser.h"
+#include "tokenizer/tokenizer.h"
 
 class DebugParser : public Parser {
 

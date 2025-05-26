@@ -9,23 +9,23 @@ find_package(pybind11 REQUIRED)
 include_directories(include)
 
 add_library(masm STATIC
-        src/tokenizer.cpp
-        src/parser.cpp
-        src/register.cpp
+        src/io/consoleio.cpp
+        src/interpreter/memory.cpp
+        src/interpreter/interpreter.cpp
+        src/interpreter/syscalls.cpp
+        src/interpreter/heap.cpp
+        src/interpreter/register.cpp
+        src/parser/parser.cpp
+        src/parser/instruction.cpp
+        src/parser/labels.cpp
+        src/parser/directive.cpp
+        src/tokenizer/tokenizer.cpp
+        src/tokenizer/postprocessor.cpp
         src/utils.cpp
-        src/instruction.cpp
-        src/memory.cpp
-        src/interpreter.cpp
-        src/syscalls.cpp
-        src/labels.cpp
-        src/directive.cpp
-        src/postprocessor.cpp
-        src/heap.cpp
-        src/consoleio.cpp
 )
 
 pybind11_add_module(pymasm
-        src/python_bindings.cpp
+        src/pybind/python_bindings.cpp
 )
 
 # Link the Python module with our library
@@ -34,13 +34,13 @@ target_link_libraries(pymasm PRIVATE masm)
 target_compile_definitions(pymasm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
 add_executable(masm-exec src/main.cpp
-        src/fileio.cpp
+        src/io/fileio.cpp
 )
 target_link_libraries(masm-exec masm)
 set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
 
 add_executable(masm-fg test/fixture_gen.cpp
-        src/fileio.cpp
+        src/io/fileio.cpp
 )
 target_link_libraries(masm-fg masm)
 
@@ -56,24 +56,21 @@ target_link_libraries(masm-fg CLI11::CLI11)
 
 find_package(Catch2 3 REQUIRED)
 add_executable(masm-tests
-        src/fileio.cpp
-        test/test_tokenizer.cpp
-        test/test_utils.cpp
-        test/test_parser.cpp
-        src/interpreter.cpp
-        src/syscalls.cpp
-        test/test_interpreter.cpp
-        test/test_syscall.cpp
+        src/io/fileio.cpp
         test/testing_utilities.cpp
-        test/testing_utilities.h
-        test/test_arithmetic_instructions.cpp
-        test/test_comparison_instructions.cpp
-        test/test_control_instructions.cpp
-        test/test_memory_instructions.cpp
-        test/test_pseudo_instructions.cpp
+        test/test_components/test_tokenizer.cpp
+        test/test_components/test_parser.cpp
+        test/test_components/test_interpreter.cpp
+        test/test_components/test_syscall.cpp
+        test/test_instructions/test_arithmetic_instructions.cpp
+        test/test_instructions/test_comparison_instructions.cpp
+        test/test_instructions/test_control_instructions.cpp
+        test/test_instructions/test_memory_instructions.cpp
+        test/test_instructions/test_pseudo_instructions.cpp
+        test/test_utils.cpp
 )
-target_link_libraries(masm-tests masm)
-target_link_libraries(masm-tests Catch2::Catch2WithMain)
+target_link_libraries(masm-tests PRIVATE masm)
+target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 include(Catch)

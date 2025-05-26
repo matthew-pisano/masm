@@ -2,11 +2,11 @@
 #include <string>
 #include <vector>
 
+#include "interpreter/interpreter.h"
+#include "io/consoleio.h"
+#include "io/fileio.h"
+#include "parser/parser.h"
 #include "CLI/CLI.hpp"
-#include "consoleio.h"
-#include "fileio.h"
-#include "interpreter.h"
-#include "parser.h"
 #include "utils.h"
 
 
