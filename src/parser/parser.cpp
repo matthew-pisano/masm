@@ -8,9 +8,9 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "exceptions.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
-#include "exceptions.h"
 #include "utils.h"
 
 
@@ -222,10 +222,26 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
+    // move $tx, $ty -> addu $tx, $ty, $zero
     if (instructionName == "move") {
         std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
         return parseInstruction(loc, {TokenType::INSTRUCTION, "addu"}, modifiedArgs);
     }
+    // mul $tx, $ty, $tz -> mult $ty, $tz; mflo $tx
+    if (instructionName == "mul") {
+        std::vector<Token> modifiedArgs = {args[1], args[2]};
+        std::vector<std::byte> multBytes =
+                parseInstruction(loc, {TokenType::INSTRUCTION, "mult"}, modifiedArgs);
+
+        loc += 4; // Increment location since we have added an instruction
+
+        modifiedArgs = {{TokenType::REGISTER, args[0].value}};
+        std::vector<std::byte> mfloBytes =
+                parseInstruction(loc, {TokenType::INSTRUCTION, "mflo"}, modifiedArgs);
+        multBytes.insert(multBytes.end(), mfloBytes.begin(), mfloBytes.end());
+        return multBytes;
+    }
+    // nop -> sll $zero, $zero, 0
     if (instructionName == "nop") {
         std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "zero"},
                                            {TokenType::REGISTER, "zero"},
