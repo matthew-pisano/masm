@@ -3,6 +3,7 @@
 //
 
 
+#include <exceptions.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -19,6 +20,9 @@
 namespace py = pybind11;
 
 
+/**
+ * Wrapper class for the Interpreter object to manage Python streams
+ */
 class InterpreterWrapper {
     std::unique_ptr<PyBytesIOBuf> ibuf_;
     std::unique_ptr<PyBytesIOBuf> obuf_;
@@ -46,6 +50,7 @@ PYBIND11_MODULE(pymasm, m) {
     const py::module_ tokenizer_module = m.def_submodule("tokenizer", "Masm Tokenizer");
     const py::module_ parser_module = m.def_submodule("parser", "Masm Parser");
     const py::module_ interpreter_module = m.def_submodule("interpreter", "Masm Interpreter");
+    const py::module_ exceptions_module = m.def_submodule("exceptions", "Masm Exceptions");
 
     // Tokenizer Bindings //
 
@@ -150,4 +155,11 @@ PYBIND11_MODULE(pymasm, m) {
             .def("step", &InterpreterWrapper::step, "Executes a single instruction")
             .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
+
+    // Exceptions Bindings //
+
+    py::register_exception<MasmException>(exceptions_module, "MasmException");
+    py::register_exception<MasmSyntaxError>(exceptions_module, "MasmSyntaxError");
+    py::register_exception<MasmRuntimeError>(exceptions_module, "MasmRuntimeError");
+    py::register_exception<ExecExit>(exceptions_module, "ExecExit");
 }
