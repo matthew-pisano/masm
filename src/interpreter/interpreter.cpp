@@ -35,6 +35,7 @@ int Interpreter::interpret(const MemLayout& layout) {
             if (ioMode == IOMode::MMIO)
                 writeMMIO();
         } catch (ExecExit& e) {
+            ostream << "\n" << e.what() << std::endl;
             return e.code();
         }
     }
@@ -80,11 +81,14 @@ void Interpreter::writeMMIO() {
 
 
 void Interpreter::step() {
-    const int32_t instruction = state.memory.wordAt(state.registers[Register::PC]);
-    if (instruction == 0)
+    int32_t& pc = state.registers[Register::PC];
+    if (pc >= TEXT_SEC_END)
+        throw MasmRuntimeError("Out of bounds read access", pc);
+    if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
+    const int32_t instruction = state.memory.wordAt(pc);
 
-    state.registers[Register::PC] += 4;
+    pc += 4;
 
     try {
         if (instruction == 0x0000000C) {

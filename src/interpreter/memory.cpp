@@ -73,6 +73,8 @@ void Memory::byteTo(const uint32_t index, const int8_t value) {
     memory[index] = static_cast<std::byte>(value);
 }
 
+bool Memory::isValid(const uint32_t index) const { return memory.contains(index); }
+
 
 void Memory::loadProgram(const MemLayout& layout) {
     for (const std::pair<MemSection, std::vector<std::byte>> pair : layout)

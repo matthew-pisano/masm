@@ -13,6 +13,12 @@
 
 
 /**
+ * The upper bound for the text segment address space
+ */
+constexpr int32_t TEXT_SEC_END = 0x10000000;
+
+
+/**
  * Class representing valid, named sections of memory
  */
 enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA, MMIO };
@@ -88,6 +94,13 @@ public:
      * @param value The byte to write
      */
     void byteTo(uint32_t index, int8_t value);
+
+    /**
+     * Checks if the given index is initialized and valid
+     * @param index The index to check
+     * @return True if the index is valid, false otherwise
+     */
+    bool isValid(uint32_t index) const;
 
     /**
      * Loads a program and initial static data into memory
