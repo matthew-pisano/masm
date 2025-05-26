@@ -29,9 +29,11 @@ int Interpreter::interpret(const MemLayout& layout) {
 
     while (true) {
         try {
-            readMMIO();
+            if (ioMode == IOMode::MMIO)
+                readMMIO();
             step();
-            writeMMIO();
+            if (ioMode == IOMode::MMIO)
+                writeMMIO();
         } catch (ExecExit& e) {
             return e.code();
         }
@@ -40,6 +42,9 @@ int Interpreter::interpret(const MemLayout& layout) {
 
 
 void Interpreter::readMMIO() {
+    if (ioMode != IOMode::MMIO)
+        throw std::runtime_error("MMIO mode not enabled for reading input");
+
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
 
@@ -58,6 +63,9 @@ void Interpreter::readMMIO() {
 
 
 void Interpreter::writeMMIO() {
+    if (ioMode != IOMode::MMIO)
+        throw std::runtime_error("MMIO mode not enabled for writing output");
+
     const uint32_t output_ready = memSectionOffset(MemSection::MMIO) + 8;
     const uint32_t output_data = output_ready + 4;
 
@@ -81,7 +89,7 @@ void Interpreter::step() {
     try {
         if (instruction == 0x0000000C) {
             // Syscall instruction
-            execSyscall(state, istream, ostream);
+            execSyscall(ioMode, state, istream, ostream);
             return;
         }
 

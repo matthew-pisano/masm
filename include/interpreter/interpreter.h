@@ -14,6 +14,15 @@
 
 
 /**
+ * Enumeration of the I/O modes for the interpreter
+ */
+enum class IOMode {
+    SYSCALL, // System call mode for reading/writing
+    MMIO // Memory-mapped I/O mode for reading/writing MMIO registers
+};
+
+
+/**
  * The state of the interpreter, which includes the register file and memory
  */
 struct State {
@@ -27,6 +36,8 @@ struct State {
  * The interpreter class, which is responsible for executing MIPS instructions
  */
 class Interpreter {
+
+    IOMode ioMode;
 
     /**
      * The input stream for the program to use
@@ -82,8 +93,10 @@ protected:
     State state;
 
 public:
-    Interpreter() : istream(std::cin), ostream(std::cout) {}
-    Interpreter(std::istream& input, std::ostream& output) : istream(input), ostream(output) {}
+    explicit Interpreter(const IOMode ioMode) :
+        ioMode(ioMode), istream(std::cin), ostream(std::cout) {}
+    Interpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
+        ioMode(ioMode), istream(input), ostream(output) {}
 
     /**
      * Initializes the program in the interpreter with the given memory layout

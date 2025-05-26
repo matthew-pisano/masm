@@ -403,3 +403,10 @@ TEST_CASE("Test Tokenize Globals") {
                     "test/fixtures/" + test_case + "/globalsTwo.asm"},
                    "test/fixtures/" + test_case + "/globalsOne.tkn");
 }
+
+
+TEST_CASE("Test Tokenize Syscall Input Output") {
+    const std::string test_case = "input_output";
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+}

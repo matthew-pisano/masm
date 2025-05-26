@@ -4,8 +4,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "interpreter/interpreter.h"
 #include "exceptions.h"
+#include "interpreter/interpreter.h"
 #include "interpreter/syscalls.h"
 
 
@@ -42,8 +42,8 @@ TEST_CASE("Test Print String Syscall") {
 
 
 TEST_CASE("Test Read Int Syscall") {
-    const std::string input = "42";
-    std::stringstream istream(input);
+    const std::string input = "42\n";
+    std::istringstream istream(input);
     State state;
     readIntSyscall(state, istream);
 

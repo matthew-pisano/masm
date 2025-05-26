@@ -5,10 +5,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "../testing_utilities.h"
 #include "interpreter/interpreter.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
-#include "../testing_utilities.h"
 
 
 TEST_CASE("Test j Instruction") {
@@ -29,8 +29,8 @@ TEST_CASE("Test j Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
         REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010);
@@ -56,8 +56,8 @@ TEST_CASE("Test jal Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
         REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010);
@@ -83,8 +83,8 @@ TEST_CASE("Test jr Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+
     interpreter.getState().registers[Register::T0] = 0x00400010;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -110,8 +110,8 @@ TEST_CASE("Test jalr Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+
     interpreter.getState().registers[Register::T0] = 0x00400010;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -143,8 +143,7 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
@@ -152,8 +151,7 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterNe{std::cin, std::cout};
-    interpreterNe.setUpdateMMIO(false);
+    DebugInterpreter interpreterNe{IOMode::SYSCALL, std::cin, std::cout};
     interpreterNe.getState().registers[Register::T0] = 37;
     interpreterNe.getState().registers[Register::T1] = 42;
     interpreterNe.interpret(actualLayout);
@@ -185,8 +183,7 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
@@ -194,8 +191,7 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004);
     }
 
-    DebugInterpreter interpreter2Ne{std::cin, std::cout};
-    interpreter2Ne.setUpdateMMIO(false);
+    DebugInterpreter interpreter2Ne{IOMode::SYSCALL, std::cin, std::cout};
     interpreter2Ne.getState().registers[Register::T0] = 37;
     interpreter2Ne.getState().registers[Register::T1] = 42;
     interpreter2Ne.interpret(actualLayout);
@@ -226,24 +222,21 @@ TEST_CASE("Test bgtz Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterGt{std::cin, std::cout};
-    interpreterGt.setUpdateMMIO(false);
+    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterLt{std::cin, std::cout};
-    interpreterLt.setUpdateMMIO(false);
+    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -273,24 +266,21 @@ TEST_CASE("Test bltz Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterGt{std::cin, std::cout};
-    interpreterGt.setUpdateMMIO(false);
+    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterLt{std::cin, std::cout};
-    interpreterLt.setUpdateMMIO(false);
+    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -320,24 +310,21 @@ TEST_CASE("Test bgez Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterGt{std::cin, std::cout};
-    interpreterGt.setUpdateMMIO(false);
+    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterLt{std::cin, std::cout};
-    interpreterLt.setUpdateMMIO(false);
+    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -367,24 +354,21 @@ TEST_CASE("Test blez Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{std::cin, std::cout};
-    interpreterEq.setUpdateMMIO(false);
+    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterGt{std::cin, std::cout};
-    interpreterGt.setUpdateMMIO(false);
+    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterLt{std::cin, std::cout};
-    interpreterLt.setUpdateMMIO(false);
+    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {

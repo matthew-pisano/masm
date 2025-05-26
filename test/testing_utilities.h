@@ -24,20 +24,15 @@ public:
 class DebugInterpreter : public Interpreter {
 
 public:
-    DebugInterpreter() {}
-    DebugInterpreter(std::istream& input, std::ostream& output) : Interpreter(input, output) {}
+    explicit DebugInterpreter(const IOMode ioMode) : Interpreter(ioMode) {}
+    DebugInterpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
+        Interpreter(ioMode, input, output) {}
 
     /**
      * Gets the current state of the interpreter
      * @return The current state of the interpreter
      */
     State& getState();
-
-    /**
-     * Sets whether to update the MMIO output ready bits and data words
-     * @param update Whether to update the MMIO output ready bits and data words
-     */
-    void setUpdateMMIO(bool update);
 };
 
 

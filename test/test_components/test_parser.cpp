@@ -5,11 +5,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "../testing_utilities.h"
+#include "exceptions.h"
 #include "io/fileio.h"
 #include "parser/directive.h"
 #include "parser/parser.h"
-#include "../testing_utilities.h"
-#include "exceptions.h"
 #include "utils.h"
 
 
@@ -226,4 +226,11 @@ TEST_CASE("Test Parse Globals") {
     validateMemLayout({"test/fixtures/" + test_case + "/globalsOne.asm",
                        "test/fixtures/" + test_case + "/globalsTwo.asm"},
                       "test/fixtures/" + test_case + "/globalsOne.pse");
+}
+
+
+TEST_CASE("Test Parse Syscall Input Output") {
+    const std::string test_case = "input_output";
+    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }

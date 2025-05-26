@@ -2,21 +2,24 @@
 #include <string>
 #include <vector>
 
+#include "CLI/CLI.hpp"
 #include "interpreter/interpreter.h"
 #include "io/consoleio.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
-#include "CLI/CLI.hpp"
 #include "utils.h"
 
 
 int main(const int argc, char* argv[]) {
     std::vector<std::string> inputFileNames;
+    bool useMMIO = false;
 
     CLI::App app{"masm - MIPS Interpreter", "masm"};
     app.add_option("input-file", inputFileNames, "Input file to load")
             ->required()
             ->allow_extra_args();
+    app.add_flag("--mmio", useMMIO,
+                 "Use memory-mapped I/O instead of system calls for input/output operations");
 
     try {
         app.parse(argc, argv);
@@ -39,7 +42,8 @@ int main(const int argc, char* argv[]) {
         Parser parser{};
         const MemLayout layout = parser.parse(program);
 
-        Interpreter interpreter{};
+        const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
+        Interpreter interpreter{ioMode};
         exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

@@ -7,21 +7,23 @@
 #include <string>
 #include <vector>
 
+#include "../testing_utilities.h"
 #include "interpreter/interpreter.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
-#include "../testing_utilities.h"
 #include "utils.h"
 
 
 /**
  * Validates the output of a program versus the expected output
+ * @param ioMode The I/O mode to use for the interpreter
  * @param sourceFileNames The names of the source files to tokenize
  * @param logFileName The name of the output log to compare against
+ * @param inputString The input string to provide to the program
  */
-void validateOutput(const std::vector<std::string>& sourceFileNames,
-                    const std::string& logFileName) {
+void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceFileNames,
+                    const std::string& logFileName, const std::string& inputString = "") {
     const std::vector<std::string> logLines = readFileLines(logFileName);
 
     std::vector<RawFile> sourceLines;
@@ -35,10 +37,10 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
     const MemLayout layout = parser.parse(program);
 
     int exitCode = 0;
+    std::istringstream iss(inputString);
     std::ostringstream oss;
 
-    DebugInterpreter interpreter{std::cin, oss};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{ioMode, iss, oss};
     exitCode = interpreter.interpret(layout);
 
     REQUIRE(exitCode == 0);
@@ -54,41 +56,50 @@ void validateOutput(const std::vector<std::string>& sourceFileNames,
 
 TEST_CASE("Test Execute Hello World") {
     const std::string test_case = "hello_world";
-    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Load Address") {
     const std::string test_case = "load_address";
-    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Loops") {
     const std::string test_case = "loops";
-    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Syscall") {
     const std::string test_case = "syscall";
-    validateOutput({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 TEST_CASE("Test Execute Globals") {
     const std::string test_case = "globals";
-    validateOutput({"test/fixtures/" + test_case + "/globalsOne.asm",
+    validateOutput(IOMode::SYSCALL,
+                   {"test/fixtures/" + test_case + "/globalsOne.asm",
                     "test/fixtures/" + test_case + "/globalsTwo.asm"},
                    "test/fixtures/" + test_case + "/globalsOne.txt");
+}
+
+
+TEST_CASE("Test Execute Syscall Input Output") {
+    const std::string test_case = "input_output";
+    const std::string inputString = "5\n";
+    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }

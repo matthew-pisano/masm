@@ -34,8 +34,7 @@ TEST_CASE("Test lb Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().memory.byteTo(0x10010004, 0x82348687);
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
@@ -69,8 +68,7 @@ TEST_CASE("Test lbu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().memory.byteTo(0x10010004, 0x82348687);
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
@@ -104,8 +102,7 @@ TEST_CASE("Test lh Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().memory.halfTo(0x10010004, 0x82348687);
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
@@ -139,8 +136,7 @@ TEST_CASE("Test lhu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().memory.halfTo(0x10010004, 0x82348687);
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
@@ -174,8 +170,7 @@ TEST_CASE("Test lw Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().memory.wordTo(0x10010004, 0x82348687);
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
@@ -207,8 +202,7 @@ TEST_CASE("Test lui Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00640000;
@@ -240,8 +234,7 @@ TEST_CASE("Test sb Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.getState().registers[Register::T0] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -275,8 +268,7 @@ TEST_CASE("Test sh Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.getState().registers[Register::T0] = 0x12345678;
     interpreter.interpret(actualLayout);
@@ -310,8 +302,7 @@ TEST_CASE("Test sw Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{std::cin, std::cout};
-    interpreter.setUpdateMMIO(false);
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.getState().registers[Register::T0] = 0x12345678;
     interpreter.interpret(actualLayout);
