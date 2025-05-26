@@ -7,6 +7,8 @@ from .tokenizer import SourceLine
 
 
 class MemSection(Enum):
+    """Memory sections for MIPS assembly programs"""
+
     TEXT = ...
     DATA = ...
     HEAP = ...
@@ -33,8 +35,17 @@ class MemLayout(Dict[MemSection, Any]):
 
 
 class Parser:
+    """Parser for MIPS assembly programs"""
+
     def __init__(self) -> None: ...
 
     def parse(self, program: List[SourceLine]) -> MemLayout:
-        """Parses the given program and returns a MemLayout object"""
+        """Parses the given program and returns a MemLayout object
+
+        Args:
+            program (List[SourceLine]): The tokenized program to parse
+        Returns:
+            MemLayout: The memory layout of the program
+        Raises:
+            MasmSyntaxError: If a syntax error occurs during parsing"""
         ...

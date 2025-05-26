@@ -5,6 +5,8 @@ from typing import List
 
 
 class TokenType(Enum):
+    """Token types for MIPS assembly programs"""
+
     UNKNOWN = ...
     SEC_DIRECTIVE = ...
     ALLOC_DIRECTIVE = ...
@@ -22,8 +24,13 @@ class TokenType(Enum):
 
 
 class RawFile:
+    """Represents a raw source code file with a name and lines of text"""
+
     name: str
+    """The name of the file, typically a path or filename"""
+
     lines: List[str]
+    """The lines of text in the file, each line as a string"""
 
     def __init__(self) -> None: ...
 
@@ -33,8 +40,13 @@ class RawFile:
 
 
 class Token:
+    """Represents a token in the MIPS assembly language with a type and value"""
+
     type: TokenType
+    """The type of the token, indicating its category (e.g., instruction, label, directive)"""
+
     value: str
+    """The string value of the token, which is the actual text representation of the token"""
 
     def __init__(self) -> None: ...
 
@@ -50,8 +62,13 @@ class Token:
 
 
 class SourceLine:
+    """Represents a line of tokenized source code with its line number and tokens"""
+
     lineno: int
+    """The line number of the source code line, starting from 1"""
+
     tokens: List[Token]
+    """A list of tokens that represent the content of the source code line"""
 
     def __init__(self) -> None: ...
 
@@ -61,14 +78,30 @@ class SourceLine:
 
 
 class Tokenizer:
+    """Tokenizer for MIPS assembly programs that converts raw source files into tokenized source lines"""
+
     def __init__(self) -> None: ...
 
     @staticmethod
     def tokenize_file(raw_file: RawFile) -> List[SourceLine]:
-        """Tokenizes the given file and returns a vector of SourceLine objects"""
+        """Tokenizes the given file and returns a vector of SourceLine objects
+
+        Args:
+            raw_file (RawFile): The raw file to tokenize
+        Returns:
+            List[SourceLine]: A list of SourceLine objects representing the tokenized lines of the file
+        Raises:
+            MasmSyntaxError: If a syntax error occurs during tokenization"""
         ...
 
     @staticmethod
     def tokenize(raw_files: List[RawFile]) -> List[SourceLine]:
-        """Tokenizes the given raw files and returns a vector of SourceLine objects"""
+        """Tokenizes and post-processes the given raw files and returns a vector of SourceLine objects
+
+        Args:
+            raw_files (List[RawFile]): The list of raw files to tokenize
+        Returns:
+            List[SourceLine]: A list of SourceLine objects representing the tokenized lines of the files
+        Raises:
+            MasmSyntaxError: If a syntax error occurs during tokenization"""
         ...

@@ -93,6 +93,8 @@ public:
 
     /**
      * Executes a single program instruction at the current program state
+     * @throw ExecExit if the program exits normally
+     * @throw MasmRuntimeError if an error occurs during execution
      */
     void step();
 

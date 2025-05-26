@@ -113,7 +113,7 @@ public:
     static std::vector<SourceLine> tokenizeFile(const RawFile& rawFile);
 
     /**
-     * Tokenizes incoming source code lines from multiple files into parsable tokens
+     * Tokenizes and post-processes source code lines from multiple files into parsable tokens
      * @param rawFiles The lines of source code to tokenize
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
