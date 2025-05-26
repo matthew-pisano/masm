@@ -168,3 +168,21 @@ std::string hexToInt(std::string hex) {
     }
     return std::to_string(hexInt);
 }
+
+
+uint32_t stoui32(const std::string& str) {
+    if (!isSignedInteger(str))
+        throw std::runtime_error("Invalid integer " + str);
+
+    try {
+        const uint32_t value = std::stoul(str);
+        if (value > UINT32_MAX)
+            throw std::runtime_error("Unsigned integer out of range: " + str);
+
+        return value;
+    } catch (const std::out_of_range& e) {
+        throw std::runtime_error("Unsigned integer out of range: " + str);
+    } catch (const std::invalid_argument& e) {
+        throw std::runtime_error("Invalid unsigned integer: " + str);
+    }
+}

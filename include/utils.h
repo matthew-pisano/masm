@@ -110,4 +110,12 @@ std::vector<std::byte> f64ToBEByte(double f64);
  */
 std::string hexToInt(std::string hex);
 
+
+/**
+ * Converts a string to an unsigned 32-bit integer wth bounds and error handling
+ * @param str The string to convert
+ * @return The unsigned 32-bit integer value of the string
+ */
+uint32_t stoui32(const std::string& str);
+
 #endif // UTILS_H

@@ -93,16 +93,15 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
     for (const Token& arg : args) {
         switch (arg.type) {
             case TokenType::IMMEDIATE:
-                if (!isSignedInteger(arg.value))
-                    throw std::runtime_error("Invalid integer " + arg.value);
-                argCodes.push_back(static_cast<uint32_t>(std::stoi(arg.value)));
+                argCodes.push_back(stoui32(arg.value));
                 break;
-            case TokenType::REGISTER:
-                if (isSignedInteger(arg.value) && std::stoi(arg.value) >= 0)
-                    argCodes.push_back(std::stoi(arg.value));
+            case TokenType::REGISTER: {
+                if (isSignedInteger(arg.value))
+                    argCodes.push_back(stoui32(arg.value));
                 else
                     argCodes.push_back(regFile.indexFromName(arg.value));
                 break;
+            }
             default:
                 // Should never be reached
                 throw std::runtime_error("Invalid argument type " +
