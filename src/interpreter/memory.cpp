@@ -18,9 +18,19 @@ void Memory::readSideEffect(const uint32_t index) {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
 
-    if (index == input_data)
+    if (index >= input_data && index < input_data + 4)
         // Reset ready bit
-        wordTo(input_ready, 0);
+        memory[input_ready + 3] = std::byte{0};
+}
+
+
+void Memory::writeSideEffect(const uint32_t index) {
+    const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
+    const uint32_t output_ready = memSectionOffset(MemSection::MMIO) + 8;
+
+    if ((index >= output_ready && index < output_ready + 4) ||
+        (index >= input_ready && index < input_ready + 4))
+        throw std::runtime_error("Invalid write access at " + std::to_string(index));
 }
 
 
@@ -53,6 +63,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
     if (index % 4 != 0)
         throw std::runtime_error("Invalid word access at " + std::to_string(index));
 
+    writeSideEffect(index);
     memory[index] = static_cast<std::byte>(value >> 24);
     memory[index + 1] = static_cast<std::byte>(value >> 16);
     memory[index + 2] = static_cast<std::byte>(value >> 8);
@@ -64,12 +75,14 @@ void Memory::halfTo(const uint32_t index, const int16_t value) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
 
+    writeSideEffect(index);
     memory[index] = static_cast<std::byte>(value >> 8);
     memory[index + 1] = static_cast<std::byte>(value);
 }
 
 
 void Memory::byteTo(const uint32_t index, const int8_t value) {
+    writeSideEffect(index);
     memory[index] = static_cast<std::byte>(value);
 }
 
@@ -84,7 +97,7 @@ void Memory::loadProgram(const MemLayout& layout) {
 
 
 std::byte Memory::operator[](const uint32_t index) const { return memory.at(index); }
-std::byte& Memory::operator[](const uint32_t index) { return memory.at(index); }
+std::byte& Memory::operator[](const uint32_t index) { return memory[index]; }
 
 
 MemSection nameToMemSection(const std::string& name) {

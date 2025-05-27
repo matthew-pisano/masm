@@ -20,7 +20,7 @@ void Interpreter::initProgram(const MemLayout& layout) {
     state.registers[Register::SP] = 0x7FFFFFFC;
     state.registers[Register::GP] = 0x10008000;
     // Set MMIO output ready bit to 1
-    state.memory.wordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
+    state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
 }
 
 
@@ -29,11 +29,11 @@ int Interpreter::interpret(const MemLayout& layout) {
 
     while (true) {
         try {
-            if (ioMode == IOMode::MMIO)
+            if (ioMode == IOMode::MMIO) {
                 readMMIO();
-            step();
-            if (ioMode == IOMode::MMIO)
                 writeMMIO();
+            }
+            step();
         } catch (ExecExit& e) {
             ostream << "\n" << e.what() << std::endl;
             return e.code();
@@ -49,6 +49,10 @@ void Interpreter::readMMIO() {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
 
+    if (state.memory.wordAt(input_ready) == 1)
+        // Return if the previous character has yet to be read by the program
+        return;
+
     char c = 0;
     // Check if the input stream has characters to read
     if (&istream == &std::cin && consoleHasChar()) {
@@ -57,7 +61,7 @@ void Interpreter::readMMIO() {
         istream.get(c);
 
     if (c) {
-        state.memory.wordTo(input_ready, 1);
+        state.memory[input_ready + 3] = std::byte{1};
         state.memory.wordTo(input_data, c);
     }
 }
@@ -77,6 +81,11 @@ void Interpreter::writeMMIO() {
     const char c = static_cast<char>(state.memory.wordAt(output_data));
     ostream << c;
     ostream.flush();
+
+    // Reset ready bit
+    state.memory[output_ready + 3] = std::byte{1};
+    // Reset data word
+    state.memory[output_data + 3] = std::byte{0};
 }
 
 

@@ -40,7 +40,7 @@ class Memory {
     std::unordered_map<uint32_t, std::byte> memory;
 
     /**
-     * Gets the byte at the given address or zero if not allocated
+     * Gets the byte at the given address or zero if not allocated (without triggering side effects)
      * @param index The address to read from
      * @return The byte stored at the given address or zero if not allocated
      */
@@ -51,6 +51,12 @@ class Memory {
      * @param index The address to read from
      */
     void readSideEffect(uint32_t index);
+
+    /**
+     * Processes any side effects from writing to an address, such as updating the MMIO ready bit
+     * @param index The address to write to
+     */
+    void writeSideEffect(uint32_t index);
 
 public:
     /**
