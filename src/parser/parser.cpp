@@ -203,8 +203,9 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
     }
     // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
     if (instructionName == "la") {
-        const unsigned int upperBytes = (std::stoi(args[1].value) & 0xFFFF0000) >> 16;
-        const unsigned int lowerBytes = std::stoi(args[1].value) & 0x0000FFFF;
+        const uint32_t value = stoui32(args[1].value);
+        const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
+        const unsigned int lowerBytes = value & 0x0000FFFF;
 
         std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "at"},
                                            {TokenType::IMMEDIATE, std::to_string(upperBytes)}};

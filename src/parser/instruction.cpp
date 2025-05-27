@@ -175,7 +175,8 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
         !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "la" &&
-        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args) &&
+        !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "lui" &&
         !tokenTypeMatch({TokenType::REGISTER, TokenType::IMMEDIATE}, args))
