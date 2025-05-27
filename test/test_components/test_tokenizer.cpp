@@ -410,3 +410,10 @@ TEST_CASE("Test Tokenize Syscall Input Output") {
     validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
+
+
+TEST_CASE("Test Tokenize MMIO Input Output") {
+    const std::string test_case = "mmio";
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+}

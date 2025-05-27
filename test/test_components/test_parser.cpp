@@ -234,3 +234,10 @@ TEST_CASE("Test Parse Syscall Input Output") {
     validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }
+
+
+TEST_CASE("Test Parse MMIO Input Output") {
+    const std::string test_case = "mmio";
+    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+}

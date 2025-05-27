@@ -103,3 +103,11 @@ TEST_CASE("Test Execute Syscall Input Output") {
     validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }
+
+
+TEST_CASE("Test Execute MMIO Input Output") {
+    const std::string test_case = "mmio";
+    const std::string inputString = "1234";
+    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+}
