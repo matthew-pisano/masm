@@ -51,6 +51,8 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
         REQUIRE(actualLine == logLine);
         actualLines.erase(0, actualLine.length() + 1);
     }
+
+    REQUIRE(actualLines.empty());
 }
 
 
