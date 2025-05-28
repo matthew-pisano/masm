@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../testing_utilities.h"
+#include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
@@ -26,12 +27,12 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
                     const std::string& logFileName, const std::string& inputString = "") {
     const std::vector<std::string> logLines = readFileLines(logFileName);
 
-    std::vector<RawFile> sourceLines;
-    sourceLines.reserve(sourceFileNames.size()); // Preallocate memory for performance
+    std::vector<RawFile> sourceFiles;
+    sourceFiles.reserve(sourceFileNames.size()); // Preallocate memory for performance
     for (const std::string& fileName : sourceFileNames)
-        sourceLines.push_back({getFileBasename(fileName), readFileLines(fileName)});
+        sourceFiles.push_back({getFileBasename(fileName), readFileLines(fileName)});
 
-    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceLines);
+    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceFiles);
 
     Parser parser{};
     const MemLayout layout = parser.parse(program);
@@ -53,6 +54,21 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     }
 
     REQUIRE(actualLines.empty());
+}
+
+
+TEST_CASE("Test Runtime Error") {
+    std::vector<RawFile> sourceFiles = {{"test.asm", {"main:", "div $zero, $zero"}}};
+    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceFiles);
+
+    Parser parser{};
+    const MemLayout layout = parser.parse(program);
+
+    std::istringstream iss;
+    std::ostringstream oss;
+
+    DebugInterpreter interpreter{IOMode::SYSCALL, iss, oss};
+    REQUIRE_THROWS_AS(interpreter.interpret(layout), MasmRuntimeError);
 }
 
 

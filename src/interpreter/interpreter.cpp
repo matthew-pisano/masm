@@ -134,7 +134,7 @@ void Interpreter::step() {
         throw;
     } catch (std::runtime_error& e) {
         std::string what = e.what();
-        what += "(line " + std::to_string(state.memory.getByteSource(pc - 4)) + ")";
+        what += " (line " + std::to_string(state.memory.getByteSource(pc - 4)) + ")";
         throw MasmRuntimeError(what, pc - 4);
     }
 }
