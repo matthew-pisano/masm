@@ -71,9 +71,13 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
  * Class to represent a line of source code
  */
 struct SourceLine {
+    std::string filename;
     size_t lineno;
     std::vector<Token> tokens;
 };
+
+bool operator==(const SourceLine& lhs, const SourceLine& rhs);
+bool operator!=(const SourceLine& lhs, const SourceLine& rhs);
 
 
 /**
@@ -97,11 +101,13 @@ class Tokenizer {
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
      * @param rawLine The line of source code to tokenize
+     * @param filename The name of the source file
      * @param lineno The line number of the source code
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating line
      */
-    static std::vector<SourceLine> tokenizeLine(const std::string& rawLine, size_t lineno);
+    static std::vector<SourceLine> tokenizeLine(const std::string& rawLine,
+                                                const std::string& filename, size_t lineno);
 
 public:
     /**

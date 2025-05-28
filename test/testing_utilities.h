@@ -56,7 +56,7 @@ RawFile makeRawFile(const std::vector<std::string>& lines);
  * Validates the token lines of a file against the expected tokens, fails if the tokens do not match
  * @param expectedTokens The expected tokens to compare against
  * @param actualTokens The actual tokens to compare
- * @throw std::runtime_error when the tokens do not match
+ * @throw runtime_error when the tokens do not match
  */
 void validateTokenLines(const std::vector<std::vector<Token>>& expectedTokens,
                         const std::vector<SourceLine>& actualTokens);

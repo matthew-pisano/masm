@@ -14,10 +14,10 @@ class Postprocessor {
 
     /**
      * Adds all global declarations to the globals vector and removes declarations from file
-     * @param globals The vector to add global declarations to
+     * @param globals The vector to add global declarations to along with their original lines
      * @param tokenizedFile The tokenized file to collect and prune globals from
      */
-    static void collectGlobals(std::vector<std::pair<std::string, size_t>>& globals,
+    static void collectGlobals(std::vector<std::pair<std::string, SourceLine>>& globals,
                                std::vector<SourceLine>& tokenizedFile);
 
     /**

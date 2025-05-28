@@ -41,7 +41,7 @@ public:
     /**
      * Populates the label map prior to processing using static allocations for the given tokens
      * @param tokens The program tokens
-     * @throw runtime_error When a duplicate label definition is detected
+     * @throw MasmSyntaxError When a duplicate label definition is detected
      */
     void populateLabelMap(const std::vector<SourceLine>& tokens);
 };

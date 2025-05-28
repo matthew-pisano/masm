@@ -6,6 +6,7 @@
 #define INTERPRETER_H
 
 #include <iostream>
+#include <memory>
 
 
 #include "heap.h"
@@ -26,9 +27,38 @@ enum class IOMode {
  * The state of the interpreter, which includes the register file and memory
  */
 struct State {
+    /**
+     * The register file containing the values of all registers
+     */
     RegisterFile registers;
+
+    /**
+     * The main memory of the interpreter, which contains the program code and data
+     */
     Memory memory;
+
+    /**
+     * The heap allocator for dynamic memory allocation
+     */
     HeapAllocator heapAllocator;
+
+    /**
+     * The main memory map between indices and their original sources in the source code
+     */
+    std::unordered_map<uint32_t, std::shared_ptr<SourceLine>> byteSources;
+
+    /**
+     * Gets the source line for the given address
+     * @param addr The address to get the source line for
+     * @return The source line corresponding to the given address
+     */
+    SourceLine getSourceLine(uint32_t addr) const;
+
+    /**
+     * Loads a program and initial static data into memory, along with line markers for loaded data
+     * @param layout The memory layout to load
+     */
+    void loadProgram(const MemLayout& layout);
 };
 
 

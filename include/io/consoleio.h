@@ -28,7 +28,7 @@ bool consoleHasChar();
 /**
  * Get a single character from the console
  * @return The character read from the console
- * @throw std::runtime_error if there is no character to read from the console
+ * @throw runtime_error if there is no character to read from the console
  */
 char consoleGetChar();
 

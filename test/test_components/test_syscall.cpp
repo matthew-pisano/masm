@@ -166,7 +166,7 @@ TEST_CASE("Test Negative Sleep Syscall") {
     State state;
     state.registers[Register::A0] = -500;
 
-    REQUIRE_THROWS_MATCHES(sleepSyscall(state), MasmRuntimeError,
+    REQUIRE_THROWS_MATCHES(sleepSyscall(state), std::runtime_error,
                            Catch::Matchers::Message("Negative sleep time: -500"));
 }
 

@@ -13,26 +13,8 @@
  * A base class for all MASM exceptions
  */
 class MasmException : public std::runtime_error {
-
-    /**
-     * Constructs a message for the exception
-     * @param message The message to display
-     * @param useAddr Whether to use the address or line number
-     * @param loc The line number or address of the error
-     * @return The formatted message
-     */
-    static std::string constructMessage(const std::string& message, const bool useAddr,
-                                        const size_t loc) {
-        if (loc == 0ul)
-            return message;
-        const std::string msg = useAddr ? "Error at address" : "Error on line";
-        return std::format("{} {}: {}", msg, loc, message);
-    }
-
 protected:
-    explicit MasmException(const std::string& message, const bool useAddr,
-                           const size_t lineno = 0) :
-        std::runtime_error(constructMessage(message, useAddr, lineno)) {}
+    explicit MasmException(const std::string& message) : std::runtime_error(message) {}
 
 public:
     [[nodiscard]] const char* what() const noexcept override { return std::runtime_error::what(); }
@@ -43,9 +25,15 @@ public:
  * A class for syntax errors in MASM
  */
 class MasmSyntaxError final : public MasmException {
+    static std::string constructMessage(const std::string& message, const std::string& filename,
+                                        const size_t lineno) {
+        return std::format("Syntax error at {}:{} -> {}", filename, lineno, message);
+    }
+
 public:
-    explicit MasmSyntaxError(const std::string& message, const size_t lineno = 0) :
-        MasmException(message, false, lineno) {}
+    explicit MasmSyntaxError(const std::string& message, const std::string& filename,
+                             const size_t lineno) :
+        MasmException(constructMessage(message, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 
@@ -54,9 +42,23 @@ public:
  * A class for runtime errors in MASM
  */
 class MasmRuntimeError final : public MasmException {
+    /**
+     * Constructs a message for the runtime exception
+     * @param message The original error message to display
+     * @param addr The address of the error
+     * @param lineno The line number of the source code that produced the error
+     * @param filename The name of the source file that produced the error
+     * @return The formatted message
+     */
+    static std::string constructMessage(const std::string& message, const size_t addr,
+                                        const std::string& filename, const size_t lineno) {
+        return std::format("Runtime error at {} ({}:{}) -> {}", addr, filename, lineno, message);
+    }
+
 public:
-    explicit MasmRuntimeError(const std::string& message, const size_t addr = 0) :
-        MasmException(message, true, addr) {}
+    explicit MasmRuntimeError(const std::string& message, const size_t addr,
+                              const std::string& filename, const size_t lineno) :
+        MasmException(constructMessage(message, addr, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 

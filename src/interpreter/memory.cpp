@@ -89,24 +89,6 @@ void Memory::byteTo(const uint32_t index, const int8_t value) {
 bool Memory::isValid(const uint32_t index) const { return memory.contains(index); }
 
 
-void Memory::loadProgram(const MemLayout& layout) {
-    for (const std::pair<MemSection, std::vector<std::byte>> pair : layout.data)
-        for (size_t i = 0; i < pair.second.size(); i++) {
-            uint32_t memOffset = memSectionOffset(pair.first) + i;
-            memory[memOffset] = pair.second[i];
-            if (isSectionExecutable(pair.first))
-                byteSources[memOffset] = layout.lineMarkers.at(pair.first).at(i);
-        }
-}
-
-
-size_t Memory::getByteSource(const uint32_t index) const {
-    if (!byteSources.contains(index))
-        return 0;
-    return byteSources.at(index);
-}
-
-
 std::byte Memory::operator[](const uint32_t index) const { return memory.at(index); }
 std::byte& Memory::operator[](const uint32_t index) { return memory[index]; }
 

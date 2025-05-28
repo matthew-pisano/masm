@@ -14,14 +14,14 @@
 
 void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap) {
     // Stores globals that have not yet been matched to declarations
-    std::vector<std::pair<std::string, size_t>> globals;
+    std::vector<std::pair<std::string, SourceLine>> globals;
     for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
         collectGlobals(globals, programFile.second);
 
     // Create vector of just names for globals
     std::vector<std::string> globalNames = {};
     globalNames.reserve(globals.size());
-    for (const std::pair<std::string, size_t>& global : globals)
+    for (const std::pair<std::string, SourceLine>& global : globals)
         globalNames.push_back(global.first);
 
     std::vector undeclaredGlobals(globals);
@@ -42,10 +42,13 @@ void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>&
     }
 
     // If any globals were declared without a matching label declaration
-    if (!undeclaredGlobals.empty())
-        throw MasmSyntaxError("Global label '" + std::get<0>(undeclaredGlobals[0]) +
-                                      "' referenced without declaration",
-                              std::get<1>(undeclaredGlobals[0]));
+    if (!undeclaredGlobals.empty()) {
+        const std::string labelName = std::get<0>(undeclaredGlobals[0]);
+        const std::string filename = std::get<1>(undeclaredGlobals[0]).filename;
+        const size_t lineno = std::get<1>(undeclaredGlobals[0]).lineno;
+        throw MasmSyntaxError("Global label '" + labelName + "' referenced without declaration",
+                              filename, lineno);
+    }
 }
 
 
@@ -69,7 +72,7 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 }
 
 
-void Postprocessor::collectGlobals(std::vector<std::pair<std::string, size_t>>& globals,
+void Postprocessor::collectGlobals(std::vector<std::pair<std::string, SourceLine>>& globals,
                                    std::vector<SourceLine>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
@@ -78,9 +81,9 @@ void Postprocessor::collectGlobals(std::vector<std::pair<std::string, size_t>>& 
             continue;
 
         if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::LABEL_REF)
-            throw MasmSyntaxError("Invalid global label declaration", line.lineno);
+            throw MasmSyntaxError("Invalid global label declaration", line.filename, line.lineno);
 
-        globals.emplace_back(line.tokens[1].value, line.lineno);
+        globals.emplace_back(line.tokens[1].value, line);
         tokenizedFile.erase(tokenizedFile.begin() + i);
         i--;
     }
@@ -94,10 +97,10 @@ void Postprocessor::replaceEqv(std::vector<SourceLine>& tokenizedFile) {
         SourceLine& line = tokenizedFile[i];
         if (line.tokens[0] == eqvToken) {
             if (line.tokens.size() < 3 || line.tokens[1].type != TokenType::LABEL_REF)
-                throw MasmSyntaxError("Invalid eqv declaration", line.lineno);
+                throw MasmSyntaxError("Invalid eqv declaration", line.filename, line.lineno);
 
             const std::vector eqvValue(line.tokens.begin() + 2, line.tokens.end());
-            eqvMapping[line.tokens[1]] = {line.lineno, eqvValue};
+            eqvMapping[line.tokens[1]] = {line.filename, line.lineno, eqvValue};
             tokenizedFile.erase(tokenizedFile.begin() + i);
             i--;
             continue;
@@ -131,7 +134,8 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
 
         // Ensure there is space before and after the open paren
         if (openParen == tokenLine.tokens.begin() || tokenLine.tokens.size() < 4)
-            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename,
+                                  tokenLine.lineno);
         // A vector containing the last three elements of tokenLine
         std::vector<Token> lastFour = {};
         while (lastFour.size() < 4) {
@@ -148,7 +152,8 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
         const std::vector pattern = {TokenType::IMMEDIATE, TokenType::OPEN_PAREN,
                                      TokenType::REGISTER, TokenType::CLOSE_PAREN};
         if (!tokenTypeMatch(pattern, lastFour))
-            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.lineno);
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename,
+                                  tokenLine.lineno);
         // Replace with target pattern
         tokenLine.tokens.push_back(lastFour[2]);
         tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
@@ -164,7 +169,7 @@ std::vector<Token> Postprocessor::parseMacroParams(const SourceLine& line) {
 
     if (line.tokens[2].type != TokenType::OPEN_PAREN ||
         line.tokens[line.tokens.size() - 1].type != TokenType::CLOSE_PAREN)
-        throw MasmSyntaxError("Malformed macro parameter declaration", line.lineno);
+        throw MasmSyntaxError("Malformed macro parameter declaration", line.filename, line.lineno);
 
     const std::vector rawParams(line.tokens.begin() + 3, line.tokens.end() - 1);
     std::vector<Token> params = filterTokenList(rawParams, {TokenType::MACRO_PARAM});
@@ -209,7 +214,8 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                                                 tokenizedFile[pos].tokens.end() - 1));
 
     if (macroArgs.size() != macro.params.size())
-        throw MasmSyntaxError("Invalid number of macro arguments", tokenizedFile[pos].lineno);
+        throw MasmSyntaxError("Invalid number of macro arguments", tokenizedFile[pos].filename,
+                              tokenizedFile[pos].lineno);
 
     const size_t macroEndIdx = pos + macro.body.size();
 
@@ -226,7 +232,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
                 throw MasmSyntaxError("Invalid macro parameter '" + token.value + "'",
-                                      tokenizedFile.at(pos).lineno);
+                                      tokenizedFile.at(pos).filename, tokenizedFile.at(pos).lineno);
             const size_t paramIdx = std::distance(macro.params.begin(), it);
             // Replace token with argument
             token = macroArgs[paramIdx];
@@ -244,14 +250,15 @@ void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
         if (line.tokens[0].type == TokenType::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].type != TokenType::LABEL_REF)
-                throw MasmSyntaxError("Invalid macro declaration", line.lineno);
+                throw MasmSyntaxError("Invalid macro declaration", line.filename, line.lineno);
 
             Macro macro = {line.tokens[1].value, {}, {}};
             macro.params = parseMacroParams(line);
             while (true) {
                 i++;
                 if (i >= tokenizedFile.size())
-                    throw MasmSyntaxError("Unmatched macro declaration", line.lineno);
+                    throw MasmSyntaxError("Unmatched macro declaration", line.filename,
+                                          line.lineno);
 
                 if (tokenizedFile[i].tokens[0].type == TokenType::META_DIRECTIVE &&
                     tokenizedFile[i].tokens[0].value == "end_macro")
@@ -282,7 +289,7 @@ void Postprocessor::processIncludes(std::map<std::string, std::vector<SourceLine
             if (line.tokens[0] != includeToken)
                 continue;
             if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::STRING)
-                throw MasmSyntaxError("Invalid include directive", line.lineno);
+                throw MasmSyntaxError("Invalid include directive", line.filename, line.lineno);
 
             std::string includeName = line.tokens[1].value;
             const std::vector<SourceLine>& includeFile = rawProgramMap[includeName];

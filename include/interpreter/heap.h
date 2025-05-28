@@ -25,6 +25,7 @@ public:
      * Allocates a block of memory of the given size
      * @param size The size of the block to allocate
      * @return The address of the allocated block
+     * @throw runtime_error if the allocation fails
      */
     uint32_t allocate(uint32_t size);
 };

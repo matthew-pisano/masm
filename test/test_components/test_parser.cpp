@@ -164,33 +164,41 @@ TEST_CASE("Test Parser Syntax Errors") {
     SECTION("Test Unknown Label Reference") {
         Parser parser{};
         const std::vector<SourceLine> program = {
-                {0, {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "ref"}}}};
-        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
-                               Catch::Matchers::Message("Unknown label 'ref'"));
+                {"test.asm", 1, {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "ref"}}}};
+        REQUIRE_THROWS_MATCHES(
+                parser.parse(program), MasmSyntaxError,
+                Catch::Matchers::Message("Syntax error at test.asm:1 -> Unknown label 'ref'"));
     }
 
     SECTION("Test Unknown Duplicate Label") {
         Parser parser{};
-        const std::vector<SourceLine> program = {{0, {{TokenType::LABEL_DEF, "label"}}},
-                                                 {0, {{TokenType::LABEL_DEF, "label"}}}};
-        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
-                               Catch::Matchers::Message("Duplicate label 'label'"));
+        const std::vector<SourceLine> program = {
+                {"test.asm", 1, {{TokenType::LABEL_DEF, "label"}}},
+                {"test.asm", 1, {{TokenType::LABEL_DEF, "label"}}}};
+        REQUIRE_THROWS_MATCHES(
+                parser.parse(program), MasmSyntaxError,
+                Catch::Matchers::Message("Syntax error at test.asm:1 -> Duplicate label 'label'"));
     }
 
     SECTION("Test Empty Allocation Directive") {
         Parser parser{};
-        const std::vector<SourceLine> program = {{0, {{TokenType::ALLOC_DIRECTIVE, "word"}}}};
-        REQUIRE_THROWS_MATCHES(
-                parser.parse(program), MasmSyntaxError,
-                Catch::Matchers::Message("Directive 'word' expects at least one argument"));
+        const std::vector<SourceLine> program = {
+                {"test.asm", 1, {{TokenType::ALLOC_DIRECTIVE, "word"}}}};
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at test.asm:1 -> Directive "
+                                                        "'word' expects at least one argument"));
     }
 
     SECTION("Test Unsupported Directive") {
         Parser parser{};
         const std::vector<SourceLine> program = {
-                {0, {{TokenType::ALLOC_DIRECTIVE, "eeby"}, {TokenType::IMMEDIATE, "1"}}}};
-        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
-                               Catch::Matchers::Message("Unsupported directive 'eeby'"));
+                {"test.asm",
+                 1,
+                 {{TokenType::ALLOC_DIRECTIVE, "eeby"}, {TokenType::IMMEDIATE, "1"}}}};
+        REQUIRE_THROWS_MATCHES(
+                parser.parse(program), MasmSyntaxError,
+                Catch::Matchers::Message(
+                        "Syntax error at test.asm:1 -> Unsupported directive 'eeby'"));
     }
 }
 

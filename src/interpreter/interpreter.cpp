@@ -14,8 +14,25 @@
 #include "parser/instruction.h"
 
 
+SourceLine State::getSourceLine(const uint32_t addr) const { return *byteSources.at(addr); }
+
+
+void State::loadProgram(const MemLayout& layout) {
+    for (const std::pair<MemSection, std::vector<std::byte>> pair : layout.data)
+        for (size_t i = 0; i < pair.second.size(); i++) {
+            uint32_t memOffset = memSectionOffset(pair.first) + i;
+            memory[memOffset] = pair.second[i];
+            if (isSectionExecutable(pair.first)) {
+                const std::shared_ptr<SourceLine> sourceLine =
+                        layout.byteSources.at(pair.first).at(i);
+                byteSources[memOffset] = sourceLine;
+            }
+        }
+}
+
+
 void Interpreter::initProgram(const MemLayout& layout) {
-    state.memory.loadProgram(layout);
+    state.loadProgram(layout);
     // Initialize PC to the start of the text section
     state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));
     state.registers[Register::SP] = 0x7FFFFFFC;
@@ -92,10 +109,11 @@ void Interpreter::writeMMIO() {
 
 void Interpreter::step() {
     int32_t& pc = state.registers[Register::PC];
-    if (pc >= TEXT_SEC_END)
-        throw MasmRuntimeError("Out of bounds read access", pc);
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
+    const SourceLine pcSrc = state.getSourceLine(pc);
+    if (pc >= TEXT_SEC_END)
+        throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
     const int32_t instruction = state.memory.wordAt(pc);
 
     pc += 4;
@@ -133,9 +151,7 @@ void Interpreter::step() {
     } catch (ExecExit&) {
         throw;
     } catch (std::runtime_error& e) {
-        std::string what = e.what();
-        what += " (line " + std::to_string(state.memory.getByteSource(pc - 4)) + ")";
-        throw MasmRuntimeError(what, pc - 4);
+        throw MasmRuntimeError(e.what(), pc - 4, pcSrc.filename, pcSrc.lineno);
     }
 }
 

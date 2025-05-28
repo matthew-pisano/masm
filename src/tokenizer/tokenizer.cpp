@@ -9,9 +9,9 @@
 #include <string>
 #include <vector>
 
+#include "exceptions.h"
 #include "parser/instruction.h"
 #include "tokenizer/postprocessor.h"
-#include "exceptions.h"
 #include "utils.h"
 
 
@@ -24,15 +24,19 @@ constexpr std::array<const char*, 14> tokenTypeNames = {
         "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
 
 
+bool operator==(const SourceLine& lhs, const SourceLine& rhs) {
+    return lhs.filename == rhs.filename && lhs.lineno == rhs.lineno;
+}
+bool operator!=(const SourceLine& lhs, const SourceLine& rhs) { return !(lhs == rhs); }
+
+
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
 
 bool operator==(const Token& lhs, const Token& rhs) {
     return lhs.type == rhs.type && lhs.value == rhs.value;
 }
 
-bool operator!=(const Token& lhs, const Token& rhs) {
-    return !(lhs == rhs);
-}
+bool operator!=(const Token& lhs, const Token& rhs) { return !(lhs == rhs); }
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
     return os << "<" << tokenTypeToString(t.type) << ", \"" << t.value << "\">";
@@ -79,7 +83,7 @@ std::vector<SourceLine> Tokenizer::tokenizeFile(const RawFile& rawFile) {
     for (size_t i = 0; i < rawFile.lines.size(); ++i) {
         const std::string& rawLine = rawFile.lines[i];
         std::vector<SourceLine> tokenizedLines;
-        tokenizedLines = tokenizeLine(rawLine, i + 1);
+        tokenizedLines = tokenizeLine(rawLine, rawFile.name, i + 1);
         // Skip empty or comment lines
         if (tokenizedLines.empty())
             continue;
@@ -96,10 +100,11 @@ std::vector<SourceLine> Tokenizer::tokenizeFile(const RawFile& rawFile) {
 }
 
 
-std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, const size_t lineno) {
+std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine,
+                                                const std::string& filename, const size_t lineno) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
-    std::vector<SourceLine> tokens = {{lineno, {}}};
+    std::vector<SourceLine> tokens = {{filename, lineno, {}}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
@@ -125,7 +130,7 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
         else if (c == '"') {
             currentType = TokenType::STRING;
             if (!currentToken.empty())
-                throw MasmSyntaxError("Unexpected token '" + currentToken + "'", lineno);
+                throw MasmSyntaxError("Unexpected token '" + currentToken + "'", filename, lineno);
         }
         // Skip remainder of line when reaching a comment
         else if (c == '#') {
@@ -170,7 +175,8 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
     }
 
     if (!currentToken.empty())
-        throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", lineno);
+        throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", filename,
+                              lineno);
 
     return tokens;
 }
@@ -181,7 +187,8 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
     SourceLine& tokenLine = tokens[tokens.size() - 1];
 
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
-        throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.lineno);
+        throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename,
+                              tokenLine.lineno);
 
     if (currentType == TokenType::IMMEDIATE && currentToken.starts_with("0x"))
         currentToken = hexToInt(currentToken);
@@ -212,7 +219,7 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
 
     // Start a new line if a label was given
     if (c == ':')
-        tokens.push_back({tokenLine.lineno, {}});
+        tokens.push_back({tokenLine.filename, tokenLine.lineno, {}});
     else if (c == ',')
         tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
     else if (c == '(')

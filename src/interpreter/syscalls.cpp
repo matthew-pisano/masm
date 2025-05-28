@@ -36,78 +36,87 @@ char getStreamChar(std::istream& istream) {
 
 void execSyscall(const IOMode ioMode, State& state, std::istream& istream, std::ostream& ostream) {
     int32_t syscallCode = state.registers[Register::V0];
-    switch (static_cast<Syscall>(syscallCode)) {
-        case Syscall::PRINT_INT:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_INT syscall not supported in MMIO mode");
-            printIntSyscall(state, ostream);
-            break;
-        case Syscall::PRINT_STRING:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_STRING syscall not supported in MMIO mode");
-            printStringSyscall(state, ostream);
-            break;
-        case Syscall::READ_INT:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("READ_INT syscall not supported in MMIO mode");
-            readIntSyscall(state, istream);
-            break;
-        case Syscall::READ_STRING:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("READ_STRING syscall not supported in MMIO mode");
-            readStringSyscall(state, istream);
-            break;
-        case Syscall::HEAP_ALLOC:
-            heapAllocSyscall(state);
-            break;
-        case Syscall::EXIT:
-            exitSyscall();
-            break;
-        case Syscall::PRINT_CHAR:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_CHAR syscall not supported in MMIO mode");
-            printCharSyscall(state, ostream);
-            break;
-        case Syscall::READ_CHAR:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("READ_CHAR syscall not supported in MMIO mode");
-            readCharSyscall(state, istream);
-            break;
-        case Syscall::EXIT_VAL:
-            exitValSyscall(state);
-            break;
-        case Syscall::TIME:
-            timeSyscall(state);
-            break;
-        case Syscall::SLEEP:
-            sleepSyscall(state);
-            break;
-        case Syscall::PRINT_INT_HEX:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_INT_HEX syscall not supported in MMIO mode");
-            printIntHexSyscall(state, ostream);
-            break;
-        case Syscall::PRINT_INT_BIN:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_INT_BIN syscall not supported in MMIO mode");
-            printIntBinSyscall(state, ostream);
-            break;
-        case Syscall::PRINT_UINT:
-            if (ioMode != IOMode::SYSCALL)
-                throw MasmRuntimeError("PRINT_UINT syscall not supported in MMIO mode");
-            printUIntSyscall(state, ostream);
-            break;
-        case Syscall::SET_SEED:
-            setRandSeedSyscall(state);
-            break;
-        case Syscall::RAND_INT:
-            randIntSyscall(state);
-            break;
-        case Syscall::RAND_INT_RANGE:
-            randIntRangeSyscall(state);
-            break;
-        default:
-            throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
+
+    try {
+        switch (static_cast<Syscall>(syscallCode)) {
+            case Syscall::PRINT_INT:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_INT syscall not supported in MMIO mode");
+                printIntSyscall(state, ostream);
+                break;
+            case Syscall::PRINT_STRING:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_STRING syscall not supported in MMIO mode");
+                printStringSyscall(state, ostream);
+                break;
+            case Syscall::READ_INT:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("READ_INT syscall not supported in MMIO mode");
+                readIntSyscall(state, istream);
+                break;
+            case Syscall::READ_STRING:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("READ_STRING syscall not supported in MMIO mode");
+                readStringSyscall(state, istream);
+                break;
+            case Syscall::HEAP_ALLOC:
+                heapAllocSyscall(state);
+                break;
+            case Syscall::EXIT:
+                exitSyscall();
+                break;
+            case Syscall::PRINT_CHAR:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_CHAR syscall not supported in MMIO mode");
+                printCharSyscall(state, ostream);
+                break;
+            case Syscall::READ_CHAR:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("READ_CHAR syscall not supported in MMIO mode");
+                readCharSyscall(state, istream);
+                break;
+            case Syscall::EXIT_VAL:
+                exitValSyscall(state);
+                break;
+            case Syscall::TIME:
+                timeSyscall(state);
+                break;
+            case Syscall::SLEEP:
+                sleepSyscall(state);
+                break;
+            case Syscall::PRINT_INT_HEX:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_INT_HEX syscall not supported in MMIO mode");
+                printIntHexSyscall(state, ostream);
+                break;
+            case Syscall::PRINT_INT_BIN:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_INT_BIN syscall not supported in MMIO mode");
+                printIntBinSyscall(state, ostream);
+                break;
+            case Syscall::PRINT_UINT:
+                if (ioMode != IOMode::SYSCALL)
+                    throw std::runtime_error("PRINT_UINT syscall not supported in MMIO mode");
+                printUIntSyscall(state, ostream);
+                break;
+            case Syscall::SET_SEED:
+                setRandSeedSyscall(state);
+                break;
+            case Syscall::RAND_INT:
+                randIntSyscall(state);
+                break;
+            case Syscall::RAND_INT_RANGE:
+                randIntRangeSyscall(state);
+                break;
+            default:
+                throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
+        }
+    } catch (ExecExit& e) {
+        throw;
+    } catch (std::runtime_error& e) {
+        const int32_t pc = state.registers[Register::PC] - 4;
+        const SourceLine syscallSrc = state.getSourceLine(pc);
+        throw MasmRuntimeError(e.what(), pc, syscallSrc.filename, syscallSrc.lineno);
     }
 }
 
@@ -207,7 +216,7 @@ void timeSyscall(State& state) {
 void sleepSyscall(State& state) {
     const int32_t milliseconds = state.registers[Register::A0];
     if (milliseconds < 0)
-        throw MasmRuntimeError("Negative sleep time: " + std::to_string(milliseconds));
+        throw std::runtime_error("Negative sleep time: " + std::to_string(milliseconds));
 
     usleep(milliseconds * 1000);
 }

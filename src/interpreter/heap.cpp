@@ -26,10 +26,10 @@ uint32_t HeapAllocator::nextFree(const uint32_t size) const {
 
 uint32_t HeapAllocator::allocate(const uint32_t size) {
     if (size == 0)
-        throw MasmRuntimeError("Cannot allocate zero bytes");
+        throw std::runtime_error("Cannot allocate zero bytes");
     const uint32_t address = nextFree(size);
     if (address >= HEAP_BASE + HEAP_SIZE)
-        throw MasmRuntimeError("Heap overflow");
+        throw std::runtime_error("Heap overflow");
 
     for (size_t i = 0; i < blockAddresses.size(); i++) {
         if (blockAddresses[i] > address) {

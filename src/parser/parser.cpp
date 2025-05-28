@@ -19,13 +19,9 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
 
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
-    layout.lineMarkers[MemSection::TEXT] = {};
-    try {
-        // Resolve all labels before parsing instructions
-        labelMap.populateLabelMap(tokenLines);
-    } catch (const std::runtime_error& e) {
-        throw MasmSyntaxError(std::string(e.what()));
-    }
+    layout.byteSources[MemSection::TEXT] = {};
+    // Resolve all labels before parsing instructions
+    labelMap.populateLabelMap(tokenLines);
 
     for (const auto& tokenLine : tokenLines) {
         // Skip empty lines
@@ -34,7 +30,7 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
         try {
             parseLine(layout, currSection, tokenLine);
         } catch (const std::runtime_error& e) {
-            throw MasmSyntaxError(e.what(), tokenLine.lineno);
+            throw MasmSyntaxError(e.what(), tokenLine.filename, tokenLine.lineno);
         }
     }
 
@@ -56,7 +52,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
             currSection = nameToMemSection(firstToken.value);
             if (!layout.data.contains(currSection)) {
                 layout.data[currSection] = {};
-                layout.lineMarkers[currSection] = {};
+                layout.byteSources[currSection] = {};
             }
             break;
         }
@@ -82,9 +78,12 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
     layout.data[currSection].insert(layout.data[currSection].end(), memBytes.begin(),
                                     memBytes.end());
 
-    if (isSectionExecutable(currSection))
-        layout.lineMarkers[currSection].insert(layout.lineMarkers[currSection].end(),
-                                               memBytes.size(), tokenLine.lineno);
+    if (isSectionExecutable(currSection)) {
+        const std::shared_ptr<SourceLine> tokenLinePtr = std::make_shared<SourceLine>(
+                tokenLine.filename, tokenLine.lineno, tokenLine.tokens);
+        layout.byteSources[currSection].insert(layout.byteSources[currSection].end(),
+                                               memBytes.size(), tokenLinePtr);
+    }
 }
 
 
