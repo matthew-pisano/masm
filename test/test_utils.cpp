@@ -4,6 +4,7 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "utils.h"
 
@@ -59,7 +60,7 @@ TEST_CASE("Test String to Bytes") {
 
 
 TEST_CASE("Test Filter Token List") {
-    Token reg = {TokenType::REGISTER, "reg"};
+    Token reg = {TokenType::REGISTER, "t0"};
     Token label = {TokenType::LABEL_REF, "label"};
     Token param = {TokenType::MACRO_PARAM, "param"};
     Token sep = {TokenType::SEPERATOR, ","};
@@ -78,16 +79,20 @@ TEST_CASE("Test Filter Token List") {
 
     SECTION("Test Invalid Token Lists") {
         std::vector tokens = {sep};
-        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
+                               Catch::Matchers::Message("Unexpected ','"));
 
         tokens = {sep, reg};
-        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
+                               Catch::Matchers::Message("Unexpected ','"));
 
         tokens = {reg, sep};
-        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
+                               Catch::Matchers::Message("Unexpected ',' after token 't0'"));
 
         tokens = {reg, sep, reg, sep};
-        REQUIRE_THROWS_AS(filterTokenList(tokens), std::runtime_error);
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
+                               Catch::Matchers::Message("Unexpected ',' after token 't0'"));
     }
 
     SECTION("Test Invalid Elements") {
@@ -98,11 +103,15 @@ TEST_CASE("Test Filter Token List") {
         REQUIRE_NOTHROW(filterTokenList(tokens, {TokenType::REGISTER, TokenType::LABEL_REF}));
 
         tokens = {reg, sep, label};
-        REQUIRE_THROWS_AS(filterTokenList(tokens, {TokenType::REGISTER}), std::runtime_error);
+        REQUIRE_THROWS_MATCHES(
+                filterTokenList(tokens, {TokenType::REGISTER}), std::runtime_error,
+                Catch::Matchers::Message("Invalid token 'label' of type 'LABEL_REF'"));
 
         tokens = {reg, sep, label, sep, param};
-        REQUIRE_THROWS_AS(filterTokenList(tokens, {TokenType::REGISTER, TokenType::LABEL_REF}),
-                          std::runtime_error);
+        REQUIRE_THROWS_MATCHES(
+                filterTokenList(tokens, {TokenType::REGISTER, TokenType::LABEL_REF}),
+                std::runtime_error,
+                Catch::Matchers::Message("Invalid token 'param' of type 'MACRO_PARAM'"));
     }
 }
 

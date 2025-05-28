@@ -125,7 +125,7 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
         else if (c == '"') {
             currentType = TokenType::STRING;
             if (!currentToken.empty())
-                throw MasmSyntaxError("Unexpected token " + currentToken, lineno);
+                throw MasmSyntaxError("Unexpected token '" + currentToken + "'", lineno);
         }
         // Skip remainder of line when reaching a comment
         else if (c == '#') {
@@ -170,7 +170,7 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine, cons
     }
 
     if (!currentToken.empty())
-        throw MasmSyntaxError("Unexpected EOL while parsing token " + currentToken, lineno);
+        throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", lineno);
 
     return tokens;
 }
@@ -181,7 +181,7 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
     SourceLine& tokenLine = tokens[tokens.size() - 1];
 
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
-        throw MasmSyntaxError("Unexpected token " + std::string(1, c), tokenLine.lineno);
+        throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.lineno);
 
     if (currentType == TokenType::IMMEDIATE && currentToken.starts_with("0x"))
         currentToken = hexToInt(currentToken);

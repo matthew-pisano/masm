@@ -4,6 +4,8 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 #include <string>
 #include <vector>
 
@@ -68,7 +70,11 @@ TEST_CASE("Test Runtime Error") {
     std::ostringstream oss;
 
     DebugInterpreter interpreter{IOMode::SYSCALL, iss, oss};
-    REQUIRE_THROWS_AS(interpreter.interpret(layout), MasmRuntimeError);
+
+    REQUIRE_THROWS_MATCHES(
+            interpreter.interpret(layout), MasmRuntimeError,
+            Catch::Matchers::Message(
+                    "Error at address 4194304: Division by zero in DIV instruction (line 2)"));
 }
 
 

@@ -86,17 +86,17 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
         if (i % 2 == 1 && listTokens[i].type != TokenType::SEPERATOR)
             throw std::runtime_error("Expected , after token " + listTokens[i - 1].value);
         if (i % 2 == 0 && listTokens[i].type == TokenType::SEPERATOR)
-            throw std::runtime_error("Unexpected ,");
+            throw std::runtime_error("Unexpected ','");
         if (i == listTokens.size() - 1 && listTokens[i].type == TokenType::SEPERATOR)
-            throw std::runtime_error("Unexpected , after token " + listTokens[i - 1].value);
+            throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value + "'");
 
         if (listTokens[i].type == TokenType::SEPERATOR)
             continue;
 
         if (!validElems.empty() &&
             std::ranges::find(validElems, listTokens[i].type) == validElems.end())
-            throw std::runtime_error("Invalid token " + listTokens[i].value + " of type " +
-                                     tokenTypeToString(listTokens[i].type));
+            throw std::runtime_error("Invalid token '" + listTokens[i].value + "' of type '" +
+                                     tokenTypeToString(listTokens[i].type) + "'");
         // Only push non seperator elements
         elements.push_back(listTokens[i]);
     }

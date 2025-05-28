@@ -55,7 +55,7 @@ public:
  */
 class MasmRuntimeError final : public MasmException {
 public:
-    explicit MasmRuntimeError(const std::string& message, const size_t addr = -1) :
+    explicit MasmRuntimeError(const std::string& message, const size_t addr = 0) :
         MasmException(message, true, addr) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };

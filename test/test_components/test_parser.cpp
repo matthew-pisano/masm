@@ -4,6 +4,8 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "../testing_utilities.h"
 #include "exceptions.h"
@@ -163,27 +165,32 @@ TEST_CASE("Test Parser Syntax Errors") {
         Parser parser{};
         const std::vector<SourceLine> program = {
                 {0, {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "ref"}}}};
-        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Unknown label 'ref'"));
     }
 
     SECTION("Test Unknown Duplicate Label") {
         Parser parser{};
         const std::vector<SourceLine> program = {{0, {{TokenType::LABEL_DEF, "label"}}},
                                                  {0, {{TokenType::LABEL_DEF, "label"}}}};
-        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Duplicate label 'label'"));
     }
 
     SECTION("Test Empty Allocation Directive") {
         Parser parser{};
         const std::vector<SourceLine> program = {{0, {{TokenType::ALLOC_DIRECTIVE, "word"}}}};
-        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+        REQUIRE_THROWS_MATCHES(
+                parser.parse(program), MasmSyntaxError,
+                Catch::Matchers::Message("Directive 'word' expects at least one argument"));
     }
 
     SECTION("Test Unsupported Directive") {
         Parser parser{};
         const std::vector<SourceLine> program = {
                 {0, {{TokenType::ALLOC_DIRECTIVE, "eeby"}, {TokenType::IMMEDIATE, "1"}}}};
-        REQUIRE_THROWS_AS(parser.parse(program), MasmSyntaxError);
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Unsupported directive 'eeby'"));
     }
 }
 

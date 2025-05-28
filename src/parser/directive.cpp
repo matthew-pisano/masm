@@ -13,37 +13,39 @@
 void validateAllocDirective(const Token& dirToken, const std::vector<Token>& args) {
     const std::string dirName = dirToken.value;
     if (args.empty())
-        throw std::runtime_error("Directive " + dirName + " expects at least one argument");
+        throw std::runtime_error("Directive '" + dirName + "' expects at least one argument");
 
     const std::vector<std::string> singleArgDirectives = {"asciiz", "ascii", "space", "align"};
     if (std::ranges::find(singleArgDirectives, dirName) != singleArgDirectives.end() &&
         args.size() != 1)
-        throw std::runtime_error(dirName + " directive expects exactly one argument");
+        throw std::runtime_error("Directive '" + dirName + "' expects exactly one argument");
 
 
     if (dirName == "align") {
         const std::string val = args[0].value;
         if (args[0].type != TokenType::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) < 0 ||
             std::stoi(val) > 3)
-            throw std::runtime_error(dirName +
-                                     " directive expects an integer argument between 0 and 3");
+            throw std::runtime_error("Directive '" + dirName +
+                                     "' expects an integer argument between 0 and 3");
     } else if (dirName == "asciiz" || dirName == "ascii") {
         if (args[0].type != TokenType::STRING)
-            throw std::runtime_error(dirName + " directive expects a string argument");
+            throw std::runtime_error("Directive '" + dirName + "' expects a string argument");
     } else if (dirName == "byte" || dirName == "half" || dirName == "word") {
         for (const Token& arg : args)
             if (arg.type != TokenType::IMMEDIATE || !isSignedInteger(arg.value))
-                throw std::runtime_error(dirName + " directive expects integers as arguments");
+                throw std::runtime_error("Directive '" + dirName +
+                                         "' expects integers as arguments");
     } else if (dirName == "double" || dirName == "float") {
         for (const Token& arg : args)
             if (arg.type != TokenType::IMMEDIATE || !isSignedFloat(arg.value))
-                throw std::runtime_error(dirName + " directive expects floats as arguments");
+                throw std::runtime_error("Directive '" + dirName + "' expects floats as arguments");
     } else if (dirName == "space") {
         const std::string val = args[0].value;
         if (args[0].type != TokenType::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) <= 0)
-            throw std::runtime_error(dirName + " directive expects a positive integer argument");
+            throw std::runtime_error("Directive '" + dirName +
+                                     "' expects a positive integer argument");
     } else
-        throw std::runtime_error("Unsupported directive " + dirName);
+        throw std::runtime_error("Unsupported directive '" + dirName + "'");
 }
 
 

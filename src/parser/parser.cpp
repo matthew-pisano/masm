@@ -73,7 +73,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
         case TokenType::LABEL_DEF:
             break;
         default:
-            throw std::runtime_error("Encountered unexpected token " + firstToken.value);
+            throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
     }
 
     if (memBytes.empty())

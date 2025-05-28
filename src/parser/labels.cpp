@@ -17,7 +17,7 @@ void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
     for (Token& arg : instructionArgs)
         if (arg.type == TokenType::LABEL_REF) {
             if (!labelMap.contains(arg.value))
-                throw std::runtime_error("Unknown label " + arg.value);
+                throw std::runtime_error("Unknown label '" + arg.value + "'");
             arg = {TokenType::IMMEDIATE, std::to_string(labelMap[arg.value])};
         }
 }
@@ -73,7 +73,7 @@ void LabelMap::populateLabelMap(const std::vector<SourceLine>& tokens) {
             case TokenType::LABEL_DEF: {
                 if (labelMap.contains(firstToken.value) ||
                     std::ranges::find(pendingLabels, firstToken.value) != pendingLabels.end())
-                    throw std::runtime_error("Duplicate label " + firstToken.value);
+                    throw std::runtime_error("Duplicate label '" + firstToken.value + "'");
                 pendingLabels.push_back(firstToken.value);
                 break;
             }

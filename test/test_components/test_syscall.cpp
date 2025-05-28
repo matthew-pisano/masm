@@ -3,6 +3,8 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "exceptions.h"
 #include "interpreter/interpreter.h"
@@ -85,7 +87,10 @@ TEST_CASE("Test Heap Allocation Syscall") {
 }
 
 
-TEST_CASE("Test Exit Syscall") { REQUIRE_THROWS_AS(exitSyscall(), ExecExit); }
+TEST_CASE("Test Exit Syscall") {
+    REQUIRE_THROWS_MATCHES(exitSyscall(), ExecExit,
+                           Catch::Matchers::Message("Program exited with code 0"));
+}
 
 
 TEST_CASE("Test Print Char Syscall") {
@@ -114,7 +119,8 @@ TEST_CASE("Test Exit Value Syscall") {
     State state;
     state.registers[Register::A0] = exitCode;
 
-    REQUIRE_THROWS_AS(exitValSyscall(state), ExecExit);
+    REQUIRE_THROWS_MATCHES(exitValSyscall(state), ExecExit,
+                           Catch::Matchers::Message("Program exited with code 42"));
     try {
         exitValSyscall(state);
     } catch (const ExecExit& e) {
@@ -160,7 +166,8 @@ TEST_CASE("Test Negative Sleep Syscall") {
     State state;
     state.registers[Register::A0] = -500;
 
-    REQUIRE_THROWS_AS(sleepSyscall(state), MasmRuntimeError);
+    REQUIRE_THROWS_MATCHES(sleepSyscall(state), MasmRuntimeError,
+                           Catch::Matchers::Message("Negative sleep time: -500"));
 }
 
 

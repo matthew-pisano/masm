@@ -14,26 +14,38 @@
 
 void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap) {
     // Stores globals that have not yet been matched to declarations
-    std::vector<std::string> globals;
+    std::vector<std::pair<std::string, size_t>> globals;
     for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
         collectGlobals(globals, programFile.second);
+
+    // Create vector of just names for globals
+    std::vector<std::string> globalNames = {};
+    globalNames.reserve(globals.size());
+    for (const std::pair<std::string, size_t>& global : globals)
+        globalNames.push_back(global.first);
 
     std::vector undeclaredGlobals(globals);
     // Mangle labels and resolve globals
     for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap) {
         for (SourceLine& line : programFile.second) {
             // Mangle the labels in the line
-            std::string lineDeclaration = mangleLabelsInLine(globals, line, programFile.first);
+            std::string lineDeclaration = mangleLabelsInLine(globalNames, line, programFile.first);
             // If a label was declared, add it to the list of found declarations
             if (!lineDeclaration.empty())
-                std::erase(undeclaredGlobals, lineDeclaration);
+                for (size_t i = 0; i < undeclaredGlobals.size(); i++) {
+                    if (std::get<0>(undeclaredGlobals[i]) == lineDeclaration) {
+                        undeclaredGlobals.erase(undeclaredGlobals.begin() + i);
+                        break;
+                    }
+                }
         }
     }
 
     // If any globals were declared without a matching label declaration
     if (!undeclaredGlobals.empty())
-        throw MasmSyntaxError("Global label " + undeclaredGlobals[0] +
-                              " referenced without declaration");
+        throw MasmSyntaxError("Global label '" + std::get<0>(undeclaredGlobals[0]) +
+                                      "' referenced without declaration",
+                              std::get<1>(undeclaredGlobals[0]));
 }
 
 
@@ -57,7 +69,7 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 }
 
 
-void Postprocessor::collectGlobals(std::vector<std::string>& globals,
+void Postprocessor::collectGlobals(std::vector<std::pair<std::string, size_t>>& globals,
                                    std::vector<SourceLine>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
@@ -68,7 +80,7 @@ void Postprocessor::collectGlobals(std::vector<std::string>& globals,
         if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::LABEL_REF)
             throw MasmSyntaxError("Invalid global label declaration", line.lineno);
 
-        globals.push_back(line.tokens[1].value);
+        globals.emplace_back(line.tokens[1].value, line.lineno);
         tokenizedFile.erase(tokenizedFile.begin() + i);
         i--;
     }
@@ -213,7 +225,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                 continue;
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
-                throw MasmSyntaxError("Invalid macro parameter " + token.value,
+                throw MasmSyntaxError("Invalid macro parameter '" + token.value + "'",
                                       tokenizedFile.at(pos).lineno);
             const size_t paramIdx = std::distance(macro.params.begin(), it);
             // Replace token with argument
