@@ -18,7 +18,8 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
     MemLayout layout;
 
     MemSection currSection = MemSection::TEXT;
-    layout[MemSection::TEXT] = {};
+    layout.data[MemSection::TEXT] = {};
+    layout.lineMarkers[MemSection::TEXT] = {};
     try {
         // Resolve all labels before parsing instructions
         labelMap.populateLabelMap(tokenLines);
@@ -43,29 +44,30 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
 
 void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine) {
     // Get next open location in memory
-    uint32_t memLoc = memSectionOffset(currSection) + layout[currSection].size();
+    uint32_t memLoc = memSectionOffset(currSection) + layout.data[currSection].size();
 
     const Token& firstToken = tokenLine.tokens[0];
     const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
+    std::vector<std::byte> memBytes;
     switch (firstToken.type) {
         case TokenType::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
-            if (!layout.contains(currSection))
-                layout[currSection] = {};
+            if (!layout.data.contains(currSection)) {
+                layout.data[currSection] = {};
+                layout.lineMarkers[currSection] = {};
+            }
             break;
         }
         case TokenType::ALLOC_DIRECTIVE: {
             std::vector<std::byte> directiveBytes = parseAllocDirective(memLoc, firstToken, args);
-            layout[currSection].insert(layout[currSection].end(), directiveBytes.begin(),
-                                       directiveBytes.end());
+            memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
             break;
         }
         case TokenType::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
-            layout[currSection].insert(layout[currSection].end(), instrBytes.begin(),
-                                       instrBytes.end());
+            memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
             break;
         }
         case TokenType::LABEL_DEF:
@@ -73,6 +75,16 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
         default:
             throw std::runtime_error("Encountered unexpected token " + firstToken.value);
     }
+
+    if (memBytes.empty())
+        return;
+
+    layout.data[currSection].insert(layout.data[currSection].end(), memBytes.begin(),
+                                    memBytes.end());
+
+    if (isSectionExecutable(currSection))
+        layout.lineMarkers[currSection].insert(layout.lineMarkers[currSection].end(),
+                                               memBytes.size(), tokenLine.lineno);
 }
 
 

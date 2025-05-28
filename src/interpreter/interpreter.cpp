@@ -4,6 +4,7 @@
 
 #include "interpreter/interpreter.h"
 
+#include <cstring>
 #include <sstream>
 #include <stdexcept>
 
@@ -132,7 +133,9 @@ void Interpreter::step() {
     } catch (ExecExit&) {
         throw;
     } catch (std::runtime_error& e) {
-        throw MasmRuntimeError(e.what(), state.registers[Register::PC] - 4);
+        std::string what = e.what();
+        what += "(line " + std::to_string(state.memory.getByteSource(pc - 4)) + ")";
+        throw MasmRuntimeError(what, pc - 4);
     }
 }
 

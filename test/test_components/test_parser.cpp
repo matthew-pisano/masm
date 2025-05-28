@@ -35,7 +35,7 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
             i += 1;
             continue;
         }
-        expectedMem[currSection].push_back(parsedBytes[i]);
+        expectedMem.data[currSection].push_back(parsedBytes[i]);
     }
 
     std::vector<RawFile> sourceLines;
@@ -47,11 +47,11 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
 
     Parser parser{};
     MemLayout actualMem = parser.parse(program);
-    REQUIRE(expectedMem.size() == actualMem.size());
-    for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem) {
-        REQUIRE(actualMem.contains(pair.first));
+    REQUIRE(expectedMem.data.size() == actualMem.data.size());
+    for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem.data) {
+        REQUIRE(actualMem.data.contains(pair.first));
 
-        REQUIRE(pair.second == actualMem[pair.first]);
+        REQUIRE(pair.second == actualMem.data[pair.first]);
     }
 }
 

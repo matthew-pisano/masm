@@ -90,9 +90,20 @@ bool Memory::isValid(const uint32_t index) const { return memory.contains(index)
 
 
 void Memory::loadProgram(const MemLayout& layout) {
-    for (const std::pair<MemSection, std::vector<std::byte>> pair : layout)
-        for (size_t i = 0; i < pair.second.size(); i++)
-            memory[memSectionOffset(pair.first) + i] = pair.second[i];
+    for (const std::pair<MemSection, std::vector<std::byte>> pair : layout.data)
+        for (size_t i = 0; i < pair.second.size(); i++) {
+            uint32_t memOffset = memSectionOffset(pair.first) + i;
+            memory[memOffset] = pair.second[i];
+            if (isSectionExecutable(pair.first))
+                byteSources[memOffset] = layout.lineMarkers.at(pair.first).at(i);
+        }
+}
+
+
+size_t Memory::getByteSource(const uint32_t index) const {
+    if (!byteSources.contains(index))
+        return 0;
+    return byteSources.at(index);
 }
 
 
@@ -135,4 +146,9 @@ uint32_t memSectionOffset(const MemSection section) {
     }
     // Should never be reached
     throw std::runtime_error("Unknown memory section " + std::to_string(static_cast<int>(section)));
+}
+
+
+bool isSectionExecutable(const MemSection section) {
+    return section == MemSection::TEXT || section == MemSection::KTEXT;
 }

@@ -25,9 +25,19 @@ enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA, MMIO };
 
 
 /**
- * A type alias for an object containing memory allocations from the parser
+ * Struct representing the memory layout of a program along with the locations in the source files
  */
-using MemLayout = std::map<MemSection, std::vector<std::byte>>;
+struct MemLayout {
+    /**
+     * The memory sections and their associated data
+     */
+    std::map<MemSection, std::vector<std::byte>> data;
+
+    /**
+     * The source lines associated with each byte of memory
+     */
+    std::map<MemSection, std::vector<size_t>> lineMarkers;
+};
 
 
 /**
@@ -38,6 +48,11 @@ class Memory {
      * The main memory map between indices and bytes
      */
     std::unordered_map<uint32_t, std::byte> memory;
+
+    /**
+     * The main memory map between indices and their original sources in the source code
+     */
+    std::unordered_map<uint32_t, size_t> byteSources;
 
     /**
      * Gets the byte at the given address or zero if not allocated (without triggering side effects)
@@ -109,10 +124,17 @@ public:
     bool isValid(uint32_t index) const;
 
     /**
-     * Loads a program and initial static data into memory
+     * Loads a program and initial static data into memory, along with line markers for loaded data
      * @param layout The memory layout to load
      */
     void loadProgram(const MemLayout& layout);
+
+    /**
+     * Gets the source of the byte at the given index or zero if not allocated
+     * @param index The index to get the source for
+     * @return The source line number of the byte at the given index
+     */
+    size_t getByteSource(uint32_t index) const;
 
     std::byte operator[](uint32_t index) const;
     std::byte& operator[](uint32_t index);
@@ -135,5 +157,13 @@ MemSection nameToMemSection(const std::string& name);
  * @throw runtime_error When an invalid memory section is passed
  */
 uint32_t memSectionOffset(MemSection section);
+
+
+/**
+ * Checks if a memory section is executable
+ * @param section The section of memory to check
+ * @return True if the section is executable, false otherwise
+ */
+bool isSectionExecutable(MemSection section);
 
 #endif // MEMORY_H
