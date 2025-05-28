@@ -19,7 +19,7 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
 
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
-    layout.byteSources[MemSection::TEXT] = {};
+    layout.debugInfo[MemSection::TEXT] = {};
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(tokenLines);
 
@@ -52,7 +52,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
             currSection = nameToMemSection(firstToken.value);
             if (!layout.data.contains(currSection)) {
                 layout.data[currSection] = {};
-                layout.byteSources[currSection] = {};
+                layout.debugInfo[currSection] = {};
             }
             break;
         }
@@ -79,10 +79,10 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceL
                                     memBytes.end());
 
     if (isSectionExecutable(currSection)) {
-        const std::shared_ptr<SourceLine> tokenLinePtr = std::make_shared<SourceLine>(
-                tokenLine.filename, tokenLine.lineno, tokenLine.tokens);
-        layout.byteSources[currSection].insert(layout.byteSources[currSection].end(),
-                                               memBytes.size(), tokenLinePtr);
+        const std::shared_ptr<SourceLocator> tokenLinePtr =
+                std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
+        layout.debugInfo[currSection].insert(layout.debugInfo[currSection].end(), memBytes.size(),
+                                             tokenLinePtr);
     }
 }
 

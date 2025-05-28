@@ -43,16 +43,16 @@ struct State {
     HeapAllocator heapAllocator;
 
     /**
-     * The main memory map between indices and their original sources in the source code
+     * The main memory map between indices and the locators for their source code
      */
-    std::unordered_map<uint32_t, std::shared_ptr<SourceLine>> byteSources;
+    std::unordered_map<uint32_t, std::shared_ptr<SourceLocator>> debugInfo;
 
     /**
-     * Gets the source line for the given address
+     * Gets the source line locator for the given address
      * @param addr The address to get the source line for
-     * @return The source line corresponding to the given address
+     * @return The source line locator corresponding to the given address
      */
-    SourceLine getSourceLine(uint32_t addr) const;
+    SourceLocator getDebugInfo(uint32_t addr) const;
 
     /**
      * Loads a program and initial static data into memory, along with line markers for loaded data

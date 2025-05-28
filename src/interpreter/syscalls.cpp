@@ -115,7 +115,7 @@ void execSyscall(const IOMode ioMode, State& state, std::istream& istream, std::
         throw;
     } catch (std::runtime_error& e) {
         const int32_t pc = state.registers[Register::PC] - 4;
-        const SourceLine syscallSrc = state.getSourceLine(pc);
+        const SourceLocator syscallSrc = state.getDebugInfo(pc);
         throw MasmRuntimeError(e.what(), pc, syscallSrc.filename, syscallSrc.lineno);
     }
 }

@@ -28,6 +28,15 @@ enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA, MMIO };
 
 
 /**
+ * Struct representing the location of a source line in the program
+ */
+struct SourceLocator {
+    std::string filename;
+    size_t lineno;
+};
+
+
+/**
  * Struct representing the memory layout of a program along with the locations in the source files
  */
 struct MemLayout {
@@ -37,9 +46,9 @@ struct MemLayout {
     std::map<MemSection, std::vector<std::byte>> data;
 
     /**
-     * The source lines associated with each byte of memory
+     * The source line locators associated with each byte of memory
      */
-    std::map<MemSection, std::vector<std::shared_ptr<SourceLine>>> byteSources;
+    std::map<MemSection, std::vector<std::shared_ptr<SourceLocator>>> debugInfo;
 };
 
 

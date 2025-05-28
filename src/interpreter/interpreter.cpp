@@ -14,7 +14,7 @@
 #include "parser/instruction.h"
 
 
-SourceLine State::getSourceLine(const uint32_t addr) const { return *byteSources.at(addr); }
+SourceLocator State::getDebugInfo(const uint32_t addr) const { return *debugInfo.at(addr); }
 
 
 void State::loadProgram(const MemLayout& layout) {
@@ -23,9 +23,9 @@ void State::loadProgram(const MemLayout& layout) {
             uint32_t memOffset = memSectionOffset(pair.first) + i;
             memory[memOffset] = pair.second[i];
             if (isSectionExecutable(pair.first)) {
-                const std::shared_ptr<SourceLine> sourceLine =
-                        layout.byteSources.at(pair.first).at(i);
-                byteSources[memOffset] = sourceLine;
+                const std::shared_ptr<SourceLocator> sourceLine =
+                        layout.debugInfo.at(pair.first).at(i);
+                debugInfo[memOffset] = sourceLine;
             }
         }
 }
@@ -111,7 +111,7 @@ void Interpreter::step() {
     int32_t& pc = state.registers[Register::PC];
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
-    const SourceLine pcSrc = state.getSourceLine(pc);
+    const SourceLocator pcSrc = state.getDebugInfo(pc);
     if (pc >= TEXT_SEC_END)
         throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
     const int32_t instruction = state.memory.wordAt(pc);
