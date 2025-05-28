@@ -52,7 +52,8 @@ class MasmRuntimeError final : public MasmException {
      */
     static std::string constructMessage(const std::string& message, const size_t addr,
                                         const std::string& filename, const size_t lineno) {
-        return std::format("Runtime error at {} ({}:{}) -> {}", addr, filename, lineno, message);
+        std::string hexAddr = std::format("0x{:08X}", addr);
+        return std::format("Runtime error at {} ({}:{}) -> {}", hexAddr, filename, lineno, message);
     }
 
 public:
