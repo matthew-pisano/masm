@@ -47,10 +47,6 @@ int Interpreter::interpret(const MemLayout& layout) {
 
     while (true) {
         try {
-            if (ioMode == IOMode::MMIO) {
-                readMMIO();
-                writeMMIO();
-            }
             step();
         } catch (ExecExit& e) {
             ostream << "\n" << e.what() << std::endl;
@@ -108,6 +104,12 @@ void Interpreter::writeMMIO() {
 
 
 void Interpreter::step() {
+    // Update MMIO registers
+    if (ioMode == IOMode::MMIO) {
+        readMMIO();
+        writeMMIO();
+    }
+
     int32_t& pc = state.registers[Register::PC];
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
