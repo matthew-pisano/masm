@@ -101,8 +101,9 @@ PYBIND11_MODULE(pymasm, m) {
     // Binding for the SourceLine struct
     py::class_<SourceLine>(tokenizer_module, "SourceLine")
             .def(py::init<>())
-            .def(py::init<size_t, const std::vector<Token>&>(), py::arg("lineno"),
-                 py::arg("tokens"))
+            .def(py::init<const std::string&, size_t, const std::vector<Token>&>(),
+                 py::arg("filename"), py::arg("lineno"), py::arg("tokens"))
+            .def_readwrite("filename", &SourceLine::filename)
             .def_readwrite("lineno", &SourceLine::lineno)
             .def_readwrite("tokens", &SourceLine::tokens)
             .def("__repr__", [](const SourceLine& sl) {
@@ -114,8 +115,8 @@ PYBIND11_MODULE(pymasm, m) {
                 if (!concatLine.empty())
                     concatLine.pop_back();
 
-                return "<SourceLine(lineno=" + std::to_string(sl.lineno) + ", tokens='" +
-                       concatLine + "')>";
+                return "<SourceLine(filename='" + sl.filename +
+                       "', lineno=" + std::to_string(sl.lineno) + ", tokens=[" + concatLine + "]>";
             });
 
     // Binding for the Tokenizer class
@@ -138,7 +139,13 @@ PYBIND11_MODULE(pymasm, m) {
             .value("KDATA", MemSection::KDATA)
             .value("MMIO", MemSection::MMIO);
 
-    py::bind_map<MemLayout>(parser_module, "MemLayout", "Memory layout mapping");
+    // Binding for the MemLayout struct
+    py::class_<MemLayout>(tokenizer_module, "MemLayout")
+            .def(py::init<>())
+            .def_readwrite("data", &MemLayout::data)
+            .def("__repr__", [](const MemLayout& ml) {
+                return "<MemLayout(data size=" + std::to_string(ml.data.size()) + ")>";
+            });
 
     // Binding for the Parser Class
     py::class_<Parser>(parser_module, "Parser")

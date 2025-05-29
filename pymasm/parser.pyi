@@ -1,7 +1,7 @@
 """Masm Parser"""
 
 from enum import Enum
-from typing import Dict, Any, List
+from typing import Dict, List
 
 from .tokenizer import SourceLine
 
@@ -17,21 +17,17 @@ class MemSection(Enum):
     MMIO = ...
 
 
-# MemLayout is a dictionary-like mapping
-class MemLayout(Dict[MemSection, Any]):
-    """Memory layout mapping"""
+class MemLayout:
+    """Memory layout for MIPS assembly programs"""
+
+    data: Dict[MemSection, bytes]
+    """A dictionary mapping memory sections to bytes"""
 
     def __init__(self) -> None: ...
 
-    def __getitem__(self, key: MemSection) -> Any: ...
+    def __init__(self, data: Dict[MemSection, bytes]) -> None: ...
 
-    def __setitem__(self, key: MemSection, value: Any) -> None: ...
-
-    def __delitem__(self, key: MemSection) -> None: ...
-
-    def __iter__(self) -> Any: ...
-
-    def __len__(self) -> int: ...
+    def __repr__(self) -> str: ...
 
 
 class Parser:

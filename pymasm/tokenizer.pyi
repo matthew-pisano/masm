@@ -64,6 +64,9 @@ class Token:
 class SourceLine:
     """Represents a line of tokenized source code with its line number and tokens"""
 
+    filename: str
+    """The name of the source file this line belongs to"""
+
     lineno: int
     """The line number of the source code line, starting from 1"""
 
@@ -72,7 +75,7 @@ class SourceLine:
 
     def __init__(self) -> None: ...
 
-    def __init__(self, lineno: int, tokens: List[Token]) -> None: ...
+    def __init__(self, filename: str, lineno: int, tokens: List[Token]) -> None: ...
 
     def __repr__(self) -> str: ...
 
