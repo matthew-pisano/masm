@@ -164,6 +164,8 @@ PYBIND11_MODULE(pymasm_core, m) {
             // Constructor that accepts Python file-like objects
             .def(py::init<IOMode, py::object, py::object>())
             .def("step", &InterpreterWrapper::step, "Executes a single instruction")
+            .def("init_program", &InterpreterWrapper::initProgram, py::arg("layout"),
+                 "Initializes the interpreter with the given memory layout")
             .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
 
