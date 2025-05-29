@@ -33,12 +33,12 @@ std::string LabelMap::lookupLabel(const uint32_t address) const {
 }
 
 
-void LabelMap::populateLabelMap(const std::vector<SourceLine>& tokens) {
+void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
     MemSection currSection = MemSection::TEXT;
     std::map<MemSection, uint32_t> memSizes = {{currSection, 0}};
     std::vector<std::string> pendingLabels;
 
-    for (const SourceLine& line : tokens) {
+    for (const LineTokens& line : tokens) {
         if (line.tokens.empty())
             continue;
 

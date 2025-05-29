@@ -9,13 +9,12 @@
 #include <vector>
 
 /**
- * Loads a file and returns its contents as a vector of strings, where each string is a line in the
- * file.
+ * Loads a file and returns its contents as a string
  * @param fileName The name of the file to load
- * @return A vector of the lines within the given file
+ * @return A string containing the contents of the file
  * @throw runtime_error When a file fails to open
  */
-std::vector<std::string> readFileLines(const std::string& fileName);
+std::string readFile(const std::string& fileName);
 
 
 /**

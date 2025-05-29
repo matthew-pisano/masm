@@ -43,7 +43,7 @@ public:
      * @param tokens The program tokens
      * @throw MasmSyntaxError When a duplicate label definition is detected
      */
-    void populateLabelMap(const std::vector<SourceLine>& tokens);
+    void populateLabelMap(const std::vector<LineTokens>& tokens);
 };
 
 #endif // LABELS_H

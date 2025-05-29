@@ -71,16 +71,15 @@ PYBIND11_MODULE(pymasm_core, m) {
             .value("STRING", TokenType::STRING)
             .value("MACRO_PARAM", TokenType::MACRO_PARAM);
 
-    // Binding for the RawFile struct
-    py::class_<RawFile>(tokenizer_module, "RawFile")
+    // Binding for the SourceFile struct
+    py::class_<SourceFile>(tokenizer_module, "SourceFile")
             .def(py::init<>())
-            .def(py::init<const std::string&, const std::vector<std::string>&>(), py::arg("name"),
-                 py::arg("lines"))
-            .def_readwrite("name", &RawFile::name)
-            .def_readwrite("lines", &RawFile::lines)
-            .def("__repr__", [](const RawFile& rf) {
-                return "<RawFile(name='" + rf.name + "', lines=" + std::to_string(rf.lines.size()) +
-                       ")>";
+            .def(py::init<const std::string&, const std::string&>(), py::arg("name"),
+                 py::arg("source"))
+            .def_readwrite("name", &SourceFile::name)
+            .def_readwrite("source", &SourceFile::source)
+            .def("__repr__", [](const SourceFile& sf) {
+                return "<SourceFile(name='" + sf.name + "', source=" + sf.source + ")>";
             });
 
     // Binding for the Token struct
@@ -98,25 +97,25 @@ PYBIND11_MODULE(pymasm_core, m) {
             .def(py::self == py::self) // Bind the equality operator
             .def(py::self != py::self); // Bind the inequality operator
 
-    // Binding for the SourceLine struct
-    py::class_<SourceLine>(tokenizer_module, "SourceLine")
+    // Binding for the LineTokens struct
+    py::class_<LineTokens>(tokenizer_module, "LineTokens")
             .def(py::init<>())
             .def(py::init<const std::string&, size_t, const std::vector<Token>&>(),
                  py::arg("filename"), py::arg("lineno"), py::arg("tokens"))
-            .def_readwrite("filename", &SourceLine::filename)
-            .def_readwrite("lineno", &SourceLine::lineno)
-            .def_readwrite("tokens", &SourceLine::tokens)
-            .def("__repr__", [](const SourceLine& sl) {
+            .def_readwrite("filename", &LineTokens::filename)
+            .def_readwrite("lineno", &LineTokens::lineno)
+            .def_readwrite("tokens", &LineTokens::tokens)
+            .def("__repr__", [](const LineTokens& lt) {
                 std::string concatLine;
-                for (const Token& token : sl.tokens)
+                for (const Token& token : lt.tokens)
                     concatLine += token.value + " ";
 
                 // Remove trailing space
                 if (!concatLine.empty())
                     concatLine.pop_back();
 
-                return "<SourceLine(filename='" + sl.filename +
-                       "', lineno=" + std::to_string(sl.lineno) + ", tokens=[" + concatLine + "]>";
+                return "<LineTokens(filename='" + lt.filename +
+                       "', lineno=" + std::to_string(lt.lineno) + ", tokens=[" + concatLine + "]>";
             });
 
     // Binding for the Tokenizer class
@@ -124,9 +123,9 @@ PYBIND11_MODULE(pymasm_core, m) {
             // Constructors
             .def(py::init<>())
             .def_static("tokenize_file", &Tokenizer::tokenizeFile, py::arg("raw_file"),
-                        "Tokenizes the given file and returns a vector of SourceLine objects")
+                        "Tokenizes the given file and returns a vector of LineTokens objects")
             .def_static("tokenize", &Tokenizer::tokenize, py::arg("raw_files"),
-                        "Tokenizes the given raw files and returns a vector of SourceLine objects");
+                        "Tokenizes the given raw files and returns a vector of LineTokens objects");
 
     // Parser Bindings //
 

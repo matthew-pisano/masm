@@ -21,11 +21,20 @@ std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
 }
 
 
-RawFile makeRawFile(const std::vector<std::string>& lines) { return {"a.asm", lines}; }
+SourceFile makeRawFile(const std::vector<std::string>& lines) {
+    std::string source;
+    for (const std::string& line : lines) {
+        if (!source.empty())
+            source += '\n';
+        source += line;
+    }
+
+    return {"a.asm", source};
+}
 
 
 void validateTokenLines(const std::vector<std::vector<Token>>& expectedTokens,
-                        const std::vector<SourceLine>& actualTokens) {
+                        const std::vector<LineTokens>& actualTokens) {
     if (expectedTokens.size() != actualTokens.size())
         throw std::runtime_error("Expected " + std::to_string(expectedTokens.size()) +
                                  " tokens, but got " + std::to_string(actualTokens.size()));

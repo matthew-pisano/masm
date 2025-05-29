@@ -14,7 +14,7 @@
 #include "utils.h"
 
 
-MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
+MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
     MemLayout layout;
 
     MemSection currSection = MemSection::TEXT;
@@ -38,7 +38,7 @@ MemLayout Parser::parse(const std::vector<SourceLine>& tokenLines) {
 }
 
 
-void Parser::parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine) {
+void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine) {
     // Get next open location in memory
     uint32_t memLoc = memSectionOffset(currSection) + layout.data[currSection].size();
 

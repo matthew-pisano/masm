@@ -13,8 +13,8 @@
 
 
 TEST_CASE("Test lb Instruction") {
-    const RawFile rawFile = makeRawFile({"lb $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lb $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lb"},
@@ -47,8 +47,8 @@ TEST_CASE("Test lb Instruction") {
 
 
 TEST_CASE("Test lbu Instruction") {
-    const RawFile rawFile = makeRawFile({"lbu $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lbu $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lbu"},
@@ -81,8 +81,8 @@ TEST_CASE("Test lbu Instruction") {
 
 
 TEST_CASE("Test lh Instruction") {
-    const RawFile rawFile = makeRawFile({"lh $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lh $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lh"},
@@ -115,8 +115,8 @@ TEST_CASE("Test lh Instruction") {
 
 
 TEST_CASE("Test lhu Instruction") {
-    const RawFile rawFile = makeRawFile({"lhu $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lhu $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lhu"},
@@ -149,8 +149,8 @@ TEST_CASE("Test lhu Instruction") {
 
 
 TEST_CASE("Test lw Instruction") {
-    const RawFile rawFile = makeRawFile({"lw $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lw $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
@@ -183,8 +183,8 @@ TEST_CASE("Test lw Instruction") {
 
 
 TEST_CASE("Test lui Instruction") {
-    const RawFile rawFile = makeRawFile({"lui $t0, 100"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"lui $t0, 100"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lui"},
@@ -213,8 +213,8 @@ TEST_CASE("Test lui Instruction") {
 
 
 TEST_CASE("Test sb Instruction") {
-    const RawFile rawFile = makeRawFile({"sb $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"sb $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sb"},
@@ -247,8 +247,8 @@ TEST_CASE("Test sb Instruction") {
 
 
 TEST_CASE("Test sh Instruction") {
-    const RawFile rawFile = makeRawFile({"sh $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"sh $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sh"},
@@ -281,8 +281,8 @@ TEST_CASE("Test sh Instruction") {
 
 
 TEST_CASE("Test sw Instruction") {
-    const RawFile rawFile = makeRawFile({"sw $t0, 4($t1)"});
-    std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"sw $t0, 4($t1)"});
+    std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sw"},

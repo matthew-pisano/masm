@@ -8,19 +8,19 @@
 #include <stdexcept>
 
 
-std::vector<std::string> readFileLines(const std::string& fileName) {
+std::string readFile(const std::string& fileName) {
     std::ifstream inputFile;
-    std::vector<std::string> result;
+    std::string result;
 
     inputFile.open(fileName);
 
     if (!inputFile.is_open())
         throw std::runtime_error("Could not open file " + fileName);
 
-    std::string line;
-    // Read data from the file line by line
-    while (getline(inputFile, line))
-        result.push_back(line);
+    // Read data from the file character by character
+    char ch;
+    while (inputFile.get(ch))
+        result.push_back(ch);
 
     // Close the file
     inputFile.close();

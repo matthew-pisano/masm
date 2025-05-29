@@ -23,8 +23,8 @@ main:
 
 def main():
     # Load in an assembly file
-    mips_lines = hello_world_asm().split("\n")
-    mips_file = tokenizer.RawFile("hello_world.asm", mips_lines)
+    mips_source = hello_world_asm()
+    mips_file = tokenizer.SourceFile("hello_world.asm", mips_source)
 
     # Tokenize the program
     program = tokenizer.Tokenizer.tokenize([mips_file])

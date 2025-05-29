@@ -100,7 +100,7 @@ class Parser {
      * @param tokenLine The line of tokens to parse
      * @throw runtime_error When an error is encountered during parsing
      */
-    void parseLine(MemLayout& layout, MemSection& currSection, const SourceLine& tokenLine);
+    void parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine);
 
 protected:
     /**
@@ -115,7 +115,7 @@ public:
      * @return The memory allocations associated with the program
      * @throw MasmSyntaxError When an error is encountered during parsing
      */
-    MemLayout parse(const std::vector<SourceLine>& tokenLines);
+    MemLayout parse(const std::vector<LineTokens>& tokenLines);
 };
 
 #endif // PARSER_H

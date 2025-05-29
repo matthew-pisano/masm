@@ -6,7 +6,6 @@
 #define TOKENIZER_H
 
 #include <array>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -40,9 +39,19 @@ enum class TokenType {
 std::string tokenTypeToString(TokenType t);
 
 
-struct RawFile {
+/**
+ * Class to represent a raw file containing source code
+ */
+struct SourceFile {
+    /**
+     * The name of the file, used for error reporting and debugging
+     */
     std::string name;
-    std::vector<std::string> lines;
+
+    /**
+     * The source code of the file
+     */
+    std::string source;
 };
 
 
@@ -68,16 +77,16 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
 
 
 /**
- * Class to represent a line of source code
+ * Class to represent a tokenized line of source code
  */
-struct SourceLine {
+struct LineTokens {
     std::string filename;
     size_t lineno;
     std::vector<Token> tokens;
 };
 
-bool operator==(const SourceLine& lhs, const SourceLine& rhs);
-bool operator!=(const SourceLine& lhs, const SourceLine& rhs);
+bool operator==(const LineTokens& lhs, const LineTokens& rhs);
+bool operator!=(const LineTokens& lhs, const LineTokens& rhs);
 
 
 /**
@@ -96,35 +105,36 @@ class Tokenizer {
      * @param tokens The vector of source code lines to add the current token to
      */
     static void terminateToken(char c, TokenType& currentType, std::string& currentToken,
-                               std::vector<SourceLine>& tokens);
+                               std::vector<LineTokens>& tokens);
 
     /**
      * A helper function that tokenizes single lines.  Multiple token lines may be produced
-     * @param rawLine The line of source code to tokenize
+     * @param sourceLine The line of source code to tokenize
      * @param filename The name of the source file
      * @param lineno The line number of the source code
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating line
      */
-    static std::vector<SourceLine> tokenizeLine(const std::string& rawLine,
+    static std::vector<LineTokens> tokenizeLine(const std::string& sourceLine,
                                                 const std::string& filename, size_t lineno);
 
 public:
     /**
      * Tokenizes incoming source code lines into parsable tokens
-     * @param rawFile The lines of source code to tokenize
+     * @param sourceFile The lines of source code to tokenize
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
      */
-    static std::vector<SourceLine> tokenizeFile(const RawFile& rawFile);
+    static std::vector<LineTokens> tokenizeFile(const SourceFile& sourceFile);
 
     /**
      * Tokenizes and post-processes source code lines from multiple files into parsable tokens
-     * @param rawFiles The lines of source code to tokenize
+     * @param sourceFiles The lines of source code to tokenize
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
      */
-    [[nodiscard]] static std::vector<SourceLine> tokenize(const std::vector<RawFile>& rawFiles);
+    [[nodiscard]] static std::vector<LineTokens>
+    tokenize(const std::vector<SourceFile>& sourceFiles);
 };
 
 #endif // TOKENIZER_H

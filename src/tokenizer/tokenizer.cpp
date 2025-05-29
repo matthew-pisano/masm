@@ -24,10 +24,10 @@ constexpr std::array<const char*, 14> tokenTypeNames = {
         "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
 
 
-bool operator==(const SourceLine& lhs, const SourceLine& rhs) {
+bool operator==(const LineTokens& lhs, const LineTokens& rhs) {
     return lhs.filename == rhs.filename && lhs.lineno == rhs.lineno;
 }
-bool operator!=(const SourceLine& lhs, const SourceLine& rhs) { return !(lhs == rhs); }
+bool operator!=(const LineTokens& lhs, const LineTokens& rhs) { return !(lhs == rhs); }
 
 
 std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
@@ -48,10 +48,10 @@ const std::array<std::string, 5> Tokenizer::metaDirectives = {"globl", "eqv", "m
                                                               "include"};
 
 
-std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles) {
-    std::map<std::string, std::vector<SourceLine>> rawProgramMap;
-    for (const auto& rawFile : rawFiles) {
-        std::vector<SourceLine> fileTokens = tokenizeFile(rawFile);
+std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourceFiles) {
+    std::map<std::string, std::vector<LineTokens>> rawProgramMap;
+    for (const auto& rawFile : sourceFiles) {
+        std::vector<LineTokens> fileTokens = tokenizeFile(rawFile);
         Postprocessor::processBaseAddressing(fileTokens);
         rawProgramMap[rawFile.name] = fileTokens;
     }
@@ -59,8 +59,8 @@ std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles
     // Process file inclusions
     Postprocessor::processIncludes(rawProgramMap);
 
-    std::map<std::string, std::vector<SourceLine>> programMap;
-    for (std::pair<const std::string, std::vector<SourceLine>>& fileTokens : rawProgramMap) {
+    std::map<std::string, std::vector<LineTokens>> programMap;
+    for (std::pair<const std::string, std::vector<LineTokens>>& fileTokens : rawProgramMap) {
         Postprocessor::replaceEqv(fileTokens.second);
         Postprocessor::processMacros(fileTokens.second);
         programMap["masm_mangle_file_" + fileTokens.first] = fileTokens.second;
@@ -69,49 +69,48 @@ std::vector<SourceLine> Tokenizer::tokenize(const std::vector<RawFile>& rawFiles
     // Mangle labels in files
     Postprocessor::mangleLabels(programMap);
 
-    std::vector<SourceLine> program;
-    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
+    std::vector<LineTokens> program;
+    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap)
         program.insert(program.end(), programFile.second.begin(), programFile.second.end());
 
     return program;
 }
 
 
-std::vector<SourceLine> Tokenizer::tokenizeFile(const RawFile& rawFile) {
-    std::vector<SourceLine> tokenizedFile = {};
+std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
+    std::vector<LineTokens> tokenizedFile = {};
 
-    for (size_t i = 0; i < rawFile.lines.size(); ++i) {
-        const std::string& rawLine = rawFile.lines[i];
-        std::vector<SourceLine> tokenizedLines;
-        tokenizedLines = tokenizeLine(rawLine, rawFile.name, i + 1);
-        // Skip empty or comment lines
-        if (tokenizedLines.empty())
-            continue;
+    std::stringstream ss(sourceFile.source);
+    std::string line;
+    std::vector<std::string> sourceLines;
+    while (std::getline(ss, line))
+        sourceLines.push_back(line);
 
-        for (SourceLine& line : tokenizedLines) {
-            if (line.tokens.empty())
-                continue;
+    for (size_t i = 0; i < sourceLines.size(); ++i) {
+        std::vector<LineTokens> tokenizedLines = tokenizeLine(sourceLines[i], sourceFile.name, i + 1);
 
-            tokenizedFile.push_back(line);
-        }
+        for (LineTokens& tokenLine : tokenizedLines)
+            // Skip empty or comment lines
+            if (!tokenLine.tokens.empty())
+                tokenizedFile.push_back(tokenLine);
     }
 
     return tokenizedFile;
 }
 
 
-std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine,
+std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
                                                 const std::string& filename, const size_t lineno) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
 
-    std::vector<SourceLine> tokens = {{filename, lineno, {}}};
+    std::vector<LineTokens> tokens = {{filename, lineno, {}}};
     std::string currentToken;
     TokenType currentType = TokenType::UNKNOWN;
     char prevChar = '\0';
 
     // Append space to ensure all characters are tokenized
-    for (const char c : rawLine + ' ') {
-        SourceLine& tokenLine = tokens[tokens.size() - 1];
+    for (const char c : sourceLine + ' ') {
+        LineTokens& tokenLine = tokens[tokens.size() - 1];
         // When in a string, gather all characters into a single token
         if (currentType == TokenType::STRING) {
             // Terminate the string when reaching unescaped quote
@@ -183,8 +182,8 @@ std::vector<SourceLine> Tokenizer::tokenizeLine(const std::string& rawLine,
 
 
 void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string& currentToken,
-                               std::vector<SourceLine>& tokens) {
-    SourceLine& tokenLine = tokens[tokens.size() - 1];
+                               std::vector<LineTokens>& tokens) {
+    LineTokens& tokenLine = tokens[tokens.size() - 1];
 
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
         throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename,

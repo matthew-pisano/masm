@@ -19,8 +19,7 @@ def mem_mapped_io_asm():
 class TestBindings:
 
     def test_syscall_io(self, syscall_io_asm: str):
-        raw_lines = syscall_io_asm.split("\n")
-        raw_file = pymasm.tokenizer.RawFile("input_output.asm", raw_lines)
+        raw_file = pymasm.tokenizer.SourceFile("input_output.asm", syscall_io_asm)
         program = pymasm.tokenizer.Tokenizer.tokenize([raw_file])
 
         parser = pymasm.parser.Parser()
@@ -40,8 +39,7 @@ class TestBindings:
         assert ostream.getvalue() == expected_output
 
     def test_mem_mapped_io(self, mem_mapped_io_asm: str):
-        raw_lines = mem_mapped_io_asm.split("\n")
-        raw_file = pymasm.tokenizer.RawFile("mmio.asm", raw_lines)
+        raw_file = pymasm.tokenizer.SourceFile("mmio.asm", mem_mapped_io_asm)
         program = pymasm.tokenizer.Tokenizer.tokenize([raw_file])
 
         parser = pymasm.parser.Parser()

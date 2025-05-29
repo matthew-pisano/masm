@@ -40,12 +40,12 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
         expectedMem.data[currSection].push_back(parsedBytes[i]);
     }
 
-    std::vector<RawFile> sourceLines;
+    std::vector<SourceFile> sourceLines;
     sourceLines.reserve(sourceFileNames.size()); // Preallocate memory for performance
     for (const std::string& fileName : sourceFileNames)
-        sourceLines.push_back({getFileBasename(fileName), readFileLines(fileName)});
+        sourceLines.push_back({getFileBasename(fileName), readFile(fileName)});
 
-    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceLines);
+    const std::vector<LineTokens> program = Tokenizer::tokenize(sourceLines);
 
     Parser parser{};
     MemLayout actualMem = parser.parse(program);
@@ -163,7 +163,7 @@ TEST_CASE("Test Directive Allocation") {
 TEST_CASE("Test Parser Syntax Errors") {
     SECTION("Test Unknown Label Reference") {
         Parser parser{};
-        const std::vector<SourceLine> program = {
+        const std::vector<LineTokens> program = {
                 {"test.asm", 1, {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "ref"}}}};
         REQUIRE_THROWS_MATCHES(
                 parser.parse(program), MasmSyntaxError,
@@ -172,7 +172,7 @@ TEST_CASE("Test Parser Syntax Errors") {
 
     SECTION("Test Unknown Duplicate Label") {
         Parser parser{};
-        const std::vector<SourceLine> program = {
+        const std::vector<LineTokens> program = {
                 {"test.asm", 1, {{TokenType::LABEL_DEF, "label"}}},
                 {"test.asm", 1, {{TokenType::LABEL_DEF, "label"}}}};
         REQUIRE_THROWS_MATCHES(
@@ -182,7 +182,7 @@ TEST_CASE("Test Parser Syntax Errors") {
 
     SECTION("Test Empty Allocation Directive") {
         Parser parser{};
-        const std::vector<SourceLine> program = {
+        const std::vector<LineTokens> program = {
                 {"test.asm", 1, {{TokenType::ALLOC_DIRECTIVE, "word"}}}};
         REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
                                Catch::Matchers::Message("Syntax error at test.asm:1 -> Directive "
@@ -191,7 +191,7 @@ TEST_CASE("Test Parser Syntax Errors") {
 
     SECTION("Test Unsupported Directive") {
         Parser parser{};
-        const std::vector<SourceLine> program = {
+        const std::vector<LineTokens> program = {
                 {"test.asm",
                  1,
                  {{TokenType::ALLOC_DIRECTIVE, "eeby"}, {TokenType::IMMEDIATE, "1"}}}};

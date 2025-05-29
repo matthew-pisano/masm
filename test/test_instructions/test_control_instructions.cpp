@@ -12,8 +12,8 @@
 
 
 TEST_CASE("Test j Instruction") {
-    const RawFile rawFile = makeRawFile({"j label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"j label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "j"}, {TokenType::LABEL_REF, "label"}}};
@@ -39,8 +39,8 @@ TEST_CASE("Test j Instruction") {
 
 
 TEST_CASE("Test jal Instruction") {
-    const RawFile rawFile = makeRawFile({"jal label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"jal label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "jal"}, {TokenType::LABEL_REF, "label"}}};
@@ -67,8 +67,8 @@ TEST_CASE("Test jal Instruction") {
 
 
 TEST_CASE("Test jr Instruction") {
-    const RawFile rawFile = makeRawFile({"jr $t0"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"jr $t0"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "jr"}, {TokenType::REGISTER, "t0"}}};
@@ -94,8 +94,8 @@ TEST_CASE("Test jr Instruction") {
 
 
 TEST_CASE("Test jalr Instruction") {
-    const RawFile rawFile = makeRawFile({"jalr $t0"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"jalr $t0"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {
                 {{TokenType::INSTRUCTION, "jalr"}, {TokenType::REGISTER, "t0"}}};
@@ -122,8 +122,8 @@ TEST_CASE("Test jalr Instruction") {
 
 
 TEST_CASE("Test beq Instruction") {
-    const RawFile rawFile = makeRawFile({"beq $t0, $t1, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"beq $t0, $t1, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "beq"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -162,8 +162,8 @@ TEST_CASE("Test beq Instruction") {
 
 
 TEST_CASE("Test bne Instruction") {
-    const RawFile rawFile = makeRawFile({"bne $t0, $t1, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"bne $t0, $t1, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "bne"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -202,8 +202,8 @@ TEST_CASE("Test bne Instruction") {
 
 
 TEST_CASE("Test bgtz Instruction") {
-    const RawFile rawFile = makeRawFile({"bgtz $t0, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"bgtz $t0, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "bgtz"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -246,8 +246,8 @@ TEST_CASE("Test bgtz Instruction") {
 
 
 TEST_CASE("Test bltz Instruction") {
-    const RawFile rawFile = makeRawFile({"bltz $t0, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"bltz $t0, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "bltz"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -290,8 +290,8 @@ TEST_CASE("Test bltz Instruction") {
 
 
 TEST_CASE("Test bgez Instruction") {
-    const RawFile rawFile = makeRawFile({"bgez $t0, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"bgez $t0, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "bgez"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -334,8 +334,8 @@ TEST_CASE("Test bgez Instruction") {
 
 
 TEST_CASE("Test blez Instruction") {
-    const RawFile rawFile = makeRawFile({"blez $t0, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"blez $t0, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "blez"},
                                                                  {TokenType::REGISTER, "t0"},

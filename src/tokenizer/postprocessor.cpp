@@ -12,22 +12,22 @@
 #include "utils.h"
 
 
-void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>& programMap) {
+void Postprocessor::mangleLabels(std::map<std::string, std::vector<LineTokens>>& programMap) {
     // Stores globals that have not yet been matched to declarations
-    std::vector<std::pair<std::string, SourceLine>> globals;
-    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap)
+    std::vector<std::pair<std::string, LineTokens>> globals;
+    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap)
         collectGlobals(globals, programFile.second);
 
     // Create vector of just names for globals
     std::vector<std::string> globalNames = {};
     globalNames.reserve(globals.size());
-    for (const std::pair<std::string, SourceLine>& global : globals)
+    for (const std::pair<std::string, LineTokens>& global : globals)
         globalNames.push_back(global.first);
 
     std::vector undeclaredGlobals(globals);
     // Mangle labels and resolve globals
-    for (std::pair<const std::string, std::vector<SourceLine>>& programFile : programMap) {
-        for (SourceLine& line : programFile.second) {
+    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap) {
+        for (LineTokens& line : programFile.second) {
             // Mangle the labels in the line
             std::string lineDeclaration = mangleLabelsInLine(globalNames, line, programFile.first);
             // If a label was declared, add it to the list of found declarations
@@ -53,7 +53,7 @@ void Postprocessor::mangleLabels(std::map<std::string, std::vector<SourceLine>>&
 
 
 std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
-                                              SourceLine& lineTokens, const std::string& fileId) {
+                                              LineTokens& lineTokens, const std::string& fileId) {
     std::string lineDeclaration;
     for (Token& lineToken : lineTokens.tokens) {
         if (lineToken.type != TokenType::LABEL_DEF && lineToken.type != TokenType::LABEL_REF)
@@ -72,11 +72,11 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 }
 
 
-void Postprocessor::collectGlobals(std::vector<std::pair<std::string, SourceLine>>& globals,
-                                   std::vector<SourceLine>& tokenizedFile) {
+void Postprocessor::collectGlobals(std::vector<std::pair<std::string, LineTokens>>& globals,
+                                   std::vector<LineTokens>& tokenizedFile) {
     const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
-        SourceLine& line = tokenizedFile[i];
+        LineTokens& line = tokenizedFile[i];
         if (line.tokens[0] != globlToken)
             continue;
 
@@ -90,11 +90,11 @@ void Postprocessor::collectGlobals(std::vector<std::pair<std::string, SourceLine
 }
 
 
-void Postprocessor::replaceEqv(std::vector<SourceLine>& tokenizedFile) {
+void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
     const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
-    std::unordered_map<Token, SourceLine, Token::HashFunction> eqvMapping;
+    std::unordered_map<Token, LineTokens, Token::HashFunction> eqvMapping;
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
-        SourceLine& line = tokenizedFile[i];
+        LineTokens& line = tokenizedFile[i];
         if (line.tokens[0] == eqvToken) {
             if (line.tokens.size() < 3 || line.tokens[1].type != TokenType::LABEL_REF)
                 throw MasmSyntaxError("Invalid eqv declaration", line.filename, line.lineno);
@@ -122,8 +122,8 @@ void Postprocessor::replaceEqv(std::vector<SourceLine>& tokenizedFile) {
 }
 
 
-void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile) {
-    for (SourceLine& tokenLine : tokenizedFile) {
+void Postprocessor::processBaseAddressing(std::vector<LineTokens>& tokenizedFile) {
+    for (LineTokens& tokenLine : tokenizedFile) {
         const auto openParen =
                 std::ranges::find(tokenLine.tokens, Token{TokenType::OPEN_PAREN, "("});
 
@@ -162,7 +162,7 @@ void Postprocessor::processBaseAddressing(std::vector<SourceLine>& tokenizedFile
 }
 
 
-std::vector<Token> Postprocessor::parseMacroParams(const SourceLine& line) {
+std::vector<Token> Postprocessor::parseMacroParams(const LineTokens& line) {
     // If the macro has no parameters
     if (line.tokens.size() < 3)
         return {};
@@ -183,7 +183,7 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
     const std::string posStr = std::to_string(pos);
 
     // Gather and mangle label definitions first
-    for (SourceLine& bodyLine : mangledMacro.body)
+    for (LineTokens& bodyLine : mangledMacro.body)
         for (Token& bodyToken : bodyLine.tokens)
             if (bodyToken.type == TokenType::LABEL_DEF) {
                 macroLabelDefs.emplace_back(TokenType::LABEL_REF, bodyToken.value);
@@ -191,7 +191,7 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
             }
 
     // Next mangle label references
-    for (SourceLine& bodyLine : mangledMacro.body)
+    for (LineTokens& bodyLine : mangledMacro.body)
         for (Token& bodyToken : bodyLine.tokens)
             if (bodyToken.type == TokenType::LABEL_REF) {
                 auto it = std::ranges::find(macroLabelDefs, bodyToken);
@@ -207,7 +207,7 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
 
 
 void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
-                                std::vector<SourceLine>& tokenizedFile) {
+                                std::vector<LineTokens>& tokenizedFile) {
     std::vector<Token> macroArgs;
     if (tokenizedFile[pos].tokens.size() > 1)
         macroArgs = filterTokenList(std::vector(tokenizedFile[pos].tokens.begin() + 2,
@@ -243,10 +243,10 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
 }
 
 
-void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
+void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
     std::unordered_map<std::string, Macro> macroMap;
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
-        SourceLine& line = tokenizedFile[i];
+        LineTokens& line = tokenizedFile[i];
         if (line.tokens[0].type == TokenType::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].type != TokenType::LABEL_REF)
@@ -280,19 +280,19 @@ void Postprocessor::processMacros(std::vector<SourceLine>& tokenizedFile) {
 }
 
 
-void Postprocessor::processIncludes(std::map<std::string, std::vector<SourceLine>>& rawProgramMap) {
+void Postprocessor::processIncludes(std::map<std::string, std::vector<LineTokens>>& rawProgramMap) {
     const Token includeToken = {TokenType::META_DIRECTIVE, "include"};
 
     for (auto& [fileName, tokenizedFile] : rawProgramMap) {
         for (size_t i = 0; i < tokenizedFile.size(); i++) {
-            SourceLine& line = tokenizedFile[i];
+            LineTokens& line = tokenizedFile[i];
             if (line.tokens[0] != includeToken)
                 continue;
             if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::STRING)
                 throw MasmSyntaxError("Invalid include directive", line.filename, line.lineno);
 
             std::string includeName = line.tokens[1].value;
-            const std::vector<SourceLine>& includeFile = rawProgramMap[includeName];
+            const std::vector<LineTokens>& includeFile = rawProgramMap[includeName];
             // Insert contents of included file into location at including file
             tokenizedFile.insert(tokenizedFile.begin() + i, includeFile.begin(), includeFile.end());
             // Remove the include line

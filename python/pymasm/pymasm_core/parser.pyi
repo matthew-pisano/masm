@@ -3,7 +3,7 @@
 from enum import Enum
 from typing import Dict, List
 
-from .tokenizer import SourceLine
+from .tokenizer import LineTokens
 
 
 class MemSection(Enum):
@@ -23,8 +23,6 @@ class MemLayout:
     data: Dict[MemSection, bytes]
     """A dictionary mapping memory sections to bytes"""
 
-    def __init__(self) -> None: ...
-
     def __init__(self, data: Dict[MemSection, bytes]) -> None: ...
 
     def __repr__(self) -> str: ...
@@ -35,11 +33,11 @@ class Parser:
 
     def __init__(self) -> None: ...
 
-    def parse(self, program: List[SourceLine]) -> MemLayout:
+    def parse(self, program: List[LineTokens]) -> MemLayout:
         """Parses the given program and returns a MemLayout object
 
         Args:
-            program (List[SourceLine]): The tokenized program to parse
+            program (List[LineTokens]): The tokenized program to parse
         Returns:
             MemLayout: The memory layout of the program
         Raises:

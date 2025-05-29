@@ -15,8 +15,8 @@
 
 
 TEST_CASE("Test li Instruction") {
-    const RawFile rawFile = makeRawFile({"li $t0, 100"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"li $t0, 100"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -36,8 +36,8 @@ TEST_CASE("Test li Instruction") {
 
 
 TEST_CASE("Test la Instruction") {
-    const RawFile rawFile = makeRawFile({"la $t0, label"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"la $t0, label"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "la"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -59,8 +59,8 @@ TEST_CASE("Test la Instruction") {
 
 
 TEST_CASE("Test move Instruction") {
-    const RawFile rawFile = makeRawFile({"move $t0, $t1"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"move $t0, $t1"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "move"},
                                                                  {TokenType::REGISTER, "t0"},
@@ -80,8 +80,8 @@ TEST_CASE("Test move Instruction") {
 
 
 TEST_CASE("Test nop Instruction") {
-    const RawFile rawFile = makeRawFile({"nop"});
-    const std::vector<SourceLine> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    const SourceFile rawFile = makeRawFile({"nop"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
         const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "nop"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));

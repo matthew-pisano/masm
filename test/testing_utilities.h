@@ -45,11 +45,11 @@ std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec);
 
 
 /**
- * Wraps a series of lines into a raw files
+ * Wraps a series of lines into a source file
  * @param lines The lines to wrap
- * @return A raw file containing the lines
+ * @return A source file containing the lines
  */
-RawFile makeRawFile(const std::vector<std::string>& lines);
+SourceFile makeRawFile(const std::vector<std::string>& lines);
 
 
 /**
@@ -59,6 +59,6 @@ RawFile makeRawFile(const std::vector<std::string>& lines);
  * @throw runtime_error when the tokens do not match
  */
 void validateTokenLines(const std::vector<std::vector<Token>>& expectedTokens,
-                        const std::vector<SourceLine>& actualTokens);
+                        const std::vector<LineTokens>& actualTokens);
 
 #endif // TESTING_UTILITIES_H

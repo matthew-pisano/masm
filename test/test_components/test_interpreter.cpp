@@ -27,14 +27,19 @@
  */
 void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceFileNames,
                     const std::string& logFileName, const std::string& inputString = "") {
-    const std::vector<std::string> logLines = readFileLines(logFileName);
+    const std::string logSource = readFile(logFileName);
+    std::vector<std::string> logLines;
+    std::stringstream ss(logSource);
+    std::string line;
+    while (std::getline(ss, line))
+        logLines.push_back(line);
 
-    std::vector<RawFile> sourceFiles;
+    std::vector<SourceFile> sourceFiles;
     sourceFiles.reserve(sourceFileNames.size()); // Preallocate memory for performance
     for (const std::string& fileName : sourceFileNames)
-        sourceFiles.push_back({getFileBasename(fileName), readFileLines(fileName)});
+        sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
 
-    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceFiles);
+    const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
     Parser parser{};
     const MemLayout layout = parser.parse(program);
@@ -60,8 +65,8 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
 
 
 TEST_CASE("Test Runtime Error") {
-    std::vector<RawFile> sourceFiles = {{"test.asm", {"main:", "div $zero, $zero"}}};
-    const std::vector<SourceLine> program = Tokenizer::tokenize(sourceFiles);
+    std::vector<SourceFile> sourceFiles = {{"test.asm", "main:\n div $zero, $zero"}};
+    const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
     Parser parser{};
     const MemLayout layout = parser.parse(program);
