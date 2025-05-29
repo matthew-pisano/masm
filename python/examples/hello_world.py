@@ -41,11 +41,11 @@ def main():
 
     # Execute the program
     masm_interpreter = interpreter.Interpreter(io_mode, istream, ostream)
-    exitCode = masm_interpreter.interpret(mem_layout)
+    exit_code = masm_interpreter.interpret(mem_layout)
 
     # Print out the result and exit
     print(ostream.getvalue().decode())
-    sys.exit(exitCode)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

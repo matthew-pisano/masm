@@ -1,14 +1,14 @@
-import sys
 from io import BytesIO
 
 from pymasm import *
 
 
 def syscall_asm():
-    return """
+    return r"""
 .data
 prompt: .asciiz "Enter a number: "
 resp: .asciiz "Your number is: "
+nl: .asciiz "\n"
 
 .text
 
@@ -29,6 +29,12 @@ main:
     li $v0, 1           # Set syscall flag to print integer
     move $a0, $t0
     syscall             # Print the integer
+    
+    la $a0, nl          # Load in address of newline
+    li $v0, 4           # Set syscall flag to print string
+    syscall             # Print the prompt
+    
+    bne $t0, $zero, main
 
     li $v0, 10
     syscall             # Exit gracefully
@@ -50,16 +56,25 @@ def main():
     # Set the interpreter to use syscalls for input and output
     io_mode = interpreter.IOMode.SYSCALL
     # Set up input and output streams
-    istream = BytesIO(b"5\n")
+    istream = BytesIO(b'5\n4\n3\n2\n1\n0\n')
     ostream = BytesIO()
 
     # Execute the program
     masm_interpreter = interpreter.Interpreter(io_mode, istream, ostream)
-    exitCode = masm_interpreter.interpret(mem_layout)
+    masm_interpreter.init_program(mem_layout)
 
-    # Print out the result and exit
-    print(ostream.getvalue().decode())
-    sys.exit(exitCode)
+    pos = 0
+    while True:
+        try:
+            masm_interpreter.step()
+            ostream.seek(pos)
+            output = ostream.read().decode()
+            pos = len(ostream.getvalue())
+            ostream.seek(pos)
+            if output:
+                print(output, end='')
+        except exceptions.ExecExit as e:
+            break
 
 
 if __name__ == "__main__":
