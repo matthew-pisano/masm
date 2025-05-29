@@ -11,6 +11,8 @@
 
 
 int main(const int argc, char* argv[]) {
+    std::string version = "masm 1.0.0";
+
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
 
@@ -18,6 +20,7 @@ int main(const int argc, char* argv[]) {
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
     app.add_flag("--mmio", useMMIO,
                  "Use memory-mapped I/O instead of system calls for input/output operations");
+    app.set_version_flag("--version", version);
 
     try {
         app.parse(argc, argv);

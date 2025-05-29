@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pymasm"
-version = "0.1.0"
+version = "1.0.0"
 description = "MIPS Assembly Interpreter Library"
 authors = [{ name = "Matthew Pisano", email = "matthewpisano14@gmail.com" }]
 license = "BSD-3-Clause"
@@ -26,6 +26,5 @@ packages = ["pymasm"]
 [tool.setuptools.package-data]
 pymasm = ["*.so", "*.pyd", "*.pyi", "py.typed"]
 
-# If you need custom build configuration
 [tool.pybind11.options]
 cpp_std = 23
