@@ -24,7 +24,7 @@ classifiers = [
 packages = ["pymasm"]
 
 [tool.setuptools.package-data]
-pymasm = ["*.so", "*.pyd", "*.pyi", "py.typed"]
+pymasm = ["*.so", "*.pyd", "pymasm_core/*.py", "pymasm_core/*.pyi", "py.typed"]
 
 [tool.pybind11.options]
 cpp_std = 23
