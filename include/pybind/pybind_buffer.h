@@ -13,10 +13,9 @@ namespace py = pybind11;
 class PyBytesIOBuf final : public std::streambuf {
     py::object bytesio_;
     std::string read_buffer_;
-    std::size_t read_pos_;
 
 public:
-    explicit PyBytesIOBuf(const py::object& bytesio) : bytesio_(bytesio), read_pos_(0) {}
+    explicit PyBytesIOBuf(const py::object& bytesio) : bytesio_(bytesio) {}
 
 protected:
     // Output operations (writing to BytesIO)
@@ -80,7 +79,7 @@ protected:
     // Seeking support
     pos_type seekoff(off_type off, const std::ios_base::seekdir way,
                      const std::ios_base::openmode which = std::ios_base::in |
-                                                     std::ios_base::out) override {
+                                                           std::ios_base::out) override {
         if (which & std::ios_base::out) {
             // For output, delegate to BytesIO's seek
             try {
@@ -123,7 +122,7 @@ protected:
 
     pos_type seekpos(const pos_type sp,
                      const std::ios_base::openmode which = std::ios_base::in |
-                                                                  std::ios_base::out) override {
+                                                           std::ios_base::out) override {
         return seekoff(sp, std::ios_base::beg, which);
     }
 
