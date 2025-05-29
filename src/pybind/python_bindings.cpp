@@ -44,7 +44,7 @@ public:
 };
 
 
-PYBIND11_MODULE(pymasm, m) {
+PYBIND11_MODULE(pymasm_core, m) {
     m.doc() = "MIPS Assembly Interpreter Library";
 
     const py::module_ tokenizer_module = m.def_submodule("tokenizer", "Masm Tokenizer");

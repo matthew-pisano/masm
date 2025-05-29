@@ -24,14 +24,14 @@ add_library(masm STATIC
         src/utils.cpp
 )
 
-pybind11_add_module(pymasm
+pybind11_add_module(pymasm_core
         src/pybind/python_bindings.cpp
 )
 
 # Link the Python module with our library
-target_link_libraries(pymasm PRIVATE masm)
+target_link_libraries(pymasm_core PRIVATE masm)
 
-target_compile_definitions(pymasm PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+target_compile_definitions(pymasm_core PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
 add_executable(masm-exec src/main.cpp
         src/io/fileio.cpp
