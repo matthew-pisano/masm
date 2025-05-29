@@ -15,9 +15,7 @@ int main(const int argc, char* argv[]) {
     bool useMMIO = false;
 
     CLI::App app{"masm - MIPS Interpreter", "masm"};
-    app.add_option("input-file", inputFileNames, "Input file to load")
-            ->required()
-            ->allow_extra_args();
+    app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
     app.add_flag("--mmio", useMMIO,
                  "Use memory-mapped I/O instead of system calls for input/output operations");
 
