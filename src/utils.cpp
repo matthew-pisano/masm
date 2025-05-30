@@ -11,9 +11,7 @@
 std::string getFileBasename(const std::string& path) {
     // Find the last occurrence of the directory separator (slash or backslash)
     const size_t sepPos = path.find_last_of(std::filesystem::path::preferred_separator);
-    const std::string baseFile = sepPos == std::string::npos ? path : path.substr(sepPos + 1);
-    // Find the last occurrence of the dot, marking the extension
-    const std::string fileName = baseFile.substr(0, baseFile.find_last_of('.'));
+    const std::string fileName = sepPos == std::string::npos ? path : path.substr(sepPos + 1);
     return fileName;
 }
 
@@ -88,7 +86,8 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
         if (i % 2 == 0 && listTokens[i].type == TokenType::SEPERATOR)
             throw std::runtime_error("Unexpected ','");
         if (i == listTokens.size() - 1 && listTokens[i].type == TokenType::SEPERATOR)
-            throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value + "'");
+            throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value +
+                                     "'");
 
         if (listTokens[i].type == TokenType::SEPERATOR)
             continue;
