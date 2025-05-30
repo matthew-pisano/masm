@@ -63,7 +63,7 @@ void Interpreter::readMMIO() {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
 
-    if (state.memory.wordAt(input_ready) == 1)
+    if (state.memory.wordAt(input_ready) != 0)
         // Return if the previous character has yet to be read by the program
         return;
 
