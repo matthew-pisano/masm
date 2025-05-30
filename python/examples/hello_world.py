@@ -1,3 +1,4 @@
+import os
 import sys
 from io import BytesIO
 
@@ -5,20 +6,9 @@ from pymasm import *
 
 
 def hello_world_asm():
-    return """
-.data
-msg: .asciiz "Hello there"
-
-.text
-
-main:
-    la $a0, msg         # Load in address of message
-    li $v0, 4           # Set syscall flag to print string
-    syscall             # Print the message
-
-    li $v0, 10
-    syscall             # Exit gracefully
-"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(f"{script_dir}/hello_world.asm", "r") as f:
+        return f.read()
 
 
 def main():
