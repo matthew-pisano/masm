@@ -57,3 +57,27 @@ class TestBindings:
 
         assert exitCode == 0
         assert ostream.getvalue() == expected_output
+
+    def test_incremental_mem_mapped_io(self, mem_mapped_io_asm: str):
+        raw_file = pymasm.tokenizer.SourceFile("mmio.asm", mem_mapped_io_asm)
+        program = pymasm.tokenizer.Tokenizer.tokenize([raw_file])
+
+        parser = pymasm.parser.Parser()
+        layout = parser.parse(program)
+
+        io_mode = pymasm.interpreter.IOMode.MMIO
+        istream = BytesIO()
+        ostream = BytesIO()
+        interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
+        interpreter.init_program(layout)
+
+        while True:
+            try:
+                # Write data incrementally as process steps through instructions
+                istream.write(b'a')
+                istream.seek(0)
+                interpreter.step()
+            except pymasm.exceptions.ExecExit as e:
+                break
+
+        assert ostream.getvalue() == b'aaaa'
