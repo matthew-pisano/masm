@@ -71,13 +71,22 @@ class TestBindings:
         interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
         interpreter.init_program(layout)
 
+        chars = [b'd', b'c', b'b', b'a']
+
         while True:
             try:
                 # Write data incrementally as process steps through instructions
-                istream.write(b'a')
-                istream.seek(0)
+                if chars:
+                    # Save the current position so interpreter can read from where it left off
+                    pos = istream.tell()
+                    # Seek to the end to append a character
+                    istream.seek(len(istream.getvalue()))
+                    istream.write(chars.pop())
+                    # Restore the saved position for reading
+                    istream.seek(pos)
+
                 interpreter.step()
             except pymasm.exceptions.ExecExit as e:
                 break
 
-        assert ostream.getvalue() == b'aaaa'
+        assert ostream.getvalue() == b'abcd'

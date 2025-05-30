@@ -38,7 +38,7 @@ def main():
             masm_interpreter.step()
             ostream.seek(pos)
             output = ostream.read().decode()
-            pos = len(ostream.getvalue())
+            pos = ostream.tell()
             ostream.seek(pos)
             if output:
                 print(output, end='')
