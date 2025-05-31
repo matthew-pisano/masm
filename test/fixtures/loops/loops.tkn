@@ -1,7 +1,7 @@
-04main@masm_mangle_file_loops
+04main@masm_mangle_file_loops.asm
 06li07t109,0824
 06li07t009,08-1
-04loop@masm_mangle_file_loops
+04loop@masm_mangle_file_loops.asm
 06addi07a009,07t009,080
 06li07v009,081
 06syscall
@@ -9,9 +9,9 @@
 06li07v009,0811
 06syscall
 06addi07t009,07t009,081
-06bgt07t009,07t109,05exit@masm_mangle_file_loops
-06j05loop@masm_mangle_file_loops
-04exit@masm_mangle_file_loops
+06bgt07t009,07t109,05exit@masm_mangle_file_loops.asm
+06j05loop@masm_mangle_file_loops.asm
+04exit@masm_mangle_file_loops.asm
 06addi07a009,07zero09,0847
 06li07v009,0811
 06syscall

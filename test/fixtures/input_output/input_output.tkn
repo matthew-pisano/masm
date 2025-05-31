@@ -1,38 +1,38 @@
 01data
-04promptmsg@masm_mangle_file_input_output
+04promptmsg@masm_mangle_file_input_output.asm
 02asciiz12Enter a number to calculate the factorial: 
-04outmsg@masm_mangle_file_input_output
+04outmsg@masm_mangle_file_input_output.asm
 02asciiz12The factorial is: 
 01text
-04main@masm_mangle_file_input_output
+04main@masm_mangle_file_input_output.asm
 06li07v009,084
-06la07a009,05promptmsg@masm_mangle_file_input_output
+06la07a009,05promptmsg@masm_mangle_file_input_output.asm
 06syscall
 06li07v009,085
 06syscall
 06move07a009,07v0
-06jal05fact@masm_mangle_file_input_output
+06jal05fact@masm_mangle_file_input_output.asm
 06move07s109,07v0
 06li07v009,084
-06la07a009,05outmsg@masm_mangle_file_input_output
+06la07a009,05outmsg@masm_mangle_file_input_output.asm
 06syscall
 06li07v009,081
 06move07a009,07s1
 06syscall
 06li07v009,0810
 06syscall
-04fact@masm_mangle_file_input_output
+04fact@masm_mangle_file_input_output.asm
 06addi07sp09,07sp09,08-8
 06sw07ra09,07sp09,084
 06sw07a009,07sp09,080
 06slti07t009,07a009,081
-06beq07t009,07zero09,05recurse@masm_mangle_file_input_output
+06beq07t009,07zero09,05recurse@masm_mangle_file_input_output.asm
 06addi07v009,07zero09,081
 06addi07sp09,07sp09,088
 06jr07ra
-04recurse@masm_mangle_file_input_output
+04recurse@masm_mangle_file_input_output.asm
 06addi07a009,07a009,08-1
-06jal05fact@masm_mangle_file_input_output
+06jal05fact@masm_mangle_file_input_output.asm
 06lw07a009,07sp09,080
 06lw07ra09,07sp09,084
 06addi07sp09,07sp09,088

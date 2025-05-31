@@ -1,10 +1,10 @@
 01data
-04label@masm_mangle_file_load_address
+04label@masm_mangle_file_load_address.asm
 02asciiz12hello there
-04label2@masm_mangle_file_load_address
+04label2@masm_mangle_file_load_address.asm
 02asciiz12hello there
 01text
-06la07s009,05label@masm_mangle_file_load_address
+06la07s009,05label@masm_mangle_file_load_address.asm
 06lw07s109,07s009,080
 06add07a009,07zero09,07s1
 06li07v009,0811
