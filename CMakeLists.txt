@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.30)
 project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
-add_compile_options(-fPIC -Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
 
-find_package(pybind11 REQUIRED)
-
+add_compile_options(-Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
 include_directories(include)
+
+
+## MASM Static Library ##
 
 add_library(masm STATIC
         src/io/consoleio.cpp
@@ -23,26 +24,18 @@ add_library(masm STATIC
         src/tokenizer/postprocessor.cpp
         src/utils.cpp
 )
+target_compile_options(masm PRIVATE -fPIC)
 
+
+## Python Bindings ##
+
+find_package(pybind11 REQUIRED)
 pybind11_add_module(pymasm_core
         src/pybind/python_bindings.cpp
 )
-
-# Link the Python module with our library
+# Link the Python module with masm
 target_link_libraries(pymasm_core PRIVATE masm)
 
-target_compile_definitions(pymasm_core PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
-
-add_executable(masm-exec src/main.cpp
-        src/io/fileio.cpp
-)
-target_link_libraries(masm-exec masm)
-set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
-
-add_executable(masm-fg test/fixture_gen.cpp
-        src/io/fileio.cpp
-)
-target_link_libraries(masm-fg masm)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -51,8 +44,26 @@ FetchContent_Declare(
         GIT_TAG main
 )
 FetchContent_MakeAvailable(cli11)
-target_link_libraries(masm-exec CLI11::CLI11)
-target_link_libraries(masm-fg CLI11::CLI11)
+
+
+## MASM Main Executables ##
+
+add_executable(masm-exec src/main.cpp
+        src/io/fileio.cpp
+)
+target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
+set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
+
+
+## Fixture Generator Executable ##
+
+add_executable(masm-fg test/fixture_gen.cpp
+        src/io/fileio.cpp
+)
+target_link_libraries(masm-fg PRIVATE masm CLI11::CLI11)
+
+
+## Unit Tests ##
 
 find_package(Catch2 3 REQUIRED)
 add_executable(masm-tests
