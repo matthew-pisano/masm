@@ -20,26 +20,34 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
         args.size() != 1)
         throw std::runtime_error("Directive '" + dirName + "' expects exactly one argument");
 
-
+    // Align
     if (dirName == "align") {
         const std::string val = args[0].value;
         if (args[0].type != TokenType::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) < 0 ||
             std::stoi(val) > 3)
             throw std::runtime_error("Directive '" + dirName +
                                      "' expects an integer argument between 0 and 3");
-    } else if (dirName == "asciiz" || dirName == "ascii") {
+    }
+    // Asciiz or Ascii
+    else if (dirName == "asciiz" || dirName == "ascii") {
         if (args[0].type != TokenType::STRING)
             throw std::runtime_error("Directive '" + dirName + "' expects a string argument");
-    } else if (dirName == "byte" || dirName == "half" || dirName == "word") {
+    }
+    // Byte, Half, Word
+    else if (dirName == "byte" || dirName == "half" || dirName == "word") {
         for (const Token& arg : args)
             if (arg.type != TokenType::IMMEDIATE || !isSignedInteger(arg.value))
                 throw std::runtime_error("Directive '" + dirName +
                                          "' expects integers as arguments");
-    } else if (dirName == "double" || dirName == "float") {
+    }
+    // Double or Float
+    else if (dirName == "double" || dirName == "float") {
         for (const Token& arg : args)
             if (arg.type != TokenType::IMMEDIATE || !isSignedFloat(arg.value))
                 throw std::runtime_error("Directive '" + dirName + "' expects floats as arguments");
-    } else if (dirName == "space") {
+    }
+    // Space
+    else if (dirName == "space") {
         const std::string val = args[0].value;
         if (args[0].type != TokenType::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) <= 0)
             throw std::runtime_error("Directive '" + dirName +
@@ -123,7 +131,7 @@ parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
     }
     // Should have already thrown in validate
     else
-        throw std::runtime_error("Unsupported directive " + dirName);
+        throw std::runtime_error("Unsupported directive '" + dirName + "'");
 
     return {bytes, padding};
 }
@@ -131,6 +139,7 @@ parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
 
 std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken,
                                            const std::vector<Token>& args) {
+    // Simply return the allocation portion of parsePaddedAllocDirective()
     return std::get<0>(parsePaddedAllocDirective(loc, dirToken, args));
 }
 

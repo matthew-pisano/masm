@@ -27,6 +27,7 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
         // Skip empty lines
         if (tokenLine.tokens.empty())
             continue;
+
         try {
             parseLine(layout, currSection, tokenLine);
         } catch (const std::runtime_error& e) {
@@ -50,6 +51,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
     switch (firstToken.type) {
         case TokenType::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
+            // If the section does not exist in the layout, create it
             if (!layout.data.contains(currSection)) {
                 layout.data[currSection] = {};
                 layout.debugInfo[currSection] = {};
@@ -67,7 +69,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             break;
         }
         case TokenType::LABEL_DEF:
-            break;
+            break;  // Ignore label definitions, they do not add any additional memory allocations
         default:
             throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
     }
@@ -78,6 +80,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
     layout.data[currSection].insert(layout.data[currSection].end(), memBytes.begin(),
                                     memBytes.end());
 
+    // If the section is executable, add debug info for the instruction
     if (isSectionExecutable(currSection)) {
         const std::shared_ptr<SourceLocator> tokenLinePtr =
                 std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
@@ -108,8 +111,10 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
                 break;
             case TokenType::REGISTER: {
                 if (isSignedInteger(arg.value))
+                    // If the register is an integer, use it as the register index
                     argCodes.push_back(stoui32(arg.value));
                 else
+                    // Otherwise, use the register name to get the index
                     argCodes.push_back(regFile.indexFromName(arg.value));
                 break;
             }
@@ -178,7 +183,7 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
     std::vector branchOpCodes = {static_cast<uint32_t>(InstructionCode::BEQ),
                                  static_cast<uint32_t>(InstructionCode::BNE)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
-        // Branch instructions are offset by 4 bytes so divide by 4
+        // Branch targets are always word-aligned, so divide by 4
         const int32_t offset = (immediate - static_cast<int32_t>(loc) - 4) >> 2;
         if (offset < -32768 || offset > 32767)
             throw std::runtime_error("Branch instruction offset out of range");
@@ -240,7 +245,7 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
     }
     // mul $tx, $ty, $tz -> mult $ty, $tz; mflo $tx
     if (instructionName == "mul") {
-        std::vector<Token> modifiedArgs = {args[1], args[2]};
+        std::vector modifiedArgs = {args[1], args[2]};
         std::vector<std::byte> multBytes =
                 parseInstruction(loc, {TokenType::INSTRUCTION, "mult"}, modifiedArgs);
 
@@ -316,7 +321,7 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(uint32_t& loc, const
                     {TokenType::REGISTER, "zero"},
                     {TokenType::LABEL_REF, labelName}};
     std::vector<std::byte> branchBytes;
-    // Swap branch instruction when including equal in comparrison or not
+    // Swap branch instruction when including equal in comparison or not
     if (checkEq)
         branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "beq"}, modifiedArgs);
     else

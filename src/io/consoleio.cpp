@@ -62,6 +62,7 @@ bool consoleHasChar() {
     return select(STDIN_FILENO + 1, &readfds, nullptr, nullptr, &tv) > 0;
 }
 
+
 char consoleGetChar() {
     char c;
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);

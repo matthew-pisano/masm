@@ -6,9 +6,12 @@
 
 #include <stdexcept>
 
+#include "utils.h"
+
 
 std::byte Memory::memAt(const uint32_t index) const {
     if (!memory.contains(index))
+        // Default of zero if not found
         return static_cast<std::byte>(0);
     return memory.at(index);
 }
@@ -18,25 +21,29 @@ void Memory::readSideEffect(const uint32_t index) {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
 
+    // Check if reading from input data word
     if (index >= input_data && index < input_data + 4)
-        // Reset ready bit
+        // Reset input ready bit
         memory[input_ready + 3] = std::byte{0};
 }
 
 
 void Memory::writeSideEffect(const uint32_t index) {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
-    const uint32_t output_ready = memSectionOffset(MemSection::MMIO) + 8;
+    const uint32_t input_data = input_ready + 4;
+    const uint32_t output_ready = input_data + 4;
 
+    // Check if writing to input or output ready bits or input data word
     if ((index >= output_ready && index < output_ready + 4) ||
-        (index >= input_ready && index < input_ready + 4))
-        throw std::runtime_error("Invalid write access at " + std::to_string(index));
+        (index >= input_ready && index < input_ready + 4) ||
+        (index >= input_data && index < input_data + 4))
+        throw std::runtime_error("Invalid write into read-only memory at " + hex_to_string(index));
 }
 
 
 int32_t Memory::wordAt(const uint32_t index) {
     if (index % 4 != 0)
-        throw std::runtime_error("Invalid word access at " + std::to_string(index));
+        throw std::runtime_error("Invalid word access at " + hex_to_string(index));
 
     readSideEffect(index);
     return static_cast<int32_t>(memAt(index)) << 24 | static_cast<int32_t>(memAt(index + 1)) << 16 |
@@ -46,7 +53,7 @@ int32_t Memory::wordAt(const uint32_t index) {
 
 uint16_t Memory::halfAt(const uint32_t index) {
     if (index % 2 != 0)
-        throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
+        throw std::runtime_error("Invalid half-word access at " + hex_to_string(index));
 
     readSideEffect(index);
     return static_cast<uint16_t>(memAt(index)) << 8 | static_cast<uint16_t>(memAt(index + 1));
@@ -61,7 +68,7 @@ uint8_t Memory::byteAt(const uint32_t index) {
 
 void Memory::wordTo(const uint32_t index, const int32_t value) {
     if (index % 4 != 0)
-        throw std::runtime_error("Invalid word access at " + std::to_string(index));
+        throw std::runtime_error("Invalid word access at " + hex_to_string(index));
 
     writeSideEffect(index);
     memory[index] = static_cast<std::byte>(value >> 24);
@@ -73,7 +80,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
 
 void Memory::halfTo(const uint32_t index, const int16_t value) {
     if (index % 2 != 0)
-        throw std::runtime_error("Invalid half-word access at " + std::to_string(index));
+        throw std::runtime_error("Invalid half-word access at " + hex_to_string(index));
 
     writeSideEffect(index);
     memory[index] = static_cast<std::byte>(value >> 8);

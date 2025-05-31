@@ -151,6 +151,13 @@ std::vector<std::byte> f64ToBEByte(double f64) {
 }
 
 
+std::string hex_to_string(const uint32_t value) {
+    std::stringstream ss;
+    ss << "0x" << std::hex << value;
+    return ss.str();
+}
+
+
 std::string hexToInt(std::string hex) {
     const std::regex pattern("^[-]?0x[0-9a-fA-F]+$");
     if (!std::regex_match(hex, pattern))

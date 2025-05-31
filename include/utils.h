@@ -112,6 +112,14 @@ std::string hexToInt(std::string hex);
 
 
 /**
+ * Converts an integer to a hexadecimal string
+ * @param value The integer value to convert
+ * @return The hexadecimal string representation of the integer value
+ */
+std::string hex_to_string(uint32_t value);
+
+
+/**
  * Converts a string to an unsigned 32-bit integer wth bounds and error handling
  * @param str The string to convert
  * @return The unsigned 32-bit integer value of the string

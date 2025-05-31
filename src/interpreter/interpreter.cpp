@@ -80,8 +80,10 @@ void Interpreter::readMMIO() {
         istream.get(c);
 
     if (c) {
+        // Set the ready bit
         state.memory[input_ready + 3] = std::byte{1};
-        state.memory.wordTo(input_data, c);
+        // Set the input data byte
+        state.memory[input_data + 3] = static_cast<std::byte>(c);
     }
 
     // Clear error flags from peeking when stream is empty
@@ -125,7 +127,7 @@ void Interpreter::step() {
     if (pc >= TEXT_SEC_END)
         throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
     const int32_t instruction = state.memory.wordAt(pc);
-
+    // Increment program counter
     pc += 4;
 
     try {
@@ -295,8 +297,11 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             state.registers[Register::PC] = state.registers[rs];
             break;
         case InstructionCode::JALR: {
-            // Jump and link
+            // Link current PC to RA register
             state.registers[Register::RA] = state.registers[Register::PC]; // Already incremented
+            // Save stack pointer to frame pointer
+            state.registers[Register::FP] = state.registers[Register::SP];
+            // Jump to the address in rs
             state.registers[Register::PC] = state.registers[rs];
             break;
         }
@@ -395,9 +400,12 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
 
 
 void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
-    if (opCode == InstructionCode::JAL)
-        // Jump and link
+    if (opCode == InstructionCode::JAL) {
+        // Link current PC to RA register
         state.registers[Register::RA] = state.registers[Register::PC]; // PC incremented earlier
+        // Save stack pointer to frame pointer
+        state.registers[Register::FP] = state.registers[Register::SP];
+    }
 
     // Jump to the target address
     state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | address << 2;

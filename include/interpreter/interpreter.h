@@ -24,7 +24,7 @@ enum class IOMode {
 
 
 /**
- * The state of the interpreter, which includes the register file and memory
+ * The state of the interpreter, which includes the register file, memory, the heap, and debug info
  */
 struct State {
     /**
@@ -43,19 +43,19 @@ struct State {
     HeapAllocator heapAllocator;
 
     /**
-     * The main memory map between indices and the locators for their source code
+     * The main memory map between indices and the locators for their source code, used for errors
      */
     std::unordered_map<uint32_t, std::shared_ptr<SourceLocator>> debugInfo;
 
     /**
-     * Gets the source line locator for the given address
+     * Gets the source line locator for the given executable address
      * @param addr The address to get the source line for
      * @return The source line locator corresponding to the given address
      */
     SourceLocator getDebugInfo(uint32_t addr) const;
 
     /**
-     * Loads a program and initial static data into memory, along with line markers for loaded data
+     * Loads a program and initial static data into memory, along with source locators for text
      * @param layout The memory layout to load
      */
     void loadProgram(const MemLayout& layout);
@@ -145,7 +145,7 @@ public:
     void step();
 
     /**
-     * Initializes a program and executes until an exit syscall or exception occurs
+     * Initializes a program and steps until an exit syscall or exception occurs
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */

@@ -84,6 +84,7 @@ void Postprocessor::collectGlobals(std::vector<std::pair<std::string, LineTokens
             throw MasmSyntaxError("Invalid global label declaration", line.filename, line.lineno);
 
         globals.emplace_back(line.tokens[1].value, line);
+        // Remove the global declaration line from the file
         tokenizedFile.erase(tokenizedFile.begin() + i);
         i--;
     }
@@ -101,17 +102,20 @@ void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
 
             const std::vector eqvValue(line.tokens.begin() + 2, line.tokens.end());
             eqvMapping[line.tokens[1]] = {line.filename, line.lineno, eqvValue};
+            // Remove the eqv declaration line from the file
             tokenizedFile.erase(tokenizedFile.begin() + i);
             i--;
             continue;
         }
 
+        // Replace any label references with their eqv values
         for (size_t j = 0; j < line.tokens.size(); j++) {
             if (line.tokens[j].type != TokenType::LABEL_REF)
                 continue;
 
             auto it = eqvMapping.find(line.tokens[j]);
             if (it != eqvMapping.end()) {
+                // Replace the label reference with the eqv value
                 line.tokens.erase(line.tokens.begin() + j);
                 line.tokens.insert(line.tokens.begin() + j, it->second.tokens.begin(),
                                    it->second.tokens.end());
@@ -220,8 +224,10 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
     const size_t macroEndIdx = pos + macro.body.size();
 
     Macro mangledMacro = mangleMacroLabels(macro, pos);
+    // Insert the mangled macro body into the tokenized file
     tokenizedFile.insert(tokenizedFile.begin() + pos, mangledMacro.body.begin(),
                          mangledMacro.body.end());
+    // Remove the macro call line
     tokenizedFile.erase(tokenizedFile.begin() + pos + mangledMacro.body.size());
 
     // Replace macro parameters with arguments
@@ -247,34 +253,43 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
     std::unordered_map<std::string, Macro> macroMap;
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
+        // If the line is a macro declaration
         if (line.tokens[0].type == TokenType::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].type != TokenType::LABEL_REF)
                 throw MasmSyntaxError("Invalid macro declaration", line.filename, line.lineno);
 
             Macro macro = {line.tokens[1].value, {}, {}};
+            // If the macro has parameters, parse them
             macro.params = parseMacroParams(line);
+            // Process the macro body until the end_macro directive
             while (true) {
                 i++;
+                // If we reach the end of the file without finding an end_macro directive
                 if (i >= tokenizedFile.size())
                     throw MasmSyntaxError("Unmatched macro declaration", line.filename,
                                           line.lineno);
 
+                // If we find an end_macro directive, break out of the loop
                 if (tokenizedFile[i].tokens[0].type == TokenType::META_DIRECTIVE &&
                     tokenizedFile[i].tokens[0].value == "end_macro")
                     break;
 
+                // If we find a label reference that matches a macro, expand it
                 if (tokenizedFile[i].tokens[0].type == TokenType::LABEL_REF &&
                     macroMap.contains(tokenizedFile[i].tokens[0].value))
                     expandMacro(macroMap[tokenizedFile[i].tokens[0].value], i, tokenizedFile);
             }
+            // Store the macro in the map and remove the macro declaration from the file
             macro.body =
                     std::vector(tokenizedFile.begin() + macroStart + 1, tokenizedFile.begin() + i);
             macroMap[macro.name] = macro;
             tokenizedFile.erase(tokenizedFile.begin() + macroStart, tokenizedFile.begin() + i + 1);
             i = macroStart - 1;
-        } else if (line.tokens[0].type == TokenType::LABEL_REF &&
-                   macroMap.contains(line.tokens[0].value))
+        }
+        // If the line is a label reference that matches a macro, expand it
+        else if (line.tokens[0].type == TokenType::LABEL_REF &&
+                 macroMap.contains(line.tokens[0].value))
             expandMacro(macroMap[line.tokens[0].value], i, tokenizedFile);
     }
 }

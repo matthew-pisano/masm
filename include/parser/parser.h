@@ -6,11 +6,10 @@
 #define PARSER_H
 
 #include <cstdint>
-#include <map>
 
 #include "interpreter/memory.h"
-#include "tokenizer/tokenizer.h"
 #include "labels.h"
+#include "tokenizer/tokenizer.h"
 
 
 /**

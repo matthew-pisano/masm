@@ -5,7 +5,6 @@
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <array>
 #include <string>
 #include <vector>
 
@@ -23,7 +22,7 @@ enum class TokenType {
     INSTRUCTION,
     REGISTER,
     IMMEDIATE,
-    SEPERATOR,
+    SEPERATOR, // Used to separate tokens, such as commas
     OPEN_PAREN,
     CLOSE_PAREN,
     STRING,
@@ -32,7 +31,7 @@ enum class TokenType {
 
 
 /**
- * Returns a string representation of the given token type
+ * Returns a string representation (name) of the given token type
  * @param t The token type to parse
  * @return The string representation
  */
@@ -59,9 +58,19 @@ struct SourceFile {
  * Class containing the type and text value of a token
  */
 struct Token {
+    /**
+     * The type of the token, used to determine how to parse it
+     */
     TokenType type;
+
+    /**
+     * The text value of the token, which is the raw string representation
+     */
     std::string value;
 
+    /**
+     * Constructs a token with the given type and value (used for mappings with tokens as keys)
+     */
     struct HashFunction {
         size_t operator()(const Token& token) const {
             const size_t typeHash = std::hash<int>()(static_cast<int>(token.type));
@@ -80,8 +89,19 @@ std::ostream& operator<<(std::ostream& os, const Token& t);
  * Class to represent a tokenized line of source code
  */
 struct LineTokens {
+    /**
+     * The name of the source file this line belongs to, used for error reporting
+     */
     std::string filename;
+
+    /**
+     * The line number of the source code, used for error reporting
+     */
     size_t lineno;
+
+    /**
+     * The tokens in this line, which are the parsed tokens from the source code
+     */
     std::vector<Token> tokens;
 };
 
@@ -93,9 +113,6 @@ bool operator!=(const LineTokens& lhs, const LineTokens& rhs);
  * Class to tokenize incoming source code lines into parsable tokens
  */
 class Tokenizer {
-
-    const static std::array<std::string, 4> secDirectives;
-    const static std::array<std::string, 5> metaDirectives;
 
     /**
      * A helper function that terminates the current token and starts a new one

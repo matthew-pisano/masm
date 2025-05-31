@@ -5,10 +5,16 @@
 #ifndef DIRECTIVE_H
 #define DIRECTIVE_H
 
+#include <array>
 #include <cstdint>
 #include <vector>
 
 #include "tokenizer/tokenizer.h"
+
+
+const std::array<std::string, 4> MEM_SEC_DIRECTIVES = {"data", "text", "kdata", "ktext"};
+const std::array<std::string, 5> META_DIRECTIVES = {"globl", "eqv", "macro", "end_macro",
+                                                    "include"};
 
 
 /**
@@ -31,6 +37,7 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
  */
 std::tuple<std::vector<std::byte>, size_t>
 parsePaddedAllocDirective(uint32_t loc, const Token& dirToken, const std::vector<Token>& args);
+
 
 /**
  * Parses a directive and its arguments into bytes that can be allocated to memory

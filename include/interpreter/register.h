@@ -16,6 +16,9 @@
  */
 enum class Register {
     ZERO,
+    /**
+     * Assembler temporary register, used when executing decomposed pseudo instructions
+     */
     AT,
     V0,
     V1,
@@ -41,14 +44,41 @@ enum class Register {
     S7,
     T8,
     T9,
+    /**
+     * Kernel-reserved register
+     */
     K0,
+    /**
+     * Kernel-reserved register
+     */
     K1,
+    /**
+     * Stores a pointer to the global area of mmeory
+     */
     GP,
+    /**
+     * Stores the current address of the stack head
+     */
     SP,
+    /**
+     * Stores the base address of the stack at the beginning of the current procedure
+     */
     FP,
+    /**
+     * Stores the return address of the current procedure
+     */
     RA,
+    /**
+     * The program counter, used to track which instruction is being executed
+     */
     PC,
+    /**
+     * Stores the high-order bits of a 64-bit operation, like multiplication or division
+     */
     HI,
+    /**
+     * Stores the low-order bits of a 64-bit operation, like multiplication or division
+     */
     LO
 };
 

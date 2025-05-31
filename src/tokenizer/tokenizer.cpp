@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "exceptions.h"
+#include "parser/directive.h"
 #include "parser/instruction.h"
 #include "tokenizer/postprocessor.h"
 #include "utils.h"
@@ -43,13 +44,10 @@ std::ostream& operator<<(std::ostream& os, const Token& t) {
 }
 
 
-const std::array<std::string, 4> Tokenizer::secDirectives = {"data", "text", "kdata", "ktext"};
-const std::array<std::string, 5> Tokenizer::metaDirectives = {"globl", "eqv", "macro", "end_macro",
-                                                              "include"};
-
-
 std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourceFiles) {
     std::map<std::string, std::vector<LineTokens>> rawProgramMap;
+
+    // Tokenize each source file and process base addressing
     for (const auto& rawFile : sourceFiles) {
         std::vector<LineTokens> fileTokens = tokenizeFile(rawFile);
         Postprocessor::processBaseAddressing(fileTokens);
@@ -60,6 +58,8 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
     Postprocessor::processIncludes(rawProgramMap);
 
     std::map<std::string, std::vector<LineTokens>> programMap;
+
+    // Process macros and eqv directives in each file
     for (std::pair<const std::string, std::vector<LineTokens>>& fileTokens : rawProgramMap) {
         Postprocessor::replaceEqv(fileTokens.second);
         Postprocessor::processMacros(fileTokens.second);
@@ -69,6 +69,7 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
     // Mangle labels in files
     Postprocessor::mangleLabels(programMap);
 
+    // Combine all tokenized lines into a single program vector
     std::vector<LineTokens> program;
     for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap)
         program.insert(program.end(), programFile.second.begin(), programFile.second.end());
@@ -80,6 +81,7 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
 std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
     std::vector<LineTokens> tokenizedFile = {};
 
+    // Split the source code into lines
     std::stringstream ss(sourceFile.source);
     std::string line;
     std::vector<std::string> sourceLines;
@@ -87,7 +89,8 @@ std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
         sourceLines.push_back(line);
 
     for (size_t i = 0; i < sourceLines.size(); ++i) {
-        std::vector<LineTokens> tokenizedLines = tokenizeLine(sourceLines[i], sourceFile.name, i + 1);
+        std::vector<LineTokens> tokenizedLines =
+                tokenizeLine(sourceLines[i], sourceFile.name, i + 1);
 
         for (LineTokens& tokenLine : tokenizedLines)
             // Skip empty or comment lines
@@ -173,6 +176,7 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
         }
     }
 
+    // If the current token is not terminated before the end of the file (usually with strings)
     if (!currentToken.empty())
         throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", filename,
                               lineno);
@@ -198,11 +202,11 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
 
     // Reassign directive as section directive if directive is data, text, etc.
     if (currentType == TokenType::ALLOC_DIRECTIVE &&
-        std::ranges::find(secDirectives, currentToken) != secDirectives.end())
+        std::ranges::find(MEM_SEC_DIRECTIVES, currentToken) != MEM_SEC_DIRECTIVES.end())
         currentType = TokenType::SEC_DIRECTIVE;
     // Reassign directive as meta directive if directive is .globl, .macro, etc.
     else if (currentType == TokenType::ALLOC_DIRECTIVE &&
-             std::ranges::find(metaDirectives, currentToken) != metaDirectives.end())
+             std::ranges::find(META_DIRECTIVES, currentToken) != META_DIRECTIVES.end())
         currentType = TokenType::META_DIRECTIVE;
 
     // Correct for labels put at beginning of line

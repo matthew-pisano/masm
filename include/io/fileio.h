@@ -18,8 +18,7 @@ std::string readFile(const std::string& fileName);
 
 
 /**
- * Loads a file and returns its contents as a vector of bytes, where each byte is a character in the
- * file.
+ * Loads a file and returns its contents as a vector of bytes (characters)
  * @param fileName The name of the file to load
  * @return A vector of the bytes within the given file
  */

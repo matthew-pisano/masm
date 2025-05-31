@@ -11,11 +11,15 @@
 #include "tokenizer.h"
 
 
+/**
+ * A class that post-processes a tokenized file to perform various transformations like managing
+ * global definitions and defining/expanding macros
+ */
 class Postprocessor {
 
     /**
      * Adds all global declarations to the globals vector and removes declarations from file
-     * @param globals The vector to add global declarations to along with their original lines
+     * @param globals The vector to add global declarations to, along with their original lines
      * @param tokenizedFile The tokenized file to collect and prune globals from
      */
     static void collectGlobals(std::vector<std::pair<std::string, LineTokens>>& globals,
@@ -23,7 +27,7 @@ class Postprocessor {
 
     /**
      * A helper function that mangles labels in the given line of tokens
-     * @param globals The vector of global labels to check against
+     * @param globals The vector of global labels to check against (skipped by mangling)
      * @param lineTokens The line of tokens to mangle
      * @param fileId The file ID to append to the label
      * @return The label declaration found, if any
@@ -42,8 +46,19 @@ class Postprocessor {
      * A struct representing a macro
      */
     struct Macro {
+        /**
+         * The name of the macro
+         */
         std::string name;
+
+        /**
+         * The parameters of the macro, if any
+         */
         std::vector<Token> params;
+
+        /**
+         * The original line of tokens that declared the macro
+         */
         std::vector<LineTokens> body;
     };
 

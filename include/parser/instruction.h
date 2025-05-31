@@ -89,9 +89,16 @@ bool operator==(uint32_t lhs, InstructionCode code);
 
 
 /**
- * Class representing all valid instruction types and sub-types (used for mapping arguments)
+ * Class representing all valid instruction types and subtypes (used for mapping arguments)
  */
 enum class InstructionType {
+    // D -> Destination Register
+    // S -> First Source Register
+    // T -> Second Source Register
+    // H -> Shift Amount (shamt)
+    // I -> Immediate Value
+    // L -> Label Reference
+
     R_TYPE_D_S_T, // R-Type
     R_TYPE_D_T_H, // R-Type with shamt
     R_TYPE_D, // R-Type with only destination register
@@ -108,11 +115,23 @@ enum class InstructionType {
 
 
 /**
- * Class Detailing the details of a specific instruction
+ * Class holding the details of a specific instruction
  */
 struct InstructionOp {
+    /**
+     * The type of instruction, which determines how the arguments are interpreted
+     */
     InstructionType type;
+
+    /**
+     * The function code or operation code associated with the instruction
+     */
     InstructionCode opFuncCode;
+
+    /**
+     * The size of the instruction in bytes, used for memory allocation and alignment.
+     * This is usually 4 bytes for most instructions, but can vary for pseudo instructions.
+     */
     uint8_t size;
 };
 

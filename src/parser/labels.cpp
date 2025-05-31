@@ -49,6 +49,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
             switch (firstToken.type) {
                 case TokenType::SEC_DIRECTIVE: {
                     currSection = nameToMemSection(firstToken.value);
+                    // Init memory section if it is not already in the mapping
                     if (!memSizes.contains(currSection))
                         memSizes[currSection] = 0;
                     break;
@@ -76,6 +77,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                     if (labelMap.contains(firstToken.value) ||
                         std::ranges::find(pendingLabels, firstToken.value) != pendingLabels.end())
                         throw std::runtime_error("Duplicate label '" + firstToken.value + "'");
+                    // Add to pending labels (address resolved to next instruction/directive)
                     pendingLabels.push_back(firstToken.value);
                     break;
                 }
