@@ -75,7 +75,12 @@ int main(const int argc, char* argv[]) {
         return app.exit(e);
     }
 
-    const std::string projectName = getFileBasename(inputFileNames[0]);
+    std::string projectName = getFileBasename(inputFileNames[0]);
+    // Split off extension
+    const size_t extPos = projectName.find_last_of('.');
+    if (extPos != std::string::npos)
+        projectName.erase(extPos); // Remove extension if it exists
+
     try {
         std::vector<SourceFile> programLines;
         programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
