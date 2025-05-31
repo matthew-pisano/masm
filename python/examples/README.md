@@ -9,7 +9,7 @@ This directory contains several example usages of the `pymasm` package build by 
     * Reading output from the `ostream` provided to the interpreter.
 
 * [syscall.py](syscall.py) contains additionally functionality related to *syscall I/O*:
-    * Reading input from the `istream` provided to the interpreter.
+    * Sending input to the `istream` provided to the interpreter.
     * Manually initializing the program.
     * Manually stepping through the program and taking output.
 
