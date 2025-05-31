@@ -78,6 +78,9 @@ void Interpreter::readMMIO() {
         state.memory[input_ready + 3] = std::byte{1};
         state.memory.wordTo(input_data, c);
     }
+
+    // Clear error flags from peeking when stream is empty
+    istream.clear();
 }
 
 

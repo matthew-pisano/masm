@@ -71,6 +71,9 @@ class TestBindings:
         interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
         interpreter.init_program(layout)
 
+        # Dummy step before writing to input stream to test error flag clearing
+        interpreter.step()
+
         chars = [b'd', b'c', b'b', b'a']
 
         while True:
