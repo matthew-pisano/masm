@@ -131,9 +131,11 @@ PYBIND11_MODULE(pymasm_core, m) {
 
     // Binding for the MemSection enum
     py::enum_<MemSection>(parser_module, "MemSection")
-            .value("TEXT", MemSection::TEXT)
             .value("DATA", MemSection::DATA)
             .value("HEAP", MemSection::HEAP)
+            .value("GLOBAL", MemSection::GLOBAL)
+            .value("STACK", MemSection::STACK)
+            .value("TEXT", MemSection::TEXT)
             .value("KTEXT", MemSection::KTEXT)
             .value("KDATA", MemSection::KDATA)
             .value("MMIO", MemSection::MMIO);

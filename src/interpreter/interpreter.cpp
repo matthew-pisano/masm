@@ -22,6 +22,8 @@ void State::loadProgram(const MemLayout& layout) {
         for (size_t i = 0; i < pair.second.size(); i++) {
             uint32_t memOffset = memSectionOffset(pair.first) + i;
             memory[memOffset] = pair.second[i];
+
+            // Add debug info from layout if the address is executable text
             if (isSectionExecutable(pair.first)) {
                 const std::shared_ptr<SourceLocator> sourceLine =
                         layout.debugInfo.at(pair.first).at(i);
@@ -35,8 +37,11 @@ void Interpreter::initProgram(const MemLayout& layout) {
     state.loadProgram(layout);
     // Initialize PC to the start of the text section
     state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));
-    state.registers[Register::SP] = 0x7FFFFFFC;
-    state.registers[Register::GP] = 0x10008000;
+    // Initialize the stack registers
+    state.registers[Register::FP] = static_cast<int32_t>(memSectionOffset(MemSection::STACK));
+    state.registers[Register::SP] = static_cast<int32_t>(memSectionOffset(MemSection::STACK));
+    // Initialize the global pointer to the start of the global section
+    state.registers[Register::GP] = static_cast<int32_t>(memSectionOffset(MemSection::GLOBAL));
     // Set MMIO output ready bit to 1
     state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
 }

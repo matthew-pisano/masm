@@ -94,18 +94,14 @@ std::byte& Memory::operator[](const uint32_t index) { return memory[index]; }
 
 
 MemSection nameToMemSection(const std::string& name) {
-    if (name == "text")
-        return MemSection::TEXT;
     if (name == "data")
         return MemSection::DATA;
-    if (name == "heap")
-        return MemSection::HEAP;
+    if (name == "text")
+        return MemSection::TEXT;
     if (name == "ktext")
         return MemSection::KTEXT;
     if (name == "kdata")
         return MemSection::KDATA;
-    if (name == "mmio")
-        return MemSection::MMIO;
     // Should never be reached
     throw std::runtime_error("Unknown memory directive " + name);
 }
@@ -116,7 +112,11 @@ uint32_t memSectionOffset(const MemSection section) {
         case MemSection::DATA:
             return 0x10010000;
         case MemSection::HEAP:
-            return 0x10040000;
+            return 0x10040000; // Heap grows upwards, so this is the start of the heap
+        case MemSection::GLOBAL:
+            return 0x10008000;
+        case MemSection::STACK:
+            return 0x7fffeffc; // Stack grows downwards, so this is the top of the stack
         case MemSection::TEXT:
             return 0x00400000;
         case MemSection::KDATA:

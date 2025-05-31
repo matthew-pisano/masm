@@ -24,7 +24,25 @@ constexpr int32_t TEXT_SEC_END = 0x10000000;
 /**
  * Class representing valid, named sections of memory
  */
-enum class MemSection { DATA, HEAP, TEXT, KTEXT, KDATA, MMIO };
+enum class MemSection { DATA, HEAP, GLOBAL, STACK, TEXT, KTEXT, KDATA, MMIO };
+
+
+/**
+ * Returns the memory section associated with a mnemonic
+ * @param name The name of the memory section
+ * @return The associated memory section
+ * @throw runtime_error When an invalid memory section is named
+ */
+MemSection nameToMemSection(const std::string& name);
+
+
+/**
+ * Returns the static offset of a named memory section
+ * @param section The section of memory
+ * @return The memory offset in bytes
+ * @throw runtime_error When an invalid memory section is passed
+ */
+uint32_t memSectionOffset(MemSection section);
 
 
 /**
@@ -133,24 +151,6 @@ public:
     std::byte operator[](uint32_t index) const;
     std::byte& operator[](uint32_t index);
 };
-
-
-/**
- * Returns the memory section associated with a mnemonic
- * @param name The name of the memory section
- * @return The associated memory section
- * @throw runtime_error When an invalid memory section is named
- */
-MemSection nameToMemSection(const std::string& name);
-
-
-/**
- * Returns the static offset of a named memory section
- * @param section The section of memory
- * @return The memory offset in bytes
- * @throw runtime_error When an invalid memory section is passed
- */
-uint32_t memSectionOffset(MemSection section);
 
 
 /**
