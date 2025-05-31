@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 
 import pymasm
@@ -83,7 +84,7 @@ class TestBindings:
                     # Save the current position so interpreter can read from where it left off
                     pos = istream.tell()
                     # Seek to the end to append a character
-                    istream.seek(len(istream.getvalue()))
+                    istream.seek(0, os.SEEK_END)
                     istream.write(chars.pop())
                     # Restore the saved position for reading
                     istream.seek(pos)

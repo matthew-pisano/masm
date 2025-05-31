@@ -12,3 +12,7 @@ This directory contains several example usages of the `pymasm` package build by 
     * Reading input from the `istream` provided to the interpreter.
     * Manually initializing the program.
     * Manually stepping through the program and taking output.
+
+* [mmio.py](mmio.py) contains an example for using *MMIO*:
+    * Inputs sent to the program over time at sparse timesteps
+    * Outputs gotten from the program over time at sparse timesteps
