@@ -69,7 +69,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             break;
         }
         case TokenType::LABEL_DEF:
-            break;  // Ignore label definitions, they do not add any additional memory allocations
+            break; // Ignore label definitions, they do not add any additional memory allocations
         default:
             throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
     }
@@ -96,8 +96,6 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
     // Throw error if pattern for instruction is invalid
     validateInstruction(instrToken, args);
 
-    RegisterFile regFile{};
-
     // Resolve label references to their computed address values
     labelMap.resolveLabels(args);
 
@@ -115,7 +113,7 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
                     argCodes.push_back(stoui32(arg.value));
                 else
                     // Otherwise, use the register name to get the index
-                    argCodes.push_back(regFile.indexFromName(arg.value));
+                    argCodes.push_back(RegisterFile::indexFromName(arg.value));
                 break;
             }
             default:
