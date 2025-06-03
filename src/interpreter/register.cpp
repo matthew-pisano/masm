@@ -24,3 +24,14 @@ int32_t RegisterFile::operator[](const Register index) const {
 int32_t& RegisterFile::operator[](const Register index) {
     return registers.at(static_cast<size_t>(index));
 }
+
+
+int32_t Coproc0RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
+int32_t& Coproc0RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
+
+int32_t Coproc0RegisterFile::operator[](const Register index) const {
+    return registers.at(static_cast<size_t>(index));
+}
+int32_t& Coproc0RegisterFile::operator[](const Register index) {
+    return registers.at(static_cast<size_t>(index));
+}

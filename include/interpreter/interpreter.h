@@ -64,6 +64,11 @@ struct State {
     RegisterFile registers;
 
     /**
+     * The coprocessor 0 register file, which contains special registers for handling exceptions
+     */
+    Coproc0RegisterFile cp0;
+
+    /**
      * The main memory of the interpreter, which contains the program code and data
      */
     Memory memory;
