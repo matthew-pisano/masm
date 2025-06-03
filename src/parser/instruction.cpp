@@ -75,6 +75,9 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         // Syscall
         {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
 
+        // Eret
+        {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
+
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"la", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},

@@ -193,6 +193,11 @@ void Interpreter::step() {
             execSyscall(ioMode, state, istream, ostream);
             return;
         }
+        if (instruction == 0x42000018) {
+            // Eret instruction
+            execEret();
+            return;
+        }
 
         const uint32_t opCode = instruction >> 26 & 0x3F;
         if (opCode == 0) {
@@ -466,4 +471,14 @@ void Interpreter::execJType(const uint32_t opCode, const uint32_t address) {
 
     // Jump to the target address
     state.registers[Register::PC] = (state.registers[Register::PC] & 0xF0000000) | address << 2;
+}
+
+
+void Interpreter::execEret() {
+    // Restore the PC from the saved address in the EPC register
+    state.registers[Register::PC] = state.cp0[Coproc0Register::EPC];
+    state.cp0[Coproc0Register::EPC] = 0;
+
+    // Clear the cause register
+    state.cp0[Coproc0Register::CAUSE] = 0;
 }

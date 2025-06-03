@@ -68,6 +68,12 @@ class Parser {
     static std::vector<std::byte> parseSyscallInstruction();
 
     /**
+     * A specialized function to parse the eret instruction
+     * @return The memory allocation associated with the eret instruction
+     */
+    static std::vector<std::byte> parseEretInstruction();
+
+    /**
      * A more generalized function to parse pseudo instructions
      * @param loc The location in which the instruction will be placed into memory
      * @param instructionName The name of the pseudo instruction

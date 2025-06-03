@@ -145,6 +145,11 @@ class Interpreter {
     void execJType(uint32_t opCode, uint32_t address);
 
     /**
+     * Executes the ERET instruction, which returns from an exception handler
+     */
+    void execEret();
+
+    /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      * @return True if input was read successfully, false if no input is available
      */

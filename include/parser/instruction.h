@@ -74,6 +74,9 @@ enum class InstructionCode {
     // Syscall
     SYSCALL = 0x00,
 
+    // Eret
+    ERET = 0x00,
+
     // Remapped Instructions
     BGTZ = 0x07,
     BLEZ = 0x06,
@@ -110,6 +113,7 @@ enum class InstructionType {
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
     SYSCALL, // Syscall
+    ERET, // Eret instruction
     PSEUDO // Pseudo instruction
 };
 

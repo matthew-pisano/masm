@@ -147,8 +147,8 @@ public:
     int32_t operator[](uint32_t index) const;
     int32_t& operator[](uint32_t index);
 
-    int32_t operator[](Register index) const;
-    int32_t& operator[](Register index);
+    int32_t operator[](Coproc0Register index) const;
+    int32_t& operator[](Coproc0Register index);
 };
 
 #endif // REGISTER_H
