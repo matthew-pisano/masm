@@ -44,12 +44,32 @@ TEST_CASE("Test Print String Syscall") {
 
 
 TEST_CASE("Test Read Int Syscall") {
-    const std::string input = "42\n";
-    std::istringstream istream(input);
     State state;
-    readIntSyscall(state, istream);
 
-    REQUIRE(state.registers[Register::V0] == 42);
+    SECTION("Valid Input") {
+        const std::string input = "42\n";
+        std::istringstream istream(input);
+        readIntSyscall(state, istream);
+
+        REQUIRE(state.registers[Register::V0] == 42);
+    }
+
+    SECTION("Invalid Input") {
+        const std::string input = "invalid\n";
+        std::istringstream istream(input);
+
+        REQUIRE_THROWS_MATCHES(readIntSyscall(state, istream), std::runtime_error,
+                               Catch::Matchers::Message("Invalid input: invalid"));
+    }
+
+    SECTION("Out of Range Input") {
+        const std::string input = "99999999999999999999\n"; // Too large for int32_t
+        std::istringstream istream(input);
+
+        REQUIRE_THROWS_MATCHES(
+                readIntSyscall(state, istream), std::runtime_error,
+                Catch::Matchers::Message("Input out of range: 99999999999999999999"));
+    }
 }
 
 
@@ -70,20 +90,29 @@ TEST_CASE("Test Read String Syscall") {
 TEST_CASE("Test Heap Allocation Syscall") {
     State state;
 
-    state.registers[Register::A0] = 100;
-    heapAllocSyscall(state);
-    uint32_t address = state.registers[Register::V0];
-    REQUIRE(address == HEAP_BASE);
+    SECTION("Test Heap Allocation with Valid Size") {
+        state.registers[Register::A0] = 100;
+        heapAllocSyscall(state);
+        uint32_t address = state.registers[Register::V0];
+        REQUIRE(address == HEAP_BASE);
 
-    state.registers[Register::A0] = 50;
-    heapAllocSyscall(state);
-    address = state.registers[Register::V0];
-    REQUIRE(address == HEAP_BASE + 100);
+        state.registers[Register::A0] = 50;
+        heapAllocSyscall(state);
+        address = state.registers[Register::V0];
+        REQUIRE(address == HEAP_BASE + 100);
 
-    state.registers[Register::A0] = 200;
-    heapAllocSyscall(state);
-    address = state.registers[Register::V0];
-    REQUIRE(address == HEAP_BASE + 150);
+        state.registers[Register::A0] = 200;
+        heapAllocSyscall(state);
+        address = state.registers[Register::V0];
+        REQUIRE(address == HEAP_BASE + 150);
+    }
+
+    SECTION("Test Heap Allocation with Zero Size") {
+        state.registers[Register::A0] = 0;
+
+        REQUIRE_THROWS_MATCHES(heapAllocSyscall(state), std::runtime_error,
+                               Catch::Matchers::Message("Cannot allocate zero bytes"));
+    }
 }
 
 
@@ -144,21 +173,32 @@ TEST_CASE("Test Time Syscall") {
 
 TEST_CASE("Test Sleep Syscall") {
     State state;
-    state.registers[Register::A0] = 500;
 
-    const auto startDuration = std::chrono::system_clock::now().time_since_epoch();
-    const long startMillis =
-            std::chrono::duration_cast<std::chrono::milliseconds>(startDuration).count();
+    SECTION("Test Sleep with Valid Duration") {
+        state.registers[Register::A0] = 500;
 
-    sleepSyscall(state);
+        const auto startDuration = std::chrono::system_clock::now().time_since_epoch();
+        const long startMillis =
+                std::chrono::duration_cast<std::chrono::milliseconds>(startDuration).count();
 
-    const auto endDuration = std::chrono::system_clock::now().time_since_epoch();
-    const long endMillis =
-            std::chrono::duration_cast<std::chrono::milliseconds>(endDuration).count();
+        sleepSyscall(state);
 
-    // Check that the program continues after the sleep syscall
-    // Use a small tolerance to avoid errors
-    REQUIRE(std::abs(endMillis - startMillis - state.registers[Register::A0]) < 10);
+        const auto endDuration = std::chrono::system_clock::now().time_since_epoch();
+        const long endMillis =
+                std::chrono::duration_cast<std::chrono::milliseconds>(endDuration).count();
+
+        // Check that the program continues after the sleep syscall
+        // Use a small tolerance to avoid errors
+        REQUIRE(std::abs(endMillis - startMillis - state.registers[Register::A0]) < 10);
+    }
+
+
+    SECTION("Test Sleep with Negative Duration") {
+        state.registers[Register::A0] = -500;
+
+        REQUIRE_THROWS_MATCHES(sleepSyscall(state), std::runtime_error,
+                               Catch::Matchers::Message("Negative sleep time: -500"));
+    }
 }
 
 
