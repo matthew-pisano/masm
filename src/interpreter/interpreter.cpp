@@ -74,9 +74,9 @@ void Interpreter::readMMIO() {
 
     char c = 0;
     // Check if the input stream has characters to read
-    if (&istream == &std::cin && consoleHasChar()) {
+    if (&istream == &std::cin && consoleHasChar())
         c = consoleGetChar();
-    } else if (istream.peek() != std::char_traits<char>::eof())
+    else if (istream.peek() != std::char_traits<char>::eof())
         istream.get(c);
 
     if (c) {
@@ -99,7 +99,7 @@ void Interpreter::writeMMIO() {
     const uint32_t output_data = output_ready + 4;
 
     // Check if the output stream is ready to write
-    if (state.memory.wordAt(output_ready) == 0 || state.memory.wordAt(output_data) == 0)
+    if (state.memory.wordAt(output_ready) != 0)
         return;
 
     const char c = static_cast<char>(state.memory.wordAt(output_data));

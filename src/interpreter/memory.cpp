@@ -32,12 +32,18 @@ void Memory::writeSideEffect(const uint32_t index) {
     const uint32_t input_ready = memSectionOffset(MemSection::MMIO);
     const uint32_t input_data = input_ready + 4;
     const uint32_t output_ready = input_data + 4;
+    const uint32_t output_data = output_ready + 4;
 
     // Check if writing to input or output ready bits or input data word
     if ((index >= output_ready && index < output_ready + 4) ||
         (index >= input_ready && index < input_ready + 4) ||
         (index >= input_data && index < input_data + 4))
         throw std::runtime_error("Invalid write into read-only memory at " + hex_to_string(index));
+
+    // Check if writing to output data word
+    if (index >= output_data && index < output_data + 4)
+        // Reset output ready bit
+        memory[output_ready + 3] = std::byte{0};
 }
 
 
