@@ -74,6 +74,10 @@ enum class InstructionCode {
     // Syscall
     SYSCALL = 0x00,
 
+    // Co Processor 0 Instructions
+    MFC0 = 0x00, // Move from CP0
+    MTC0 = 0x04, // Move to CP0
+
     // Eret
     ERET = 0x00,
 
@@ -114,6 +118,7 @@ enum class InstructionType {
     J_TYPE_L, // J-Type
     SYSCALL, // Syscall
     ERET, // Eret instruction
+    CP0_TYPE_T_D, // Co-Processor 0 Type (Move from/to CP0)
     PSEUDO // Pseudo instruction
 };
 

@@ -155,6 +155,8 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
             return parseSyscallInstruction();
         case InstructionType::ERET:
             return parseEretInstruction();
+        case InstructionType::CP0_TYPE_T_D:
+            return parseCP0Instruction(opFuncCode, argCodes[0], argCodes[1]);
         case InstructionType::PSEUDO:
             return parsePseudoInstruction(loc, instrToken.value, args);
     }
@@ -210,6 +212,15 @@ std::vector<std::byte> Parser::parseSyscallInstruction() { return i32ToBEByte(0x
 
 
 std::vector<std::byte> Parser::parseEretInstruction() { return i32ToBEByte(0x42000018); }
+
+
+std::vector<std::byte> Parser::parseCP0Instruction(const uint32_t rs, const uint32_t rt,
+                                                   const uint32_t rd) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0x10 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
+                                 (rd & 0x1F) << 11 | (0 & 0x7FF);
+    return i32ToBEByte(instruction);
+}
 
 
 std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,

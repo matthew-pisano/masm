@@ -150,6 +150,11 @@ class Interpreter {
     void execEret();
 
     /**
+     * Executes the given CP0-Type instruction
+     */
+    void execCP0Type(uint32_t rs, uint32_t rt, uint32_t rd);
+
+    /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      * @return True if input was read successfully, false if no input is available
      */

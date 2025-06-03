@@ -74,6 +74,15 @@ class Parser {
     static std::vector<std::byte> parseEretInstruction();
 
     /**
+     * Parses a CP0 instruction into bytes that can be allocated to memory
+     * @param rs Stores operation of the instruction
+     * @param rt The index of the rt register
+     * @param rd The index of the rd register
+     * @return The memory allocation associated with the CP0 move instruction
+     */
+    static std::vector<std::byte> parseCP0Instruction(uint32_t rs, uint32_t rt, uint32_t rd);
+
+    /**
      * A more generalized function to parse pseudo instructions
      * @param loc The location in which the instruction will be placed into memory
      * @param instructionName The name of the pseudo instruction

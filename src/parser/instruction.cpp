@@ -78,6 +78,10 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         // Eret
         {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
 
+        // Co-Processor 0 Instructions
+        {"mfc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MFC0, 4}},
+        {"mtc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MTC0, 4}},
+
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"la", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
@@ -161,6 +165,15 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         case InstructionType::SYSCALL:
             if (!tokenTypeMatch({}, args))
                 throw std::runtime_error("Invalid format for Syscall");
+            break;
+        case InstructionType::ERET:
+            if (!tokenTypeMatch({}, args))
+                throw std::runtime_error("Invalid format for Eret instruction");
+            break;
+        case InstructionType::CP0_TYPE_T_D:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for Co-Processor 0 instruction " +
+                                         instruction.value);
             break;
         case InstructionType::PSEUDO:
             validatePseudoInstruction(instruction, args);

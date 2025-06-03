@@ -200,7 +200,15 @@ void Interpreter::step() {
         }
 
         const uint32_t opCode = instruction >> 26 & 0x3F;
-        if (opCode == 0) {
+        if (opCode == 0x10) {
+            // Co-Processor 0 instruction
+            const uint32_t rs = instruction >> 21 & 0x1F;
+            const uint32_t rt = instruction >> 16 & 0x1F;
+            const uint32_t rd = instruction >> 11 & 0x1F;
+
+            // Execute Co-Processor 0 instruction
+            execCP0Type(rs, rt, rd);
+        } else if (opCode == 0) {
             // R-Type instruction
             const uint32_t funct = instruction & 0x3F;
             const uint32_t rs = instruction >> 21 & 0x1F;
@@ -481,4 +489,22 @@ void Interpreter::execEret() {
 
     // Clear the cause register
     state.cp0[Coproc0Register::CAUSE] = 0;
+}
+
+
+void Interpreter::execCP0Type(const uint32_t rs, const uint32_t rt, const uint32_t rd) {
+    switch (static_cast<InstructionCode>(rs)) {
+        case InstructionCode::MFC0: {
+            // Move from CP0
+            state.registers[rt] = state.cp0[rd];
+            break;
+        }
+        case InstructionCode::MTC0: {
+            // Move to CP0
+            state.cp0[rd] = state.registers[rt];
+            break;
+        }
+        default:
+            throw std::runtime_error("Unknown Co-Processor 0 instruction " + std::to_string(rs));
+    }
 }
