@@ -38,6 +38,14 @@ enum class INTERP_CODE { KEYBOARD_INTERP = 0x0100, DISPLAY_INTERP = 0x0200 };
 
 
 /**
+ * Converts the value of the cause register to a human-readable error string
+ * @param cause The value of the cause register to convert
+ * @return A string representation of the cause register value
+ */
+std::string causeToString(uint32_t cause);
+
+
+/**
  * Enumeration of the I/O modes for the interpreter
  */
 enum class IOMode {
@@ -143,7 +151,12 @@ class Interpreter {
      */
     bool writeMMIO();
 
-    void except();
+    /**
+     * Handles exceptions that occur during execution
+     * @param cause The value of the cause register to send to the exception
+     * @throw MasmRuntimeError if no instruction is found at the interrupt handler address
+     */
+    void except(uint32_t cause);
 
 
 protected:

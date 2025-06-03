@@ -12,6 +12,39 @@
 #include "interpreter/syscalls.h"
 #include "io/consoleio.h"
 #include "parser/instruction.h"
+#include "utils.h"
+
+
+std::string causeToString(const uint32_t cause) {
+    if (cause & static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP))
+        return "MMIO read interrupt failed";
+    if (cause & static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP))
+        return "MMIO write interrupt failed";
+
+    const uint32_t excCode = cause & 0x007c; // Zero out all bits except for [2-6]
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD))
+        return "Failed to load address";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::ADDRESS_EXCEPTION_STORE))
+        return "Failed to store address";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::SYSCALL_EXCEPTION))
+        return "Failed to execute syscall";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::BREAKPOINT_EXCEPTION))
+        return "Failed to handle breakpoint";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::RESERVED_INSTRUCTION_EXCEPTION))
+        return "Attempted to execute reserved instruction";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION))
+        return "Integer overflow";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::TRAP_EXCEPTION))
+        return "Trap exception occurred";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION))
+        return "Division by zero";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::FLOATING_POINT_OVERFLOW))
+        return "Floating point overflow";
+    if (excCode == static_cast<uint32_t>(EXCEPT_CODE::FLOATING_POINT_UNDERFLOW))
+        return "Floating point underflow";
+
+    return "Unknown exception code: " + std::to_string(excCode);
+}
 
 
 SourceLocator State::getDebugInfo(const uint32_t addr) const { return *debugInfo.at(addr); }
@@ -61,7 +94,7 @@ int Interpreter::interpret(const MemLayout& layout) {
 }
 
 
-void Interpreter::readMMIO() {
+bool Interpreter::readMMIO() {
     if (ioMode != IOMode::MMIO)
         throw std::runtime_error("MMIO mode not enabled for reading input");
 
@@ -70,7 +103,7 @@ void Interpreter::readMMIO() {
 
     if (state.memory.wordAt(input_ready) != 0)
         // Return if the previous character has yet to be read by the program
-        return;
+        return false;
 
     char c = 0;
     // Check if the input stream has characters to read
@@ -88,10 +121,12 @@ void Interpreter::readMMIO() {
 
     // Clear error flags from peeking when stream is empty
     istream.clear();
+
+    return true;
 }
 
 
-void Interpreter::writeMMIO() {
+bool Interpreter::writeMMIO() {
     if (ioMode != IOMode::MMIO)
         throw std::runtime_error("MMIO mode not enabled for writing output");
 
@@ -100,7 +135,7 @@ void Interpreter::writeMMIO() {
 
     // Check if the output stream is ready to write
     if (state.memory.wordAt(output_ready) != 0)
-        return;
+        return false;
 
     const char c = static_cast<char>(state.memory.wordAt(output_data));
     ostream << c;
@@ -110,15 +145,37 @@ void Interpreter::writeMMIO() {
     state.memory[output_ready + 3] = std::byte{1};
     // Reset data word
     state.memory[output_data + 3] = std::byte{0};
+
+    return true;
+}
+
+
+void Interpreter::except(const uint32_t cause) {
+    // Check if exception handler is a valid address
+    const uint32_t handlerAddress = memSectionOffset(MemSection::KTEXT);
+    if (!state.memory.isValid(handlerAddress)) {
+        const int32_t pc = state.registers[Register::PC];
+        const SourceLocator pcSrc = state.getDebugInfo(pc);
+        const std::string what = std::format(
+                "Failed to handle exception ({}); no exception handler found at address {}",
+                causeToString(cause), hex_to_string(handlerAddress));
+        throw MasmRuntimeError(what, pc, pcSrc.filename, pcSrc.lineno);
+    }
 }
 
 
 void Interpreter::step() {
+    uint32_t cause = 0;
     // Update MMIO registers
     if (ioMode == IOMode::MMIO) {
-        readMMIO();
-        writeMMIO();
+        if (readMMIO())
+            cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
+        if (writeMMIO())
+            cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
+
+    if (cause)
+        except(cause);
 
     int32_t& pc = state.registers[Register::PC];
     if (!state.memory.isValid(pc))
