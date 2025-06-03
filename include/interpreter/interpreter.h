@@ -15,6 +15,29 @@
 
 
 /**
+ * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause register)
+ */
+enum class EXCEPT_CODE {
+    ADDRESS_EXCEPTION_LOAD = 0x0010,
+    ADDRESS_EXCEPTION_STORE = 0x0014,
+    SYSCALL_EXCEPTION = 0x0020,
+    BREAKPOINT_EXCEPTION = 0x0024,
+    RESERVED_INSTRUCTION_EXCEPTION = 0x0028,
+    ARITHMETIC_OVERFLOW_EXCEPTION = 0x0030,
+    TRAP_EXCEPTION = 0x0034,
+    DIVIDE_BY_ZERO_EXCEPTION = 0x003c,
+    FLOATING_POINT_OVERFLOW = 0x0040,
+    FLOATING_POINT_UNDERFLOW = 0x0044
+};
+
+
+/**
+ * The possible interrupt codes for keyboard and display input/output (bit [8-9] of cause register)
+ */
+enum class INTERP_CODE { KEYBOARD_INTERP = 0x0100, DISPLAY_INTERP = 0x0200 };
+
+
+/**
  * Enumeration of the I/O modes for the interpreter
  */
 enum class IOMode {
@@ -110,13 +133,17 @@ class Interpreter {
 
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
+     * @return True if input was read successfully, false if no input is available
      */
-    void readMMIO();
+    bool readMMIO();
 
     /**
      * Writes the MMIO output data word to output stream
+     * @return True if output was written successfully, false if no output is available
      */
-    void writeMMIO();
+    bool writeMMIO();
+
+    void except();
 
 
 protected:
