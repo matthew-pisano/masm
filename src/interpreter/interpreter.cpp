@@ -168,9 +168,15 @@ void Interpreter::step() {
     uint32_t cause = 0;
     // Update MMIO registers
     if (ioMode == IOMode::MMIO) {
-        if (readMMIO())
+        // Bit 0 is the interrupt enable bit
+        const uint32_t interpEnabled = state.cp0[Coproc0Register::STATUS] & 0x1;
+        const uint32_t keyboardEnabled = state.cp0[Coproc0Register::STATUS] &
+                                         static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
+        const uint32_t displayEnabled = state.cp0[Coproc0Register::STATUS] &
+                                        static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
+        if (readMMIO() && interpEnabled && keyboardEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
-        if (writeMMIO())
+        if (writeMMIO() && interpEnabled && displayEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
 
