@@ -78,9 +78,9 @@ void Interpreter::initProgram(const MemLayout& layout) {
     // Set MMIO output ready bit to 1
     state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
     // Enable interrupts
-    // Enable MMIO interrupts for keyboard and display
+    // Enable MMIO interrupt bits for keyboard and display
     state.cp0[Coproc0Register::STATUS] |= static_cast<int32_t>(INTERP_CODE::DISPLAY_INTERP) |
-                                          static_cast<int32_t>(INTERP_CODE::KEYBOARD_INTERP) | 0x1;
+                                          static_cast<int32_t>(INTERP_CODE::KEYBOARD_INTERP);
 }
 
 
@@ -177,8 +177,9 @@ void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
 
 void Interpreter::step() {
     uint32_t cause = 0;
-    // Update MMIO registers
-    if (ioMode == IOMode::MMIO) {
+    int32_t& pc = state.registers[Register::PC];
+    // Update MMIO registers if in MMIO mode and the PC is not in the KTEXT section
+    if (ioMode == IOMode::MMIO && pc < memSectionOffset(MemSection::KTEXT)) {
         // Bit 0 is the interrupt enable bit
         const uint32_t interpEnabled = state.cp0[Coproc0Register::STATUS] & 0x1;
         const uint32_t keyboardEnabled = state.cp0[Coproc0Register::STATUS] &
@@ -191,7 +192,6 @@ void Interpreter::step() {
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
 
-    int32_t& pc = state.registers[Register::PC];
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
     const SourceLocator pcSrc = state.getDebugInfo(pc);
