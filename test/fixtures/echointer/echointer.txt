@@ -1,0 +1,2 @@
+Hello there!q
+Program exited with code 0

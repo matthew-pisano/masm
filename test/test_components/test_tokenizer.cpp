@@ -474,3 +474,10 @@ TEST_CASE("Test Tokenize MMIO Input Output") {
     validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
+
+
+TEST_CASE("Test Tokenize Echo Interrupt") {
+    const std::string test_case = "echointer";
+    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+}

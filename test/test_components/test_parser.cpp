@@ -24,8 +24,9 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
                        const std::string& parsedFileName) {
     const std::vector<std::byte> parsedBytes = readFileBytes(parsedFileName);
 
-    std::vector memSecBytes = {static_cast<std::byte>(MemSection::DATA),
-                               static_cast<std::byte>(MemSection::TEXT)};
+    std::vector memSecBytes = {
+            static_cast<std::byte>(MemSection::DATA), static_cast<std::byte>(MemSection::TEXT),
+            static_cast<std::byte>(MemSection::KDATA), static_cast<std::byte>(MemSection::KTEXT)};
 
     MemLayout expectedMem;
     MemSection currSection;
@@ -253,6 +254,13 @@ TEST_CASE("Test Parse Syscall Input Output") {
 
 TEST_CASE("Test Parse MMIO Input Output") {
     const std::string test_case = "mmio";
+    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+}
+
+
+TEST_CASE("Test Parse Echo Interrupt") {
+    const std::string test_case = "echointer";
     validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
 }

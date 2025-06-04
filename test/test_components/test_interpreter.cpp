@@ -140,3 +140,12 @@ TEST_CASE("Test Execute MMIO Input Output") {
     validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }
+
+
+TEST_CASE("Test Execute Echo Interrupt") {
+    const std::string test_case = "echointer";
+    const std::string padding(50, '\0');
+    const std::string inputString = padding + "Hello there!q";
+    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+}

@@ -1,0 +1,49 @@
+01data
+04lastChar@masm_mangle_file_echointer.asm
+02word080
+01text
+04main@masm_mangle_file_echointer.asm
+06la07t709,05enable_rxint@masm_mangle_file_echointer.asm
+06jalr07t7
+04loop@masm_mangle_file_echointer.asm
+06la07t009,05lastChar@masm_mangle_file_echointer.asm
+06lw07t109,07t009,080
+06li07t209,08113
+06bne07t109,07t209,05loop@masm_mangle_file_echointer.asm
+04exit@masm_mangle_file_echointer.asm
+06li07v009,0810
+06syscall
+01ktext
+04interp@masm_mangle_file_echointer.asm
+06la07k009,05ihrSaveArea@masm_mangle_file_echointer.asm
+06sw07t009,07k009,080
+06sw07t109,07k009,084
+06sw07t209,07k009,088
+06sw07t309,07k009,0812
+06lui07t009,0865535
+06lw07t109,07t009,080
+06andi07t109,07t109,081
+06beq07t109,07009,05intDone@masm_mangle_file_echointer.asm
+06lw07t209,07t009,084
+06la07t309,05lastChar@masm_mangle_file_echointer.asm
+06sw07t209,07t309,080
+06lw07t109,07t009,088
+06andi07t109,07t109,081
+06beq07t109,07009,05intDone@masm_mangle_file_echointer.asm
+06sw07t209,07t009,0812
+04intDone@masm_mangle_file_echointer.asm
+06mfc007t009,0713
+06mtc007009,0713
+06lw07t009,07k009,080
+06lw07t109,07k009,084
+06lw07t209,07k009,088
+06lw07t309,07k009,0812
+06eret
+04enable_rxint@masm_mangle_file_echointer.asm
+06mfc007t009,0712
+06ori07t009,07t009,081
+06mtc007t009,0712
+06jr07ra
+01kdata
+04ihrSaveArea@masm_mangle_file_echointer.asm
+02space0816
