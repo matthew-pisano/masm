@@ -56,8 +56,8 @@ This program uses a 32 element array composed of 32-bit integers to represent it
     - [X] Macros/Eqv Directives
 - [X] Syntax and Runtime Errors
 - [X] Keyboard/Display MMIO
-- [ ] Interrupts
-    - [ ] MMIO Interrupts
-    - [ ] Exceptions
+- [X] Interrupts
+    - [X] MMIO Interrupts
+    - [X] Exceptions
 - [ ] Floating Point Coprocessor
     - [ ] Floating Point Syscalls
