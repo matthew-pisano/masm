@@ -78,9 +78,8 @@ TEST_CASE("Test Runtime Error") {
 
     REQUIRE_THROWS_MATCHES(
             interpreter.interpret(layout), MasmRuntimeError,
-            Catch::Matchers::Message(
-                    "Runtime error at 0x00400000 (test.asm:2) -> Division by zero in "
-                    "DIV instruction"));
+            Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "
+                                     "zero: Division by zero in DIV instruction (unhandled)"));
 }
 
 

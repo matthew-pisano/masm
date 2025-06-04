@@ -58,7 +58,7 @@ TEST_CASE("Test Read Int Syscall") {
         const std::string input = "invalid\n";
         std::istringstream istream(input);
 
-        REQUIRE_THROWS_MATCHES(readIntSyscall(state, istream), std::runtime_error,
+        REQUIRE_THROWS_MATCHES(readIntSyscall(state, istream), ExecExcept,
                                Catch::Matchers::Message("Invalid input: invalid"));
     }
 
@@ -67,7 +67,7 @@ TEST_CASE("Test Read Int Syscall") {
         std::istringstream istream(input);
 
         REQUIRE_THROWS_MATCHES(
-                readIntSyscall(state, istream), std::runtime_error,
+                readIntSyscall(state, istream), ExecExcept,
                 Catch::Matchers::Message("Input out of range: 99999999999999999999"));
     }
 }
@@ -110,7 +110,7 @@ TEST_CASE("Test Heap Allocation Syscall") {
     SECTION("Test Heap Allocation with Zero Size") {
         state.registers[Register::A0] = 0;
 
-        REQUIRE_THROWS_MATCHES(heapAllocSyscall(state), std::runtime_error,
+        REQUIRE_THROWS_MATCHES(heapAllocSyscall(state), ExecExcept,
                                Catch::Matchers::Message("Cannot allocate zero bytes"));
     }
 }
@@ -196,18 +196,9 @@ TEST_CASE("Test Sleep Syscall") {
     SECTION("Test Sleep with Negative Duration") {
         state.registers[Register::A0] = -500;
 
-        REQUIRE_THROWS_MATCHES(sleepSyscall(state), std::runtime_error,
+        REQUIRE_THROWS_MATCHES(sleepSyscall(state), ExecExcept,
                                Catch::Matchers::Message("Negative sleep time: -500"));
     }
-}
-
-
-TEST_CASE("Test Negative Sleep Syscall") {
-    State state;
-    state.registers[Register::A0] = -500;
-
-    REQUIRE_THROWS_MATCHES(sleepSyscall(state), std::runtime_error,
-                           Catch::Matchers::Message("Negative sleep time: -500"));
 }
 
 

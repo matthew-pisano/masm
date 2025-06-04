@@ -28,11 +28,11 @@ uint32_t HeapAllocator::nextFree(const uint32_t size) const {
 
 uint32_t HeapAllocator::allocate(const uint32_t size) {
     if (size == 0)
-        throw std::runtime_error("Cannot allocate zero bytes");
+        throw ExecExcept("Cannot allocate zero bytes", EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     const uint32_t address = nextFree(size);
     if (address >= HEAP_BASE + HEAP_SIZE)
-        throw std::runtime_error("Heap overflow");
+        throw ExecExcept("Heap overflow", EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     // Insert new block sequentially before the block with the next greatest address
     for (size_t i = 0; i < blockAddresses.size(); i++) {

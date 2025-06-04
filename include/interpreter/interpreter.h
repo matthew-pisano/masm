@@ -15,23 +15,6 @@
 
 
 /**
- * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause register)
- */
-enum class EXCEPT_CODE {
-    ADDRESS_EXCEPTION_LOAD = 0x0010,
-    ADDRESS_EXCEPTION_STORE = 0x0014,
-    SYSCALL_EXCEPTION = 0x0020,
-    BREAKPOINT_EXCEPTION = 0x0024,
-    RESERVED_INSTRUCTION_EXCEPTION = 0x0028,
-    ARITHMETIC_OVERFLOW_EXCEPTION = 0x0030,
-    TRAP_EXCEPTION = 0x0034,
-    DIVIDE_BY_ZERO_EXCEPTION = 0x003c,
-    FLOATING_POINT_OVERFLOW = 0x0040,
-    FLOATING_POINT_UNDERFLOW = 0x0044
-};
-
-
-/**
  * The possible interrupt codes for keyboard and display input/output (bit [8-9] of cause register)
  */
 enum class INTERP_CODE { KEYBOARD_INTERP = 0x0100, DISPLAY_INTERP = 0x0200 };
@@ -167,11 +150,18 @@ class Interpreter {
     bool writeMMIO();
 
     /**
+     * Handles an interrupt by executing the exception handler
+     * @param cause The value of the cause register to send to the interrupt handler
+     */
+    void interrupt(uint32_t cause);
+
+    /**
      * Handles exceptions that occur during execution
      * @param cause The value of the cause register to send to the exception
+     * @param excMsg A message to include in the exception
      * @throw MasmRuntimeError if no instruction is found at the interrupt handler address
      */
-    void except(uint32_t cause);
+    void except(uint32_t cause, const std::string& excMsg);
 
 
 protected:

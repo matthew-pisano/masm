@@ -65,7 +65,7 @@ public:
 
 
 /**
- * Execution to indicate that the program has terminated successfully eith the given code
+ * Execution to indicate that the program has terminated successfully with the given code
  */
 class ExecExit final : public std::runtime_error {
     int errorCode;
@@ -79,6 +79,41 @@ public:
      * @return The error code
      */
     [[nodiscard]] int code() const { return errorCode; }
+};
+
+
+/**
+ * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause register)
+ */
+enum class EXCEPT_CODE {
+    ADDRESS_EXCEPTION_LOAD = 0x0010,
+    ADDRESS_EXCEPTION_STORE = 0x0014,
+    SYSCALL_EXCEPTION = 0x0020,
+    BREAKPOINT_EXCEPTION = 0x0024,
+    RESERVED_INSTRUCTION_EXCEPTION = 0x0028,
+    ARITHMETIC_OVERFLOW_EXCEPTION = 0x0030,
+    TRAP_EXCEPTION = 0x0034,
+    DIVIDE_BY_ZERO_EXCEPTION = 0x003c,
+    FLOATING_POINT_OVERFLOW = 0x0040,
+    FLOATING_POINT_UNDERFLOW = 0x0044
+};
+
+
+/**
+ * Execution exception to indicate that an error has occurred during execution
+ */
+class ExecExcept final : public std::runtime_error {
+    EXCEPT_CODE causeCode;
+
+public:
+    explicit ExecExcept(const std::string& message, const EXCEPT_CODE code) :
+        std::runtime_error(message), causeCode(code) {}
+
+    /**
+     * Get the cause value of the exception
+     * @return The cause value
+     */
+    [[nodiscard]] EXCEPT_CODE cause() const { return causeCode; }
 };
 
 #endif // EXCEPTIONS_H

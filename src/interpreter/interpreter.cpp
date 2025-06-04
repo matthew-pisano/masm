@@ -77,6 +77,8 @@ void Interpreter::initProgram(const MemLayout& layout) {
     state.registers[Register::GP] = static_cast<int32_t>(memSectionOffset(MemSection::GLOBAL));
     // Set MMIO output ready bit to 1
     state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
+    // Enable interrupts
+    state.cp0[Coproc0Register::STATUS] = 0x1; // Set interrupt enable bit
 }
 
 
@@ -150,17 +152,23 @@ bool Interpreter::writeMMIO() {
 }
 
 
-void Interpreter::except(const uint32_t cause) {
+void Interpreter::interrupt(const uint32_t cause) { except(cause, ""); }
+
+
+void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
     // Check if exception handler is a valid address
     const uint32_t handlerAddress = memSectionOffset(MemSection::KTEXT);
+    const int32_t pc = state.registers[Register::PC] - 4;
     if (!state.memory.isValid(handlerAddress)) {
-        const int32_t pc = state.registers[Register::PC];
         const SourceLocator pcSrc = state.getDebugInfo(pc);
-        const std::string what = std::format(
-                "Failed to handle exception ({}); no exception handler found at address {}",
-                causeToString(cause), hex_to_string(handlerAddress));
+        const std::string what = std::format("{}: {} (unhandled)", causeToString(cause), excMsg);
         throw MasmRuntimeError(what, pc, pcSrc.filename, pcSrc.lineno);
     }
+
+    // Transfer control to exception handler
+    state.cp0[Coproc0Register::EPC] = pc; // Save PC before exception
+    state.cp0[Coproc0Register::CAUSE] = static_cast<int32_t>(cause);
+    state.registers[Register::PC] = static_cast<int32_t>(handlerAddress);
 }
 
 
@@ -180,9 +188,6 @@ void Interpreter::step() {
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
 
-    if (cause)
-        except(cause);
-
     int32_t& pc = state.registers[Register::PC];
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
@@ -192,6 +197,9 @@ void Interpreter::step() {
     const int32_t instruction = state.memory.wordAt(pc);
     // Increment program counter
     pc += 4;
+
+    if (cause)
+        interrupt(cause);
 
     try {
         if (instruction == 0x0000000C) {
@@ -238,6 +246,9 @@ void Interpreter::step() {
         }
     } catch (ExecExit&) {
         throw;
+    } catch (ExecExcept& e) {
+        cause = static_cast<uint32_t>(e.cause());
+        except(cause, e.what());
     } catch (std::runtime_error& e) {
         throw MasmRuntimeError(e.what(), pc - 4, pcSrc.filename, pcSrc.lineno);
     }
@@ -251,7 +262,8 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             const int64_t extResult = static_cast<int64_t>(state.registers[rs]) +
                                       static_cast<int64_t>(state.registers[rt]);
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw std::runtime_error("Integer overflow in ADD instruction");
+                throw ExecExcept("Integer overflow in ADD instruction",
+                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             state.registers[rd] = state.registers[rs] + state.registers[rt];
             break;
         }
@@ -263,14 +275,16 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             break;
         case InstructionCode::DIV: {
             if (state.registers[rt] == 0)
-                throw std::runtime_error("Division by zero in DIV instruction");
+                throw ExecExcept("Division by zero in DIV instruction",
+                                 EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
             state.registers[Register::LO] = state.registers[rs] / state.registers[rt];
             state.registers[Register::HI] = state.registers[rs] % state.registers[rt];
             break;
         }
         case InstructionCode::DIVU: {
             if (state.registers[rt] == 0)
-                throw std::runtime_error("Division by zero in DIVU instruction");
+                throw ExecExcept("Division by zero in DIVU instruction",
+                                 EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
             const uint32_t rsVal = state.registers[rs];
             const uint32_t rtVal = state.registers[rt];
             state.registers[Register::LO] = static_cast<int32_t>(rsVal / rtVal);
@@ -349,7 +363,8 @@ void Interpreter::execRType(const uint32_t funct, const uint32_t rs, const uint3
             const int64_t extResult = static_cast<int64_t>(state.registers[rs]) -
                                       static_cast<int64_t>(state.registers[rt]);
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw std::runtime_error("Integer overflow in SUB instruction");
+                throw ExecExcept("Integer overflow in SUB instruction",
+                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             state.registers[rd] = state.registers[rs] - state.registers[rt];
             break;
         }
@@ -399,7 +414,8 @@ void Interpreter::execIType(const uint32_t opCode, const uint32_t rs, const uint
         case InstructionCode::ADDI: {
             const int64_t extResult = static_cast<int64_t>(state.registers[rs]) + signExtImm;
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw std::runtime_error("Integer overflow in ADDI instruction");
+                throw ExecExcept("Integer overflow in ADDI instruction",
+                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             state.registers[rt] = state.registers[rs] + signExtImm;
             break;
         }
@@ -510,6 +526,7 @@ void Interpreter::execCP0Type(const uint32_t rs, const uint32_t rt, const uint32
             state.cp0[rd] = state.registers[rt];
             break;
         }
+        // Should never be reached
         default:
             throw std::runtime_error("Unknown Co-Processor 0 instruction " + std::to_string(rs));
     }
