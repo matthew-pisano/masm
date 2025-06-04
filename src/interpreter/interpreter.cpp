@@ -78,7 +78,9 @@ void Interpreter::initProgram(const MemLayout& layout) {
     // Set MMIO output ready bit to 1
     state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
     // Enable interrupts
-    state.cp0[Coproc0Register::STATUS] = 0x1; // Set interrupt enable bit
+    // Enable MMIO interrupts for keyboard and display
+    state.cp0[Coproc0Register::STATUS] |= static_cast<int32_t>(INTERP_CODE::DISPLAY_INTERP) |
+                                          static_cast<int32_t>(INTERP_CODE::KEYBOARD_INTERP) | 0x1;
 }
 
 
@@ -124,7 +126,8 @@ bool Interpreter::readMMIO() {
     // Clear error flags from peeking when stream is empty
     istream.clear();
 
-    return true;
+    // Return true if a character was read, false otherwise
+    return static_cast<bool>(c);
 }
 
 
@@ -182,9 +185,9 @@ void Interpreter::step() {
                                          static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         const uint32_t displayEnabled = state.cp0[Coproc0Register::STATUS] &
                                         static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        if (readMMIO() && interpEnabled && keyboardEnabled)
+        if (interpEnabled && keyboardEnabled && readMMIO())
             cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
-        if (writeMMIO() && interpEnabled && displayEnabled)
+        if (interpEnabled && displayEnabled && writeMMIO())
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
 

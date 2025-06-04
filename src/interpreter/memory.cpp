@@ -39,8 +39,7 @@ void Memory::writeSideEffect(const uint32_t index) {
     if ((index >= output_ready && index < output_ready + 4) ||
         (index >= input_ready && index < input_ready + 4) ||
         (index >= input_data && index < input_data + 4))
-        throw ExecExcept("Invalid write into read-only memory at " + hex_to_string(index),
-                         EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
+        throw std::runtime_error("Invalid write into read-only memory at " + hex_to_string(index));
 
     // Check if writing to output data word
     if (index >= output_data && index < output_data + 4)
