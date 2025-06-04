@@ -50,14 +50,14 @@ class MasmRuntimeError final : public MasmException {
      * @param filename The name of the source file that produced the error
      * @return The formatted message
      */
-    static std::string constructMessage(const std::string& message, const size_t addr,
+    static std::string constructMessage(const std::string& message, const uint32_t addr,
                                         const std::string& filename, const size_t lineno) {
         std::string hexAddr = std::format("0x{:08X}", addr);
         return std::format("Runtime error at {} ({}:{}) -> {}", hexAddr, filename, lineno, message);
     }
 
 public:
-    explicit MasmRuntimeError(const std::string& message, const size_t addr,
+    explicit MasmRuntimeError(const std::string& message, const uint32_t addr,
                               const std::string& filename, const size_t lineno) :
         MasmException(constructMessage(message, addr, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
