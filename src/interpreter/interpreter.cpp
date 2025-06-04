@@ -179,7 +179,7 @@ void Interpreter::step() {
     uint32_t cause = 0;
     int32_t& pc = state.registers[Register::PC];
     // Update MMIO registers if in MMIO mode and the PC is not in the KTEXT section
-    if (ioMode == IOMode::MMIO && pc < memSectionOffset(MemSection::KTEXT)) {
+    if (ioMode == IOMode::MMIO && static_cast<uint32_t>(pc) < memSectionOffset(MemSection::KTEXT)) {
         // Bit 0 is the interrupt enable bit
         const uint32_t interpEnabled = state.cp0[Coproc0Register::STATUS] & 0x1;
         const uint32_t keyboardEnabled = state.cp0[Coproc0Register::STATUS] &
