@@ -186,9 +186,9 @@ void Interpreter::step() {
                                          static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         const uint32_t displayEnabled = state.cp0[Coproc0Register::STATUS] &
                                         static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        if (interpEnabled && keyboardEnabled && readMMIO())
+        if (readMMIO() && interpEnabled && keyboardEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
-        if (interpEnabled && displayEnabled && writeMMIO())
+        if (writeMMIO() && interpEnabled && displayEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
     }
 
