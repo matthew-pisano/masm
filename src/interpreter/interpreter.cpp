@@ -201,8 +201,10 @@ void Interpreter::step() {
     // Increment program counter
     pc += 4;
 
-    if (cause)
+    if (cause) {
         interrupt(cause);
+        return;
+    }
 
     try {
         if (instruction == 0x0000000C) {
