@@ -114,6 +114,7 @@ enum class InstructionType {
 
     // SP -> Single Precision Floating Point
     // DP -> Double Precision Floating Point
+    // C -> Condition
 
     R_TYPE_D_S_T, // R-Type
     R_TYPE_D_T_H, // R-Type with shamt
@@ -135,8 +136,8 @@ enum class InstructionType {
     CP1_TYPE_SP_D_S_T,
     CP1_TYPE_DP_D_S_T,
     CP1_TYPE_L,
-    CP1_TYPE_SP_S_T,
-    CP1_TYPE_DP_S_T,
+    CP1_TYPE_SP_S_T_C,
+    CP1_TYPE_DP_S_T_C,
     CP1_TYPE_T_S,
     CP1_TYPE_T_L,
 

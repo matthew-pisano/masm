@@ -126,16 +126,17 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
     const uint32_t opFuncCode = static_cast<uint32_t>(instructionOp.opFuncCode);
     // Parse integer arguments into a single instruction word
     switch (instructionOp.type) {
+        // Core CPU Instructions
         case InstructionType::R_TYPE_D_S_T:
-            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0, opFuncCode);
+            return parseRTypeInstruction(argCodes[0], argCodes[1], argCodes[2], 0x00, opFuncCode);
         case InstructionType::R_TYPE_D_T_S:
-            return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0, opFuncCode);
+            return parseRTypeInstruction(argCodes[0], argCodes[2], argCodes[1], 0x00, opFuncCode);
         case InstructionType::R_TYPE_D_T_H:
-            return parseRTypeInstruction(argCodes[0], 0, argCodes[1], argCodes[2], opFuncCode);
+            return parseRTypeInstruction(argCodes[0], 0x00, argCodes[1], argCodes[2], opFuncCode);
         case InstructionType::R_TYPE_D:
-            return parseRTypeInstruction(argCodes[0], 0, 0, 0, opFuncCode);
+            return parseRTypeInstruction(argCodes[0], 0x00, 0x00, 0x00, opFuncCode);
         case InstructionType::R_TYPE_S:
-            return parseRTypeInstruction(0, argCodes[0], 0, 0, opFuncCode);
+            return parseRTypeInstruction(0x00, argCodes[0], 0x00, 0x00, opFuncCode);
         case InstructionType::I_TYPE_T_S_I:
             return parseITypeInstruction(loc, opFuncCode, argCodes[0], argCodes[1],
                                          static_cast<int32_t>(argCodes[2]));
@@ -145,18 +146,40 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
                                          static_cast<int32_t>(argCodes[2]));
         case InstructionType::I_TYPE_T_I:
             // Location not needed for short I-Type instructions
-            return parseITypeInstruction(0, opFuncCode, argCodes[0], 0,
+            return parseITypeInstruction(0x00, opFuncCode, argCodes[0], 0x00,
                                          static_cast<int32_t>(argCodes[1]));
         case InstructionType::R_TYPE_S_T:
-            return parseRTypeInstruction(0, argCodes[0], argCodes[1], 0, opFuncCode);
+            return parseRTypeInstruction(0x00, argCodes[0], argCodes[1], 0x00, opFuncCode);
         case InstructionType::J_TYPE_L:
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
-        case InstructionType::ERET:
-            return parseEretInstruction();
+
+        // Co-Processor 0 Instructions
         case InstructionType::CP0_TYPE_T_D:
             return parseCP0Instruction(opFuncCode, argCodes[0], argCodes[1]);
+        case InstructionType::ERET:
+            return parseEretInstruction();
+
+        // Co-Processor 1 Instructions (Floating Point)
+        case InstructionType::CP1_TYPE_SP_D_S:
+            return parseCP1RegInstruction(0x10, 0x00, argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_DP_D_S:
+            return parseCP1RegInstruction(0x11, 0x00, argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_SP_D_S_T:
+            return parseCP1RegInstruction(0x10, argCodes[2], argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_DP_D_S_T:
+            return parseCP1RegInstruction(0x11, argCodes[2], argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_L:
+            return parseCP1CondImmInstruction(opFuncCode, argCodes[0]);
+        case InstructionType::CP1_TYPE_SP_S_T_C:
+            return parseCP1CondInstruction(0x10, argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_DP_S_T_C:
+            return parseCP1CondInstruction(0x11, argCodes[1], argCodes[0], opFuncCode);
+        case InstructionType::CP1_TYPE_T_S:
+            return parseCP1RegImmInstruction(opFuncCode, argCodes[0], argCodes[1]);
+        case InstructionType::CP1_TYPE_T_L:
+            return parseCP1ImmInstruction(opFuncCode, argCodes[1], argCodes[0], argCodes[2]);
         case InstructionType::PSEUDO:
             return parsePseudoInstruction(loc, instrToken.value, args);
     }
@@ -214,11 +237,56 @@ std::vector<std::byte> Parser::parseSyscallInstruction() { return i32ToBEByte(0x
 std::vector<std::byte> Parser::parseEretInstruction() { return i32ToBEByte(0x42000018); }
 
 
-std::vector<std::byte> Parser::parseCP0Instruction(const uint32_t rs, const uint32_t rt,
+std::vector<std::byte> Parser::parseCP0Instruction(const uint32_t op, const uint32_t rt,
                                                    const uint32_t rd) {
     // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (0x10 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
-                                 (rd & 0x1F) << 11 | (0 & 0x7FF);
+    const uint32_t instruction = (0x10 & 0x3F) << 26 | (op & 0x1F) << 21 | (rt & 0x1F) << 16 |
+                                 (rd & 0x1F) << 11 | 0x00 & 0x7FF;
+    return i32ToBEByte(instruction);
+}
+
+
+std::vector<std::byte> Parser::parseCP1RegInstruction(const uint32_t fmt, const uint32_t ft,
+                                                      const uint32_t fs, const uint32_t fd,
+                                                      const uint32_t func) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
+                                 (fs & 0x1F) << 11 | (fd & 0x1F) << 6 | func & 0x3F;
+    return i32ToBEByte(instruction);
+}
+
+
+std::vector<std::byte> Parser::parseCP1RegImmInstruction(const uint32_t sub, const uint32_t ft,
+                                                         const uint32_t fs) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0x11 & 0x3F) << 26 | (sub & 0x1F) << 21 | (ft & 0x1F) << 16 |
+                                 (fs & 0x1F) << 11 | 0x00 & 0x7FF;
+    return i32ToBEByte(instruction);
+}
+
+
+std::vector<std::byte> Parser::parseCP1ImmInstruction(const uint32_t op, const uint32_t base,
+                                                      const uint32_t ft, const uint32_t offset) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction =
+            (op & 0x3F) << 26 | (base & 0x1F) << 21 | (ft & 0x1F) << 16 | (offset & 0xFFFF);
+    return i32ToBEByte(instruction);
+}
+
+std::vector<std::byte> Parser::parseCP1CondInstruction(const uint32_t fmt, const uint32_t ft,
+                                                       const uint32_t fs, const uint32_t func) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
+                                 (fs & 0x1F) << 11 | (0x00 & 0x07) << 8 | (0x00 & 0x03) << 6 |
+                                 (0x03 & 0x03) << 6 | func & 0xF;
+    return i32ToBEByte(instruction);
+}
+
+std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t tf,
+                                                          const uint32_t offset) {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0x11 & 0x3F) << 26 | (0x08 & 0x1F) << 21 | (0x00 & 0x07) << 18 |
+                                 (0x00 & 0x01) << 17 << (tf & 0x01) << 16 | offset & 0xFFFF;
     return i32ToBEByte(instruction);
 }
 

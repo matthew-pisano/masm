@@ -75,12 +75,25 @@ class Parser {
 
     /**
      * Parses a CP0 instruction into bytes that can be allocated to memory
-     * @param rs Stores operation of the instruction
+     * @param op Stores operation of the instruction
      * @param rt The index of the rt register
      * @param rd The index of the rd register
      * @return The memory allocation associated with the CP0 move instruction
      */
-    static std::vector<std::byte> parseCP0Instruction(uint32_t rs, uint32_t rt, uint32_t rd);
+    static std::vector<std::byte> parseCP0Instruction(uint32_t op, uint32_t rt, uint32_t rd);
+
+    static std::vector<std::byte> parseCP1RegInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
+                                                         uint32_t fd, uint32_t func);
+
+    static std::vector<std::byte> parseCP1RegImmInstruction(uint32_t sub, uint32_t ft, uint32_t fs);
+
+    static std::vector<std::byte> parseCP1ImmInstruction(uint32_t op, uint32_t base, uint32_t ft,
+                                                         uint32_t offset);
+
+    static std::vector<std::byte> parseCP1CondInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
+                                                          uint32_t func);
+
+    static std::vector<std::byte> parseCP1CondImmInstruction(uint32_t tf, uint32_t offset);
 
     /**
      * A more generalized function to parse pseudo instructions

@@ -188,8 +188,8 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         // Co-Processor 1 Instructions (Floating Point)
         case InstructionType::CP1_TYPE_SP_D_S:
         case InstructionType::CP1_TYPE_DP_D_S:
-        case InstructionType::CP1_TYPE_SP_S_T:
-        case InstructionType::CP1_TYPE_DP_S_T:
+        case InstructionType::CP1_TYPE_SP_S_T_C:
+        case InstructionType::CP1_TYPE_DP_S_T_C:
         case InstructionType::CP1_TYPE_T_S:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
