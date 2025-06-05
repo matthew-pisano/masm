@@ -72,15 +72,27 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sh", {InstructionType::I_TYPE_T_S_I, InstructionCode::SH, 4}},
         {"sw", {InstructionType::I_TYPE_T_S_I, InstructionCode::SW, 4}},
 
+        // Remapped Instructions (real instructions remapped to more simple instructions)
+        {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
+        {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
+        {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
+        {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
+
         // Syscall
         {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
-
-        // Eret
-        {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
 
         // Co-Processor 0 Instructions
         {"mfc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MFC0, 4}},
         {"mtc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MTC0, 4}},
+
+        // Eret
+        {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
+
+        // Co-Processor 1 Instructions (Floating Point)
+        {"abs.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::ABS_S, 4}},
+        {"abs.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::ABS_D, 4}},
+        {"add.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::ADD_S, 4}},
+        {"add.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::ADD_D, 4}},
 
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
@@ -92,12 +104,6 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"bgt", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"bge", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"ble", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
-
-        // Remapped Instructions (real instructions remapped to more simple instructions)
-        {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
-        {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
-        {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
-        {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
 };
 
 
@@ -116,6 +122,7 @@ InstructionOp nameToInstructionOp(const std::string& name) {
 void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
 
     switch (nameToInstructionOp(instruction.value).type) {
+        // Core CPU Instructions
         case InstructionType::R_TYPE_D_T_S:
         case InstructionType::R_TYPE_D_S_T:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
@@ -166,13 +173,43 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
             if (!tokenTypeMatch({}, args))
                 throw std::runtime_error("Invalid format for Syscall");
             break;
+
+        // Co-Processor 0 Instructions
+        case InstructionType::CP0_TYPE_T_D:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
+                throw std::runtime_error("Invalid format for Co-Processor 0 instruction " +
+                                         instruction.value);
+            break;
         case InstructionType::ERET:
             if (!tokenTypeMatch({}, args))
                 throw std::runtime_error("Invalid format for Eret instruction");
             break;
-        case InstructionType::CP0_TYPE_T_D:
+
+        // Co-Processor 1 Instructions (Floating Point)
+        case InstructionType::CP1_TYPE_SP_D_S:
+        case InstructionType::CP1_TYPE_DP_D_S:
+        case InstructionType::CP1_TYPE_SP_S_T:
+        case InstructionType::CP1_TYPE_DP_S_T:
+        case InstructionType::CP1_TYPE_T_S:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER}, args))
-                throw std::runtime_error("Invalid format for Co-Processor 0 instruction " +
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::CP1_TYPE_SP_D_S_T:
+        case InstructionType::CP1_TYPE_DP_D_S_T:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::REGISTER, TokenType::REGISTER},
+                                args))
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::CP1_TYPE_T_L:
+            if (!tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
+                                         instruction.value);
+            break;
+        case InstructionType::CP1_TYPE_L:
+            if (!tokenTypeMatch({TokenType::LABEL_REF}, args))
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
                                          instruction.value);
             break;
         case InstructionType::PSEUDO:

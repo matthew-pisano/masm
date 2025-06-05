@@ -71,6 +71,12 @@ enum class InstructionCode {
     SH = 0x29,
     SW = 0x2b,
 
+    // Remapped Instructions
+    BGTZ = 0x07,
+    BLEZ = 0x06,
+    BLTZ = 0x07,
+    BGEZ = 0x01,
+
     // Syscall
     SYSCALL = 0x00,
 
@@ -81,11 +87,11 @@ enum class InstructionCode {
     // Eret
     ERET = 0x00,
 
-    // Remapped Instructions
-    BGTZ = 0x07,
-    BLEZ = 0x06,
-    BLTZ = 0x07,
-    BGEZ = 0x01,
+    // Co Processor 1 (Floating Point) Instructions
+    ABS_S = 0x05,
+    ABS_D = 0x05,
+    ADD_S = 0x00,
+    ADD_D = 0x00,
 
     // Instruction Code for Pseudo Instructions
     PSEUDO = 0x00,
@@ -106,6 +112,9 @@ enum class InstructionType {
     // I -> Immediate Value
     // L -> Label Reference
 
+    // SP -> Single Precision Floating Point
+    // DP -> Double Precision Floating Point
+
     R_TYPE_D_S_T, // R-Type
     R_TYPE_D_T_H, // R-Type with shamt
     R_TYPE_D, // R-Type with only destination register
@@ -117,8 +126,20 @@ enum class InstructionType {
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
     SYSCALL, // Syscall
+
     ERET, // Eret instruction
     CP0_TYPE_T_D, // Co-Processor 0 Type (Move from/to CP0)
+
+    CP1_TYPE_SP_D_S,
+    CP1_TYPE_DP_D_S,
+    CP1_TYPE_SP_D_S_T,
+    CP1_TYPE_DP_D_S_T,
+    CP1_TYPE_L,
+    CP1_TYPE_SP_S_T,
+    CP1_TYPE_DP_S_T,
+    CP1_TYPE_T_S,
+    CP1_TYPE_T_L,
+
     PSEUDO // Pseudo instruction
 };
 
