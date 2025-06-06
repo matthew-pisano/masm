@@ -589,6 +589,7 @@ void Interpreter::execCP1RegType(const uint32_t fmt, const uint32_t ft, const ui
                 state.cp1.setFloat(fd, std::abs(state.cp1.getFloat(fs)));
             else
                 state.cp1.setDouble(fd, std::abs(state.cp1.getDouble(fs)));
+            break;
         }
         case InstructionCode::FP_ADD: {
             if (singlePrecision) {
