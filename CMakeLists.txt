@@ -80,6 +80,7 @@ add_executable(masm-tests
         test/test_instructions/test_pseudo_instructions.cpp
         test/test_utils.cpp
         test/test_instructions/test_cp0_instructions.cpp
+        test/test_instructions/test_cp1_instructions.cpp
 )
 target_link_libraries(masm-tests PRIVATE masm)
 target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
