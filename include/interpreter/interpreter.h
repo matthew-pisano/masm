@@ -137,6 +137,16 @@ class Interpreter {
      */
     void execCP0Type(uint32_t rs, uint32_t rt, uint32_t rd);
 
+    void execCP1RegType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd, uint32_t func);
+
+    void execCP1RegImmType(uint32_t sub, uint32_t rt, uint32_t fs);
+
+    void execCP1ImmType(uint32_t op, uint32_t base, uint32_t ft, uint32_t offset);
+
+    void execCP1CondType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t cond);
+
+    void execCP1CondImmType(uint32_t tf, uint32_t offset);
+
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      * @return True if input was read successfully, false if no input is available

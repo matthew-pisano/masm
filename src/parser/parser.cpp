@@ -256,10 +256,10 @@ std::vector<std::byte> Parser::parseCP1RegInstruction(const uint32_t fmt, const 
 }
 
 
-std::vector<std::byte> Parser::parseCP1RegImmInstruction(const uint32_t sub, const uint32_t ft,
+std::vector<std::byte> Parser::parseCP1RegImmInstruction(const uint32_t sub, const uint32_t rt,
                                                          const uint32_t fs) {
     // Combine fields into 32-bit instruction code
-    const uint32_t instruction = (0x11 & 0x3F) << 26 | (sub & 0x1F) << 21 | (ft & 0x1F) << 16 |
+    const uint32_t instruction = (0x11 & 0x3F) << 26 | (sub & 0x1F) << 21 | (rt & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | 0x00 & 0x7FF;
     return i32ToBEByte(instruction);
 }
@@ -274,11 +274,11 @@ std::vector<std::byte> Parser::parseCP1ImmInstruction(const uint32_t op, const u
 }
 
 std::vector<std::byte> Parser::parseCP1CondInstruction(const uint32_t fmt, const uint32_t ft,
-                                                       const uint32_t fs, const uint32_t func) {
+                                                       const uint32_t fs, const uint32_t cond) {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | (0x00 & 0x07) << 8 | (0x00 & 0x03) << 6 |
-                                 (0x03 & 0x03) << 6 | func & 0xF;
+                                 (0x03 & 0x03) << 4 | cond & 0xF;
     return i32ToBEByte(instruction);
 }
 

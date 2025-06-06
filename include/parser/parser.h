@@ -85,13 +85,13 @@ class Parser {
     static std::vector<std::byte> parseCP1RegInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
                                                          uint32_t fd, uint32_t func);
 
-    static std::vector<std::byte> parseCP1RegImmInstruction(uint32_t sub, uint32_t ft, uint32_t fs);
+    static std::vector<std::byte> parseCP1RegImmInstruction(uint32_t sub, uint32_t rt, uint32_t fs);
 
     static std::vector<std::byte> parseCP1ImmInstruction(uint32_t op, uint32_t base, uint32_t ft,
                                                          uint32_t offset);
 
     static std::vector<std::byte> parseCP1CondInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
-                                                          uint32_t func);
+                                                          uint32_t cond);
 
     static std::vector<std::byte> parseCP1CondImmInstruction(uint32_t tf, uint32_t offset);
 
