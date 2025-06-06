@@ -173,6 +173,8 @@ class Interpreter {
      */
     void except(uint32_t cause, const std::string& excMsg);
 
+    void execInstruction(int32_t instruction);
+
 
 protected:
     /**

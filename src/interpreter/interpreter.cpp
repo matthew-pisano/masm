@@ -207,85 +207,7 @@ void Interpreter::step() {
     }
 
     try {
-        if (instruction == 0x0000000C) {
-            // Syscall instruction
-            execSyscall(ioMode, state, istream, ostream);
-            return;
-        }
-        if (instruction == 0x42000018) {
-            // Eret instruction
-            execEret();
-            return;
-        }
-
-        const uint32_t opCode = instruction >> 26 & 0x3F;
-        if (opCode == 0x10) {
-            // Co-Processor 0 instruction
-            const uint32_t rs = instruction >> 21 & 0x1F;
-            const uint32_t rt = instruction >> 16 & 0x1F;
-            const uint32_t rd = instruction >> 11 & 0x1F;
-
-            // Execute Co-Processor 0 instruction
-            execCP0Type(rs, rt, rd);
-        } else if (opCode == 0x11) {
-            // Used to distinguish Co-Processor 1 instruction types
-            const uint32_t nextFive = instruction >> 21 & 0x1F;
-            // Co-Processor 1 instruction
-            if (nextFive == 0x08) {
-                const uint32_t tf = instruction >> 16 & 0x01;
-                const uint32_t offset = instruction & 0xFFFF;
-                // Execute Co-Processor 1 cond immediate instruction
-                execCP1CondImmType(tf, offset);
-            } else if (nextFive == 0x00 || nextFive == 0x04) {
-                const uint32_t sub = instruction >> 21 & 0x1F;
-                const uint32_t rt = instruction >> 16 & 0x1F;
-                const uint32_t fs = instruction >> 11 & 0x1F;
-                // Execute Co-Processor 1 reg immediate instruction
-                execCP1RegImmType(sub, rt, fs);
-            } else {
-                const uint32_t fmt = instruction >> 21 & 0x1F;
-                const uint32_t ft = instruction >> 16 & 0x1F;
-                const uint32_t fs = instruction >> 11 & 0x1F;
-                const uint32_t fd = instruction >> 6 & 0x1F;
-                const uint32_t func = instruction & 0x3F;
-
-                if ((func >> 4 & 0x03) == 0x03)
-                    // Co-Processor 1 cond type instruction
-                    execCP1CondType(fmt, ft, fs, func & 0x0F);
-                else
-                    // Co-Processor 1 reg type instruction
-                    execCP1RegType(fmt, ft, fs, fd, func);
-            }
-        } else if (opCode == 0x35 || opCode == 0x31 || opCode == 0x3D || opCode == 0x39) {
-            // Co-Processor 1 immediate instructions
-            const uint32_t base = instruction >> 21 & 0x1F;
-            const uint32_t ft = instruction >> 16 & 0x1F;
-            const uint32_t offset = instruction & 0xFFFF;
-
-            // Execute Co-Processor 1 immediate instruction
-            execCP1ImmType(opCode, base, ft, offset);
-        } else if (opCode == 0x00) {
-            // R-Type instruction
-            const uint32_t funct = instruction & 0x3F;
-            const uint32_t rs = instruction >> 21 & 0x1F;
-            const uint32_t rt = instruction >> 16 & 0x1F;
-            const uint32_t rd = instruction >> 11 & 0x1F;
-            const uint32_t shamt = instruction >> 6 & 0x1F;
-
-            // Execute R-Type instruction
-            execRType(funct, rs, rt, rd, shamt);
-        } else if (opCode == 0x02 || opCode == 0x03) {
-            // J-Type instruction
-            execJType(opCode, instruction & 0x3FFFFFF);
-        } else {
-            // I-Type instruction
-            const uint32_t rs = instruction >> 21 & 0x1F;
-            const uint32_t rt = instruction >> 16 & 0x1F;
-            const int32_t immediate = instruction & 0xFFFF;
-
-            // Execute I-Type instruction
-            execIType(opCode, rs, rt, immediate);
-        }
+        execInstruction(instruction);
     } catch (ExecExit&) {
         throw;
     } catch (ExecExcept& e) {
@@ -293,6 +215,89 @@ void Interpreter::step() {
         except(cause, e.what());
     } catch (std::runtime_error& e) {
         throw MasmRuntimeError(e.what(), pc - 4, pcSrc.filename, pcSrc.lineno);
+    }
+}
+
+
+void Interpreter::execInstruction(const int32_t instruction) {
+    if (instruction == 0x0000000C) {
+        // Syscall instruction
+        execSyscall(ioMode, state, istream, ostream);
+        return;
+    }
+    if (instruction == 0x42000018) {
+        // Eret instruction
+        execEret();
+        return;
+    }
+
+    const uint32_t opCode = instruction >> 26 & 0x3F;
+    if (opCode == 0x10) {
+        // Co-Processor 0 instruction
+        const uint32_t rs = instruction >> 21 & 0x1F;
+        const uint32_t rt = instruction >> 16 & 0x1F;
+        const uint32_t rd = instruction >> 11 & 0x1F;
+
+        // Execute Co-Processor 0 instruction
+        execCP0Type(rs, rt, rd);
+    } else if (opCode == 0x11) {
+        // Used to distinguish Co-Processor 1 instruction types
+        const uint32_t nextFive = instruction >> 21 & 0x1F;
+        // Co-Processor 1 instruction
+        if (nextFive == 0x08) {
+            const uint32_t tf = instruction >> 16 & 0x01;
+            const uint32_t offset = instruction & 0xFFFF;
+            // Execute Co-Processor 1 cond immediate instruction
+            execCP1CondImmType(tf, offset);
+        } else if (nextFive == 0x00 || nextFive == 0x04) {
+            const uint32_t sub = instruction >> 21 & 0x1F;
+            const uint32_t rt = instruction >> 16 & 0x1F;
+            const uint32_t fs = instruction >> 11 & 0x1F;
+            // Execute Co-Processor 1 reg immediate instruction
+            execCP1RegImmType(sub, rt, fs);
+        } else {
+            const uint32_t fmt = instruction >> 21 & 0x1F;
+            const uint32_t ft = instruction >> 16 & 0x1F;
+            const uint32_t fs = instruction >> 11 & 0x1F;
+            const uint32_t fd = instruction >> 6 & 0x1F;
+            const uint32_t func = instruction & 0x3F;
+
+            if ((func >> 4 & 0x03) == 0x03)
+                // Co-Processor 1 cond type instruction
+                execCP1CondType(fmt, ft, fs, func & 0x0F);
+            else
+                // Co-Processor 1 reg type instruction
+                execCP1RegType(fmt, ft, fs, fd, func);
+        }
+    } else if (opCode == 0x35 || opCode == 0x31 || opCode == 0x3D || opCode == 0x39) {
+        // Co-Processor 1 immediate instructions
+        const uint32_t base = instruction >> 21 & 0x1F;
+        const uint32_t ft = instruction >> 16 & 0x1F;
+        const uint32_t offset = instruction & 0xFFFF;
+
+        // Execute Co-Processor 1 immediate instruction
+        execCP1ImmType(opCode, base, ft, offset);
+    } else if (opCode == 0x00) {
+        // R-Type instruction
+        const uint32_t funct = instruction & 0x3F;
+        const uint32_t rs = instruction >> 21 & 0x1F;
+        const uint32_t rt = instruction >> 16 & 0x1F;
+        const uint32_t rd = instruction >> 11 & 0x1F;
+        const uint32_t shamt = instruction >> 6 & 0x1F;
+
+        // Execute R-Type instruction
+        execRType(funct, rs, rt, rd, shamt);
+    } else if (opCode == 0x02 || opCode == 0x03) {
+        // J-Type instruction
+        execJType(opCode, instruction & 0x3FFFFFF);
+    } else {
+        // I-Type instruction
+        const uint32_t rs = instruction >> 21 & 0x1F;
+        const uint32_t rt = instruction >> 16 & 0x1F;
+        const int32_t immediate = instruction & 0xFFFF;
+
+        // Execute I-Type instruction
+        execIType(opCode, rs, rt, immediate);
     }
 }
 
@@ -573,3 +578,15 @@ void Interpreter::execCP0Type(const uint32_t rs, const uint32_t rt, const uint32
             throw std::runtime_error("Unknown Co-Processor 0 instruction " + std::to_string(rs));
     }
 }
+
+
+void Interpreter::execCP1RegType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd,
+                                 uint32_t func) {}
+
+void Interpreter::execCP1RegImmType(uint32_t sub, uint32_t rt, uint32_t fs) {}
+
+void Interpreter::execCP1ImmType(uint32_t op, uint32_t base, uint32_t ft, uint32_t offset) {}
+
+void Interpreter::execCP1CondType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t cond) {}
+
+void Interpreter::execCP1CondImmType(uint32_t tf, uint32_t offset) {}
