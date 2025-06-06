@@ -4,11 +4,56 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "../testing_utilities.h"
+#include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "interpreter/memory.h"
 #include "tokenizer/tokenizer.h"
+
+
+TEST_CASE("Test FP Double Invalid Register Read") {
+    const SourceFile rawFile = makeRawFile({"abs.d $f0, $f1"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "abs.d"},
+                                                                 {TokenType::REGISTER, "f0"},
+                                                                 {TokenType::SEPERATOR, ","},
+                                                                 {TokenType::REGISTER, "f1"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    DebugParser parser{};
+    const MemLayout actualLayout = parser.parse(actualTokens);
+
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    REQUIRE_THROWS_MATCHES(interpreter.interpret(actualLayout), MasmRuntimeError,
+                           Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
+                                                    "Invalid double precision register: f1"));
+}
+
+
+TEST_CASE("Test FP Double Invalid Register Write") {
+    const SourceFile rawFile = makeRawFile({"abs.d $f1, $f2"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "abs.d"},
+                                                                 {TokenType::REGISTER, "f1"},
+                                                                 {TokenType::SEPERATOR, ","},
+                                                                 {TokenType::REGISTER, "f2"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    DebugParser parser{};
+    const MemLayout actualLayout = parser.parse(actualTokens);
+
+    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    REQUIRE_THROWS_MATCHES(interpreter.interpret(actualLayout), MasmRuntimeError,
+                           Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
+                                                    "Invalid double precision register: f1"));
+}
 
 
 TEST_CASE("Test FP Abs.s Instruction") {
