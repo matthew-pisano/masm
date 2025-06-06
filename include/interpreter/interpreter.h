@@ -52,6 +52,11 @@ struct State {
     Coproc0RegisterFile cp0;
 
     /**
+     * The coprocessor 1 register file, which contains floating-point registers and operations
+     */
+    Coproc1RegisterFile cp1;
+
+    /**
      * The main memory of the interpreter, which contains the program code and data
      */
     Memory memory;

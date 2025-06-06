@@ -11,8 +11,9 @@
 #include <string>
 
 
-using float32_t = _Float32;
-using float64_t = _Float64;
+// Stand-in for fixed-width floating point types
+using float32_t = float;
+using float64_t = double;
 
 
 /**

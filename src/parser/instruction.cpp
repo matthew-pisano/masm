@@ -89,10 +89,10 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
 
         // Co-Processor 1 Instructions (Floating Point)
-        {"abs.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::ABS_S, 4}},
-        {"abs.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::ABS_D, 4}},
-        {"add.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::ADD_S, 4}},
-        {"add.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::ADD_D, 4}},
+        {"abs.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_ABS, 4}},
+        {"abs.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_ABS, 4}},
+        {"add.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_ADD, 4}},
+        {"add.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::FP_ADD, 4}},
 
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},

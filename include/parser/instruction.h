@@ -88,10 +88,8 @@ enum class InstructionCode {
     ERET = 0x00,
 
     // Co Processor 1 (Floating Point) Instructions
-    ABS_S = 0x05,
-    ABS_D = 0x05,
-    ADD_S = 0x00,
-    ADD_D = 0x00,
+    FP_ABS = 0x05,
+    FP_ADD = 0x00,
 
     // Instruction Code for Pseudo Instructions
     PSEUDO = 0x00,

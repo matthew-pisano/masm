@@ -580,13 +580,39 @@ void Interpreter::execCP0Type(const uint32_t rs, const uint32_t rt, const uint32
 }
 
 
-void Interpreter::execCP1RegType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd,
-                                 uint32_t func) {}
+void Interpreter::execCP1RegType(const uint32_t fmt, const uint32_t ft, const uint32_t fs,
+                                 const uint32_t fd, const uint32_t func) {
+    const bool singlePrecision = fmt == 0x10; // Single precision format
+    switch (static_cast<InstructionCode>(func)) {
+        case InstructionCode::FP_ABS: {
+            if (singlePrecision)
+                state.cp1.setFloat(fd, std::abs(state.cp1.getFloat(fs)));
+            else
+                state.cp1.setDouble(fd, std::abs(state.cp1.getDouble(fs)));
+        }
+        case InstructionCode::FP_ADD: {
+            if (singlePrecision) {
+                const float32_t result = state.cp1.getFloat(fs) + state.cp1.getFloat(ft);
+                state.cp1.setFloat(fd, result);
+            } else {
+                const float64_t result = state.cp1.getDouble(fs) + state.cp1.getDouble(ft);
+                state.cp1.setDouble(fd, result);
+            }
+            break;
+        }
+        // Should never be reached
+        default:
+            throw std::runtime_error("Unknown Co-Processor 1 reg type instruction " +
+                                     std::to_string(func));
+    }
+}
 
-void Interpreter::execCP1RegImmType(uint32_t sub, uint32_t rt, uint32_t fs) {}
+void Interpreter::execCP1RegImmType(const uint32_t sub, const uint32_t rt, const uint32_t fs) {}
 
-void Interpreter::execCP1ImmType(uint32_t op, uint32_t base, uint32_t ft, uint32_t offset) {}
+void Interpreter::execCP1ImmType(const uint32_t op, const uint32_t base, const uint32_t ft,
+                                 const uint32_t offset) {}
 
-void Interpreter::execCP1CondType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t cond) {}
+void Interpreter::execCP1CondType(const uint32_t fmt, const uint32_t ft, const uint32_t fs,
+                                  const uint32_t cond) {}
 
-void Interpreter::execCP1CondImmType(uint32_t tf, uint32_t offset) {}
+void Interpreter::execCP1CondImmType(const uint32_t tf, const uint32_t offset) {}
