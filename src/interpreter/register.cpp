@@ -26,23 +26,80 @@ int RegisterFile::indexFromName(const std::string& name) {
 }
 
 
+// Core register access
 int32_t RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
 
 int32_t RegisterFile::operator[](const Register index) const {
-    return registers.at(static_cast<size_t>(index));
+    return registers.at(static_cast<uint32_t>(index));
 }
 int32_t& RegisterFile::operator[](const Register index) {
-    return registers.at(static_cast<size_t>(index));
+    return registers.at(static_cast<uint32_t>(index));
 }
 
 
+// Coprocessor 0 register access
 int32_t Coproc0RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& Coproc0RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
 
 int32_t Coproc0RegisterFile::operator[](const Coproc0Register index) const {
-    return registers.at(static_cast<size_t>(index));
+    return registers.at(static_cast<uint32_t>(index));
 }
 int32_t& Coproc0RegisterFile::operator[](const Coproc0Register index) {
-    return registers.at(static_cast<size_t>(index));
+    return registers.at(static_cast<uint32_t>(index));
+}
+
+
+// Coprocessor 1 (floating point) register access
+float32_t Coproc1RegisterFile::getFloat(const uint32_t index) const {
+    return *reinterpret_cast<const float32_t*>(&registers.at(index));
+}
+
+void Coproc1RegisterFile::setFloat(const uint32_t index, const float32_t value) {
+    registers.at(index) = *reinterpret_cast<const int32_t*>(&value);
+}
+
+float32_t Coproc1RegisterFile::getFloat(const Coproc1Register index) const {
+    return getFloat(static_cast<uint32_t>(index));
+}
+
+void Coproc1RegisterFile::setFloat(const Coproc1Register index, const float32_t value) {
+    setFloat(static_cast<uint32_t>(index), value);
+}
+
+float64_t Coproc1RegisterFile::getDouble(const uint32_t index) const {
+    const float64_t lower = *reinterpret_cast<const float32_t*>(&registers.at(index));
+    const float64_t upper = *reinterpret_cast<const float32_t*>(&registers.at(index + 1));
+    return (upper * 0x100000000) + lower; // Combine the two 32-bit parts into a 64-bit float
+}
+
+void Coproc1RegisterFile::setDouble(const uint32_t index, const float64_t value) {
+    const float32_t lower = static_cast<float32_t>(value);
+    const float32_t upper = static_cast<float32_t>(value / 0x100000000);
+    registers.at(index) = *reinterpret_cast<const int32_t*>(&lower);
+    registers.at(index + 1) = *reinterpret_cast<const int32_t*>(&upper);
+}
+
+float64_t Coproc1RegisterFile::getDouble(const Coproc1Register index) const {
+    return getDouble(static_cast<uint32_t>(index));
+}
+
+void Coproc1RegisterFile::setDouble(const Coproc1Register index, const float64_t value) {
+    setDouble(static_cast<uint32_t>(index), value);
+}
+
+int32_t Coproc1RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
+int32_t& Coproc1RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
+int32_t Coproc1RegisterFile::operator[](const Coproc0Register index) const {
+    return registers.at(static_cast<uint32_t>(index));
+}
+int32_t& Coproc1RegisterFile::operator[](const Coproc0Register index) {
+    return registers.at(static_cast<uint32_t>(index));
+}
+
+
+// Coprocessor 1 flags access
+bool Coproc1RegisterFile::getFlag(const uint32_t index) const { return flags.at(index); }
+void Coproc1RegisterFile::setFlag(const uint32_t index, const bool value) {
+    flags.at(index) = value;
 }
