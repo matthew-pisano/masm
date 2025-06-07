@@ -60,6 +60,11 @@ add_executable(masm-exec src/main.cpp
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
 
+# Static linking for Windows cross-compilation (ensures dlls are packaged in)
+if (CMAKE_CROSSCOMPILING AND WIN32)
+    target_link_libraries(masm-exec PRIVATE -static)
+endif ()
+
 
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
