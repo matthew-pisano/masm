@@ -93,7 +93,8 @@ class Parser {
     static std::vector<std::byte> parseCP1CondInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
                                                           uint32_t cond);
 
-    static std::vector<std::byte> parseCP1CondImmInstruction(uint32_t tf, uint32_t offset);
+    static std::vector<std::byte> parseCP1CondImmInstruction(uint32_t loc, uint32_t tf,
+                                                             int32_t offset);
 
     /**
      * A more generalized function to parse pseudo instructions

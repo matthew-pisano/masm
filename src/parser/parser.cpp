@@ -174,7 +174,7 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
         case InstructionType::CP1_TYPE_DP_D_S_T:
             return parseCP1RegInstruction(0x11, argCodes[2], argCodes[1], argCodes[0], opFuncCode);
         case InstructionType::CP1_TYPE_L:
-            return parseCP1CondImmInstruction(opFuncCode, argCodes[0]);
+            return parseCP1CondImmInstruction(loc, opFuncCode, static_cast<int32_t>(argCodes[0]));
         case InstructionType::CP1_TYPE_SP_S_T_C:
             return parseCP1CondInstruction(0x10, argCodes[1], argCodes[0], opFuncCode);
         case InstructionType::CP1_TYPE_DP_S_T_C:
@@ -212,10 +212,10 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
                                  static_cast<uint32_t>(InstructionCode::BNE)};
     if (std::ranges::find(branchOpCodes, opcode) != branchOpCodes.end()) {
         // Branch targets are always word-aligned, so divide by 4
-        const int32_t offset = (immediate - static_cast<int32_t>(loc) - 4) >> 2;
-        if (offset < -32768 || offset > 32767)
+        const int32_t pcOffset = (immediate - static_cast<int32_t>(loc) - 4) >> 2;
+        if (pcOffset < -32768 || pcOffset > 32767)
             throw std::runtime_error("Branch instruction offset out of range");
-        immediate = static_cast<int32_t>(offset);
+        immediate = static_cast<int32_t>(pcOffset);
     }
 
     // Combine fields into 32-bit instruction code
@@ -285,8 +285,15 @@ std::vector<std::byte> Parser::parseCP1CondInstruction(const uint32_t fmt, const
     return i32ToBEByte(instruction);
 }
 
-std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t tf,
-                                                          const uint32_t offset) {
+std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, const uint32_t tf,
+                                                          int32_t offset) {
+
+    // Branch targets are always word-aligned, so divide by 4
+    const int32_t pcOffset = (offset - static_cast<int32_t>(loc) - 4) >> 2;
+    if (pcOffset < -32768 || pcOffset > 32767)
+        throw std::runtime_error("Branch instruction offset out of range");
+    offset = static_cast<int32_t>(pcOffset);
+
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (0x08 & 0x1F) << 21 | (0x00 & 0x07) << 18 |
                                  (0x00 & 0x01) << 17 << (tf & 0x01) << 16 | offset & 0xFFFF;
