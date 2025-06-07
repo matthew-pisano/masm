@@ -36,9 +36,12 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
     // Byte, Half, Word
     else if (dirName == "byte" || dirName == "half" || dirName == "word") {
         for (const Token& arg : args)
-            if (arg.type != TokenType::IMMEDIATE || !isSignedInteger(arg.value))
+            if (arg.type != TokenType::IMMEDIATE || !isSignedInteger(arg.value)) {
+                if (dirName == "word" && arg.type == TokenType::LABEL_REF)
+                    continue;
                 throw std::runtime_error("Directive '" + dirName +
                                          "' expects integers as arguments");
+            }
     }
     // Double or Float
     else if (dirName == "double" || dirName == "float") {

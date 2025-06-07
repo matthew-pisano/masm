@@ -55,6 +55,12 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                     break;
                 }
                 case TokenType::ALLOC_DIRECTIVE: {
+                    // Replace label references with dummy values while measuring allocations
+                    // Real values used during memory allocation
+                    for (Token& arg : args)
+                        if (arg.type == TokenType::LABEL_REF)
+                            arg = {TokenType::IMMEDIATE, "0"};
+
                     const std::tuple<std::vector<std::byte>, size_t> alloc =
                             parsePaddedAllocDirective(memSizes[currSection], firstToken, args);
                     // Assign labels to the following byte allocation plus the section offset

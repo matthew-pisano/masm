@@ -204,6 +204,24 @@ TEST_CASE("Test Parser Syntax Errors") {
 }
 
 
+TEST_CASE("Test Word Allocation from Label") {
+    Parser parser{};
+    const std::vector<LineTokens> program = {
+            {"test.asm", 1, {{TokenType::SEC_DIRECTIVE, "data"}}},
+            {"test.asm", 2, {{TokenType::LABEL_DEF, "label"}}},
+            {"test.asm", 2, {{TokenType::ALLOC_DIRECTIVE, "word"}, {TokenType::IMMEDIATE, "0"}}},
+            {"test.asm",
+             3,
+             {{TokenType::ALLOC_DIRECTIVE, "word"}, {TokenType::LABEL_REF, "label"}}}};
+
+    MemLayout layout = parser.parse(program);
+    REQUIRE(layout.data[MemSection::DATA].size() == 8);
+    std::vector<std::byte> expected =
+            intVec2ByteVec({0x00, 0x00, 0x00, 0x00, 0x10, 0x01, 0x00, 0x00});
+    REQUIRE(expected == layout.data[MemSection::DATA]);
+}
+
+
 TEST_CASE("Test Parse Hello World") {
     const std::string test_case = "hello_world";
     validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},

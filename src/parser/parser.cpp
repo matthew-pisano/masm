@@ -59,6 +59,9 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             break;
         }
         case TokenType::ALLOC_DIRECTIVE: {
+            // Resolve label references to their integer values before parsing
+            labelMap.resolveLabels(args);
+
             std::vector<std::byte> directiveBytes = parseAllocDirective(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
             break;
