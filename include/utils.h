@@ -11,6 +11,11 @@
 #include <vector>
 
 
+// Stand-in for fixed-width floating point types
+using float32_t = float;
+using float64_t = double;
+
+
 /**
  * Gets the basename of a file path
  * @param path The file path to get the basename of

@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "exceptions.h"
+#include "interpreter/cpu.h"
 #include "io/consoleio.h"
 
 

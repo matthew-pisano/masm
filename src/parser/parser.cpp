@@ -4,11 +4,11 @@
 
 #include "parser/parser.h"
 
-#include <../include/interpreter/register.h>
 #include <algorithm>
 #include <stdexcept>
 
 #include "exceptions.h"
+#include "interpreter/cpu.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
 #include "utils.h"

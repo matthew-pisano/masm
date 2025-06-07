@@ -9,9 +9,11 @@
 #include <memory>
 
 
+#include "cp0.h"
+#include "cp1.h"
+#include "cpu.h"
 #include "heap.h"
 #include "memory.h"
-#include "register.h"
 
 
 /**

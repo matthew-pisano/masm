@@ -15,7 +15,6 @@ add_library(masm STATIC
         src/interpreter/interpreter.cpp
         src/interpreter/syscalls.cpp
         src/interpreter/heap.cpp
-        src/interpreter/register.cpp
         src/parser/parser.cpp
         src/parser/instruction.cpp
         src/parser/labels.cpp
@@ -23,6 +22,9 @@ add_library(masm STATIC
         src/tokenizer/tokenizer.cpp
         src/tokenizer/postprocessor.cpp
         src/utils.cpp
+        src/interpreter/cpu.cpp
+        src/interpreter/cp0.cpp
+        src/interpreter/cp1.cpp
 )
 target_compile_options(masm PRIVATE -fPIC)
 
