@@ -401,7 +401,7 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(uint32_t& loc, const
     loc += 4; // Increment location since we have added an instruction
 
     // Recover address from parsed label
-    const std::string labelName = labelMap.lookupLabel(std::stoi(labelAddr.value));
+    const std::string labelName = labelMap.lookupLabel(std::stol(labelAddr.value));
     modifiedArgs = {{TokenType::REGISTER, "at"},
                     {TokenType::REGISTER, "zero"},
                     {TokenType::LABEL_REF, labelName}};
