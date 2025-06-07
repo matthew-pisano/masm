@@ -3,7 +3,17 @@ project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_compile_options(-Wall -Wextra -pedantic -Wno-bitwise-op-parentheses)
+add_compile_options(-Wall -Wextra -pedantic)
+
+if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
+    add_compile_options(-Wno-bitwise-op-parentheses)
+endif ()
+
+# Static linking for Windows cross-compilation
+if (CMAKE_CROSSCOMPILING AND WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+endif ()
+
 include_directories(include)
 
 
@@ -26,17 +36,11 @@ add_library(masm STATIC
         src/interpreter/cp0.cpp
         src/interpreter/cp1.cpp
 )
-target_compile_options(masm PRIVATE -fPIC)
 
-
-## Python Bindings ##
-
-find_package(pybind11 REQUIRED)
-pybind11_add_module(pymasm_core
-        src/pybind/python_bindings.cpp
-)
-# Link the Python module with masm
-target_link_libraries(pymasm_core PRIVATE masm)
+# -fPIC only needed for native Linux builds (not Windows cross-compilation)
+if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
+    target_compile_options(masm PRIVATE -fPIC)
+endif ()
 
 
 include(FetchContent)
@@ -57,36 +61,49 @@ target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
 
 
-## Fixture Generator Executable ##
+if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
-add_executable(masm-fg test/fixture_gen.cpp
-        src/io/fileio.cpp
-)
-target_link_libraries(masm-fg PRIVATE masm CLI11::CLI11)
+    ## Python Bindings ##
+
+    find_package(pybind11 REQUIRED)
+    pybind11_add_module(pymasm_core
+            src/pybind/python_bindings.cpp
+    )
+    # Link the Python module with masm
+    target_link_libraries(pymasm_core PRIVATE masm)
+
+    ## Fixture Generator Executable ##
+
+    add_executable(masm-fg test/fixture_gen.cpp
+            src/io/fileio.cpp
+    )
+    target_link_libraries(masm-fg PRIVATE masm CLI11::CLI11)
 
 
-## Unit Tests ##
+    ## Unit Tests ##
 
-find_package(Catch2 3 REQUIRED)
-add_executable(masm-tests
-        src/io/fileio.cpp
-        test/testing_utilities.cpp
-        test/test_components/test_tokenizer.cpp
-        test/test_components/test_parser.cpp
-        test/test_components/test_interpreter.cpp
-        test/test_components/test_syscall.cpp
-        test/test_instructions/test_arithmetic_instructions.cpp
-        test/test_instructions/test_comparison_instructions.cpp
-        test/test_instructions/test_control_instructions.cpp
-        test/test_instructions/test_memory_instructions.cpp
-        test/test_instructions/test_pseudo_instructions.cpp
-        test/test_utils.cpp
-        test/test_instructions/test_cp0_instructions.cpp
-        test/test_instructions/test_cp1_instructions.cpp
-)
-target_link_libraries(masm-tests PRIVATE masm)
-target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
+    find_package(Catch2 3 REQUIRED)
+    add_executable(masm-tests
+            src/io/fileio.cpp
+            test/testing_utilities.cpp
+            test/test_components/test_tokenizer.cpp
+            test/test_components/test_parser.cpp
+            test/test_components/test_interpreter.cpp
+            test/test_components/test_syscall.cpp
+            test/test_instructions/test_arithmetic_instructions.cpp
+            test/test_instructions/test_comparison_instructions.cpp
+            test/test_instructions/test_control_instructions.cpp
+            test/test_instructions/test_memory_instructions.cpp
+            test/test_instructions/test_pseudo_instructions.cpp
+            test/test_utils.cpp
+            test/test_instructions/test_cp0_instructions.cpp
+            test/test_instructions/test_cp1_instructions.cpp
+    )
+    target_link_libraries(masm-tests PRIVATE masm)
+    target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(masm-tests)
+    include(CTest)
+    include(Catch)
+    catch_discover_tests(masm-tests)
+
+endif ()
