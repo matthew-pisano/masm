@@ -94,6 +94,46 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"abs.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_ABS, 4}},
         {"add.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_ADD, 4}},
         {"add.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::FP_ADD, 4}},
+        {"div.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_DIV, 4}},
+        {"div.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::FP_DIV, 4}},
+        {"mul.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_MUL, 4}},
+        {"mul.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::FP_MUL, 4}},
+        {"neg.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_NEG, 4}},
+        {"neg.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_NEG, 4}},
+        {"sqrt.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_SQRT, 4}},
+        {"sqrt.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_SQRT, 4}},
+        {"sub.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_SUB, 4}},
+        {"sub.d", {InstructionType::CP1_TYPE_DP_D_S_T, InstructionCode::FP_SUB, 4}},
+
+        // Comparison Instructions
+        {"c.eq.s", {InstructionType::CP1_TYPE_SP_S_T_C, InstructionCode::FP_C_EQ, 4}},
+        {"c.eq.d", {InstructionType::CP1_TYPE_DP_S_T_C, InstructionCode::FP_C_EQ, 4}},
+        {"c.lt.s", {InstructionType::CP1_TYPE_SP_S_T_C, InstructionCode::FP_C_LT, 4}},
+        {"c.lt.d", {InstructionType::CP1_TYPE_DP_S_T_C, InstructionCode::FP_C_LT, 4}},
+        {"c.le.s", {InstructionType::CP1_TYPE_SP_S_T_C, InstructionCode::FP_C_LE, 4}},
+        {"c.le.d", {InstructionType::CP1_TYPE_DP_S_T_C, InstructionCode::FP_C_LE, 4}},
+
+        // Branch Instructions
+        {"bc1f", {InstructionType::CP1_TYPE_L, InstructionCode::FP_BC1F, 4}},
+        {"bc1t", {InstructionType::CP1_TYPE_L, InstructionCode::FP_BC1T, 4}},
+
+        // Conversion Instructions
+        {"cvt.d.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_CVT_D, 4}},
+        {"cvt.s.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_CVT_S, 4}},
+
+        // Load Instructions
+        {"lwc1", {InstructionType::CP1_TYPE_T_S_I, InstructionCode::FP_LWC1, 4}},
+        {"ldc1", {InstructionType::CP1_TYPE_T_S_I, InstructionCode::FP_LDC1, 4}},
+
+        // Store Instructions
+        {"swc1", {InstructionType::CP1_TYPE_T_S_I, InstructionCode::FP_SWC1, 4}},
+        {"sdc1", {InstructionType::CP1_TYPE_T_S_I, InstructionCode::FP_SDC1, 4}},
+
+        // Move Instructions
+        {"mfc1", {InstructionType::CP1_TYPE_T_S, InstructionCode::FP_MFC1, 4}},
+        {"mtc1", {InstructionType::CP1_TYPE_T_S, InstructionCode::FP_MTC1, 4}},
+        {"mov.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_MOV, 4}},
+        {"mov.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_MOV, 4}},
 
         // Pseudo Instructions
         {"li", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
@@ -203,7 +243,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
                                          instruction.value);
             break;
-        case InstructionType::CP1_TYPE_T_L:
+        case InstructionType::CP1_TYPE_T_S_I:
             if (!tokenTypeMatch({TokenType::REGISTER, TokenType::LABEL_REF}, args))
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
                                          instruction.value);

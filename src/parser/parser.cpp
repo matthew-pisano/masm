@@ -178,7 +178,7 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
             return parseCP1CondInstruction(0x11, argCodes[1], argCodes[0], opFuncCode);
         case InstructionType::CP1_TYPE_T_S:
             return parseCP1RegImmInstruction(opFuncCode, argCodes[0], argCodes[1]);
-        case InstructionType::CP1_TYPE_T_L:
+        case InstructionType::CP1_TYPE_T_S_I:
             return parseCP1ImmInstruction(opFuncCode, argCodes[1], argCodes[0], argCodes[2]);
         case InstructionType::PSEUDO:
             return parsePseudoInstruction(loc, instrToken.value, args);

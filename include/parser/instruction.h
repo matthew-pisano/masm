@@ -169,7 +169,7 @@ enum class InstructionType {
     CP1_TYPE_SP_S_T_C,
     CP1_TYPE_DP_S_T_C,
     CP1_TYPE_T_S,
-    CP1_TYPE_T_L,
+    CP1_TYPE_T_S_I,
 
     PSEUDO // Pseudo instruction
 };
