@@ -49,7 +49,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 
     std::vector<std::byte> memBytes;
     switch (firstToken.type) {
-        case TokenType::SEC_DIRECTIVE: {
+        case TokenCategory::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
             // If the section does not exist in the layout, create it
             if (!layout.data.contains(currSection)) {
@@ -58,7 +58,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             }
             break;
         }
-        case TokenType::ALLOC_DIRECTIVE: {
+        case TokenCategory::ALLOC_DIRECTIVE: {
             // Resolve label references to their integer values before parsing
             labelMap.resolveLabels(args);
 
@@ -66,12 +66,12 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
             break;
         }
-        case TokenType::INSTRUCTION: {
+        case TokenCategory::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
             break;
         }
-        case TokenType::LABEL_DEF:
+        case TokenCategory::LABEL_DEF:
             break; // Ignore label definitions, they do not add any additional memory allocations
         default:
             throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
@@ -107,10 +107,10 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
     // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
         switch (arg.type) {
-            case TokenType::IMMEDIATE:
+            case TokenCategory::IMMEDIATE:
                 argCodes.push_back(stoui32(arg.value));
                 break;
-            case TokenType::REGISTER: {
+            case TokenCategory::REGISTER: {
                 if (isSignedInteger(arg.value))
                     // If the register is an integer, use it as the register index
                     argCodes.push_back(stoui32(arg.value));
@@ -306,8 +306,8 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
                                                       const std::vector<Token>& args) {
     // li $t0, imm -> addiu $t0, $zero, imm
     if (instructionName == "li") {
-        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
-        return parseInstruction(loc, {TokenType::INSTRUCTION, "addiu"}, modifiedArgs);
+        std::vector modifiedArgs = {args[0], {TokenCategory::REGISTER, "zero"}, args[1]};
+        return parseInstruction(loc, {TokenCategory::INSTRUCTION, "addiu"}, modifiedArgs);
     }
     // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
     if (instructionName == "la") {
@@ -315,46 +315,46 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
         const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
         const unsigned int lowerBytes = value & 0x0000FFFF;
 
-        std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "at"},
-                                           {TokenType::IMMEDIATE, std::to_string(upperBytes)}};
+        std::vector<Token> modifiedArgs = {{TokenCategory::REGISTER, "at"},
+                                           {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
         std::vector<std::byte> luiBytes =
-                parseInstruction(loc, {TokenType::INSTRUCTION, "lui"}, modifiedArgs);
+                parseInstruction(loc, {TokenCategory::INSTRUCTION, "lui"}, modifiedArgs);
 
         loc += 4; // Increment location since we have added an instruction
 
         modifiedArgs = {args[0],
-                        {TokenType::REGISTER, "at"},
-                        {TokenType::IMMEDIATE, std::to_string(lowerBytes)}};
+                        {TokenCategory::REGISTER, "at"},
+                        {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
         std::vector<std::byte> oriBytes =
-                parseInstruction(loc, {TokenType::INSTRUCTION, "ori"}, modifiedArgs);
+                parseInstruction(loc, {TokenCategory::INSTRUCTION, "ori"}, modifiedArgs);
         luiBytes.insert(luiBytes.end(), oriBytes.begin(), oriBytes.end());
         return luiBytes;
     }
     // move $tx, $ty -> addu $tx, $ty, $zero
     if (instructionName == "move") {
-        std::vector modifiedArgs = {args[0], {TokenType::REGISTER, "zero"}, args[1]};
-        return parseInstruction(loc, {TokenType::INSTRUCTION, "addu"}, modifiedArgs);
+        std::vector modifiedArgs = {args[0], {TokenCategory::REGISTER, "zero"}, args[1]};
+        return parseInstruction(loc, {TokenCategory::INSTRUCTION, "addu"}, modifiedArgs);
     }
     // mul $tx, $ty, $tz -> mult $ty, $tz; mflo $tx
     if (instructionName == "mul") {
         std::vector modifiedArgs = {args[1], args[2]};
         std::vector<std::byte> multBytes =
-                parseInstruction(loc, {TokenType::INSTRUCTION, "mult"}, modifiedArgs);
+                parseInstruction(loc, {TokenCategory::INSTRUCTION, "mult"}, modifiedArgs);
 
         loc += 4; // Increment location since we have added an instruction
 
-        modifiedArgs = {{TokenType::REGISTER, args[0].value}};
+        modifiedArgs = {{TokenCategory::REGISTER, args[0].value}};
         std::vector<std::byte> mfloBytes =
-                parseInstruction(loc, {TokenType::INSTRUCTION, "mflo"}, modifiedArgs);
+                parseInstruction(loc, {TokenCategory::INSTRUCTION, "mflo"}, modifiedArgs);
         multBytes.insert(multBytes.end(), mfloBytes.begin(), mfloBytes.end());
         return multBytes;
     }
     // nop -> sll $zero, $zero, 0
     if (instructionName == "nop") {
-        std::vector<Token> modifiedArgs = {{TokenType::REGISTER, "zero"},
-                                           {TokenType::REGISTER, "zero"},
-                                           {TokenType::IMMEDIATE, "0"}};
-        return parseInstruction(loc, {TokenType::INSTRUCTION, "sll"}, modifiedArgs);
+        std::vector<Token> modifiedArgs = {{TokenCategory::REGISTER, "zero"},
+                                           {TokenCategory::REGISTER, "zero"},
+                                           {TokenCategory::IMMEDIATE, "0"}};
+        return parseInstruction(loc, {TokenCategory::INSTRUCTION, "sll"}, modifiedArgs);
     }
 
     // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
@@ -371,7 +371,7 @@ std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
     }
 
     // bxxz $tx, label -> slt $at, $zero, $tx; bxx $at, $zero, label
-    const Token regZero = {TokenType::REGISTER, "zero"};
+    const Token regZero = {TokenCategory::REGISTER, "zero"};
     std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
     if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
         branchZeroPseudoInstrs.end()) {
@@ -398,26 +398,26 @@ std::vector<std::byte> Parser::parseBranchPseudoInstruction(uint32_t& loc, const
     std::vector<Token> modifiedArgs;
     // Swap argument order when checking for less than or greater than relationship
     if (checkLt)
-        modifiedArgs = {{TokenType::REGISTER, "at"}, reg1, reg2};
+        modifiedArgs = {{TokenCategory::REGISTER, "at"}, reg1, reg2};
     else
-        modifiedArgs = {{TokenType::REGISTER, "at"}, reg2, reg1};
+        modifiedArgs = {{TokenCategory::REGISTER, "at"}, reg2, reg1};
 
     std::vector<std::byte> sltBytes =
-            parseInstruction(loc, {TokenType::INSTRUCTION, "slt"}, modifiedArgs);
+            parseInstruction(loc, {TokenCategory::INSTRUCTION, "slt"}, modifiedArgs);
 
     loc += 4; // Increment location since we have added an instruction
 
     // Recover address from parsed label
     const std::string labelName = labelMap.lookupLabel(std::stol(labelAddr.value));
-    modifiedArgs = {{TokenType::REGISTER, "at"},
-                    {TokenType::REGISTER, "zero"},
-                    {TokenType::LABEL_REF, labelName}};
+    modifiedArgs = {{TokenCategory::REGISTER, "at"},
+                    {TokenCategory::REGISTER, "zero"},
+                    {TokenCategory::LABEL_REF, labelName}};
     std::vector<std::byte> branchBytes;
     // Swap branch instruction when including equal in comparison or not
     if (checkEq)
-        branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "beq"}, modifiedArgs);
+        branchBytes = parseInstruction(loc, {TokenCategory::INSTRUCTION, "beq"}, modifiedArgs);
     else
-        branchBytes = parseInstruction(loc, {TokenType::INSTRUCTION, "bne"}, modifiedArgs);
+        branchBytes = parseInstruction(loc, {TokenCategory::INSTRUCTION, "bne"}, modifiedArgs);
 
     sltBytes.insert(sltBytes.end(), branchBytes.begin(), branchBytes.end());
     return sltBytes;

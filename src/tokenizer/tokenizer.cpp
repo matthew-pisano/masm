@@ -19,7 +19,7 @@
 /**
  * An array storing the names of memory directives
  */
-constexpr std::array<const char*, 14> tokenTypeNames = {
+constexpr std::array<const char*, 14> TokenCategoryNames = {
         "UNKNOWN",    "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",
         "LABEL_REF",  "INSTRUCTION",   "REGISTER",        "IMMEDIATE",      "SEPERATOR",
         "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
@@ -31,7 +31,7 @@ bool operator==(const LineTokens& lhs, const LineTokens& rhs) {
 bool operator!=(const LineTokens& lhs, const LineTokens& rhs) { return !(lhs == rhs); }
 
 
-std::string tokenTypeToString(TokenType t) { return tokenTypeNames.at(static_cast<int>(t)); }
+std::string TokenCategoryToString(TokenCategory t) { return TokenCategoryNames.at(static_cast<int>(t)); }
 
 bool operator==(const Token& lhs, const Token& rhs) {
     return lhs.type == rhs.type && lhs.value == rhs.value;
@@ -40,7 +40,7 @@ bool operator==(const Token& lhs, const Token& rhs) {
 bool operator!=(const Token& lhs, const Token& rhs) { return !(lhs == rhs); }
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    return os << "<" << tokenTypeToString(t.type) << ", \"" << t.value << "\">";
+    return os << "<" << TokenCategoryToString(t.type) << ", \"" << t.value << "\">";
 }
 
 
@@ -104,22 +104,22 @@ std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
 
 std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
                                                 const std::string& filename, const size_t lineno) {
-    const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
+    const Token eqvToken = {TokenCategory::META_DIRECTIVE, "eqv"};
 
     std::vector<LineTokens> tokens = {{filename, lineno, {}}};
     std::string currentToken;
-    TokenType currentType = TokenType::UNKNOWN;
+    TokenCategory currentType = TokenCategory::UNKNOWN;
     char prevChar = '\0';
 
     // Append space to ensure all characters are tokenized
     for (const char c : sourceLine + ' ') {
         LineTokens& tokenLine = tokens[tokens.size() - 1];
         // When in a string, gather all characters into a single token
-        if (currentType == TokenType::STRING) {
+        if (currentType == TokenCategory::STRING) {
             // Terminate the string when reaching unescaped quote
             if (c == '"' && prevChar != '\\') {
-                currentType = TokenType::UNKNOWN;
-                tokenLine.tokens.push_back({TokenType::STRING, currentToken});
+                currentType = TokenCategory::UNKNOWN;
+                tokenLine.tokens.push_back({TokenCategory::STRING, currentToken});
                 currentToken.clear();
             } else {
                 // Add character to the string token
@@ -130,7 +130,7 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
         }
         // Begin a string at an open quote
         else if (c == '"') {
-            currentType = TokenType::STRING;
+            currentType = TokenCategory::STRING;
             if (!currentToken.empty())
                 throw MasmSyntaxError("Unexpected token '" + currentToken + "'", filename, lineno);
         }
@@ -143,35 +143,35 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
             terminateToken(c, currentType, currentToken, tokens);
         }
         // When the token type has already been decided
-        else if (currentType != TokenType::UNKNOWN) {
+        else if (currentType != TokenCategory::UNKNOWN) {
             // Accumulate character into the current token
             currentToken += c;
         }
         // A preceding dot marks the token as a directive
         else if (c == '.') {
-            currentType = TokenType::ALLOC_DIRECTIVE;
+            currentType = TokenCategory::ALLOC_DIRECTIVE;
         }
         // A preceding dollar sign marks the token as a register
         else if (c == '$') {
-            currentType = TokenType::REGISTER;
+            currentType = TokenCategory::REGISTER;
         }
         // A preceding percentage sign marks the token as a macro parameter
         else if (c == '%') {
-            currentType = TokenType::MACRO_PARAM;
+            currentType = TokenCategory::MACRO_PARAM;
         }
         // Handle Immediates, Instructions, and Label references
         else if (isdigit(c) || c == '-' ||
                  (c == 'x' && currentToken.size() == 1 && currentToken[0] == '0')) {
-            currentType = TokenType::IMMEDIATE;
+            currentType = TokenCategory::IMMEDIATE;
             currentToken += c;
         } else {
             // Set first token in line as an instruction, otherwise as a label reference
             // If the third token in an eqv directive line, also set as instruction
             if (tokenLine.tokens.empty() ||
                 (tokenLine.tokens.size() == 2 && tokenLine.tokens[0] == eqvToken))
-                currentType = TokenType::INSTRUCTION;
+                currentType = TokenCategory::INSTRUCTION;
             else
-                currentType = TokenType::LABEL_REF;
+                currentType = TokenCategory::LABEL_REF;
             currentToken += c;
         }
     }
@@ -185,7 +185,7 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
 }
 
 
-void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string& currentToken,
+void Tokenizer::terminateToken(const char c, TokenCategory& currentType, std::string& currentToken,
                                std::vector<LineTokens>& tokens) {
     LineTokens& tokenLine = tokens[tokens.size() - 1];
 
@@ -193,40 +193,40 @@ void Tokenizer::terminateToken(const char c, TokenType& currentType, std::string
         throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename,
                               tokenLine.lineno);
 
-    if (currentType == TokenType::IMMEDIATE && currentToken.starts_with("0x"))
+    if (currentType == TokenCategory::IMMEDIATE && currentToken.starts_with("0x"))
         currentToken = hexToInt(currentToken);
 
     // Assign the current token as a label definition if a colon follows
     if (c == ':')
-        currentType = TokenType::LABEL_DEF;
+        currentType = TokenCategory::LABEL_DEF;
 
     // Reassign directive as section directive if directive is data, text, etc.
-    if (currentType == TokenType::ALLOC_DIRECTIVE &&
+    if (currentType == TokenCategory::ALLOC_DIRECTIVE &&
         std::ranges::find(MEM_SEC_DIRECTIVES, currentToken) != MEM_SEC_DIRECTIVES.end())
-        currentType = TokenType::SEC_DIRECTIVE;
+        currentType = TokenCategory::SEC_DIRECTIVE;
     // Reassign directive as meta directive if directive is .globl, .macro, etc.
-    else if (currentType == TokenType::ALLOC_DIRECTIVE &&
+    else if (currentType == TokenCategory::ALLOC_DIRECTIVE &&
              std::ranges::find(META_DIRECTIVES, currentToken) != META_DIRECTIVES.end())
-        currentType = TokenType::META_DIRECTIVE;
+        currentType = TokenCategory::META_DIRECTIVE;
 
     // Correct for labels put at beginning of line
-    if (currentType == TokenType::INSTRUCTION && !isInstruction(currentToken))
-        currentType = TokenType::LABEL_REF;
+    if (currentType == TokenCategory::INSTRUCTION && !isInstruction(currentToken))
+        currentType = TokenCategory::LABEL_REF;
 
     // Add the current token to the vector and reset
     if (!currentToken.empty()) {
         tokenLine.tokens.push_back({currentType, currentToken});
         currentToken.clear();
-        currentType = TokenType::UNKNOWN;
+        currentType = TokenCategory::UNKNOWN;
     }
 
     // Start a new line if a label was given
     if (c == ':')
         tokens.push_back({tokenLine.filename, tokenLine.lineno, {}});
     else if (c == ',')
-        tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
+        tokenLine.tokens.push_back({TokenCategory::SEPERATOR, ","});
     else if (c == '(')
-        tokenLine.tokens.push_back({TokenType::OPEN_PAREN, "("});
+        tokenLine.tokens.push_back({TokenCategory::OPEN_PAREN, "("});
     else if (c == ')')
-        tokenLine.tokens.push_back({TokenType::CLOSE_PAREN, ")"});
+        tokenLine.tokens.push_back({TokenCategory::CLOSE_PAREN, ")"});
 }

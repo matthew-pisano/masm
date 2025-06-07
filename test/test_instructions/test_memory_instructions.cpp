@@ -17,12 +17,12 @@ TEST_CASE("Test lb Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lb"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lb"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -51,12 +51,12 @@ TEST_CASE("Test lbu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lbu"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lbu"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -85,12 +85,12 @@ TEST_CASE("Test lh Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lh"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lh"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -119,12 +119,12 @@ TEST_CASE("Test lhu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lhu"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lhu"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -153,12 +153,12 @@ TEST_CASE("Test lw Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lw"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -187,10 +187,10 @@ TEST_CASE("Test lui Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "lui"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "100"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lui"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "100"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -217,12 +217,12 @@ TEST_CASE("Test sb Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sb"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sb"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -251,12 +251,12 @@ TEST_CASE("Test sh Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sh"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sh"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -285,12 +285,12 @@ TEST_CASE("Test sw Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "sw"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 

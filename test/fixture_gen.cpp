@@ -25,11 +25,11 @@ std::vector<LineTokens> genTokenFile(std::ofstream& tokenFile,
     for (const LineTokens& tokenLine : tokenizedLines) {
         for (const Token& token : tokenLine.tokens) {
             constexpr unsigned char groupSep = 0x1d;
-            std::string tokenType = std::to_string(static_cast<int>(token.type));
+            std::string TokenCategory = std::to_string(static_cast<int>(token.type));
             if (static_cast<int>(token.type) < 10)
-                tokenType.insert(0, "0");
+                TokenCategory.insert(0, "0");
 
-            tokenFile << tokenType << token.value << groupSep;
+            tokenFile << TokenCategory << token.value << groupSep;
         }
         tokenFile << std::endl;
     }

@@ -18,10 +18,10 @@ TEST_CASE("Test li Instruction") {
     const SourceFile rawFile = makeRawFile({"li $t0, 100"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "li"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::IMMEDIATE, "100"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "li"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "100"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -39,10 +39,10 @@ TEST_CASE("Test la Instruction") {
     const SourceFile rawFile = makeRawFile({"la $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "la"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "la"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -62,10 +62,10 @@ TEST_CASE("Test move Instruction") {
     const SourceFile rawFile = makeRawFile({"move $t0, $t1"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "move"},
-                                                                 {TokenType::REGISTER, "t0"},
-                                                                 {TokenType::SEPERATOR, ","},
-                                                                 {TokenType::REGISTER, "t1"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "move"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -83,7 +83,7 @@ TEST_CASE("Test nop Instruction") {
     const SourceFile rawFile = makeRawFile({"nop"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenType::INSTRUCTION, "nop"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "nop"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 

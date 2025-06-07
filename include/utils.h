@@ -65,7 +65,7 @@ std::vector<std::byte> stringToBytes(const std::string& string, bool nullTermina
  * @throw runtime_error When the list is malformed or contains invalid tokens
  */
 std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
-                                   const std::vector<TokenType>& validElems = {});
+                                   const std::vector<TokenCategory>& validElems = {});
 
 
 /**
@@ -74,7 +74,8 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
  * @param tokens The tokens to check
  * @return True if the tokens match the pattern, false otherwise
  */
-bool tokenTypeMatch(const std::vector<TokenType>& pattern, const std::vector<Token>& tokens);
+bool TokenCategoryMatch(const std::vector<TokenCategory>& pattern,
+                        const std::vector<Token>& tokens);
 
 
 /**

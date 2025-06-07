@@ -4,7 +4,7 @@ from enum import Enum
 from typing import List
 
 
-class TokenType(Enum):
+class TokenCategory(Enum):
     """Token types for MIPS assembly programs"""
 
     UNKNOWN = ...
@@ -40,13 +40,13 @@ class SourceFile:
 class Token:
     """Represents a token in the MIPS assembly language with a type and value"""
 
-    type: TokenType
+    type: TokenCategory
     """The type of the token, indicating its category (e.g., instruction, label, directive)"""
 
     value: str
     """The string value of the token, which is the actual text representation of the token"""
 
-    def __init__(self, type: TokenType, value: str) -> None: ...
+    def __init__(self, type: TokenCategory, value: str) -> None: ...
 
     def __repr__(self) -> str: ...
 

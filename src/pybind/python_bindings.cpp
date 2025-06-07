@@ -54,22 +54,22 @@ PYBIND11_MODULE(pymasm_core, m) {
 
     // Tokenizer Bindings //
 
-    // Binding for the TokenType enum
-    py::enum_<TokenType>(tokenizer_module, "TokenType")
-            .value("UNKNOWN", TokenType::UNKNOWN)
-            .value("SEC_DIRECTIVE", TokenType::SEC_DIRECTIVE)
-            .value("ALLOC_DIRECTIVE", TokenType::ALLOC_DIRECTIVE)
-            .value("META_DIRECTIVE", TokenType::META_DIRECTIVE)
-            .value("LABEL_DEF", TokenType::LABEL_DEF)
-            .value("LABEL_REF", TokenType::LABEL_REF)
-            .value("INSTRUCTION", TokenType::INSTRUCTION)
-            .value("REGISTER", TokenType::REGISTER)
-            .value("IMMEDIATE", TokenType::IMMEDIATE)
-            .value("SEPERATOR", TokenType::SEPERATOR)
-            .value("OPEN_PAREN", TokenType::OPEN_PAREN)
-            .value("CLOSE_PAREN", TokenType::CLOSE_PAREN)
-            .value("STRING", TokenType::STRING)
-            .value("MACRO_PARAM", TokenType::MACRO_PARAM);
+    // Binding for the TokenCategory enum
+    py::enum_<TokenCategory>(tokenizer_module, "TokenCategory")
+            .value("UNKNOWN", TokenCategory::UNKNOWN)
+            .value("SEC_DIRECTIVE", TokenCategory::SEC_DIRECTIVE)
+            .value("ALLOC_DIRECTIVE", TokenCategory::ALLOC_DIRECTIVE)
+            .value("META_DIRECTIVE", TokenCategory::META_DIRECTIVE)
+            .value("LABEL_DEF", TokenCategory::LABEL_DEF)
+            .value("LABEL_REF", TokenCategory::LABEL_REF)
+            .value("INSTRUCTION", TokenCategory::INSTRUCTION)
+            .value("REGISTER", TokenCategory::REGISTER)
+            .value("IMMEDIATE", TokenCategory::IMMEDIATE)
+            .value("SEPERATOR", TokenCategory::SEPERATOR)
+            .value("OPEN_PAREN", TokenCategory::OPEN_PAREN)
+            .value("CLOSE_PAREN", TokenCategory::CLOSE_PAREN)
+            .value("STRING", TokenCategory::STRING)
+            .value("MACRO_PARAM", TokenCategory::MACRO_PARAM);
 
     // Binding for the SourceFile struct
     py::class_<SourceFile>(tokenizer_module, "SourceFile")
@@ -85,12 +85,12 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the Token struct
     py::class_<Token>(tokenizer_module, "Token")
             .def(py::init<>())
-            .def(py::init<TokenType, const std::string&>(), py::arg("type"), py::arg("value"))
+            .def(py::init<TokenCategory, const std::string&>(), py::arg("type"), py::arg("value"))
             .def_readwrite("type", &Token::type)
             .def_readwrite("value", &Token::value)
             .def("__repr__",
                  [](const Token& t) {
-                     return "<Token(type=" + tokenTypeToString(t.type) + ", value='" + t.value +
+                     return "<Token(type=" + TokenCategoryToString(t.type) + ", value='" + t.value +
                             "')>";
                  })
             .def("__str__", [](const Token& t) { return t.value; })

@@ -10,9 +10,9 @@
 
 
 /**
- * All valid types for tokens
+ * All valid categories for tokens
  */
-enum class TokenType {
+enum class TokenCategory {
     UNKNOWN,
     SEC_DIRECTIVE, // Directives that denote the state of a memory section
     ALLOC_DIRECTIVE, // Directives that allocate memory
@@ -35,7 +35,7 @@ enum class TokenType {
  * @param t The token type to parse
  * @return The string representation
  */
-std::string tokenTypeToString(TokenType t);
+std::string TokenCategoryToString(TokenCategory t);
 
 
 /**
@@ -61,7 +61,7 @@ struct Token {
     /**
      * The type of the token, used to determine how to parse it
      */
-    TokenType type;
+    TokenCategory type;
 
     /**
      * The text value of the token, which is the raw string representation
@@ -121,7 +121,7 @@ class Tokenizer {
      * @param currentToken The current token to terminate
      * @param tokens The vector of source code lines to add the current token to
      */
-    static void terminateToken(char c, TokenType& currentType, std::string& currentToken,
+    static void terminateToken(char c, TokenCategory& currentType, std::string& currentToken,
                                std::vector<LineTokens>& tokens);
 
     /**

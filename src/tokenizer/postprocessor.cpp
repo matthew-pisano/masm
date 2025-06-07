@@ -56,11 +56,11 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
                                               LineTokens& lineTokens, const std::string& fileId) {
     std::string lineDeclaration;
     for (Token& lineToken : lineTokens.tokens) {
-        if (lineToken.type != TokenType::LABEL_DEF && lineToken.type != TokenType::LABEL_REF)
+        if (lineToken.type != TokenCategory::LABEL_DEF && lineToken.type != TokenCategory::LABEL_REF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
-        if (lineToken.type == TokenType::LABEL_DEF)
+        if (lineToken.type == TokenCategory::LABEL_DEF)
             lineDeclaration = lineToken.value;
 
         // If the label is not a global, mangle it
@@ -74,13 +74,13 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 
 void Postprocessor::collectGlobals(std::vector<std::pair<std::string, LineTokens>>& globals,
                                    std::vector<LineTokens>& tokenizedFile) {
-    const Token globlToken = {TokenType::META_DIRECTIVE, "globl"};
+    const Token globlToken = {TokenCategory::META_DIRECTIVE, "globl"};
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
         if (line.tokens[0] != globlToken)
             continue;
 
-        if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::LABEL_REF)
+        if (line.tokens.size() != 2 || line.tokens[1].type != TokenCategory::LABEL_REF)
             throw MasmSyntaxError("Invalid global label declaration", line.filename, line.lineno);
 
         globals.emplace_back(line.tokens[1].value, line);
@@ -92,12 +92,12 @@ void Postprocessor::collectGlobals(std::vector<std::pair<std::string, LineTokens
 
 
 void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
-    const Token eqvToken = {TokenType::META_DIRECTIVE, "eqv"};
+    const Token eqvToken = {TokenCategory::META_DIRECTIVE, "eqv"};
     std::unordered_map<Token, LineTokens, Token::HashFunction> eqvMapping;
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
         if (line.tokens[0] == eqvToken) {
-            if (line.tokens.size() < 3 || line.tokens[1].type != TokenType::LABEL_REF)
+            if (line.tokens.size() < 3 || line.tokens[1].type != TokenCategory::LABEL_REF)
                 throw MasmSyntaxError("Invalid eqv declaration", line.filename, line.lineno);
 
             const std::vector eqvValue(line.tokens.begin() + 2, line.tokens.end());
@@ -110,7 +110,7 @@ void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
 
         // Replace any label references with their eqv values
         for (size_t j = 0; j < line.tokens.size(); j++) {
-            if (line.tokens[j].type != TokenType::LABEL_REF)
+            if (line.tokens[j].type != TokenCategory::LABEL_REF)
                 continue;
 
             auto it = eqvMapping.find(line.tokens[j]);
@@ -129,10 +129,10 @@ void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
 void Postprocessor::processBaseAddressing(std::vector<LineTokens>& tokenizedFile) {
     for (LineTokens& tokenLine : tokenizedFile) {
         const auto openParen =
-                std::ranges::find(tokenLine.tokens, Token{TokenType::OPEN_PAREN, "("});
+                std::ranges::find(tokenLine.tokens, Token{TokenCategory::OPEN_PAREN, "("});
 
         // Skip instances or parens outside of instructions
-        if (tokenLine.tokens[0].type != TokenType::INSTRUCTION ||
+        if (tokenLine.tokens[0].type != TokenCategory::INSTRUCTION ||
             openParen == tokenLine.tokens.end())
             continue;
 
@@ -148,19 +148,19 @@ void Postprocessor::processBaseAddressing(std::vector<LineTokens>& tokenizedFile
         }
 
         // Insert 0 when no immediate value precedes parentheses
-        if (lastFour[0].type != TokenType::IMMEDIATE) {
+        if (lastFour[0].type != TokenCategory::IMMEDIATE) {
             tokenLine.tokens.push_back(lastFour[0]);
-            lastFour[0] = {TokenType::IMMEDIATE, "0"};
+            lastFour[0] = {TokenCategory::IMMEDIATE, "0"};
         }
 
-        const std::vector pattern = {TokenType::IMMEDIATE, TokenType::OPEN_PAREN,
-                                     TokenType::REGISTER, TokenType::CLOSE_PAREN};
-        if (!tokenTypeMatch(pattern, lastFour))
+        const std::vector pattern = {TokenCategory::IMMEDIATE, TokenCategory::OPEN_PAREN,
+                                     TokenCategory::REGISTER, TokenCategory::CLOSE_PAREN};
+        if (!TokenCategoryMatch(pattern, lastFour))
             throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename,
                                   tokenLine.lineno);
         // Replace with target pattern
         tokenLine.tokens.push_back(lastFour[2]);
-        tokenLine.tokens.push_back({TokenType::SEPERATOR, ","});
+        tokenLine.tokens.push_back({TokenCategory::SEPERATOR, ","});
         tokenLine.tokens.push_back(lastFour[0]);
     }
 }
@@ -171,12 +171,12 @@ std::vector<Token> Postprocessor::parseMacroParams(const LineTokens& line) {
     if (line.tokens.size() < 3)
         return {};
 
-    if (line.tokens[2].type != TokenType::OPEN_PAREN ||
-        line.tokens[line.tokens.size() - 1].type != TokenType::CLOSE_PAREN)
+    if (line.tokens[2].type != TokenCategory::OPEN_PAREN ||
+        line.tokens[line.tokens.size() - 1].type != TokenCategory::CLOSE_PAREN)
         throw MasmSyntaxError("Malformed macro parameter declaration", line.filename, line.lineno);
 
     const std::vector rawParams(line.tokens.begin() + 3, line.tokens.end() - 1);
-    std::vector<Token> params = filterTokenList(rawParams, {TokenType::MACRO_PARAM});
+    std::vector<Token> params = filterTokenList(rawParams, {TokenCategory::MACRO_PARAM});
     return params;
 }
 
@@ -189,15 +189,15 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
     // Gather and mangle label definitions first
     for (LineTokens& bodyLine : mangledMacro.body)
         for (Token& bodyToken : bodyLine.tokens)
-            if (bodyToken.type == TokenType::LABEL_DEF) {
-                macroLabelDefs.emplace_back(TokenType::LABEL_REF, bodyToken.value);
+            if (bodyToken.type == TokenCategory::LABEL_DEF) {
+                macroLabelDefs.emplace_back(TokenCategory::LABEL_REF, bodyToken.value);
                 bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
             }
 
     // Next mangle label references
     for (LineTokens& bodyLine : mangledMacro.body)
         for (Token& bodyToken : bodyLine.tokens)
-            if (bodyToken.type == TokenType::LABEL_REF) {
+            if (bodyToken.type == TokenCategory::LABEL_REF) {
                 auto it = std::ranges::find(macroLabelDefs, bodyToken);
                 // If label is from outside macro
                 if (it == macroLabelDefs.end())
@@ -233,7 +233,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
     // Replace macro parameters with arguments
     while (pos < macroEndIdx) {
         for (auto& token : tokenizedFile.at(pos).tokens) {
-            if (token.type != TokenType::MACRO_PARAM)
+            if (token.type != TokenCategory::MACRO_PARAM)
                 continue;
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
@@ -254,9 +254,9 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
         // If the line is a macro declaration
-        if (line.tokens[0].type == TokenType::META_DIRECTIVE && line.tokens[0].value == "macro") {
+        if (line.tokens[0].type == TokenCategory::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
-            if (line.tokens.size() < 2 || line.tokens[1].type != TokenType::LABEL_REF)
+            if (line.tokens.size() < 2 || line.tokens[1].type != TokenCategory::LABEL_REF)
                 throw MasmSyntaxError("Invalid macro declaration", line.filename, line.lineno);
 
             Macro macro = {line.tokens[1].value, {}, {}};
@@ -271,12 +271,12 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
                                           line.lineno);
 
                 // If we find an end_macro directive, break out of the loop
-                if (tokenizedFile[i].tokens[0].type == TokenType::META_DIRECTIVE &&
+                if (tokenizedFile[i].tokens[0].type == TokenCategory::META_DIRECTIVE &&
                     tokenizedFile[i].tokens[0].value == "end_macro")
                     break;
 
                 // If we find a label reference that matches a macro, expand it
-                if (tokenizedFile[i].tokens[0].type == TokenType::LABEL_REF &&
+                if (tokenizedFile[i].tokens[0].type == TokenCategory::LABEL_REF &&
                     macroMap.contains(tokenizedFile[i].tokens[0].value))
                     expandMacro(macroMap[tokenizedFile[i].tokens[0].value], i, tokenizedFile);
             }
@@ -288,7 +288,7 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
             i = macroStart - 1;
         }
         // If the line is a label reference that matches a macro, expand it
-        else if (line.tokens[0].type == TokenType::LABEL_REF &&
+        else if (line.tokens[0].type == TokenCategory::LABEL_REF &&
                  macroMap.contains(line.tokens[0].value))
             expandMacro(macroMap[line.tokens[0].value], i, tokenizedFile);
     }
@@ -296,14 +296,14 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
 
 
 void Postprocessor::processIncludes(std::map<std::string, std::vector<LineTokens>>& rawProgramMap) {
-    const Token includeToken = {TokenType::META_DIRECTIVE, "include"};
+    const Token includeToken = {TokenCategory::META_DIRECTIVE, "include"};
 
     for (auto& [fileName, tokenizedFile] : rawProgramMap) {
         for (size_t i = 0; i < tokenizedFile.size(); i++) {
             LineTokens& line = tokenizedFile[i];
             if (line.tokens[0] != includeToken)
                 continue;
-            if (line.tokens.size() != 2 || line.tokens[1].type != TokenType::STRING)
+            if (line.tokens.size() != 2 || line.tokens[1].type != TokenCategory::STRING)
                 throw MasmSyntaxError("Invalid include directive", line.filename, line.lineno);
 
             std::string includeName = line.tokens[1].value;
