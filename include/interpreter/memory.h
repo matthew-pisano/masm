@@ -12,8 +12,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "tokenizer/tokenizer.h"
-
 
 /**
  * The upper bound for the text segment address space

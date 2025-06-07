@@ -9,6 +9,8 @@
 #include <map>
 #include <string>
 
+#include "memory.h"
+
 /**
  * Enum representing the valid register numbers
  */
@@ -110,5 +112,40 @@ public:
     int32_t operator[](Register index) const;
     int32_t& operator[](Register index);
 };
+
+
+/**
+ * Executes the given R-Type instruction
+ * @param registers The CPU registers to operate on
+ * @param funct The function code of the instruction
+ * @param rs The first source register
+ * @param rt The second source register
+ * @param rd The destination register
+ * @param shamt The shift amount
+ */
+void execRType(RegisterFile& registers, uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd,
+               uint32_t shamt);
+
+
+/**
+ * Executes the given I-Type instruction
+ * @param registers The CPU registers to operate on
+ * @param memory The memory state to operate on
+ * @param opCode The opcode of the instruction
+ * @param rs The first source register
+ * @param rt The second source register
+ * @param immediate The immediate value
+ */
+void execIType(RegisterFile& registers, Memory& memory, uint32_t opCode, uint32_t rs, uint32_t rt,
+               int32_t immediate);
+
+
+/**
+ * Executes the given J-Type instruction
+ * @param registers The CPU registers to operate on
+ * @param opCode The opcode of the instruction
+ * @param address The address to jump to
+ */
+void execJType(RegisterFile& registers, uint32_t opCode, uint32_t address);
 
 #endif // CPU_H

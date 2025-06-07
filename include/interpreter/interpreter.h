@@ -109,52 +109,6 @@ class Interpreter {
     std::ostream& ostream;
 
     /**
-     * Executes the given R-Type instruction
-     * @param funct The function code of the instruction
-     * @param rs The first source register
-     * @param rt The second source register
-     * @param rd The destination register
-     * @param shamt The shift amount
-     */
-    void execRType(uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t shamt);
-
-    /**
-     * Executes the given I-Type instruction
-     * @param opCode The opcode of the instruction
-     * @param rs The first source register
-     * @param rt The second source register
-     * @param immediate The immediate value
-     */
-    void execIType(uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
-
-    /**
-     * Executes the given J-Type instruction
-     * @param opCode The opcode of the instruction
-     * @param address The address to jump to
-     */
-    void execJType(uint32_t opCode, uint32_t address);
-
-    /**
-     * Executes the ERET instruction, which returns from an exception handler
-     */
-    void execEret();
-
-    /**
-     * Executes the given CP0-Type instruction
-     */
-    void execCP0Type(uint32_t rs, uint32_t rt, uint32_t rd);
-
-    void execCP1RegType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd, uint32_t func);
-
-    void execCP1RegImmType(uint32_t sub, uint32_t rt, uint32_t fs);
-
-    void execCP1ImmType(uint32_t op, uint32_t base, uint32_t ft, uint32_t offset);
-
-    void execCP1CondType(uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t cond);
-
-    void execCP1CondImmType(uint32_t tf, uint32_t offset);
-
-    /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      * @return True if input was read successfully, false if no input is available
      */
@@ -180,8 +134,11 @@ class Interpreter {
      */
     void except(uint32_t cause, const std::string& excMsg);
 
+    /**
+     * Decodes an instructions and determines how to interpret its value
+     * @param instruction The instruction to execute
+     */
     void execInstruction(int32_t instruction);
-
 
 protected:
     /**
