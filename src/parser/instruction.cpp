@@ -72,7 +72,7 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sh", {InstructionType::I_TYPE_T_S_I, InstructionCode::SH, 4}},
         {"sw", {InstructionType::I_TYPE_T_S_I, InstructionCode::SW, 4}},
 
-        // Remapped Instructions (real instructions remapped to more simple instructions)
+        // Remapped Instructions (supported by the ISA, but remapped for convenience of parsing)
         {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
         {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
         {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
@@ -88,7 +88,8 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         // Eret
         {"eret", {InstructionType::ERET, InstructionCode::ERET, 4}},
 
-        // Co-Processor 1 Instructions (Floating Point)
+        // Co Processor 1 (Floating Point) Instructions
+        // Arithmetic Instructions
         {"abs.s", {InstructionType::CP1_TYPE_SP_D_S, InstructionCode::FP_ABS, 4}},
         {"abs.d", {InstructionType::CP1_TYPE_DP_D_S, InstructionCode::FP_ABS, 4}},
         {"add.s", {InstructionType::CP1_TYPE_SP_D_S_T, InstructionCode::FP_ADD, 4}},

@@ -71,7 +71,7 @@ enum class InstructionCode {
     SH = 0x29,
     SW = 0x2b,
 
-    // Remapped Instructions
+    // Remapped Instructions (supported by the ISA, but remapped for convenience of parsing)
     BGTZ = 0x07,
     BLEZ = 0x06,
     BLTZ = 0x07,
@@ -81,34 +81,47 @@ enum class InstructionCode {
     SYSCALL = 0x00,
 
     // Co Processor 0 Instructions
-    MFC0 = 0x00, // Move from CP0
-    MTC0 = 0x04, // Move to CP0
+    MFC0 = 0x00,
+    MTC0 = 0x04,
 
     // Eret
     ERET = 0x00,
 
     // Co Processor 1 (Floating Point) Instructions
+    // Arithmetic Instructions
     FP_ABS = 0x05,
     FP_ADD = 0x00,
-    FP_BC1F = 0x00, // Branch on FP condition false
-    FP_BC1T = 0x01, // Branch on FP condition true
-    FP_C_EQ = 0x02, // Compare equal
-    FP_C_LT = 0x0c, // Compare less than
-    FP_C_LE = 0x0e, // Compare less than or equal
-    FP_CVT_D = 0x21, // Convert to double
-    FP_CVT_S = 0x20, // Convert to single
-    FP_DIV = 0x03, // Divide
-    FP_LDC1 = 0x35, // Load double word to CP1
-    FP_LWC1 = 0x31, // Load word to CP1
-    FP_MFC1 = 0x00, // Move from CP1
-    FP_MOV = 0x06, // Move (copy) value in CP1
-    FP_MTC1 = 0x04, // Move to CP1
-    FP_MUL = 0x02, // Multiply
-    FP_NEG = 0x07, // Negate value in CP1
-    FP_SDC1 = 0x3d, // Store double word from CP1
-    FP_SWC1 = 0x39, // Store word from CP1
-    FP_SQRT = 0x04, // Square root
-    FP_SUB = 0x01, // Subtract
+    FP_DIV = 0x03,
+    FP_MUL = 0x02,
+    FP_NEG = 0x07,
+    FP_SQRT = 0x04,
+    FP_SUB = 0x01,
+
+    // Comparison Instructions
+    FP_C_EQ = 0x02,
+    FP_C_LT = 0x0c,
+    FP_C_LE = 0x0e,
+
+    // Branch Instructions
+    FP_BC1F = 0x00,
+    FP_BC1T = 0x01,
+
+    // Conversion Instructions
+    FP_CVT_D = 0x21,
+    FP_CVT_S = 0x20,
+
+    // Load Instructions
+    FP_LDC1 = 0x35,
+    FP_LWC1 = 0x31,
+
+    // Store Instructions
+    FP_SDC1 = 0x3d,
+    FP_SWC1 = 0x39,
+
+    // Move Instructions
+    FP_MFC1 = 0x00,
+    FP_MTC1 = 0x04,
+    FP_MOV = 0x06,
 
     // Instruction Code for Pseudo Instructions
     PSEUDO = 0x00,
