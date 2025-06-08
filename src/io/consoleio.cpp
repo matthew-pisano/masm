@@ -115,6 +115,7 @@ char consoleGetChar() {
 #else
 // Linux implementation
 #include <fcntl.h>
+#include <iostream>
 #include <stdexcept>
 #include <sys/select.h>
 #include <termios.h>
@@ -125,7 +126,7 @@ void enableRawConsoleMode() {
     termios term{};
     tcgetattr(STDIN_FILENO, &term);
     // Turn off canonical mode and echo mode
-    term.c_lflag &= ~(ICANON);
+    term.c_lflag &= ~(ICANON | ECHO);
     // Set minimum number of input bytes and timeout
     term.c_cc[VMIN] = 0; // Return immediately, even if no bytes are available
     term.c_cc[VTIME] = 0; // No timeout
@@ -141,7 +142,7 @@ void disableRawConsoleMode() {
     termios term{};
     tcgetattr(STDIN_FILENO, &term);
     // Restore canonical mode and echo mode
-    term.c_lflag |= (ICANON);
+    term.c_lflag |= (ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
 
     // Reset stdin to blocking mode
@@ -178,8 +179,13 @@ char consoleGetChar() {
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);
 
     if (bytesRead > 0) {
-        if (c == 127)
+        if (c == 127) {
+            // Remove the previous character on the screen
+            std::cout << "\b \b" << std::flush;
             return '\b'; // Convert DEL to BACKSPACE
+        }
+        // Output the character immediately to stdout as user feedback
+        std::cout << c << std::flush;
         return c;
     }
 
