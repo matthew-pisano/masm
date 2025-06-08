@@ -13,6 +13,7 @@
 #include "cp1.h"
 #include "cpu.h"
 #include "heap.h"
+#include "io/consoleio.h"
 #include "memory.h"
 
 
@@ -109,6 +110,11 @@ class Interpreter {
     std::ostream& ostream;
 
     /**
+     * The console handle for reading input and writing output to the console
+     */
+    ConsoleHandle conHandle;
+
+    /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
      * @return True if input was read successfully, false if no input is available
      */
@@ -147,8 +153,8 @@ protected:
     State state;
 
 public:
-    explicit Interpreter(const IOMode ioMode) :
-        ioMode(ioMode), istream(std::cin), ostream(std::cout) {}
+    explicit Interpreter(const IOMode ioMode, const ConsoleHandle& conHandle) :
+        ioMode(ioMode), istream(std::cin), ostream(std::cout), conHandle(conHandle) {}
     Interpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
         ioMode(ioMode), istream(input), ostream(output) {}
 

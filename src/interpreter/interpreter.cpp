@@ -110,8 +110,8 @@ bool Interpreter::readMMIO() {
 
     char c = 0;
     // Check if the input stream has characters to read
-    if (&istream == &std::cin && consoleHasChar())
-        c = consoleGetChar();
+    if (&istream == &std::cin && conHandle.consoleHasChar())
+        c = conHandle.consoleGetChar();
     else if (&istream != &std::cin && istream.peek() != std::char_traits<char>::eof())
         istream.get(c);
 

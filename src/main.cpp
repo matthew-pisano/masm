@@ -28,8 +28,9 @@ int main(const int argc, char* argv[]) {
         return app.exit(e);
     }
 
+    ConsoleHandle conHandle;
     // Set terminal to raw mode
-    enableRawConsoleMode();
+    conHandle.enableRawConsoleMode();
 
     int exitCode = 1;
     try {
@@ -44,14 +45,14 @@ int main(const int argc, char* argv[]) {
         const MemLayout layout = parser.parse(program);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        Interpreter interpreter{ioMode};
+        Interpreter interpreter(ioMode, conHandle);
         exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
 
     // Restore terminal settings
-    disableRawConsoleMode();
+    conHandle.disableRawConsoleMode();
 
     return exitCode;
 }

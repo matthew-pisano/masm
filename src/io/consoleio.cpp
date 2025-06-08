@@ -17,7 +17,7 @@ static HANDLE hStdin = nullptr;
 static bool rawModeEnabled = false;
 
 
-void enableRawConsoleMode() {
+void ConsoleHandle::enableRawConsoleMode() {
     hStdin = GetStdHandle(STD_INPUT_HANDLE);
     if (hStdin == INVALID_HANDLE_VALUE)
         throw std::runtime_error("Failed to get stdin handle");
@@ -38,7 +38,7 @@ void enableRawConsoleMode() {
 }
 
 
-void disableRawConsoleMode() {
+void ConsoleHandle::disableRawConsoleMode() {
     if (rawModeEnabled && hStdin != nullptr) {
         // Restore the original console mode
         SetConsoleMode(hStdin, originalConsoleMode);
@@ -47,7 +47,7 @@ void disableRawConsoleMode() {
 }
 
 
-bool consoleHasChar() {
+bool ConsoleHandle::consoleHasChar() {
     if (!rawModeEnabled)
         return false;
 
@@ -81,7 +81,7 @@ bool consoleHasChar() {
 }
 
 
-char consoleGetChar() {
+char ConsoleHandle::consoleGetChar() {
     if (!rawModeEnabled)
         throw std::runtime_error("Raw console mode not enabled");
 
@@ -122,7 +122,7 @@ char consoleGetChar() {
 #include <unistd.h>
 
 
-void enableRawConsoleMode() {
+void ConsoleHandle::enableRawConsoleMode() {
     termios term{};
     tcgetattr(STDIN_FILENO, &term);
     // Turn off canonical mode and echo mode
@@ -138,7 +138,7 @@ void enableRawConsoleMode() {
 }
 
 
-void disableRawConsoleMode() {
+void ConsoleHandle::disableRawConsoleMode() {
     termios term{};
     tcgetattr(STDIN_FILENO, &term);
     // Restore canonical mode and echo mode
@@ -151,7 +151,7 @@ void disableRawConsoleMode() {
 }
 
 
-bool consoleHasChar() {
+bool ConsoleHandle::consoleHasChar() {
     // Try to read 0 bytes - will return > 0 if data is available
     char buf;
     const size_t bytesRead = read(STDIN_FILENO, &buf, 0);
@@ -174,7 +174,7 @@ bool consoleHasChar() {
 }
 
 
-char consoleGetChar() {
+char ConsoleHandle::consoleGetChar() {
     char c;
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);
 
