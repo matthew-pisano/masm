@@ -4,6 +4,8 @@
 
 #ifndef CONSOLEIO_H
 #define CONSOLEIO_H
+#include <cstdint>
+
 
 /**
  * ConsoleHandle class for handling console input/output in raw mode
@@ -13,12 +15,12 @@ class ConsoleHandle {
     /**
      * The start of the unmodifiable code region
      */
-    size_t inputBase = 0;
+    uint32_t inputBase = 0;
 
     /**
      * The current position of the input cursor
      */
-    size_t inputCursor = 0;
+    uint32_t inputCursor = 0;
 
 public:
     /**

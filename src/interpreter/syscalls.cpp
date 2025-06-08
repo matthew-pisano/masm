@@ -14,35 +14,28 @@
 #include "io/consoleio.h"
 
 
-std::map<size_t, RandomGenerator> rngMap = {};
-
-
-/**
- * Reads (blocking) a character from the input stream, handling both console and file streams.
- * @param istream The input stream to read from, can be std::cin or any other input stream
- * @return The character read from the input stream
- */
-char getStreamChar(std::istream& istream) {
+char SystemHandle::getStreamChar(std::istream& istream) {
     char c;
     if (&istream != &std::cin)
         istream.get(c);
     else {
-        while (!consoleHasChar())
+        while (!conHandle.consoleHasChar())
             usleep(1000); // Sleep for 1 ms
-        c = consoleGetChar();
+        c = conHandle.consoleGetChar();
     }
     return c;
 }
 
 
-void requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
+void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
     if (ioMode != IOMode::SYSCALL)
         throw ExecExcept(syscallName + " syscall not supported in MMIO mode",
                          EXCEPT_CODE::SYSCALL_EXCEPTION);
 }
 
 
-void execSyscall(const IOMode ioMode, State& state, std::istream& istream, std::ostream& ostream) {
+void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& istream,
+                               std::ostream& ostream) {
     int32_t syscallCode = state.registers[Register::V0];
 
     switch (static_cast<Syscall>(syscallCode)) {
@@ -112,13 +105,13 @@ void execSyscall(const IOMode ioMode, State& state, std::istream& istream, std::
 }
 
 
-void printIntSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     ostream << value;
 }
 
 
-void printStringSyscall(State& state, std::ostream& ostream) {
+void SystemHandle::printStringSyscall(State& state, std::ostream& ostream) {
     int32_t address = state.registers[Register::A0];
     while (true) {
         const unsigned char c = state.memory.byteAt(address);
@@ -131,7 +124,7 @@ void printStringSyscall(State& state, std::ostream& ostream) {
 }
 
 
-void readIntSyscall(State& state, std::istream& istream) {
+void SystemHandle::readIntSyscall(State& state, std::istream& istream) {
     std::string input;
     while (true) {
         const char c = getStreamChar(istream);
@@ -153,7 +146,7 @@ void readIntSyscall(State& state, std::istream& istream) {
 }
 
 
-void readStringSyscall(State& state, std::istream& istream) {
+void SystemHandle::readStringSyscall(State& state, std::istream& istream) {
     const int32_t address = state.registers[Register::A0];
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
@@ -171,35 +164,37 @@ void readStringSyscall(State& state, std::istream& istream) {
 }
 
 
-void heapAllocSyscall(State& state) {
+void SystemHandle::heapAllocSyscall(State& state) {
     const int32_t size = state.registers[Register::A0];
     const int32_t ptr = static_cast<int32_t>(state.heapAllocator.allocate(size));
     state.registers[Register::V0] = ptr;
 }
 
 
-void exitSyscall() { throw ExecExit("Program exited with code " + std::to_string(0), 0); }
+void SystemHandle::exitSyscall() {
+    throw ExecExit("Program exited with code " + std::to_string(0), 0);
+}
 
 
-void printCharSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printCharSyscall(const State& state, std::ostream& ostream) {
     const char c = static_cast<char>(state.registers[Register::A0]);
     ostream << c;
 }
 
 
-void readCharSyscall(State& state, std::istream& istream) {
+void SystemHandle::readCharSyscall(State& state, std::istream& istream) {
     const char c = getStreamChar(istream);
     state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }
 
 
-void exitValSyscall(const State& state) {
+void SystemHandle::exitValSyscall(const State& state) {
     const int32_t exitCode = state.registers[Register::A0];
     throw ExecExit("Program exited with code " + std::to_string(exitCode), exitCode);
 }
 
 
-void timeSyscall(State& state) {
+void SystemHandle::timeSyscall(State& state) {
     // Get the current time in milliseconds since the epoch
     const auto now = std::chrono::system_clock::now();
     const auto duration = now.time_since_epoch();
@@ -212,7 +207,7 @@ void timeSyscall(State& state) {
 }
 
 
-void sleepSyscall(State& state) {
+void SystemHandle::sleepSyscall(State& state) {
     const int32_t milliseconds = state.registers[Register::A0];
     if (milliseconds < 0)
         throw ExecExcept("Negative sleep time: " + std::to_string(milliseconds),
@@ -222,39 +217,39 @@ void sleepSyscall(State& state) {
 }
 
 
-void printIntHexSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntHexSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     ostream << std::hex << std::setw(8) << std::setfill('0') << value;
     ostream.flush();
 }
 
-void printIntBinSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntBinSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     for (int i = 31; i >= 0; --i)
         ostream << (value >> i & 1);
     ostream.flush();
 }
 
-void printUIntSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printUIntSyscall(const State& state, std::ostream& ostream) {
     const uint32_t value = state.registers[Register::A0];
     ostream << value;
     ostream.flush();
 }
 
-void setRandSeedSyscall(State& state) {
+void SystemHandle::setRandSeedSyscall(State& state) {
     const int32_t id = state.registers[Register::A0];
     const int32_t seed = state.registers[Register::A1];
     rngMap[id] = RandomGenerator(seed);
 }
 
-void randIntSyscall(State& state) {
+void SystemHandle::randIntSyscall(State& state) {
     const int32_t id = state.registers[Register::A0];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();
     state.registers[Register::A0] = static_cast<int32_t>(rngMap[id].getRandomInt());
 }
 
-void randIntRangeSyscall(State& state) {
+void SystemHandle::randIntRangeSyscall(State& state) {
     const int32_t id = state.registers[Register::A0];
     const int32_t max = state.registers[Register::A1];
     if (!rngMap.contains(id))
