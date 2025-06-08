@@ -177,8 +177,11 @@ char consoleGetChar() {
     char c;
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);
 
-    if (bytesRead > 0)
+    if (bytesRead > 0) {
+        if (c == 127)
+            return '\b'; // Convert DEL to BACKSPACE
         return c;
+    }
 
     throw std::runtime_error("No character available to read from console");
 }
