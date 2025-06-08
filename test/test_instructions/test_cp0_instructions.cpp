@@ -28,7 +28,7 @@ TEST_CASE("Test Eret Instruction") {
     }
 
     constexpr int32_t expectedPC = 0x00400004;
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().cp0[Coproc0Register::EPC] = expectedPC;
     interpreter.getState().cp0[Coproc0Register::CAUSE] = 1;
     interpreter.interpret(actualLayout);
@@ -59,7 +59,7 @@ TEST_CASE("Test Mtc0 Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 1444;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(1444 == interpreter.getState().cp0[Coproc0Register::VADDR]); }
@@ -85,7 +85,7 @@ TEST_CASE("Test Mfc0 Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().cp0[Coproc0Register::VADDR] = 1444;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(1444 == interpreter.getState().registers[Register::T1]); }

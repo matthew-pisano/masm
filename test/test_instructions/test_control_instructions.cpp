@@ -29,7 +29,7 @@ TEST_CASE("Test j Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
 
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -56,7 +56,7 @@ TEST_CASE("Test jal Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
 
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -83,7 +83,7 @@ TEST_CASE("Test jr Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
 
     interpreter.getState().registers[Register::T0] = 0x00400010;
     interpreter.interpret(actualLayout);
@@ -110,7 +110,7 @@ TEST_CASE("Test jalr Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
 
     interpreter.getState().registers[Register::T0] = 0x00400010;
     interpreter.interpret(actualLayout);
@@ -125,12 +125,13 @@ TEST_CASE("Test beq Instruction") {
     const SourceFile rawFile = makeRawFile({"beq $t0, $t1, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "beq"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "beq"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -143,7 +144,7 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
@@ -151,7 +152,7 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterNe{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterNe(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterNe.getState().registers[Register::T0] = 37;
     interpreterNe.getState().registers[Register::T1] = 42;
     interpreterNe.interpret(actualLayout);
@@ -165,12 +166,13 @@ TEST_CASE("Test bne Instruction") {
     const SourceFile rawFile = makeRawFile({"bne $t0, $t1, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "bne"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "bne"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -183,7 +185,7 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
@@ -191,7 +193,7 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004);
     }
 
-    DebugInterpreter interpreter2Ne{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter2Ne(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter2Ne.getState().registers[Register::T0] = 37;
     interpreter2Ne.getState().registers[Register::T1] = 42;
     interpreter2Ne.interpret(actualLayout);
@@ -205,10 +207,11 @@ TEST_CASE("Test bgtz Instruction") {
     const SourceFile rawFile = makeRawFile({"bgtz $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "bgtz"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "bgtz"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -222,21 +225,21 @@ TEST_CASE("Test bgtz Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterGt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterLt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -249,10 +252,11 @@ TEST_CASE("Test bltz Instruction") {
     const SourceFile rawFile = makeRawFile({"bltz $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "bltz"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "bltz"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -266,21 +270,21 @@ TEST_CASE("Test bltz Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterGt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterLt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -293,10 +297,11 @@ TEST_CASE("Test bgez Instruction") {
     const SourceFile rawFile = makeRawFile({"bgez $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "bgez"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "bgez"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -310,21 +315,21 @@ TEST_CASE("Test bgez Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterGt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterLt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
@@ -337,10 +342,11 @@ TEST_CASE("Test blez Instruction") {
     const SourceFile rawFile = makeRawFile({"blez $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "blez"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "blez"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -354,21 +360,21 @@ TEST_CASE("Test blez Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreterEq{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterEq(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") {
         REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010);
     }
 
-    DebugInterpreter interpreterGt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterGt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") {
         REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008);
     }
 
-    DebugInterpreter interpreterLt{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreterLt(IOMode::SYSCALL, {std::cin, std::cout});
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {

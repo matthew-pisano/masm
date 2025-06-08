@@ -26,7 +26,8 @@ TEST_CASE("Test Print Int Syscall") {
     State state;
     state.registers[Register::A0] = std::stoi(expected);
     std::stringstream ostream;
-    sysHandle.printIntSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printIntSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str());
 }
@@ -39,7 +40,8 @@ TEST_CASE("Test Print String Syscall") {
     const uint32_t strAddr = writeStringToMem(state, expected);
     state.registers[Register::A0] = static_cast<int32_t>(strAddr);
     std::stringstream ostream;
-    sysHandle.printStringSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printStringSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str());
 }
@@ -52,7 +54,8 @@ TEST_CASE("Test Read Int Syscall") {
     SECTION("Valid Input") {
         const std::string input = "42\n";
         std::istringstream istream(input);
-        sysHandle.readIntSyscall(state, istream);
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readIntSyscall(state, streamHandle);
 
         REQUIRE(state.registers[Register::V0] == 42);
     }
@@ -60,24 +63,27 @@ TEST_CASE("Test Read Int Syscall") {
     SECTION("Invalid Input") {
         const std::string input = "invalid\n";
         std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
 
-        REQUIRE_THROWS_MATCHES(sysHandle.readIntSyscall(state, istream), ExecExcept,
+        REQUIRE_THROWS_MATCHES(sysHandle.readIntSyscall(state, streamHandle), ExecExcept,
                                Catch::Matchers::Message("Invalid input: invalid"));
     }
 
     SECTION("Out of Range Input") {
         const std::string input = "99999999999999999999\n"; // Too large for int32_t
         std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
 
         REQUIRE_THROWS_MATCHES(
-                sysHandle.readIntSyscall(state, istream), ExecExcept,
+                sysHandle.readIntSyscall(state, streamHandle), ExecExcept,
                 Catch::Matchers::Message("Input out of range: 99999999999999999999"));
     }
 
     SECTION("Edited Input") {
         const std::string input = "42\b4\n";
         std::istringstream istream(input);
-        sysHandle.readIntSyscall(state, istream);
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readIntSyscall(state, streamHandle);
 
         REQUIRE(state.registers[Register::V0] == 44);
     }
@@ -94,21 +100,23 @@ TEST_CASE("Test Read String Syscall") {
         const uint32_t strAddr = memSectionOffset(MemSection::DATA);
         state.registers[Register::A0] = static_cast<int32_t>(strAddr);
         state.registers[Register::A1] = static_cast<int32_t>(input.size());
-        sysHandle.readStringSyscall(state, istream);
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readStringSyscall(state, streamHandle);
 
         for (size_t i = 0; i < input.size(); i++)
             REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
     }
 
     SECTION("Read Edited String") {
-        const std::string input = "Hello, world!\b\b\b\b\b\bthere!";
+        const std::string input = "Hello, world\b\b\b\b\bthere!";
         const std::string expected = "Hello, there!";
         std::stringstream istream(input);
         State state;
         const uint32_t strAddr = memSectionOffset(MemSection::DATA);
         state.registers[Register::A0] = static_cast<int32_t>(strAddr);
-        state.registers[Register::A1] = static_cast<int32_t>(input.size());
-        sysHandle.readStringSyscall(state, istream);
+        state.registers[Register::A1] = static_cast<int32_t>(expected.size());
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readStringSyscall(state, streamHandle);
 
         for (size_t i = 0; i < expected.size(); i++)
             REQUIRE(state.memory.byteAt(strAddr + i) == expected[i]);
@@ -159,7 +167,8 @@ TEST_CASE("Test Print Char Syscall") {
     State state;
     state.registers[Register::A0] = static_cast<int32_t>(expected);
     std::stringstream ostream;
-    sysHandle.printCharSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printCharSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str()[0]);
 }
@@ -170,7 +179,8 @@ TEST_CASE("Test Read Char Syscall") {
     const std::string input = "A";
     std::stringstream istream(input);
     State state;
-    sysHandle.readCharSyscall(state, istream);
+    StreamHandle streamHandle{istream, std::cout};
+    sysHandle.readCharSyscall(state, streamHandle);
 
     REQUIRE(state.registers[Register::V0] == static_cast<int32_t>(input[0]));
 }
@@ -244,7 +254,8 @@ TEST_CASE("Test Print Int Hex Syscall") {
     State state;
     state.registers[Register::A0] = 69;
     std::stringstream ostream;
-    sysHandle.printIntHexSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printIntHexSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str());
 }
@@ -256,7 +267,8 @@ TEST_CASE("Test Print Int Bin Syscall") {
     State state;
     state.registers[Register::A0] = 69;
     std::stringstream ostream;
-    sysHandle.printIntBinSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printIntBinSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str());
 }
@@ -268,7 +280,8 @@ TEST_CASE("Test Print UInt Syscall") {
     State state;
     state.registers[Register::A0] = -420;
     std::stringstream ostream;
-    sysHandle.printUIntSyscall(state, ostream);
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printUIntSyscall(state, streamHandle);
 
     REQUIRE(expected == ostream.str());
 }

@@ -24,8 +24,8 @@ public:
 class DebugInterpreter : public Interpreter {
 
 public:
-    DebugInterpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
-        Interpreter(ioMode, input, output) {}
+    DebugInterpreter(const IOMode ioMode, const StreamHandle& streamHandle) :
+        Interpreter(ioMode, streamHandle) {}
 
     /**
      * Gets the current state of the interpreter

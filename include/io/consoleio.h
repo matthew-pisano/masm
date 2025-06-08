@@ -5,12 +5,15 @@
 #ifndef CONSOLEIO_H
 #define CONSOLEIO_H
 #include <cstdint>
+#include <iostream>
+
+#include "streamio.h"
 
 
 /**
  * ConsoleHandle class for handling console input/output in raw mode
  */
-class ConsoleHandle {
+class ConsoleHandle final : public StreamHandle {
 
     /**
      * The start of the unmodifiable code region
@@ -28,36 +31,34 @@ class ConsoleHandle {
     bool rawModeEnabled = false;
 
 public:
+    ConsoleHandle() : StreamHandle(std::cin, std::cout) {}
+
     /**
      * Enable raw mode for terminal input to get single characters without newline
      */
     void enableRawConsoleMode();
-
-
     /**
      * Disable raw mode for terminal input to restore default behavior
      */
     void disableRawConsoleMode();
 
-
     /**
-     * Check if there are characters available to read from the console
+     * Checks if there are characters available to read from the console
      * @return True if there are characters available, false otherwise
      */
-    bool consoleHasChar();
-
+    [[nodiscard]] bool hasChar() override;
 
     /**
-     * Get a single character from the console
+     * Gets a character from the console input
      * @return The character read from the console
-     * @throw runtime_error if there is no character to read from the console
      */
-    char consoleGetChar();
+    [[nodiscard]] char getChar() override;
 
     /**
-     * Prints a character to the console
+     * Outputs a character to the console
+     * @param c The character to output
      */
-    void consolePutChar(char c);
+    void putChar(char c) override;
 };
 
 #endif // CONSOLEIO_H

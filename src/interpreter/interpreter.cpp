@@ -38,7 +38,9 @@ int Interpreter::interpret(const MemLayout& layout) {
         try {
             step();
         } catch (ExecExit& e) {
-            ostream << "\n" << e.what() << std::endl;
+            std::ostringstream oss;
+            oss << "\n" << e.what() << std::endl;
+            streamHandle.putStr(oss.str());
             return e.code();
         }
     }
@@ -58,10 +60,8 @@ bool Interpreter::readMMIO() {
 
     char c = 0;
     // Check if the input stream has characters to read
-    if (&istream == &std::cin && conHandle.consoleHasChar())
-        c = conHandle.consoleGetChar();
-    else if (&istream != &std::cin && istream.peek() != std::char_traits<char>::eof())
-        istream.get(c);
+    if (streamHandle.hasChar())
+        c = streamHandle.getChar();
 
     if (c) {
         // Set the ready bit
@@ -69,9 +69,6 @@ bool Interpreter::readMMIO() {
         // Set the input data byte
         state.memory[input_data + 3] = static_cast<std::byte>(c);
     }
-
-    // Clear error flags from peeking when stream is empty
-    istream.clear();
 
     // Return true if a character was read, false otherwise
     return static_cast<bool>(c);
@@ -91,12 +88,7 @@ bool Interpreter::writeMMIO() {
 
     const char c = static_cast<char>(state.memory.wordAt(output_data));
 
-    if (&ostream == &std::cout)
-        conHandle.consolePutChar(c);
-    else {
-        ostream << c;
-        ostream.flush();
-    }
+    streamHandle.putChar(c);
 
     // Reset ready bit
     state.memory[output_ready + 3] = std::byte{1};
@@ -174,7 +166,7 @@ void Interpreter::step() {
 void Interpreter::execInstruction(const int32_t instruction) {
     if (instruction == 0x0000000C) {
         // Syscall instruction
-        sysHandle.execSyscall(ioMode, state, istream, ostream);
+        sysHandle.execSyscall(ioMode, state, streamHandle);
         return;
     }
     if (instruction == 0x42000018) {

@@ -36,7 +36,7 @@ public:
         obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
         istream_(std::make_shared<std::istream>(ibuf_.get())),
         ostream_(std::make_unique<std::ostream>(obuf_.get())),
-        obj_(std::make_unique<Interpreter>(ioMode, *istream_, *ostream_)) {}
+        obj_(std::make_unique<Interpreter>(ioMode, StreamHandle(*istream_, *ostream_))) {}
 
     void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
@@ -85,13 +85,14 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the Token struct
     py::class_<Token>(tokenizer_module, "Token")
             .def(py::init<>())
-            .def(py::init<TokenCategory, const std::string&>(), py::arg("category"), py::arg("value"))
+            .def(py::init<TokenCategory, const std::string&>(), py::arg("category"),
+                 py::arg("value"))
             .def_readwrite("category", &Token::category)
             .def_readwrite("value", &Token::value)
             .def("__repr__",
                  [](const Token& t) {
-                     return "<Token(category=" + tokenCategoryToString(t.category) + ", value='" + t.value +
-                            "')>";
+                     return "<Token(category=" + tokenCategoryToString(t.category) + ", value='" +
+                            t.value + "')>";
                  })
             .def("__str__", [](const Token& t) { return t.value; })
             .def(py::self == py::self) // Bind the equality operator

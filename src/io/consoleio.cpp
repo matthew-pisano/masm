@@ -46,7 +46,7 @@ void ConsoleHandle::disableRawConsoleMode() {
 }
 
 
-bool ConsoleHandle::consoleHasChar() {
+bool ConsoleHandle::hasChar() {
     if (!rawModeEnabled)
         return false;
 
@@ -80,7 +80,7 @@ bool ConsoleHandle::consoleHasChar() {
 }
 
 
-char ConsoleHandle::consoleGetChar() {
+char ConsoleHandle::getChar() {
     if (!rawModeEnabled)
         throw std::runtime_error("Raw console mode not enabled");
 
@@ -103,7 +103,7 @@ char ConsoleHandle::consoleGetChar() {
                 // Convert carriage return to newline
                 c = '\n';
             // Output the character immediately to stdout as user feedback
-            std::cout << c << std::flush;
+            ostream << c << std::flush;
             return c;
         }
 
@@ -152,7 +152,7 @@ void ConsoleHandle::disableRawConsoleMode() {
 }
 
 
-bool ConsoleHandle::consoleHasChar() {
+bool ConsoleHandle::hasChar() {
     // Try to read 0 bytes - will return > 0 if data is available
     char buf;
     const size_t bytesRead = read(STDIN_FILENO, &buf, 0);
@@ -175,7 +175,7 @@ bool ConsoleHandle::consoleHasChar() {
 }
 
 
-char ConsoleHandle::consoleGetChar() {
+char ConsoleHandle::getChar() {
     char c;
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);
 
@@ -186,7 +186,7 @@ char ConsoleHandle::consoleGetChar() {
     if (c == 127) {
         if (inputCursor > inputBase) {
             // Remove the previous character on the screen
-            std::cout << "\b \b" << std::flush;
+            ostream << "\b \b" << std::flush;
             inputCursor--;
         }
         return '\b'; // Convert DEL to BACKSPACE
@@ -195,11 +195,11 @@ char ConsoleHandle::consoleGetChar() {
     // Output the character immediately to stdout as user feedback
     if (c == '\033') {
         // Escape any escape sequences
-        std::cout << "\\033" << std::flush;
+        ostream << "\\033" << std::flush;
         // Advance the cursor by 3 to account for extra characters
         inputCursor += 3;
     } else
-        std::cout << c << std::flush;
+        ostream << c << std::flush;
 
     inputCursor++;
     return c;
@@ -208,9 +208,9 @@ char ConsoleHandle::consoleGetChar() {
 #endif
 
 
-void ConsoleHandle::consolePutChar(const char c) {
-    std::cout << c;
-    std::cout.flush();
+void ConsoleHandle::putChar(const char c) {
+    ostream << c;
+    ostream.flush();
 
     inputBase++;
     inputCursor = inputBase;

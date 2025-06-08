@@ -25,19 +25,9 @@ class Interpreter {
     IOMode ioMode;
 
     /**
-     * The input stream for the program to use
-     */
-    std::istream& istream;
-
-    /**
-     * The output stream for the program to use
-     */
-    std::ostream& ostream;
-
-    /**
      * The console handle for reading input and writing output to the console
      */
-    ConsoleHandle conHandle;
+    StreamHandle& streamHandle;
 
     /**
      * The system handle for executing system calls
@@ -83,11 +73,8 @@ protected:
     State state;
 
 public:
-    explicit Interpreter(const IOMode ioMode, const ConsoleHandle& conHandle) :
-        ioMode(ioMode), istream(std::cin), ostream(std::cout), conHandle(conHandle),
-        sysHandle(SystemHandle(conHandle)) {}
-    Interpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
-        ioMode(ioMode), istream(input), ostream(output) {}
+    explicit Interpreter(const IOMode ioMode, StreamHandle& streamHandle) :
+        ioMode(ioMode), streamHandle(streamHandle) {}
 
     /**
      * Initializes the program in the interpreter with the given memory layout

@@ -74,35 +74,9 @@ enum class Syscall {
 class SystemHandle {
 
     /**
-     * The console handle used for input/output operations
-     */
-    ConsoleHandle conHandle;
-
-    /**
      * A map of random number generator instances indexed by their IDs
      */
     std::map<size_t, RandomGenerator> rngMap = {};
-
-    /**
-     * Reads (blocking) a character from the input stream, handling both console and file streams.
-     * @param istream The input stream to read from, can be std::cin or any other input stream
-     * @return The character read from the input stream
-     */
-    char getStreamChar(std::istream& istream);
-
-    /**
-     * Writes a character to the output stream
-     * @param c The character to write to the output stream
-     * @param ostream The output stream to write to
-     */
-    void putStreamChar(char c, std::ostream& ostream);
-
-    /**
-     * Writes a null-terminated string to the output stream
-     * @param str The string to write to the output stream
-     * @param ostream The output stream to write to
-     */
-    void putStreamStr(const std::string& str, std::ostream& ostream);
 
     /**
      * Checks if the current I/O mode is SYSCALL mode, and throws an exception if it is not.
@@ -113,111 +87,107 @@ class SystemHandle {
     static void requiresSyscallMode(IOMode ioMode, const std::string& syscallName);
 
 public:
-    SystemHandle() = default;
-    explicit SystemHandle(const ConsoleHandle& conHandle) : conHandle(conHandle) {}
-
     /**
      * Executes the system call based on the value in the $v0 register
      * @param ioMode The I/O mode of the interpreter (some syscalls will fail if not in SYSCALL
      * mode)
      * @param state The current state of the interpreter
-     * @param istream The input stream to read from
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for input/output operations
      */
-    void execSyscall(IOMode ioMode, State& state, std::istream& istream, std::ostream& ostream);
+    void execSyscall(IOMode ioMode, State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the integer stored in the register $a0 to the console
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printIntSyscall(const State& state, std::ostream& ostream);
+    void printIntSyscall(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the null-terminated string stored in the memory at the address in $a0 to the console
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printStringSyscall(State& state, std::ostream& ostream);
+    void printStringSyscall(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads an integer from the console and stores it in the register $v0
      * @param state The current state of the interpreter
-     * @param istream The input stream to read from
+     * @param streamHandle The stream handle for reading
      */
-    void readIntSyscall(State& state, std::istream& istream);
+    void readIntSyscall(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a string from the console and stores it in the memory at the address in $a0 up to the
      * length in $a1
      * @param state The current state of the interpreter
-     * @param istream The input stream to read from
+     * @param streamHandle The stream handle for reading
      */
-    void readStringSyscall(State& state, std::istream& istream);
+    void readStringSyscall(State& state, StreamHandle& streamHandle);
 
     /**
      * Allocates a block of memory of the size in $a0 and stores the address in $v0
      * @param state The current state of the interpreter
      */
-    static void heapAllocSyscall(State& state);
+    void heapAllocSyscall(State& state);
 
     /**
      * Exits the program with the exit code 0
      */
-    static void exitSyscall();
+    void exitSyscall();
 
     /**
      * Prints the character stored in the register $a0 to the console
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printCharSyscall(const State& state, std::ostream& ostream);
+    void printCharSyscall(const State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a character from the console and stores it in the register $v0
      * @param state The current state of the interpreter
-     * @param istream The input stream to read from
+     * @param streamHandle The stream handle for reading
      */
-    void readCharSyscall(State& state, std::istream& istream);
+    void readCharSyscall(State& state, StreamHandle& streamHandle);
 
     /**
      * Exits the program with the exit code stored in $a0
      * @param state The current state of the interpreter
      */
-    static void exitValSyscall(const State& state);
+    void exitValSyscall(const State& state);
 
     /**
      * Gets the current system time as a 64-bit integer with low bits in $a0 and high bits in $a1
      * @param state The current state of the interpreter
      */
-    static void timeSyscall(State& state);
+    void timeSyscall(State& state);
 
     /**
      * Sleeps for the given number of milliseconds specified in $a0
      * @param state The current state of the interpreter
      */
-    static void sleepSyscall(State& state);
+    void sleepSyscall(State& state);
 
     /**
      * Prints the integer stored in the register $a0 as a hexadecimal value
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printIntHexSyscall(const State& state, std::ostream& ostream);
+    void printIntHexSyscall(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the integer stored in the register $a0 as a binary value
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printIntBinSyscall(const State& state, std::ostream& ostream);
+    void printIntBinSyscall(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the unsigned integer stored in the register $a0
      * @param state The current state of the interpreter
-     * @param ostream The output stream to print to
+     * @param streamHandle The stream handle for printing
      */
-    void printUIntSyscall(const State& state, std::ostream& ostream);
+    void printUIntSyscall(const State& state, StreamHandle& streamHandle);
 
     /**
      * Sets the random seed for the random number generator with the ID of the RNG in $a0 and the

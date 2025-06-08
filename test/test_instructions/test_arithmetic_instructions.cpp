@@ -16,12 +16,13 @@ TEST_CASE("Test add Instruction") {
     const SourceFile rawFile = makeRawFile({"add $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "add"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "add"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -33,7 +34,7 @@ TEST_CASE("Test add Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.getState().registers[Register::T2] = 2;
     interpreter.interpret(actualLayout);
@@ -49,12 +50,13 @@ TEST_CASE("Test addu Instruction") {
     const SourceFile rawFile = makeRawFile({"addu $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "addu"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "addu"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -66,7 +68,7 @@ TEST_CASE("Test addu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.getState().registers[Register::T2] = 2;
     interpreter.interpret(actualLayout);
@@ -82,12 +84,13 @@ TEST_CASE("Test addi Instruction") {
     const SourceFile rawFile = makeRawFile({"addi $t0, $t1, -2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "addi"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "-2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "addi"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "-2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -99,7 +102,7 @@ TEST_CASE("Test addi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -114,12 +117,13 @@ TEST_CASE("Test addiu Instruction") {
     const SourceFile rawFile = makeRawFile({"addiu $t0, $t1, -2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "addiu"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "-2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "addiu"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "-2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -131,7 +135,7 @@ TEST_CASE("Test addiu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = -1;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -146,12 +150,13 @@ TEST_CASE("Test and Instruction") {
     const SourceFile rawFile = makeRawFile({"and $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "and"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "and"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -163,7 +168,7 @@ TEST_CASE("Test and Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
     interpreter.interpret(actualLayout);
@@ -179,12 +184,13 @@ TEST_CASE("Test andi Instruction") {
     const SourceFile rawFile = makeRawFile({"andi $t0, $t1, 0x00FF"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "andi"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "255"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "andi"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "255"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -196,7 +202,7 @@ TEST_CASE("Test andi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -211,10 +217,11 @@ TEST_CASE("Test div Instruction") {
     const SourceFile rawFile = makeRawFile({"div $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "div"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "div"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -226,7 +233,7 @@ TEST_CASE("Test div Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 17;
     interpreter.getState().registers[Register::T2] = 5;
     interpreter.interpret(actualLayout);
@@ -246,10 +253,11 @@ TEST_CASE("Test divu Instruction") {
     const SourceFile rawFile = makeRawFile({"divu $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "divu"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "divu"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -261,7 +269,7 @@ TEST_CASE("Test divu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     interpreter.getState().registers[Register::T2] = 3;
     interpreter.interpret(actualLayout);
@@ -294,7 +302,7 @@ TEST_CASE("Test mfhi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::HI] = 0x12345678;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -322,7 +330,7 @@ TEST_CASE("Test mflo Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::LO] = 0x87654321;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -350,7 +358,7 @@ TEST_CASE("Test mthi Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -378,7 +386,7 @@ TEST_CASE("Test mtlo Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x87654321;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -393,10 +401,11 @@ TEST_CASE("Test mult Instruction") {
     const SourceFile rawFile = makeRawFile({"mult $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "mult"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "mult"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -408,7 +417,7 @@ TEST_CASE("Test mult Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 2;
     interpreter.interpret(actualLayout);
@@ -429,10 +438,11 @@ TEST_CASE("Test multu Instruction") {
     const SourceFile rawFile = makeRawFile({"multu $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "multu"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "multu"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -444,7 +454,7 @@ TEST_CASE("Test multu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     interpreter.getState().registers[Register::T2] = 2;
     interpreter.interpret(actualLayout);
@@ -464,12 +474,13 @@ TEST_CASE("Test nor Instruction") {
     const SourceFile rawFile = makeRawFile({"nor $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "nor"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "nor"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -481,7 +492,7 @@ TEST_CASE("Test nor Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
     interpreter.interpret(actualLayout);
@@ -514,7 +525,7 @@ TEST_CASE("Test or Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x0F0F0F0F;
     interpreter.getState().registers[Register::T2] = 0xF0F0F0F0;
     interpreter.interpret(actualLayout);
@@ -530,12 +541,13 @@ TEST_CASE("Test ori Instruction") {
     const SourceFile rawFile = makeRawFile({"ori $t0, $t1, 0x00FF"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "ori"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "255"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "ori"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "255"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -547,7 +559,7 @@ TEST_CASE("Test ori Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345600;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -562,12 +574,13 @@ TEST_CASE("Test sll Instruction") {
     const SourceFile rawFile = makeRawFile({"sll $t0, $t1, 4"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sll"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "sll"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -579,7 +592,7 @@ TEST_CASE("Test sll Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -594,12 +607,13 @@ TEST_CASE("Test srl Instruction") {
     const SourceFile rawFile = makeRawFile({"srl $t0, $t1, 4"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "srl"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "srl"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -611,7 +625,7 @@ TEST_CASE("Test srl Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -626,12 +640,13 @@ TEST_CASE("Test sra Instruction") {
     const SourceFile rawFile = makeRawFile({"sra $t0, $t1, 4"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sra"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "sra"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -643,7 +658,7 @@ TEST_CASE("Test sra Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x80000000; // Negative number
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -658,12 +673,13 @@ TEST_CASE("Test sllv Instruction") {
     const SourceFile rawFile = makeRawFile({"sllv $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sllv"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "sllv"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -675,7 +691,7 @@ TEST_CASE("Test sllv Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 4;
     interpreter.interpret(actualLayout);
@@ -691,12 +707,13 @@ TEST_CASE("Test srlv Instruction") {
     const SourceFile rawFile = makeRawFile({"srlv $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "srlv"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "srlv"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -708,7 +725,7 @@ TEST_CASE("Test srlv Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12345678;
     interpreter.getState().registers[Register::T2] = 4;
     interpreter.interpret(actualLayout);
@@ -724,12 +741,13 @@ TEST_CASE("Test srav Instruction") {
     const SourceFile rawFile = makeRawFile({"srav $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "srav"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "srav"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -741,7 +759,7 @@ TEST_CASE("Test srav Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x80000000; // Negative number
     interpreter.getState().registers[Register::T2] = 4;
     interpreter.interpret(actualLayout);
@@ -757,12 +775,13 @@ TEST_CASE("Test sub Instruction") {
     const SourceFile rawFile = makeRawFile({"sub $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sub"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "sub"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -774,7 +793,7 @@ TEST_CASE("Test sub Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 5;
     interpreter.getState().registers[Register::T2] = 3;
     interpreter.interpret(actualLayout);
@@ -790,12 +809,13 @@ TEST_CASE("Test subu Instruction") {
     const SourceFile rawFile = makeRawFile({"subu $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "subu"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "subu"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -807,7 +827,7 @@ TEST_CASE("Test subu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 5;
     interpreter.getState().registers[Register::T2] = 3;
     interpreter.interpret(actualLayout);
@@ -823,12 +843,13 @@ TEST_CASE("Test xor Instruction") {
     const SourceFile rawFile = makeRawFile({"xor $t0, $t1, $t2"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "xor"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t2"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "xor"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t2"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -840,7 +861,7 @@ TEST_CASE("Test xor Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0xAAAAAAAA;
     interpreter.getState().registers[Register::T2] = 0x55555555;
     interpreter.interpret(actualLayout);
@@ -856,12 +877,13 @@ TEST_CASE("Test xori Instruction") {
     const SourceFile rawFile = makeRawFile({"xori $t0, $t1, 0xFFFF"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "xori"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "65535"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "xori"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "65535"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -873,7 +895,7 @@ TEST_CASE("Test xori Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, std::cin, std::cout};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
     interpreter.getState().registers[Register::T1] = 0x12340000;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {

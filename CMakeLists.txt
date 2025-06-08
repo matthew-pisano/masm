@@ -36,6 +36,7 @@ add_library(masm STATIC
         src/interpreter/cp0.cpp
         src/interpreter/cp1.cpp
         src/interpreter/state.cpp
+        src/io/streamio.cpp
 )
 
 # -fPIC only needed for native Linux builds (not Windows cross-compilation)

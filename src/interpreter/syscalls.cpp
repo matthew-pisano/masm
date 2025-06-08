@@ -14,35 +14,6 @@
 #include "io/consoleio.h"
 
 
-char SystemHandle::getStreamChar(std::istream& istream) {
-    char c;
-    if (&istream != &std::cin)
-        istream.get(c);
-    else {
-        while (!conHandle.consoleHasChar())
-            usleep(1000); // Sleep for 1 ms
-        c = conHandle.consoleGetChar();
-    }
-    return c;
-}
-
-
-void SystemHandle::putStreamChar(const char c, std::ostream& ostream) {
-    if (&ostream == &std::cout)
-        conHandle.consolePutChar(c);
-    else {
-        ostream << c;
-        ostream.flush();
-    }
-}
-
-
-void SystemHandle::putStreamStr(const std::string& str, std::ostream& ostream) {
-    for (const char c : str)
-        putStreamChar(c, ostream);
-}
-
-
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
     if (ioMode != IOMode::SYSCALL)
         throw ExecExcept(syscallName + " syscall not supported in MMIO mode",
@@ -50,26 +21,25 @@ void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& s
 }
 
 
-void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& istream,
-                               std::ostream& ostream) {
+void SystemHandle::execSyscall(const IOMode ioMode, State& state, StreamHandle& streamHandle) {
     int32_t syscallCode = state.registers[Register::V0];
 
     switch (static_cast<Syscall>(syscallCode)) {
         case Syscall::PRINT_INT:
             requiresSyscallMode(ioMode, "PRINT_INT");
-            printIntSyscall(state, ostream);
+            printIntSyscall(state, streamHandle);
             break;
         case Syscall::PRINT_STRING:
             requiresSyscallMode(ioMode, "PRINT_STRING");
-            printStringSyscall(state, ostream);
+            printStringSyscall(state, streamHandle);
             break;
         case Syscall::READ_INT:
             requiresSyscallMode(ioMode, "READ_INT");
-            readIntSyscall(state, istream);
+            readIntSyscall(state, streamHandle);
             break;
         case Syscall::READ_STRING:
             requiresSyscallMode(ioMode, "READ_STRING");
-            readStringSyscall(state, istream);
+            readStringSyscall(state, streamHandle);
             break;
         case Syscall::HEAP_ALLOC:
             heapAllocSyscall(state);
@@ -79,11 +49,11 @@ void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& 
             break;
         case Syscall::PRINT_CHAR:
             requiresSyscallMode(ioMode, "PRINT_CHAR");
-            printCharSyscall(state, ostream);
+            printCharSyscall(state, streamHandle);
             break;
         case Syscall::READ_CHAR:
             requiresSyscallMode(ioMode, "READ_CHAR");
-            readCharSyscall(state, istream);
+            readCharSyscall(state, streamHandle);
             break;
         case Syscall::EXIT_VAL:
             exitValSyscall(state);
@@ -96,15 +66,15 @@ void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& 
             break;
         case Syscall::PRINT_INT_HEX:
             requiresSyscallMode(ioMode, "PRINT_INT_HEX");
-            printIntHexSyscall(state, ostream);
+            printIntHexSyscall(state, streamHandle);
             break;
         case Syscall::PRINT_INT_BIN:
             requiresSyscallMode(ioMode, "PRINT_INT_BIN");
-            printIntBinSyscall(state, ostream);
+            printIntBinSyscall(state, streamHandle);
             break;
         case Syscall::PRINT_UINT:
             requiresSyscallMode(ioMode, "PRINT_UINT");
-            printUIntSyscall(state, ostream);
+            printUIntSyscall(state, streamHandle);
             break;
         case Syscall::SET_SEED:
             setRandSeedSyscall(state);
@@ -121,28 +91,28 @@ void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& 
 }
 
 
-void SystemHandle::printIntSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntSyscall(const State& state, StreamHandle& streamHandle) {
     const int32_t value = state.registers[Register::A0];
-    putStreamStr(std::to_string(value), ostream);
+    streamHandle.putStr(std::to_string(value));
 }
 
 
-void SystemHandle::printStringSyscall(State& state, std::ostream& ostream) {
+void SystemHandle::printStringSyscall(State& state, StreamHandle& streamHandle) {
     int32_t address = state.registers[Register::A0];
     while (true) {
         const unsigned char c = state.memory.byteAt(address);
         if (c == '\0')
             break;
-        putStreamChar(static_cast<char>(c), ostream);
+        streamHandle.putChar(static_cast<char>(c));
         address++;
     }
 }
 
 
-void SystemHandle::readIntSyscall(State& state, std::istream& istream) {
+void SystemHandle::readIntSyscall(State& state, StreamHandle& streamHandle) {
     std::string input;
     while (true) {
-        const char c = getStreamChar(istream);
+        const char c = streamHandle.getCharBlocking();
         if (c == '\n')
             break;
 
@@ -161,12 +131,12 @@ void SystemHandle::readIntSyscall(State& state, std::istream& istream) {
 }
 
 
-void SystemHandle::readStringSyscall(State& state, std::istream& istream) {
+void SystemHandle::readStringSyscall(State& state, StreamHandle& streamHandle) {
     const int32_t address = state.registers[Register::A0];
     const int32_t length = state.registers[Register::A1];
     int currLen = 0;
     while (currLen < length) {
-        const char c = getStreamChar(istream);
+        const char c = streamHandle.getCharBlocking();
         if (c == '\n')
             break;
 
@@ -191,14 +161,14 @@ void SystemHandle::exitSyscall() {
 }
 
 
-void SystemHandle::printCharSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printCharSyscall(const State& state, StreamHandle& streamHandle) {
     const char c = static_cast<char>(state.registers[Register::A0]);
-    putStreamChar(c, ostream);
+    streamHandle.putChar(c);
 }
 
 
-void SystemHandle::readCharSyscall(State& state, std::istream& istream) {
-    const char c = getStreamChar(istream);
+void SystemHandle::readCharSyscall(State& state, StreamHandle& streamHandle) {
+    const char c = streamHandle.getCharBlocking();
     state.registers[Register::V0] = 0xFF & static_cast<int32_t>(c);
 }
 
@@ -232,22 +202,22 @@ void SystemHandle::sleepSyscall(State& state) {
 }
 
 
-void SystemHandle::printIntHexSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntHexSyscall(const State& state, StreamHandle& streamHandle) {
     const int32_t value = state.registers[Register::A0];
     std::ostringstream oss;
     oss << std::hex << std::setw(8) << std::setfill('0') << value;
-    putStreamStr(oss.str(), ostream);
+    streamHandle.putStr(oss.str());
 }
 
-void SystemHandle::printIntBinSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printIntBinSyscall(const State& state, StreamHandle& streamHandle) {
     const int32_t value = state.registers[Register::A0];
     for (int i = 31; i >= 0; --i)
-        putStreamStr(std::to_string(value >> i & 1), ostream);
+        streamHandle.putStr(std::to_string(value >> i & 1));
 }
 
-void SystemHandle::printUIntSyscall(const State& state, std::ostream& ostream) {
+void SystemHandle::printUIntSyscall(const State& state, StreamHandle& streamHandle) {
     const uint32_t value = state.registers[Register::A0];
-    putStreamStr(std::to_string(value), ostream);
+    streamHandle.putStr(std::to_string(value));
 }
 
 void SystemHandle::setRandSeedSyscall(State& state) {

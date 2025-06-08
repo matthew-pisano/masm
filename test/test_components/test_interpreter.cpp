@@ -48,7 +48,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     std::istringstream iss(inputString);
     std::ostringstream oss;
 
-    DebugInterpreter interpreter{ioMode, iss, oss};
+    DebugInterpreter interpreter(ioMode, {iss, oss});
     exitCode = interpreter.interpret(layout);
 
     REQUIRE(exitCode == 0);
@@ -74,7 +74,7 @@ TEST_CASE("Test Runtime Error") {
     std::istringstream iss;
     std::ostringstream oss;
 
-    DebugInterpreter interpreter{IOMode::SYSCALL, iss, oss};
+    DebugInterpreter interpreter(IOMode::SYSCALL, {iss, oss});
 
     REQUIRE_THROWS_MATCHES(
             interpreter.interpret(layout), MasmRuntimeError,
