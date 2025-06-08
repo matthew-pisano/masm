@@ -203,7 +203,7 @@ void timeSyscall(State& state) {
     // Get the current time in milliseconds since the epoch
     const auto now = std::chrono::system_clock::now();
     const auto duration = now.time_since_epoch();
-    const long milliseconds =
+    const int64_t milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
     // Store high bits in $a1 and low bits in $a0

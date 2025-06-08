@@ -188,7 +188,7 @@ TEST_CASE("Test Time Syscall") {
     timeSyscall(state);
 
     const auto duration = std::chrono::system_clock::now().time_since_epoch();
-    const long milliseconds =
+    const int64_t milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
     REQUIRE(state.registers[Register::A0] == static_cast<int32_t>(milliseconds & 0xFFFFFFFF));
