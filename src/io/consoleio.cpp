@@ -6,6 +6,7 @@
 
 #ifdef _WIN32
 #include <conio.h>
+#include <iostream>
 #include <stdexcept>
 #include <windows.h>
 
@@ -97,8 +98,15 @@ char consoleGetChar() {
 
         // Check if it's a key down event with a valid character
         if (inputRecord.EventType == KEY_EVENT && inputRecord.Event.KeyEvent.bKeyDown &&
-            inputRecord.Event.KeyEvent.uChar.AsciiChar != 0)
-            return inputRecord.Event.KeyEvent.uChar.AsciiChar;
+            inputRecord.Event.KeyEvent.uChar.AsciiChar != 0) {
+            char c = inputRecord.Event.KeyEvent.uChar.AsciiChar;
+            if (c == '\r')
+                // Convert carriage return to newline
+                c = '\n';
+            // Output the character immediately to stdout as user feedback
+            std::cout << c << std::flush;
+            return c;
+        }
 
         // If not a useful key event, continue reading
     }
