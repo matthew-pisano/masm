@@ -11,7 +11,6 @@
 #include "interpreter/syscalls.h"
 #include "io/consoleio.h"
 #include "parser/instruction.h"
-#include "utils.h"
 
 
 void Interpreter::initProgram(const MemLayout& layout) {
@@ -91,8 +90,13 @@ bool Interpreter::writeMMIO() {
         return false;
 
     const char c = static_cast<char>(state.memory.wordAt(output_data));
-    ostream << c;
-    ostream.flush();
+
+    if (&ostream == &std::cout)
+        conHandle.consolePutChar(c);
+    else {
+        ostream << c;
+        ostream.flush();
+    }
 
     // Reset ready bit
     state.memory[output_ready + 3] = std::byte{1};

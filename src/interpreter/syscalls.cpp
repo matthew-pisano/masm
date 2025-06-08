@@ -27,6 +27,22 @@ char SystemHandle::getStreamChar(std::istream& istream) {
 }
 
 
+void SystemHandle::putStreamChar(const char c, std::ostream& ostream) {
+    if (&ostream == &std::cout)
+        conHandle.consolePutChar(c);
+    else {
+        ostream << c;
+        ostream.flush();
+    }
+}
+
+
+void SystemHandle::putStreamStr(const std::string& str, std::ostream& ostream) {
+    for (const char c : str)
+        putStreamChar(c, ostream);
+}
+
+
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
     if (ioMode != IOMode::SYSCALL)
         throw ExecExcept(syscallName + " syscall not supported in MMIO mode",
@@ -107,7 +123,7 @@ void SystemHandle::execSyscall(const IOMode ioMode, State& state, std::istream& 
 
 void SystemHandle::printIntSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
-    ostream << value;
+    putStreamStr(std::to_string(value), ostream);
 }
 
 
@@ -117,10 +133,9 @@ void SystemHandle::printStringSyscall(State& state, std::ostream& ostream) {
         const unsigned char c = state.memory.byteAt(address);
         if (c == '\0')
             break;
-        ostream << c;
+        putStreamChar(static_cast<char>(c), ostream);
         address++;
     }
-    ostream.flush();
 }
 
 
@@ -178,7 +193,7 @@ void SystemHandle::exitSyscall() {
 
 void SystemHandle::printCharSyscall(const State& state, std::ostream& ostream) {
     const char c = static_cast<char>(state.registers[Register::A0]);
-    ostream << c;
+    putStreamChar(c, ostream);
 }
 
 
@@ -219,21 +234,20 @@ void SystemHandle::sleepSyscall(State& state) {
 
 void SystemHandle::printIntHexSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
-    ostream << std::hex << std::setw(8) << std::setfill('0') << value;
-    ostream.flush();
+    std::ostringstream oss;
+    oss << std::hex << std::setw(8) << std::setfill('0') << value;
+    putStreamStr(oss.str(), ostream);
 }
 
 void SystemHandle::printIntBinSyscall(const State& state, std::ostream& ostream) {
     const int32_t value = state.registers[Register::A0];
     for (int i = 31; i >= 0; --i)
-        ostream << (value >> i & 1);
-    ostream.flush();
+        putStreamStr(std::to_string(value >> i & 1), ostream);
 }
 
 void SystemHandle::printUIntSyscall(const State& state, std::ostream& ostream) {
     const uint32_t value = state.registers[Register::A0];
-    ostream << value;
-    ostream.flush();
+    putStreamStr(std::to_string(value), ostream);
 }
 
 void SystemHandle::setRandSeedSyscall(State& state) {

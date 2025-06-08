@@ -22,6 +22,11 @@ class ConsoleHandle {
      */
     uint32_t inputCursor = 0;
 
+    /**
+     * Flag indicating whether raw mode is enabled
+     */
+    bool rawModeEnabled = false;
+
 public:
     /**
      * Enable raw mode for terminal input to get single characters without newline
@@ -48,6 +53,11 @@ public:
      * @throw runtime_error if there is no character to read from the console
      */
     char consoleGetChar();
+
+    /**
+     * Prints a character to the console
+     */
+    void consolePutChar(char c);
 };
 
 #endif // CONSOLEIO_H

@@ -14,7 +14,6 @@
 // Store original console mode to restore later
 static DWORD originalConsoleMode = 0;
 static HANDLE hStdin = nullptr;
-static bool rawModeEnabled = false;
 
 
 void ConsoleHandle::enableRawConsoleMode() {
@@ -135,6 +134,7 @@ void ConsoleHandle::enableRawConsoleMode() {
     // Set stdin to non-blocking mode
     const int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+    rawModeEnabled = true;
 }
 
 
@@ -148,6 +148,7 @@ void ConsoleHandle::disableRawConsoleMode() {
     // Reset stdin to blocking mode
     const int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK);
+    rawModeEnabled = false;
 }
 
 
@@ -178,18 +179,39 @@ char ConsoleHandle::consoleGetChar() {
     char c;
     const size_t bytesRead = read(STDIN_FILENO, &c, 1);
 
-    if (bytesRead > 0) {
-        if (c == 127) {
+    if (bytesRead <= 0)
+        throw std::runtime_error("No character available to read from console");
+
+    // Handle DEL
+    if (c == 127) {
+        if (inputCursor > inputBase) {
             // Remove the previous character on the screen
             std::cout << "\b \b" << std::flush;
-            return '\b'; // Convert DEL to BACKSPACE
+            inputCursor--;
         }
-        // Output the character immediately to stdout as user feedback
-        std::cout << c << std::flush;
-        return c;
+        return '\b'; // Convert DEL to BACKSPACE
     }
 
-    throw std::runtime_error("No character available to read from console");
+    // Output the character immediately to stdout as user feedback
+    if (c == '\033') {
+        // Escape any escape sequences
+        std::cout << "\\033" << std::flush;
+        // Advance the cursor by 3 to account for extra characters
+        inputCursor += 3;
+    } else
+        std::cout << c << std::flush;
+
+    inputCursor++;
+    return c;
 }
 
 #endif
+
+
+void ConsoleHandle::consolePutChar(const char c) {
+    std::cout << c;
+    std::cout.flush();
+
+    inputBase++;
+    inputCursor = inputBase;
+}
