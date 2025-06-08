@@ -166,7 +166,7 @@ void Interpreter::step() {
 void Interpreter::execInstruction(const int32_t instruction) {
     if (instruction == 0x0000000C) {
         // Syscall instruction
-        sysHandle.execSyscall(ioMode, state, streamHandle);
+        sysHandle.exec(ioMode, state, streamHandle);
         return;
     }
     if (instruction == 0x42000018) {
@@ -220,7 +220,7 @@ void Interpreter::execInstruction(const int32_t instruction) {
         const uint32_t offset = instruction & 0xFFFF;
 
         // Execute Co-Processor 1 immediate instruction
-        execCP1ImmType(state.cp1, state.memory, opCode, base, ft, offset);
+        execCP1ImmType(state.cp1, state.registers, state.memory, opCode, base, ft, offset);
     } else if (opCode == 0x00) {
         // R-Type instruction
         const uint32_t funct = instruction & 0x3F;
