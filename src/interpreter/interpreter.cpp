@@ -190,7 +190,7 @@ void Interpreter::execInstruction(const int32_t instruction) {
         // Co-Processor 1 instruction
         if (nextFive == 0x08) {
             const uint32_t tf = instruction >> 16 & 0x01;
-            const uint32_t offset = instruction & 0xFFFF;
+            const int32_t offset = instruction & 0xFFFF;
             // Execute Co-Processor 1 cond immediate instruction
             execCP1CondImmType(state.cp1, state.registers, tf, offset);
         } else if (nextFive == 0x00 || nextFive == 0x04) {

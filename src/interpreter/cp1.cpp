@@ -4,6 +4,7 @@
 
 #include "interpreter/cp1.h"
 
+#include <cmath>
 #include <stdexcept>
 
 #include "interpreter/cpu.h"
@@ -93,7 +94,74 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
             }
             break;
         }
-            // Should never be reached
+        case InstructionCode::FP_CVT_D: {
+            // Must be single to double conversion
+            const float64_t result = cp1.getFloat(fs);
+            cp1.setDouble(fd, result);
+            break;
+        }
+        case InstructionCode::FP_CVT_S: {
+            // Must be double to single conversion
+            const float32_t result = static_cast<float32_t>(cp1.getDouble(fs));
+            cp1.setFloat(fd, result);
+            break;
+        }
+        case InstructionCode::FP_DIV: {
+            if (singlePrecision) {
+                const float32_t result = cp1.getFloat(fs) / cp1.getFloat(ft);
+                cp1.setFloat(fd, result);
+            } else {
+                const float64_t result = cp1.getDouble(fs) / cp1.getDouble(ft);
+                cp1.setDouble(fd, result);
+            }
+            break;
+        }
+        case InstructionCode::FP_MOV: {
+            // Move operation, just copy the value
+            if (singlePrecision)
+                cp1.setFloat(fd, cp1.getFloat(fs));
+            else
+                cp1.setDouble(fd, cp1.getDouble(fs));
+            break;
+        }
+        case InstructionCode::FP_MUL: {
+            if (singlePrecision) {
+                const float32_t result = cp1.getFloat(fs) * cp1.getFloat(ft);
+                cp1.setFloat(fd, result);
+            } else {
+                const float64_t result = cp1.getDouble(fs) * cp1.getDouble(ft);
+                cp1.setDouble(fd, result);
+            }
+            break;
+        }
+        case InstructionCode::FP_NEG: {
+            if (singlePrecision)
+                cp1.setFloat(fd, -cp1.getFloat(fs));
+            else
+                cp1.setDouble(fd, -cp1.getDouble(fs));
+            break;
+        }
+        case InstructionCode::FP_SQRT: {
+            if (singlePrecision) {
+                const float32_t result = std::sqrt(cp1.getFloat(fs));
+                cp1.setFloat(fd, result);
+            } else {
+                const float64_t result = std::sqrt(cp1.getDouble(fs));
+                cp1.setDouble(fd, result);
+            }
+            break;
+        }
+        case InstructionCode::FP_SUB: {
+            if (singlePrecision) {
+                const float32_t result = cp1.getFloat(fs) - cp1.getFloat(ft);
+                cp1.setFloat(fd, result);
+            } else {
+                const float64_t result = cp1.getDouble(fs) - cp1.getDouble(ft);
+                cp1.setDouble(fd, result);
+            }
+            break;
+        }
+        // Should never be reached
         default:
             throw std::runtime_error("Unknown Co-Processor 1 reg type instruction " +
                                      std::to_string(func));
@@ -102,16 +170,110 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
 
 
 void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, const uint32_t sub,
-                       const uint32_t rt, const uint32_t fs) {}
+                       const uint32_t rt, const uint32_t fs) {
+    switch (static_cast<InstructionCode>(sub)) {
+        case InstructionCode::FP_MFC1: {
+            // Move from CP1 to CPU register
+            registers[rt] = cp1[fs];
+            break;
+        }
+        case InstructionCode::FP_MTC1: {
+            // Move from CPU register to CP1
+            cp1[fs] = registers[rt];
+            break;
+        }
+        // Should never be reached
+        default:
+            throw std::runtime_error("Unknown Co-Processor 1 reg immediate type instruction " +
+                                     std::to_string(sub));
+    }
+}
 
 
-void execCP1ImmType(Coproc1RegisterFile& cp1, Memory& memory, const uint32_t op,
-                    const uint32_t base, const uint32_t ft, const uint32_t offset) {}
+void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory,
+                    const uint32_t op, const uint32_t base, const uint32_t ft,
+                    const uint32_t offset) {
+    const uint32_t address = registers[base] + offset;
+    switch (static_cast<InstructionCode>(op)) {
+        case InstructionCode::FP_LDC1: {
+            if (ft % 2 != 0)
+                throw std::runtime_error("Invalid double precision register: f" +
+                                         std::to_string(ft));
+
+            cp1[ft] = memory.wordAt(address); // Lower 32 bits
+            cp1[ft + 1] = memory.wordAt(address + 4); // Upper 32 bits
+            break;
+        }
+        case InstructionCode::FP_LWC1:
+            cp1[ft] = memory.wordAt(address);
+            break;
+        case InstructionCode::FP_SDC1: {
+            if (ft % 2 != 0)
+                throw std::runtime_error("Invalid double precision register: f" +
+                                         std::to_string(ft));
+
+            memory.wordTo(address, cp1[ft]); // Lower 32 bits
+            memory.wordTo(address + 4, cp1[ft + 1]); // Upper 32 bits
+            break;
+        }
+        case InstructionCode::FP_SWC1: {
+            memory.wordTo(address, cp1[ft]);
+            break;
+        }
+        // Should never be reached
+        default:
+            throw std::runtime_error("Unknown Co-Processor 1 immediate type instruction " +
+                                     std::to_string(op));
+    }
+}
 
 
 void execCP1CondType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft,
-                     const uint32_t fs, const uint32_t cond) {}
+                     const uint32_t fs, const uint32_t cond) {
+    const bool singlePrecision = fmt == 0x10; // Single precision format
+    float64_t fsVal;
+    float64_t ftVal;
+
+    if (singlePrecision) {
+        fsVal = cp1.getFloat(fs);
+        ftVal = cp1.getFloat(ft);
+    } else {
+        fsVal = cp1.getDouble(fs);
+        ftVal = cp1.getDouble(ft);
+    }
+
+    switch (static_cast<InstructionCode>(cond)) {
+        case InstructionCode::FP_C_EQ:
+            cp1.setFlag(0, fsVal == ftVal);
+            break;
+        case InstructionCode::FP_C_LT:
+            cp1.setFlag(0, fsVal < ftVal);
+            break;
+        case InstructionCode::FP_C_LE:
+            cp1.setFlag(0, fsVal <= ftVal);
+            break;
+        // Should never be reached
+        default:
+            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " +
+                                     std::to_string(cond));
+    }
+}
 
 
-void execCP1CondImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, const uint32_t tf,
-                        const uint32_t offset) {}
+void execCP1CondImmType(const Coproc1RegisterFile& cp1, RegisterFile& registers, const uint32_t tf,
+                        const int32_t offset) {
+    switch (static_cast<InstructionCode>(tf)) {
+        case InstructionCode::FP_BC1F:
+            if (!cp1.getFlag(0))
+                registers[Register::PC] += offset << 2; // Offset is word-aligned, so shift by 2
+            break;
+        case InstructionCode::FP_BC1T:
+            if (cp1.getFlag(0))
+                registers[Register::PC] += offset << 2; // Offset is word-aligned, so shift by 2
+            break;
+        // Should never be reached
+        default:
+            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " +
+                                     std::to_string(tf));
+    }
+}

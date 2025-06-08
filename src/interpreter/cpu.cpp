@@ -268,11 +268,11 @@ void execIType(RegisterFile& registers, Memory& memory, const uint32_t opCode, c
             break;
         case InstructionCode::BEQ:
             if (registers[rs] == registers[rt])
-                registers[Register::PC] += signExtImm << 2;
+                registers[Register::PC] += signExtImm << 2; // Offset is word-aligned, so shift by 2
             break;
         case InstructionCode::BNE:
             if (registers[rs] != registers[rt])
-                registers[Register::PC] += signExtImm << 2;
+                registers[Register::PC] += signExtImm << 2; // Offset is word-aligned, so shift by 2
             break;
         default:
             // Should never be reached

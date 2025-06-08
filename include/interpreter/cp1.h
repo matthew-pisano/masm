@@ -170,14 +170,15 @@ void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, uint32
 /**
  * Executes the given immediate type FP instruction
  * @param cp1 The Co-Processor One registers to operate on
+ * @param registers The CPU registers to operate on
  * @param memory The memory state to operate on
  * @param op The opcode of the instruction
  * @param base The base register of the instruction
  * @param ft The first source register
  * @param offset The offset from the base register
  */
-void execCP1ImmType(Coproc1RegisterFile& cp1, Memory& memory, uint32_t op, uint32_t base,
-                    uint32_t ft, uint32_t offset);
+void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory, uint32_t op,
+                    uint32_t base, uint32_t ft, uint32_t offset);
 
 
 /**
@@ -199,7 +200,7 @@ void execCP1CondType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32
  * @param tf The source register
  * @param offset The offset from the instruction location
  */
-void execCP1CondImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t tf,
-                        uint32_t offset);
+void execCP1CondImmType(const Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t tf,
+                        int32_t offset);
 
 #endif // CP1_H
