@@ -21,35 +21,38 @@ uint32_t writeStringToMem(State& state, const std::string& string) {
 
 
 TEST_CASE("Test Print Int Syscall") {
+    SystemHandle sysHandle;
     const std::string expected = "69";
     State state;
     state.registers[Register::A0] = std::stoi(expected);
     std::stringstream ostream;
-    printIntSyscall(state, ostream);
+    sysHandle.printIntSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str());
 }
 
 
 TEST_CASE("Test Print String Syscall") {
+    SystemHandle sysHandle;
     const std::string expected = "Hello, world!";
     State state;
     const uint32_t strAddr = writeStringToMem(state, expected);
     state.registers[Register::A0] = static_cast<int32_t>(strAddr);
     std::stringstream ostream;
-    printStringSyscall(state, ostream);
+    sysHandle.printStringSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str());
 }
 
 
 TEST_CASE("Test Read Int Syscall") {
+    SystemHandle sysHandle;
     State state;
 
     SECTION("Valid Input") {
         const std::string input = "42\n";
         std::istringstream istream(input);
-        readIntSyscall(state, istream);
+        sysHandle.readIntSyscall(state, istream);
 
         REQUIRE(state.registers[Register::V0] == 42);
     }
@@ -58,7 +61,7 @@ TEST_CASE("Test Read Int Syscall") {
         const std::string input = "invalid\n";
         std::istringstream istream(input);
 
-        REQUIRE_THROWS_MATCHES(readIntSyscall(state, istream), ExecExcept,
+        REQUIRE_THROWS_MATCHES(sysHandle.readIntSyscall(state, istream), ExecExcept,
                                Catch::Matchers::Message("Invalid input: invalid"));
     }
 
@@ -67,14 +70,14 @@ TEST_CASE("Test Read Int Syscall") {
         std::istringstream istream(input);
 
         REQUIRE_THROWS_MATCHES(
-                readIntSyscall(state, istream), ExecExcept,
+                sysHandle.readIntSyscall(state, istream), ExecExcept,
                 Catch::Matchers::Message("Input out of range: 99999999999999999999"));
     }
 
     SECTION("Edited Input") {
         const std::string input = "42\b4\n";
         std::istringstream istream(input);
-        readIntSyscall(state, istream);
+        sysHandle.readIntSyscall(state, istream);
 
         REQUIRE(state.registers[Register::V0] == 44);
     }
@@ -82,6 +85,7 @@ TEST_CASE("Test Read Int Syscall") {
 
 
 TEST_CASE("Test Read String Syscall") {
+    SystemHandle sysHandle;
 
     SECTION("Read Simple String") {
         const std::string input = "Hello, world!";
@@ -90,7 +94,7 @@ TEST_CASE("Test Read String Syscall") {
         const uint32_t strAddr = memSectionOffset(MemSection::DATA);
         state.registers[Register::A0] = static_cast<int32_t>(strAddr);
         state.registers[Register::A1] = static_cast<int32_t>(input.size());
-        readStringSyscall(state, istream);
+        sysHandle.readStringSyscall(state, istream);
 
         for (size_t i = 0; i < input.size(); i++)
             REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
@@ -104,7 +108,7 @@ TEST_CASE("Test Read String Syscall") {
         const uint32_t strAddr = memSectionOffset(MemSection::DATA);
         state.registers[Register::A0] = static_cast<int32_t>(strAddr);
         state.registers[Register::A1] = static_cast<int32_t>(input.size());
-        readStringSyscall(state, istream);
+        sysHandle.readStringSyscall(state, istream);
 
         for (size_t i = 0; i < expected.size(); i++)
             REQUIRE(state.memory.byteAt(strAddr + i) == expected[i]);
@@ -113,21 +117,22 @@ TEST_CASE("Test Read String Syscall") {
 
 
 TEST_CASE("Test Heap Allocation Syscall") {
+    SystemHandle sysHandle;
     State state;
 
     SECTION("Test Heap Allocation with Valid Size") {
         state.registers[Register::A0] = 100;
-        heapAllocSyscall(state);
+        sysHandle.heapAllocSyscall(state);
         uint32_t address = state.registers[Register::V0];
         REQUIRE(address == HEAP_BASE);
 
         state.registers[Register::A0] = 50;
-        heapAllocSyscall(state);
+        sysHandle.heapAllocSyscall(state);
         address = state.registers[Register::V0];
         REQUIRE(address == HEAP_BASE + 100);
 
         state.registers[Register::A0] = 200;
-        heapAllocSyscall(state);
+        sysHandle.heapAllocSyscall(state);
         address = state.registers[Register::V0];
         REQUIRE(address == HEAP_BASE + 150);
     }
@@ -135,48 +140,52 @@ TEST_CASE("Test Heap Allocation Syscall") {
     SECTION("Test Heap Allocation with Zero Size") {
         state.registers[Register::A0] = 0;
 
-        REQUIRE_THROWS_MATCHES(heapAllocSyscall(state), ExecExcept,
+        REQUIRE_THROWS_MATCHES(sysHandle.heapAllocSyscall(state), ExecExcept,
                                Catch::Matchers::Message("Cannot allocate zero bytes"));
     }
 }
 
 
 TEST_CASE("Test Exit Syscall") {
-    REQUIRE_THROWS_MATCHES(exitSyscall(), ExecExit,
+    SystemHandle sysHandle;
+    REQUIRE_THROWS_MATCHES(sysHandle.exitSyscall(), ExecExit,
                            Catch::Matchers::Message("Program exited with code 0"));
 }
 
 
 TEST_CASE("Test Print Char Syscall") {
+    SystemHandle sysHandle;
     constexpr char expected = 'A';
     State state;
     state.registers[Register::A0] = static_cast<int32_t>(expected);
     std::stringstream ostream;
-    printCharSyscall(state, ostream);
+    sysHandle.printCharSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str()[0]);
 }
 
 
 TEST_CASE("Test Read Char Syscall") {
+    SystemHandle sysHandle;
     const std::string input = "A";
     std::stringstream istream(input);
     State state;
-    readCharSyscall(state, istream);
+    sysHandle.readCharSyscall(state, istream);
 
     REQUIRE(state.registers[Register::V0] == static_cast<int32_t>(input[0]));
 }
 
 
 TEST_CASE("Test Exit Value Syscall") {
+    SystemHandle sysHandle;
     constexpr int32_t exitCode = 42;
     State state;
     state.registers[Register::A0] = exitCode;
 
-    REQUIRE_THROWS_MATCHES(exitValSyscall(state), ExecExit,
+    REQUIRE_THROWS_MATCHES(sysHandle.exitValSyscall(state), ExecExit,
                            Catch::Matchers::Message("Program exited with code 42"));
     try {
-        exitValSyscall(state);
+        sysHandle.exitValSyscall(state);
     } catch (const ExecExit& e) {
         REQUIRE(e.code() == exitCode);
     }
@@ -184,8 +193,9 @@ TEST_CASE("Test Exit Value Syscall") {
 
 
 TEST_CASE("Test Time Syscall") {
+    SystemHandle sysHandle;
     State state;
-    timeSyscall(state);
+    sysHandle.timeSyscall(state);
 
     const auto duration = std::chrono::system_clock::now().time_since_epoch();
     const int64_t milliseconds =
@@ -197,6 +207,7 @@ TEST_CASE("Test Time Syscall") {
 
 
 TEST_CASE("Test Sleep Syscall") {
+    SystemHandle sysHandle;
     State state;
 
     SECTION("Test Sleep with Valid Duration") {
@@ -206,7 +217,7 @@ TEST_CASE("Test Sleep Syscall") {
         const long startMillis =
                 std::chrono::duration_cast<std::chrono::milliseconds>(startDuration).count();
 
-        sleepSyscall(state);
+        sysHandle.sleepSyscall(state);
 
         const auto endDuration = std::chrono::system_clock::now().time_since_epoch();
         const long endMillis =
@@ -221,46 +232,50 @@ TEST_CASE("Test Sleep Syscall") {
     SECTION("Test Sleep with Negative Duration") {
         state.registers[Register::A0] = -500;
 
-        REQUIRE_THROWS_MATCHES(sleepSyscall(state), ExecExcept,
+        REQUIRE_THROWS_MATCHES(sysHandle.sleepSyscall(state), ExecExcept,
                                Catch::Matchers::Message("Negative sleep time: -500"));
     }
 }
 
 
 TEST_CASE("Test Print Int Hex Syscall") {
+    SystemHandle sysHandle;
     const std::string expected = "00000045";
     State state;
     state.registers[Register::A0] = 69;
     std::stringstream ostream;
-    printIntHexSyscall(state, ostream);
+    sysHandle.printIntHexSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str());
 }
 
 
 TEST_CASE("Test Print Int Bin Syscall") {
+    SystemHandle sysHandle;
     const std::string expected = "00000000000000000000000001000101";
     State state;
     state.registers[Register::A0] = 69;
     std::stringstream ostream;
-    printIntBinSyscall(state, ostream);
+    sysHandle.printIntBinSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str());
 }
 
 
 TEST_CASE("Test Print UInt Syscall") {
+    SystemHandle sysHandle;
     const std::string expected = "4294966876";
     State state;
     state.registers[Register::A0] = -420;
     std::stringstream ostream;
-    printUIntSyscall(state, ostream);
+    sysHandle.printUIntSyscall(state, ostream);
 
     REQUIRE(expected == ostream.str());
 }
 
 
 TEST_CASE("Test Random Syscall with Set Seed") {
+    SystemHandle sysHandle;
     State state;
     state.registers[Register::A0] = 1;
     state.registers[Register::A1] = 42;
@@ -268,14 +283,15 @@ TEST_CASE("Test Random Syscall with Set Seed") {
     RandomGenerator rng(state.registers[Register::A1]);
     const int32_t expected = static_cast<int32_t>(rng.getRandomInt());
 
-    setRandSeedSyscall(state);
-    randIntSyscall(state);
+    sysHandle.setRandSeedSyscall(state);
+    sysHandle.randIntSyscall(state);
 
     REQUIRE(state.registers[Register::A0] == expected);
 }
 
 
 TEST_CASE("Test Random Range Syscall with Set Seed") {
+    SystemHandle sysHandle;
     State state;
     state.registers[Register::A0] = 1;
     state.registers[Register::A1] = 42; // Serves as both seed and max range
@@ -283,8 +299,8 @@ TEST_CASE("Test Random Range Syscall with Set Seed") {
     RandomGenerator rng(state.registers[Register::A1]);
     const int32_t expected = static_cast<int32_t>(rng.getRandomInt(state.registers[Register::A1]));
 
-    setRandSeedSyscall(state);
-    randIntRangeSyscall(state);
+    sysHandle.setRandSeedSyscall(state);
+    sysHandle.randIntRangeSyscall(state);
 
     REQUIRE(state.registers[Register::A0] == expected);
 }

@@ -24,7 +24,6 @@ public:
 class DebugInterpreter : public Interpreter {
 
 public:
-    explicit DebugInterpreter(const IOMode ioMode) : Interpreter(ioMode) {}
     DebugInterpreter(const IOMode ioMode, std::istream& input, std::ostream& output) :
         Interpreter(ioMode, input, output) {}
 
