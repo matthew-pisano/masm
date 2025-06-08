@@ -74,16 +74,32 @@ TEST_CASE("Test Read Int Syscall") {
 
 
 TEST_CASE("Test Read String Syscall") {
-    const std::string input = "Hello, world!";
-    std::stringstream istream(input);
-    State state;
-    const uint32_t strAddr = memSectionOffset(MemSection::DATA);
-    state.registers[Register::A0] = static_cast<int32_t>(strAddr);
-    state.registers[Register::A1] = static_cast<int32_t>(input.size());
-    readStringSyscall(state, istream);
 
-    for (size_t i = 0; i < input.size(); i++)
-        REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
+    SECTION("Read Simple String") {
+        const std::string input = "Hello, world!";
+        std::stringstream istream(input);
+        State state;
+        const uint32_t strAddr = memSectionOffset(MemSection::DATA);
+        state.registers[Register::A0] = static_cast<int32_t>(strAddr);
+        state.registers[Register::A1] = static_cast<int32_t>(input.size());
+        readStringSyscall(state, istream);
+
+        for (size_t i = 0; i < input.size(); i++)
+            REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
+    }
+
+    SECTION("Read Edited String") {
+        const std::string input = "Hello, world!\b\b\b\b\b\bthere!";
+        std::stringstream istream(input);
+        State state;
+        const uint32_t strAddr = memSectionOffset(MemSection::DATA);
+        state.registers[Register::A0] = static_cast<int32_t>(strAddr);
+        state.registers[Register::A1] = static_cast<int32_t>(input.size());
+        readStringSyscall(state, istream);
+
+        for (size_t i = 0; i < input.size(); i++)
+            REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
+    }
 }
 
 

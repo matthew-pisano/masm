@@ -137,7 +137,11 @@ void readIntSyscall(State& state, std::istream& istream) {
         const char c = getStreamChar(istream);
         if (c == '\n')
             break;
-        input += c;
+
+        if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
     }
     try {
         state.registers[Register::V0] = std::stoi(input);
@@ -157,8 +161,12 @@ void readStringSyscall(State& state, std::istream& istream) {
         const char c = getStreamChar(istream);
         if (c == '\n')
             break;
-        state.memory.byteTo(address + currLen, c);
-        currLen++;
+
+        if (c != '\b') {
+            state.memory.byteTo(address + currLen, c);
+            currLen++;
+        } else if (currLen > 0)
+            currLen--;
     }
 }
 
