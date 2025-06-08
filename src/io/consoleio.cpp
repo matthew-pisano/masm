@@ -102,8 +102,21 @@ char ConsoleHandle::getChar() {
             if (c == '\r')
                 // Convert carriage return to newline
                 c = '\n';
+
+            // Handle Backspace
+            if (c == '\b') {
+                if (inputCursor > inputBase) {
+                    // Remove the previous character on the screen
+                    ostream << "\b \b" << std::flush;
+                    inputCursor--;
+                }
+                return '\b';
+            }
+
             // Output the character immediately to stdout as user feedback
             ostream << c << std::flush;
+            inputCursor++;
+
             return c;
         }
 
@@ -189,7 +202,7 @@ char ConsoleHandle::getChar() {
             ostream << "\b \b" << std::flush;
             inputCursor--;
         }
-        return '\b'; // Convert DEL to BACKSPACE
+        return '\b'; // Convert DEL to Backspace
     }
 
     // Output the character immediately to stdout as user feedback
