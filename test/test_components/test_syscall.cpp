@@ -70,6 +70,14 @@ TEST_CASE("Test Read Int Syscall") {
                 readIntSyscall(state, istream), ExecExcept,
                 Catch::Matchers::Message("Input out of range: 99999999999999999999"));
     }
+
+    SECTION("Edited Input") {
+        const std::string input = "42\b4\n";
+        std::istringstream istream(input);
+        readIntSyscall(state, istream);
+
+        REQUIRE(state.registers[Register::V0] == 44);
+    }
 }
 
 
@@ -90,6 +98,7 @@ TEST_CASE("Test Read String Syscall") {
 
     SECTION("Read Edited String") {
         const std::string input = "Hello, world!\b\b\b\b\b\bthere!";
+        const std::string expected = "Hello, there!";
         std::stringstream istream(input);
         State state;
         const uint32_t strAddr = memSectionOffset(MemSection::DATA);
@@ -97,8 +106,8 @@ TEST_CASE("Test Read String Syscall") {
         state.registers[Register::A1] = static_cast<int32_t>(input.size());
         readStringSyscall(state, istream);
 
-        for (size_t i = 0; i < input.size(); i++)
-            REQUIRE(state.memory.byteAt(strAddr + i) == input[i]);
+        for (size_t i = 0; i < expected.size(); i++)
+            REQUIRE(state.memory.byteAt(strAddr + i) == expected[i]);
     }
 }
 
