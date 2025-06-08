@@ -69,12 +69,12 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
 
 
 /**
- * Checks to see if a given vector of tokens matches a token type pattern
+ * Checks to see if a given vector of tokens matches a token category pattern
  * @param pattern The pattern to match against
  * @param tokens The tokens to check
  * @return True if the tokens match the pattern, false otherwise
  */
-bool TokenCategoryMatch(const std::vector<TokenCategory>& pattern,
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern,
                         const std::vector<Token>& tokens);
 
 

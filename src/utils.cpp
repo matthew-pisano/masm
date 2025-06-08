@@ -81,21 +81,21 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
     std::vector<Token> elements = {};
 
     for (size_t i = 0; i < listTokens.size(); i++) {
-        if (i % 2 == 1 && listTokens[i].type != TokenCategory::SEPERATOR)
+        if (i % 2 == 1 && listTokens[i].category != TokenCategory::SEPERATOR)
             throw std::runtime_error("Expected , after token " + listTokens[i - 1].value);
-        if (i % 2 == 0 && listTokens[i].type == TokenCategory::SEPERATOR)
+        if (i % 2 == 0 && listTokens[i].category == TokenCategory::SEPERATOR)
             throw std::runtime_error("Unexpected ','");
-        if (i == listTokens.size() - 1 && listTokens[i].type == TokenCategory::SEPERATOR)
+        if (i == listTokens.size() - 1 && listTokens[i].category == TokenCategory::SEPERATOR)
             throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value +
                                      "'");
 
-        if (listTokens[i].type == TokenCategory::SEPERATOR)
+        if (listTokens[i].category == TokenCategory::SEPERATOR)
             continue;
 
         if (!validElems.empty() &&
-            std::ranges::find(validElems, listTokens[i].type) == validElems.end())
+            std::ranges::find(validElems, listTokens[i].category) == validElems.end())
             throw std::runtime_error("Invalid token '" + listTokens[i].value + "' of type '" +
-                                     TokenCategoryToString(listTokens[i].type) + "'");
+                                     tokenCategoryToString(listTokens[i].category) + "'");
         // Only push non seperator elements
         elements.push_back(listTokens[i]);
     }
@@ -104,12 +104,12 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
 }
 
 
-bool TokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens) {
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens) {
     if (pattern.size() != tokens.size())
         return false;
 
     for (size_t i = 0; i < pattern.size(); i++)
-        if (tokens[i].type != pattern[i])
+        if (tokens[i].category != pattern[i])
             return false;
 
     return true;

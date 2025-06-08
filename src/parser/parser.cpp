@@ -48,7 +48,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
     std::vector<std::byte> memBytes;
-    switch (firstToken.type) {
+    switch (firstToken.category) {
         case TokenCategory::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
             // If the section does not exist in the layout, create it
@@ -106,7 +106,7 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
     std::vector<uint32_t> argCodes = {};
     // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
-        switch (arg.type) {
+        switch (arg.category) {
             case TokenCategory::IMMEDIATE:
                 argCodes.push_back(stoui32(arg.value));
                 break;
@@ -122,7 +122,7 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
             default:
                 // Should never be reached
                 throw std::runtime_error("Invalid argument type " +
-                                         std::to_string(static_cast<int>(arg.type)));
+                                         std::to_string(static_cast<int>(arg.category)));
         }
     }
 

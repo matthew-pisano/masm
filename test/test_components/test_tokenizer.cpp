@@ -38,20 +38,21 @@ void validateTokens(const std::vector<std::string>& sourceFileNames,
 
         std::string token;
         size_t lastToken = -1;
-        std::string TokenCategory;
+        std::string tokenCategory;
         std::string tokenValue;
         for (size_t i = 0; i < line.length(); i++) {
             if (line[i] == groupSep) {
                 lastToken = i;
                 lastLine.push_back({});
-                lastLine[lastLine.size() - 1].type = static_cast<TokenCategory>(std::stoi(TokenCategory));
+                lastLine[lastLine.size() - 1].category =
+                        static_cast<TokenCategory>(std::stoi(tokenCategory));
                 lastLine[lastLine.size() - 1].value = tokenValue;
-                TokenCategory.clear();
+                tokenCategory.clear();
                 tokenValue.clear();
                 continue;
             }
             if (i - lastToken <= 2) {
-                TokenCategory += line[i];
+                tokenCategory += line[i];
                 continue;
             }
 
@@ -73,7 +74,8 @@ TEST_CASE("Test Tokenize Single Lines") {
     SECTION("Test Directive") {
         const SourceFile rawFile = makeRawFile({".asciiz"});
         std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile(rawFile);
-        std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::ALLOC_DIRECTIVE, "asciiz"}}};
+        std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::ALLOC_DIRECTIVE, "asciiz"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Memory Directive") {

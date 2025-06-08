@@ -85,12 +85,12 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the Token struct
     py::class_<Token>(tokenizer_module, "Token")
             .def(py::init<>())
-            .def(py::init<TokenCategory, const std::string&>(), py::arg("type"), py::arg("value"))
-            .def_readwrite("type", &Token::type)
+            .def(py::init<TokenCategory, const std::string&>(), py::arg("category"), py::arg("value"))
+            .def_readwrite("category", &Token::category)
             .def_readwrite("value", &Token::value)
             .def("__repr__",
                  [](const Token& t) {
-                     return "<Token(type=" + TokenCategoryToString(t.type) + ", value='" + t.value +
+                     return "<Token(category=" + tokenCategoryToString(t.category) + ", value='" + t.value +
                             "')>";
                  })
             .def("__str__", [](const Token& t) { return t.value; })

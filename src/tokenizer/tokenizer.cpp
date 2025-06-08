@@ -19,7 +19,7 @@
 /**
  * An array storing the names of memory directives
  */
-constexpr std::array<const char*, 14> TokenCategoryNames = {
+constexpr std::array<const char*, 14> tokenCategoryNames = {
         "UNKNOWN",    "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",
         "LABEL_REF",  "INSTRUCTION",   "REGISTER",        "IMMEDIATE",      "SEPERATOR",
         "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
@@ -31,16 +31,18 @@ bool operator==(const LineTokens& lhs, const LineTokens& rhs) {
 bool operator!=(const LineTokens& lhs, const LineTokens& rhs) { return !(lhs == rhs); }
 
 
-std::string TokenCategoryToString(TokenCategory t) { return TokenCategoryNames.at(static_cast<int>(t)); }
+std::string tokenCategoryToString(TokenCategory category) {
+    return tokenCategoryNames.at(static_cast<int>(category));
+}
 
 bool operator==(const Token& lhs, const Token& rhs) {
-    return lhs.type == rhs.type && lhs.value == rhs.value;
+    return lhs.category == rhs.category && lhs.value == rhs.value;
 }
 
 bool operator!=(const Token& lhs, const Token& rhs) { return !(lhs == rhs); }
 
 std::ostream& operator<<(std::ostream& os, const Token& t) {
-    return os << "<" << TokenCategoryToString(t.type) << ", \"" << t.value << "\">";
+    return os << "<" << tokenCategoryToString(t.category) << ", \"" << t.value << "\">";
 }
 
 
@@ -142,7 +144,7 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
         else if (isspace(c) || c == ',' || c == ':' || c == '(' || c == ')') {
             terminateToken(c, currentType, currentToken, tokens);
         }
-        // When the token type has already been decided
+        // When the token category has already been decided
         else if (currentType != TokenCategory::UNKNOWN) {
             // Accumulate character into the current token
             currentToken += c;

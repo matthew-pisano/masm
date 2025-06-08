@@ -23,21 +23,21 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
     // Align
     if (dirName == "align") {
         const std::string val = args[0].value;
-        if (args[0].type != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) < 0 ||
+        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) < 0 ||
             std::stoi(val) > 3)
             throw std::runtime_error("Directive '" + dirName +
                                      "' expects an integer argument between 0 and 3");
     }
     // Asciiz or Ascii
     else if (dirName == "asciiz" || dirName == "ascii") {
-        if (args[0].type != TokenCategory::STRING)
+        if (args[0].category != TokenCategory::STRING)
             throw std::runtime_error("Directive '" + dirName + "' expects a string argument");
     }
     // Byte, Half, Word
     else if (dirName == "byte" || dirName == "half" || dirName == "word") {
         for (const Token& arg : args)
-            if (arg.type != TokenCategory::IMMEDIATE || !isSignedInteger(arg.value)) {
-                if (dirName == "word" && arg.type == TokenCategory::LABEL_REF)
+            if (arg.category != TokenCategory::IMMEDIATE || !isSignedInteger(arg.value)) {
+                if (dirName == "word" && arg.category == TokenCategory::LABEL_REF)
                     continue;
                 throw std::runtime_error("Directive '" + dirName +
                                          "' expects integers as arguments");
@@ -46,13 +46,13 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
     // Double or Float
     else if (dirName == "double" || dirName == "float") {
         for (const Token& arg : args)
-            if (arg.type != TokenCategory::IMMEDIATE || !isSignedFloat(arg.value))
+            if (arg.category != TokenCategory::IMMEDIATE || !isSignedFloat(arg.value))
                 throw std::runtime_error("Directive '" + dirName + "' expects floats as arguments");
     }
     // Space
     else if (dirName == "space") {
         const std::string val = args[0].value;
-        if (args[0].type != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) <= 0)
+        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) <= 0)
             throw std::runtime_error("Directive '" + dirName +
                                      "' expects a positive integer argument");
     } else

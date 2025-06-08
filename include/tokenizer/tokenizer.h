@@ -31,11 +31,11 @@ enum class TokenCategory {
 
 
 /**
- * Returns a string representation (name) of the given token type
- * @param t The token type to parse
+ * Returns a string representation (name) of the given token category
+ * @param category The token category to parse
  * @return The string representation
  */
-std::string TokenCategoryToString(TokenCategory t);
+std::string tokenCategoryToString(TokenCategory category);
 
 
 /**
@@ -55,13 +55,13 @@ struct SourceFile {
 
 
 /**
- * Class containing the type and text value of a token
+ * Class containing the category and text value of a token
  */
 struct Token {
     /**
-     * The type of the token, used to determine how to parse it
+     * The category of the token, used to determine how to parse it
      */
-    TokenCategory type;
+    TokenCategory category;
 
     /**
      * The text value of the token, which is the raw string representation
@@ -69,11 +69,11 @@ struct Token {
     std::string value;
 
     /**
-     * Constructs a token with the given type and value (used for mappings with tokens as keys)
+     * Constructs a token with the given category and value (used for mappings with tokens as keys)
      */
     struct HashFunction {
         size_t operator()(const Token& token) const {
-            const size_t typeHash = std::hash<int>()(static_cast<int>(token.type));
+            const size_t typeHash = std::hash<int>()(static_cast<int>(token.category));
             const size_t valueHash = std::hash<std::string>()(token.value) << 1;
             return typeHash ^ valueHash;
         }

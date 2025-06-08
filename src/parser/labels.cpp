@@ -16,7 +16,7 @@
 
 void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
     for (Token& arg : instructionArgs)
-        if (arg.type == TokenCategory::LABEL_REF) {
+        if (arg.category == TokenCategory::LABEL_REF) {
             if (!labelMap.contains(arg.value))
                 throw std::runtime_error("Unknown label '" + arg.value + "'");
             arg = {TokenCategory::IMMEDIATE, std::to_string(labelMap[arg.value])};
@@ -46,7 +46,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
             const Token& firstToken = line.tokens[0];
             const std::vector unfilteredArgs(line.tokens.begin() + 1, line.tokens.end());
             std::vector<Token> args = filterTokenList(unfilteredArgs);
-            switch (firstToken.type) {
+            switch (firstToken.category) {
                 case TokenCategory::SEC_DIRECTIVE: {
                     currSection = nameToMemSection(firstToken.value);
                     // Init memory section if it is not already in the mapping
@@ -58,7 +58,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                     // Replace label references with dummy values while measuring allocations
                     // Real values used during memory allocation
                     for (Token& arg : args)
-                        if (arg.type == TokenCategory::LABEL_REF)
+                        if (arg.category == TokenCategory::LABEL_REF)
                             arg = {TokenCategory::IMMEDIATE, "0"};
 
                     const std::tuple<std::vector<std::byte>, size_t> alloc =
