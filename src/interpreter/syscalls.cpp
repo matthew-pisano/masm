@@ -117,12 +117,16 @@ void SystemHandle::printInt(const State& state, StreamHandle& streamHandle) {
 
 void SystemHandle::printFloat(const State& state, StreamHandle& streamHandle) {
     const float32_t value = state.cp1.getFloat(Coproc1Register::F12);
-    streamHandle.putStr(std::to_string(value));
+    std::ostringstream oss;
+    oss << std::setprecision(6) << value; // Set precision for float output
+    streamHandle.putStr(oss.str());
 }
 
 void SystemHandle::printDouble(const State& state, StreamHandle& streamHandle) {
     const float64_t value = state.cp1.getDouble(Coproc1Register::F12);
-    streamHandle.putStr(std::to_string(value));
+    std::ostringstream oss;
+    oss << std::setprecision(6) << value; // Set precision for double output
+    streamHandle.putStr(oss.str());
 }
 
 void SystemHandle::printString(State& state, StreamHandle& streamHandle) {

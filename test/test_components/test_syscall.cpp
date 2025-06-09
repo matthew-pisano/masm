@@ -33,6 +33,32 @@ TEST_CASE("Test Print Int Syscall") {
 }
 
 
+TEST_CASE("Test Print Float Syscall") {
+    SystemHandle sysHandle;
+    const std::string expected = "3.14";
+    State state;
+    state.cp1.setFloat(Coproc1Register::F12, std::stof(expected));
+    std::stringstream ostream;
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printFloat(state, streamHandle);
+
+    REQUIRE(expected == ostream.str());
+}
+
+
+TEST_CASE("Test Print Double Syscall") {
+    SystemHandle sysHandle;
+    const std::string expected = "2.71828";
+    State state;
+    state.cp1.setDouble(Coproc1Register::F12, std::stod(expected));
+    std::stringstream ostream;
+    StreamHandle streamHandle{std::cin, ostream};
+    sysHandle.printDouble(state, streamHandle);
+
+    REQUIRE(expected == ostream.str());
+}
+
+
 TEST_CASE("Test Print String Syscall") {
     SystemHandle sysHandle;
     const std::string expected = "Hello, world!";
@@ -86,6 +112,72 @@ TEST_CASE("Test Read Int Syscall") {
         sysHandle.readInt(state, streamHandle);
 
         REQUIRE(state.registers[Register::V0] == 44);
+    }
+}
+
+
+TEST_CASE("Test Read Float Syscall") {
+    SystemHandle sysHandle;
+    State state;
+
+    SECTION("Valid Input") {
+        const std::string input = "3.14\n";
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readFloat(state, streamHandle);
+
+        REQUIRE(state.cp1.getFloat(Coproc1Register::F0) == 3.14f);
+    }
+
+    SECTION("Invalid Input") {
+        const std::string input = "invalid\n";
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+
+        REQUIRE_THROWS_MATCHES(sysHandle.readFloat(state, streamHandle), ExecExcept,
+                               Catch::Matchers::Message("Invalid float input: invalid"));
+    }
+
+    SECTION("Out of Range Input") {
+        const std::string input = "1e40\n"; // Too large for float
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+
+        REQUIRE_THROWS_MATCHES(sysHandle.readFloat(state, streamHandle), ExecExcept,
+                               Catch::Matchers::Message("Float input out of range: 1e40"));
+    }
+}
+
+
+TEST_CASE("Test Read Double Syscall") {
+    SystemHandle sysHandle;
+    State state;
+
+    SECTION("Valid Input") {
+        const std::string input = "2.71828\n";
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+        sysHandle.readDouble(state, streamHandle);
+
+        REQUIRE(state.cp1.getDouble(Coproc1Register::F0) == 2.71828);
+    }
+
+    SECTION("Invalid Input") {
+        const std::string input = "invalid\n";
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+
+        REQUIRE_THROWS_MATCHES(sysHandle.readDouble(state, streamHandle), ExecExcept,
+                               Catch::Matchers::Message("Invalid double input: invalid"));
+    }
+
+    SECTION("Out of Range Input") {
+        const std::string input = "1e400\n"; // Too large for double
+        std::istringstream istream(input);
+        StreamHandle streamHandle{istream, std::cout};
+
+        REQUIRE_THROWS_MATCHES(sysHandle.readDouble(state, streamHandle), ExecExcept,
+                               Catch::Matchers::Message("Double input out of range: 1e400"));
     }
 }
 
@@ -316,4 +408,36 @@ TEST_CASE("Test Random Range Syscall with Set Seed") {
     sysHandle.randIntRange(state);
 
     REQUIRE(state.registers[Register::A0] == expected);
+}
+
+
+TEST_CASE("Test Random Float Syscall") {
+    SystemHandle sysHandle;
+    State state;
+    state.registers[Register::A0] = 1;
+    state.registers[Register::A1] = 1444;
+
+    RandomGenerator rng(state.registers[Register::A1]);
+    const float32_t expected = rng.getRandomFloat();
+
+    sysHandle.setRandSeed(state);
+    sysHandle.randFloat(state);
+
+    REQUIRE(state.cp1.getFloat(Coproc1Register::F0) == expected);
+}
+
+
+TEST_CASE("Test Random Double Syscall") {
+    SystemHandle sysHandle;
+    State state;
+    state.registers[Register::A0] = 1;
+    state.registers[Register::A1] = 1444;
+
+    RandomGenerator rng(state.registers[Register::A1]);
+    const float64_t expected = rng.getRandomDouble();
+
+    sysHandle.setRandSeed(state);
+    sysHandle.randDouble(state);
+
+    REQUIRE(state.cp1.getDouble(Coproc1Register::F0) == expected);
 }
