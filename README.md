@@ -59,5 +59,5 @@ This program uses a 32 element array composed of 32-bit integers to represent it
 - [X] Interrupts
     - [X] MMIO Interrupts
     - [X] Exceptions
-- [ ] Floating Point Coprocessor
-    - [ ] Floating Point Syscalls
+- [X] Floating Point Coprocessor
+    - [X] Floating Point Syscalls
