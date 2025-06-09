@@ -38,6 +38,24 @@ public:
      * @return A random integer in the range [INT32_MIN, INT32_MAX]
      */
     uint32_t getRandomInt() { return getRandomInt(INT32_MAX); }
+
+    /**
+     * Generates a random floating-point number in the range [0.0, 1.0]
+     * @return A random floating-point number in the range [0.0, 1.0]
+     */
+    float32_t getRandomFloat() {
+        std::uniform_real_distribution dist(0.0f, 1.0f);
+        return dist(rng);
+    }
+
+    /**
+     * Generates a random double-precision floating-point number in the range [0.0, 1.0]
+     * @return A random double-precision floating-point number in the range [0.0, 1.0]
+     */
+    float64_t getRandomDouble() {
+        std::uniform_real_distribution dist(0.0, 1.0);
+        return dist(rng);
+    }
 };
 
 
@@ -104,6 +122,21 @@ public:
     void printInt(const State& state, StreamHandle& streamHandle);
 
     /**
+     * Prints the floating-point number stored in the register $f12 to the console
+     * @param state The current state of the interpreter
+     * @param streamHandle The stream handle for printing
+     */
+    void printFloat(const State& state, StreamHandle& streamHandle);
+
+    /**
+     * Prints the double-precision floating-point number stored in the registers $f12 and $f13 to
+     * the console
+     * @param state The current state of the interpreter
+     * @param streamHandle The stream handle for printing
+     */
+    void printDouble(const State& state, StreamHandle& streamHandle);
+
+    /**
      * Prints the null-terminated string stored in the memory at the address in $a0 to the console
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
@@ -116,6 +149,21 @@ public:
      * @param streamHandle The stream handle for reading
      */
     void readInt(State& state, StreamHandle& streamHandle);
+
+    /**
+     * Reads a floating-point number from the console and stores it in the register $f0
+     * @param state The current state of the interpreter
+     * @param streamHandle The stream handle for reading
+     */
+    void readFloat(State& state, StreamHandle& streamHandle);
+
+    /**
+     * Reads a double-precision floating-point number from the console and stores it in the
+     * registers $f0 and $f1
+     * @param state The current state of the interpreter
+     * @param streamHandle The stream handle for reading
+     */
+    void readDouble(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a string from the console and stores it in the memory at the address in $a0 up to the
@@ -209,6 +257,20 @@ public:
      * @param state The current state of the interpreter
      */
     void randIntRange(State& state);
+
+    /**
+     * Generates a random floating-point number in the range [0.0, 1.0] from the random number
+     * generator with the ID in $a0 and stores it in $f0
+     * @param state The current state of the interpreter
+     */
+    void randFloat(State& state);
+
+    /**
+     * Generates a random double-precision floating-point number in the range [0.0, 1.0] from
+     * the random number generator with the ID in $a0 and stores it in $f0 and $f1
+     * @param state
+     */
+    void randDouble(State& state);
 };
 
 #endif // SYSCALLS_H
