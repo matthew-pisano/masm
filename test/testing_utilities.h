@@ -24,7 +24,7 @@ public:
 class DebugInterpreter : public Interpreter {
 
 public:
-    DebugInterpreter(const IOMode ioMode, const StreamHandle& streamHandle) :
+    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) :
         Interpreter(ioMode, streamHandle) {}
 
     /**

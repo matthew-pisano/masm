@@ -33,7 +33,8 @@ TEST_CASE("Test slt Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().registers[Register::T1] = -5;
     interpreter.getState().registers[Register::T2] = 3;
     interpreter.interpret(actualLayout);
@@ -67,7 +68,8 @@ TEST_CASE("Test sltu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().registers[Register::T1] = -5; // Interpreted as large positive number
     interpreter.getState().registers[Register::T2] = 3;
     interpreter.interpret(actualLayout);
@@ -101,7 +103,8 @@ TEST_CASE("Test slti Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().registers[Register::T1] = 5;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -134,7 +137,8 @@ TEST_CASE("Test sltiu Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().registers[Register::T1] = -5;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {

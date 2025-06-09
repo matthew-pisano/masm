@@ -28,7 +28,8 @@ TEST_CASE("Test FP Double Invalid Register Read") {
     DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     REQUIRE_THROWS_MATCHES(interpreter.interpret(actualLayout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
                                                     "Invalid double precision register: f1"));
@@ -49,7 +50,8 @@ TEST_CASE("Test FP Double Invalid Register Write") {
     DebugParser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     REQUIRE_THROWS_MATCHES(interpreter.interpret(actualLayout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
                                                     "Invalid double precision register: f1"));
@@ -76,7 +78,8 @@ TEST_CASE("Test FP Abs.s Instruction") {
     }
 
     constexpr float32_t expected = 42.69;
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected * -1);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -105,7 +108,8 @@ TEST_CASE("Test FP Abs.d Instruction") {
     }
 
     constexpr float64_t expected = 42e69;
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setDouble(Coproc1Register::F2, expected * -1);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -135,7 +139,8 @@ TEST_CASE("Test FP Add.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, 10);
     interpreter.getState().cp1.setFloat(Coproc1Register::F2, 20);
     interpreter.interpret(actualLayout);
@@ -167,7 +172,8 @@ TEST_CASE("Test FP Add.d Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    DebugInterpreter interpreter(IOMode::SYSCALL, {std::cin, std::cout});
+    StreamHandle streamHandle(std::cin, std::cout);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setDouble(Coproc1Register::F2, 10);
     interpreter.getState().cp1.setDouble(Coproc1Register::F4, 20);
     interpreter.interpret(actualLayout);
