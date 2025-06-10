@@ -28,6 +28,7 @@ class InterpreterWrapper {
     std::unique_ptr<PyBytesIOBuf> obuf_;
     std::shared_ptr<std::istream> istream_;
     std::unique_ptr<std::ostream> ostream_;
+    std::unique_ptr<StreamHandle> streamHandle_; // Store as member to avoid lifetime issues
     std::unique_ptr<Interpreter> obj_;
 
 public:
@@ -36,7 +37,8 @@ public:
         obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
         istream_(std::make_shared<std::istream>(ibuf_.get())),
         ostream_(std::make_unique<std::ostream>(obuf_.get())),
-        obj_(std::make_unique<Interpreter>(ioMode, StreamHandle(*istream_, *ostream_))) {}
+        streamHandle_(std::make_unique<StreamHandle>(*istream_, *ostream_)),
+        obj_(std::make_unique<Interpreter>(ioMode, *streamHandle_)) {}
 
     void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
