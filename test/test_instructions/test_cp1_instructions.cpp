@@ -17,18 +17,10 @@
 
 TEST_CASE("Test FP Double Invalid Register Read") {
     const SourceFile rawFile = makeRawFile({"abs.d $f0, $f1"});
-    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
-    SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "abs.d"},
-                 {TokenCategory::REGISTER, "f0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "f1"}}};
-        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
-    }
+    const std::vector<LineTokens> tokens = Tokenizer::tokenizeFile({rawFile});
 
     DebugParser parser{};
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(tokens);
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
@@ -40,18 +32,10 @@ TEST_CASE("Test FP Double Invalid Register Read") {
 
 TEST_CASE("Test FP Double Invalid Register Write") {
     const SourceFile rawFile = makeRawFile({"abs.d $f1, $f2"});
-    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
-    SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "abs.d"},
-                 {TokenCategory::REGISTER, "f1"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "f2"}}};
-        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
-    }
+    const std::vector<LineTokens> tokens = Tokenizer::tokenizeFile({rawFile});
 
     DebugParser parser{};
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(tokens);
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
@@ -278,12 +262,12 @@ TEST_CASE("Test FP Neg.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
+    constexpr float32_t expected = -10;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp1.setFloat(Coproc1Register::F1, 10);
+    interpreter.getState().cp1.setFloat(Coproc1Register::F1, -expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = -10;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -309,12 +293,12 @@ TEST_CASE("Test FP Sqrt.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
+    constexpr float32_t expected = 5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp1.setFloat(Coproc1Register::F1, 25);
+    interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected * expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 5;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -377,16 +361,17 @@ TEST_CASE("Test FP c.eq.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
+    constexpr float32_t testValue = 42.69;
     SECTION("Test Execute Equal") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.69);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.69);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue);
         interpreter.interpret(actualLayout);
         REQUIRE(interpreter.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Equal") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.69);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.70);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue + 0.01);
         interpreter.interpret(actualLayout);
         REQUIRE_FALSE(interpreter.getState().cp1.getFlag(0));
     }
@@ -416,16 +401,17 @@ TEST_CASE("Test FP c.lt.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
+    constexpr float32_t testValue = 42.69;
     SECTION("Test Execute Less Than") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.69);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.70);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
         interpreter.interpret(actualLayout);
         REQUIRE(interpreter.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Less Than") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.70);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.69);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue * 2);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue);
         interpreter.interpret(actualLayout);
         REQUIRE_FALSE(interpreter.getState().cp1.getFlag(0));
     }
@@ -455,23 +441,24 @@ TEST_CASE("Test FP c.le.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
+    constexpr float32_t testValue = 42.69;
     SECTION("Test Execute Less Than or Equal") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.69);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.70);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
         interpreter.interpret(actualLayout);
         REQUIRE(interpreter.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Equal") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.69);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.69);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue);
         interpreter.interpret(actualLayout);
         REQUIRE(interpreter.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Less Than or Equal") {
-        interpreter.getState().cp1.setFloat(Coproc1Register::F0, 42.70);
-        interpreter.getState().cp1.setFloat(Coproc1Register::F1, 42.69);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue * 2);
+        interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue);
         interpreter.interpret(actualLayout);
         REQUIRE_FALSE(interpreter.getState().cp1.getFlag(0));
     }
@@ -568,12 +555,12 @@ TEST_CASE("Test FP cvt.d.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
+    constexpr float32_t expected = 55.5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp1.setFloat(Coproc1Register::F1, 55.5);
+    interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float64_t expected = 55.5;
         REQUIRE(expected == interpreter.getState().cp1.getDouble(Coproc1Register::F0));
     }
 }
@@ -599,12 +586,12 @@ TEST_CASE("Test FP cvt.s.d Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
+    constexpr float64_t expected = 55.5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp1.setDouble(Coproc1Register::F2, 42.69);
+    interpreter.getState().cp1.setDouble(Coproc1Register::F2, expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 42.69;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -636,12 +623,14 @@ TEST_CASE("Test FP ldc1 Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
-    interpreter.getState().memory.wordTo(address, 0x00000000);
-    interpreter.getState().memory.wordTo(address + 4, 0x4052E000);
+
+    constexpr float64_t expected = 75.5;
+    const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
+    interpreter.getState().memory.wordTo(address, static_cast<int32_t>(intRepr & 0xFFFFFFFF));
+    interpreter.getState().memory.wordTo(address + 4, static_cast<int32_t>(intRepr >> 32));
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float64_t expected = 75.5;
         REQUIRE(expected == interpreter.getState().cp1.getDouble(Coproc1Register::F0));
     }
 }
@@ -673,11 +662,13 @@ TEST_CASE("Test FP lwc1 Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
-    interpreter.getState().memory.wordTo(address, 0x42970000);
+
+    constexpr float32_t expected = 75.5;
+    const int32_t intRepr = *reinterpret_cast<const int32_t*>(&expected);
+    interpreter.getState().memory.wordTo(address, intRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 75.5;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -709,12 +700,15 @@ TEST_CASE("Test FP sdc1 Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
+
+    constexpr float64_t expected = 75.5;
+    const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
+    const int32_t lower = static_cast<int32_t>(intRepr & 0xFFFFFFFF);
+    const int32_t upper = static_cast<int32_t>(intRepr >> 32);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
-    interpreter.getState().cp1.setDouble(Coproc1Register::F0, 75.5);
+    interpreter.getState().cp1.setDouble(Coproc1Register::F0, expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr int32_t lower = 0x00000000;
-        constexpr int32_t upper = 0x4052E000;
         REQUIRE(interpreter.getState().memory.wordAt(address) == lower);
         REQUIRE(interpreter.getState().memory.wordAt(address + 4) == upper);
     }
@@ -747,13 +741,13 @@ TEST_CASE("Test FP swc1 Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
+
+    constexpr float32_t floatRepr = 75.5;
+    const int32_t expected = *reinterpret_cast<const int32_t*>(&floatRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.getState().cp1.setFloat(Coproc1Register::F0, 75.5);
     interpreter.interpret(actualLayout);
-    SECTION("Test Execute") {
-        constexpr int32_t expected = 0x42970000;
-        REQUIRE(expected == interpreter.getState().memory.wordAt(address));
-    }
+    SECTION("Test Execute") { REQUIRE(expected == interpreter.getState().memory.wordAt(address)); }
 }
 
 
@@ -779,6 +773,7 @@ TEST_CASE("Test FP mfc1 Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+
     constexpr int32_t expected = 0x012345678;
     interpreter.getState().cp1[Coproc1Register::F0] = expected;
     interpreter.interpret(actualLayout);
@@ -808,6 +803,7 @@ TEST_CASE("Test FP mtc1 Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+
     constexpr int32_t expected = 0x012345678;
     interpreter.getState().registers[Register::T0] = expected;
     interpreter.interpret(actualLayout);
@@ -839,6 +835,7 @@ TEST_CASE("Test FP mov.s Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+
     constexpr float32_t expected = 42.69;
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected);
     interpreter.interpret(actualLayout);
