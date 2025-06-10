@@ -296,7 +296,7 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (0x08 & 0x1F) << 21 | (0x00 & 0x07) << 18 |
-                                 (0x00 & 0x01) << 17 << (tf & 0x01) << 16 | offset & 0xFFFF;
+                                 (0x00 & 0x01) << 17 | (tf & 0x01) << 16 | offset & 0xFFFF;
     return i32ToBEByte(instruction);
 }
 
