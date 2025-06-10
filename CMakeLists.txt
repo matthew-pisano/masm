@@ -7,6 +7,8 @@ add_compile_options(-Wall -Wextra -pedantic)
 
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     add_compile_options(-Wno-bitwise-op-parentheses)
+else ()
+    add_compile_options(-Wno-parentheses -Wno-strict-aliasing)
 endif ()
 
 # Static linking for Windows cross-compilation
