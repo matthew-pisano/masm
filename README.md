@@ -6,6 +6,20 @@
 * Parsing - where tokens are transformed into a memory template that will be loaded in at runtime
 * Interpreting - where the raw, parsed memory is first assembled into MIPS machine code and then executed in the same manner as a CPU would interact with its registers and main memory.
 
+## Installation
+
+While this project is designed to be primarily be built using Linux, it can generate both Linux and Windows versions of the main executable. The accompanying *Python* package is Linux-only for the time being.
+
+For the main executable, simply navigate to the [latest release](https://github.com/matthew-pisano/masm/releases/latest) and download the executable for your operating system.  `masm` requires no external dependencies or libraries, so it can be installed and run as a standalone executable.
+
+For the accompanying *Python* package, download the wheel file included in the release and run the following to install it to your current environment:
+
+```bash
+pip install pymasm-x.x.x-py3-none-any.whl 
+```
+
+Remember to replace the `x.x.x` portion with the release version that you have selected.
+
 ## Usage
 
 `masm` takes in a valid *MIPS* program and executes the instructions within on a virtual CPU that interacts with virtual registers and memory.
