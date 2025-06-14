@@ -73,8 +73,10 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
 
     // Combine all tokenized lines into a single program vector
     std::vector<LineTokens> program;
-    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap)
-        program.insert(program.end(), programFile.second.begin(), programFile.second.end());
+    for (const SourceFile& sourceFile : sourceFiles) {
+        std::vector<LineTokens> fileLines = programMap["masm_mangle_file_" + sourceFile.name];
+        program.insert(program.end(), fileLines.begin(), fileLines.end());
+    }
 
     return program;
 }

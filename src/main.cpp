@@ -34,12 +34,12 @@ int main(const int argc, char* argv[]) {
 
     int exitCode = 1;
     try {
-        std::vector<SourceFile> programLines;
-        programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
+        std::vector<SourceFile> sourceFiles;
+        sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
         for (const std::string& fileName : inputFileNames)
-            programLines.push_back({getFileBasename(fileName), readFile(fileName)});
+            sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
 
-        const std::vector<LineTokens> program = Tokenizer::tokenize(programLines);
+        const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
         Parser parser{};
         const MemLayout layout = parser.parse(program);

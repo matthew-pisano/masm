@@ -82,16 +82,16 @@ int main(const int argc, char* argv[]) {
         projectName.erase(extPos); // Remove extension if it exists
 
     try {
-        std::vector<SourceFile> programLines;
-        programLines.reserve(inputFileNames.size()); // Preallocate memory for performance
+        std::vector<SourceFile> sourceFiles;
+        sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
         for (const std::string& fileName : inputFileNames)
-            programLines.push_back({getFileBasename(fileName), readFile(fileName)});
+            sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
 
         std::ofstream tokenFile;
         tokenFile.open(projectName + ".tkn");
         if (!tokenFile.is_open())
             throw std::runtime_error("Could not open file " + projectName + ".tkn");
-        const std::vector<LineTokens> tokenizedLines = genTokenFile(tokenFile, programLines);
+        const std::vector<LineTokens> tokenizedLines = genTokenFile(tokenFile, sourceFiles);
 
         std::ofstream parserFile;
         parserFile.open(projectName + ".pse");
