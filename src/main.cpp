@@ -12,17 +12,23 @@
 
 
 int main(const int argc, char* argv[]) {
+    std::string name = "masm";
     std::string _computedVersionString(Version::VERSION);
-    std::string version = "masm " + _computedVersionString;
+    std::string version = name + " " + _computedVersionString;
 
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
 
-    CLI::App app{version + " - MIPS Interpreter", "masm"};
+    CLI::App app{version + " - MIPS Interpreter", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
     app.add_flag("--mmio", useMMIO,
                  "Use memory-mapped I/O instead of system calls for input/output operations");
     app.set_version_flag("--version", version);
+
+    // Set up help message
+    app.failure_message([name](const CLI::App* _app, const CLI::Error& e) -> std::string {
+        return name + ": error: " + CLI::FailureMessage::simple(_app, e);
+    });
 
     try {
         app.parse(argc, argv);
