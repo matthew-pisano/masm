@@ -8,10 +8,12 @@
 #include "io/fileio.h"
 #include "parser/parser.h"
 #include "utils.h"
+#include "version.h"
 
 
 int main(const int argc, char* argv[]) {
-    std::string version = "masm 1.1.0";
+    std::string _computedVersionString(Version::VERSION);
+    std::string version = "masm " + _computedVersionString;
 
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;

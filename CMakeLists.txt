@@ -3,6 +3,32 @@ project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
 
+
+# Function to extract value from JSON
+function(get_json_value JSON_FILE KEY OUTPUT_VAR)
+    file(READ ${JSON_FILE} JSON_CONTENT)
+
+    # Simple regex to extract the value for the given key
+    string(REGEX MATCH "\"${KEY}\"[ ]*:[ ]*\"([^\"]+)\"" MATCH_RESULT ${JSON_CONTENT})
+    if (MATCH_RESULT)
+        set(${OUTPUT_VAR} ${CMAKE_MATCH_1} PARENT_SCOPE)
+    else ()
+        message(FATAL_ERROR "Could not find key '${KEY}' in ${JSON_FILE}")
+    endif ()
+endfunction()
+
+
+# Read version from JSON
+get_json_value("${CMAKE_CURRENT_SOURCE_DIR}/version.json" "version" PROJECT_VERSION)
+message(STATUS "Build ${PROJECT_NAME} version: ${PROJECT_VERSION}")
+
+# Configure the version header
+configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/version.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/version.h"
+        @ONLY
+)
+
 add_compile_options(-Wall -Wextra -pedantic)
 
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
@@ -17,6 +43,7 @@ if (CMAKE_CROSSCOMPILING AND WIN32)
 endif ()
 
 include_directories(include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 
 ## MASM Static Library ##

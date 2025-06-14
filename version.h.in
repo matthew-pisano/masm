@@ -1,0 +1,10 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define PROJECT_VERSION "@PROJECT_VERSION@"
+
+namespace Version {
+    constexpr const char* VERSION = PROJECT_VERSION;
+}
+
+#endif // VERSION_H
