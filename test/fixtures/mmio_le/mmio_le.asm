@@ -41,11 +41,11 @@ getNChar:
 
 # Loop until all character have been read
 getLoop:
-    lb      $t3, 3($t1)         # Read control word
+    lb      $t3, 0($t1)         # Read control word
     andi    $t3, $t3, 0x0001    # Extract ready bit
     beq     $t3, $0, getLoop    # Keep polling till ready
 
-    lb      $t4, 3($t0)         # Read character into temporary register from input data word
+    lb      $t4, 0($t0)         # Read character into temporary register from input data word
     add     $t5, $a0, $t2       # Get store address of character, offset from base buffer address
     sb      $t4, 0($t5)         # Store the byte into the buffer at the offset
     addi    $t2, $t2, 1         # Increment counter
@@ -63,13 +63,13 @@ putNChar:
 
 # Loop until last character written out
 putLoop:
-    lb      $t3, 3($t1)         # Read control word
+    lb      $t3, 0($t1)         # Read control word
     andi    $t3, $t3, 0x0001    # Extract ready bit
     beq     $t3, $0, putLoop    # Poll till ready for next character
 
     add     $t4, $a0, $t2       # Get stored address of character, offset from base buffer address
     lbu     $t6, 0($t4)         # Load character into $t6
-    sb      $t6, 3($t5)         # Store character into output data word at the offset
+    sb      $t6, 0($t5)         # Store character into output data word at the offset
     addi    $t2, $t2, 1         # Increment counter
     slt     $t7, $t2, $a1       # Check if all characters have been written
     bne     $t7, $zero, putLoop # Loop if more character need to be written

@@ -52,11 +52,11 @@ int main(const int argc, char* argv[]) {
 
         const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
-        Parser parser;
+        Parser parser(useLittleEndian);
         const MemLayout layout = parser.parse(program);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        Interpreter interpreter(ioMode, conHandle);
+        Interpreter interpreter(ioMode, conHandle, useLittleEndian);
         exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

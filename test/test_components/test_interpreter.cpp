@@ -24,9 +24,11 @@
  * @param sourceFileNames The names of the source files to tokenize
  * @param logFileName The name of the output log to compare against
  * @param inputString The input string to provide to the program
+ * @param useLittleEndian Whether to use little-endian byte order
  */
 void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceFileNames,
-                    const std::string& logFileName, const std::string& inputString = "") {
+                    const std::string& logFileName, const std::string& inputString = "",
+                    const bool useLittleEndian = false) {
     const std::string logSource = readFile(logFileName);
     std::vector<std::string> logLines;
     std::stringstream ss(logSource);
@@ -41,7 +43,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
 
     const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
-    Parser parser{};
+    Parser parser(useLittleEndian);
     const MemLayout layout = parser.parse(program);
 
     int exitCode = 0;
@@ -49,7 +51,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     std::ostringstream oss;
 
     StreamHandle streamHandle(iss, oss);
-    DebugInterpreter interpreter(ioMode, streamHandle);
+    DebugInterpreter interpreter(ioMode, streamHandle, useLittleEndian);
     exitCode = interpreter.interpret(layout);
 
     REQUIRE(exitCode == 0);
@@ -141,6 +143,14 @@ TEST_CASE("Test Execute MMIO Input Output") {
     const std::string inputString = "1234";
     validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                    "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+}
+
+
+TEST_CASE("Test Execute MMIO Input Output Little Endian") {
+    const std::string test_case = "mmio_le";
+    const std::string inputString = "1234";
+    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString, true);
 }
 
 
