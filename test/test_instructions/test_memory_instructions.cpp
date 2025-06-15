@@ -26,7 +26,7 @@ TEST_CASE("Test lb Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x81, 0x28, 0x00, 0x04});
@@ -61,7 +61,7 @@ TEST_CASE("Test lbu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x91, 0x28, 0x00, 0x04});
@@ -96,7 +96,7 @@ TEST_CASE("Test lh Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x85, 0x28, 0x00, 0x04});
@@ -131,7 +131,7 @@ TEST_CASE("Test lhu Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x95, 0x28, 0x00, 0x04});
@@ -166,7 +166,7 @@ TEST_CASE("Test lw Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x8d, 0x28, 0x00, 0x04});
@@ -199,7 +199,7 @@ TEST_CASE("Test lui Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x3c, 0x08, 0x00, 0x64});
@@ -232,7 +232,7 @@ TEST_CASE("Test sb Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xa1, 0x28, 0x00, 0x04});
@@ -267,7 +267,7 @@ TEST_CASE("Test sh Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xa5, 0x28, 0x00, 0x04});
@@ -302,7 +302,7 @@ TEST_CASE("Test sw Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xad, 0x28, 0x00, 0x04});

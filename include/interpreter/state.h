@@ -82,6 +82,12 @@ struct State {
      * @param layout The memory layout to load
      */
     void loadProgram(const MemLayout& layout);
+
+    /**
+     * Constructor for the State class
+     * @param useLittleEndian Whether to use little-endian memory layout (default is big-endian)
+     */
+    explicit State(const bool useLittleEndian = false) : memory(useLittleEndian) {}
 };
 
 #endif // STATE_H

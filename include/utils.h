@@ -110,6 +110,37 @@ std::vector<std::byte> f64ToBEByte(double f64);
 
 
 /**
+ * Converts a 32-bit integer to a vector of bytes in little-endian order
+ * @param i32 The 32-bit integer to convert
+ * @return A vector of bytes representing the integer in little-endian order
+ */
+std::vector<std::byte> i32ToLEByte(uint32_t i32);
+
+
+/**
+ * Converts a 16-bit integer to a vector of bytes in little-endian order
+ * @param i16 The 16-bit integer to convert
+ * @return A vector of bytes representing the integer in little-endian order
+ */
+std::vector<std::byte> i16ToLEByte(uint16_t i16);
+
+/**
+ * Converts a 32-bit float to a vector of bytes in little-endian order
+ * @param f32 The 32-bit float to convert
+ * @return A vector of bytes representing the float in little-endian order
+ */
+std::vector<std::byte> f32ToLEByte(float f32);
+
+
+/**
+ * Converts a 64-bit float to a vector of bytes in little-endian order
+ * @param f64 The 64-bit float to convert
+ * @return A vector of bytes representing the float in little-endian order
+ */
+std::vector<std::byte> f64ToLEByte(double f64);
+
+
+/**
  * Converts a hexadecimal string to an integer string
  * @param hex The hexadecimal string to convert
  * @return The integer string value of the hexadecimal string

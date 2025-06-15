@@ -194,18 +194,18 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
 
 std::vector<std::byte> Parser::parseRTypeInstruction(const uint32_t rd, const uint32_t rs,
                                                      const uint32_t rt, const uint32_t shamt,
-                                                     const uint32_t funct) {
+                                                     const uint32_t funct) const {
 
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0 & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 |
                                  (rd & 0x1F) << 11 | (shamt & 0x1F) << 6 | funct & 0x3F;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
 std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const uint32_t opcode,
                                                      const uint32_t rt, const uint32_t rs,
-                                                     int32_t immediate) {
+                                                     int32_t immediate) const {
 
     // Modify immediate values to be relative to the location of the current instruction
     std::vector branchOpCodes = {static_cast<uint32_t>(InstructionCode::BEQ),
@@ -221,72 +221,76 @@ std::vector<std::byte> Parser::parseITypeInstruction(const uint32_t loc, const u
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
             (opcode & 0x3F) << 26 | (rs & 0x1F) << 21 | (rt & 0x1F) << 16 | immediate & 0xFFFF;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
 std::vector<std::byte> Parser::parseJTypeInstruction(const uint32_t opcode,
-                                                     const uint32_t address) {
+                                                     const uint32_t address) const {
 
     // Combine fields into 32-bit instruction code (address shifted by 2 to byte align to 4)
     const uint32_t instruction = (opcode & 0x3F) << 26 | (address & 0x3FFFFFF) >> 2;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
-std::vector<std::byte> Parser::parseSyscallInstruction() { return i32ToBEByte(0x0000000C); }
+std::vector<std::byte> Parser::parseSyscallInstruction() const {
+    return useLittleEndian ? i32ToLEByte(0x0000000C) : i32ToBEByte(0x0000000C);
+}
 
 
-std::vector<std::byte> Parser::parseEretInstruction() { return i32ToBEByte(0x42000018); }
+std::vector<std::byte> Parser::parseEretInstruction() const {
+    return useLittleEndian ? i32ToLEByte(0x42000018) : i32ToBEByte(0x42000018);
+}
 
 
 std::vector<std::byte> Parser::parseCP0Instruction(const uint32_t op, const uint32_t rt,
-                                                   const uint32_t rd) {
+                                                   const uint32_t rd) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x10 & 0x3F) << 26 | (op & 0x1F) << 21 | (rt & 0x1F) << 16 |
                                  (rd & 0x1F) << 11 | 0x00 & 0x7FF;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
 std::vector<std::byte> Parser::parseCP1RegInstruction(const uint32_t fmt, const uint32_t ft,
                                                       const uint32_t fs, const uint32_t fd,
-                                                      const uint32_t func) {
+                                                      const uint32_t func) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | (fd & 0x1F) << 6 | func & 0x3F;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
 std::vector<std::byte> Parser::parseCP1RegImmInstruction(const uint32_t sub, const uint32_t rt,
-                                                         const uint32_t fs) {
+                                                         const uint32_t fs) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (sub & 0x1F) << 21 | (rt & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | 0x00 & 0x7FF;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 
 std::vector<std::byte> Parser::parseCP1ImmInstruction(const uint32_t op, const uint32_t base,
-                                                      const uint32_t ft, const uint32_t offset) {
+                                                      const uint32_t ft, const uint32_t offset) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
             (op & 0x3F) << 26 | (base & 0x1F) << 21 | (ft & 0x1F) << 16 | (offset & 0xFFFF);
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 std::vector<std::byte> Parser::parseCP1CondInstruction(const uint32_t fmt, const uint32_t ft,
-                                                       const uint32_t fs, const uint32_t cond) {
+                                                       const uint32_t fs, const uint32_t cond) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | (0x00 & 0x07) << 8 | (0x00 & 0x03) << 6 |
                                  (0x03 & 0x03) << 4 | cond & 0xF;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, const uint32_t tf,
-                                                          int32_t offset) {
+                                                          int32_t offset) const {
 
     // Branch targets are always word-aligned, so divide by 4
     const int32_t pcOffset = (offset - static_cast<int32_t>(loc) - 4) >> 2;
@@ -297,7 +301,7 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (0x08 & 0x1F) << 21 | (0x00 & 0x07) << 18 |
                                  (0x00 & 0x01) << 17 | (tf & 0x01) << 16 | offset & 0xFFFF;
-    return i32ToBEByte(instruction);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 

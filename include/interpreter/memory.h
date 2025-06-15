@@ -78,6 +78,11 @@ class Memory {
     std::unordered_map<uint32_t, std::byte> memory;
 
     /**
+     * Whether to use a little endian memory layout
+     */
+    bool useLittleEndian;
+
+    /**
      * Gets the byte at the given address or zero if not allocated (without triggering side
      * effects). Only to be used for privileged reads
      * @param index The address to read from
@@ -98,6 +103,12 @@ class Memory {
     void writeSideEffect(uint32_t index);
 
 public:
+    /**
+     * Constructor for the Memory class
+     * @param useLittleEndian Whether to use little endian memory layout
+     */
+    explicit Memory(const bool useLittleEndian = false) : useLittleEndian(useLittleEndian) {}
+
     /**
      * Gets the word stored at the given word-aligned memory address (without triggering side
      * effects).  Only to be used for privileged reads

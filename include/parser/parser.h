@@ -18,6 +18,11 @@
 class Parser {
 
     /**
+     * Whether to parse to a little endian memory layout
+     */
+    bool useLittleEndian;
+
+    /**
      * Parses an instruction and its arguments into bytes that can be allocated to memory
      * @param loc The location in which the instruction will be placed into memory
      * @param instrToken The token containing the instruction
@@ -37,8 +42,8 @@ class Parser {
      * @param funct The function code for the instruction
      * @return The memory allocation associated with the instruction
      */
-    static std::vector<std::byte> parseRTypeInstruction(uint32_t rd, uint32_t rs, uint32_t rt,
-                                                        uint32_t shamt, uint32_t funct);
+    std::vector<std::byte> parseRTypeInstruction(uint32_t rd, uint32_t rs, uint32_t rt,
+                                                        uint32_t shamt, uint32_t funct) const;
 
     /**
      * Parses an I-type instruction into bytes that can be allocated to memory
@@ -50,8 +55,8 @@ class Parser {
      * @return The memory allocation associated with the instruction
      * @throw runtime_error When a branch target is out of range
      */
-    static std::vector<std::byte> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
-                                                        uint32_t rs, int32_t immediate);
+    std::vector<std::byte> parseITypeInstruction(uint32_t loc, uint32_t opcode, uint32_t rt,
+                                                        uint32_t rs, int32_t immediate) const;
 
     /**
      * Parses a J-type instruction into bytes that can be allocated to memory
@@ -59,19 +64,19 @@ class Parser {
      * @param address The address passed into the instruction
      * @return The memory allocation associated with the instruction
      */
-    static std::vector<std::byte> parseJTypeInstruction(uint32_t opcode, uint32_t address);
+    std::vector<std::byte> parseJTypeInstruction(uint32_t opcode, uint32_t address) const;
 
     /**
      * A specialized function to parse the syscall instruction
      * @return The memory allocation associated with the syscall instruction
      */
-    static std::vector<std::byte> parseSyscallInstruction();
+    std::vector<std::byte> parseSyscallInstruction() const;
 
     /**
      * A specialized function to parse the eret instruction
      * @return The memory allocation associated with the eret instruction
      */
-    static std::vector<std::byte> parseEretInstruction();
+    std::vector<std::byte> parseEretInstruction() const;
 
     /**
      * Parses a CP0 instruction into bytes that can be allocated to memory
@@ -80,21 +85,60 @@ class Parser {
      * @param rd The index of the rd register
      * @return The memory allocation associated with the CP0 move instruction
      */
-    static std::vector<std::byte> parseCP0Instruction(uint32_t op, uint32_t rt, uint32_t rd);
+    std::vector<std::byte> parseCP0Instruction(uint32_t op, uint32_t rt, uint32_t rd) const;
 
-    static std::vector<std::byte> parseCP1RegInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
-                                                         uint32_t fd, uint32_t func);
+    /**
+     * Parses a CP1 register type instruction into bytes that can be allocated to memory
+     * @param fmt Stores the format of the instruction
+     * @param ft Stores the index of the ft register
+     * @param fs Stores the index of the fs register
+     * @param fd Stores the index of the fd register
+     * @param func Stores the function code of the instruction
+     * @return The memory allocation associated with the CP1 instruction
+     */
+    std::vector<std::byte> parseCP1RegInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
+                                                         uint32_t fd, uint32_t func) const;
 
-    static std::vector<std::byte> parseCP1RegImmInstruction(uint32_t sub, uint32_t rt, uint32_t fs);
+    /**
+     * Parses a CP1 register immediate type instruction into bytes that can be allocated to memory
+     * @param sub Stores the sub-operation of the instruction
+     * @param rt The index of the rt register
+     * @param fs The index of the fs register
+     * @return The memory allocation associated with the CP1 instruction
+     */
+    std::vector<std::byte> parseCP1RegImmInstruction(uint32_t sub, uint32_t rt, uint32_t fs) const;
 
-    static std::vector<std::byte> parseCP1ImmInstruction(uint32_t op, uint32_t base, uint32_t ft,
-                                                         uint32_t offset);
+    /**
+     * Parses a CP1 immediate type instruction into bytes that can be allocated to memory
+     * @param op Stores the operation of the instruction
+     * @param base Stores the base register index
+     * @param ft The index of the ft register
+     * @param offset The immediate offset value for the instruction
+     * @return The memory allocation associated with the CP1 instruction
+     */
+    std::vector<std::byte> parseCP1ImmInstruction(uint32_t op, uint32_t base, uint32_t ft,
+                                                         uint32_t offset) const;
 
-    static std::vector<std::byte> parseCP1CondInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
-                                                          uint32_t cond);
+    /**
+     * Parses a CP1 conditional instruction into bytes that can be allocated to memory
+     * @param fmt Stores the format of the instruction
+     * @param ft Stores the index of the ft register
+     * @param fs Stores the index of the fs register
+     * @param cond Stores the condition code for the instruction
+     * @return The memory allocation associated with the CP1 instruction
+     */
+    std::vector<std::byte> parseCP1CondInstruction(uint32_t fmt, uint32_t ft, uint32_t fs,
+                                                          uint32_t cond) const;
 
-    static std::vector<std::byte> parseCP1CondImmInstruction(uint32_t loc, uint32_t tf,
-                                                             int32_t offset);
+    /**
+     * Parses a CP1 conditional immediate instruction into bytes that can be allocated to memory
+     * @param loc The location in which the instruction will be placed into memory
+     * @param tf Stores the true/false flag for the instruction
+     * @param offset The immediate offset value for the instruction
+     * @return The memory allocation associated with the CP1 instruction
+     */
+    std::vector<std::byte> parseCP1CondImmInstruction(uint32_t loc, uint32_t tf,
+                                                             int32_t offset) const;
 
     /**
      * A more generalized function to parse pseudo instructions
@@ -137,6 +181,12 @@ protected:
     LabelMap labelMap;
 
 public:
+    /**
+     * Constructor for the Parser class
+     * @param useLittleEndian Whether to use little endian memory layout
+     */
+    explicit Parser(const bool useLittleEndian = false) : useLittleEndian(useLittleEndian) {}
+
     /**
      * Parses a sequence of tokens into memory allocations ready for execution
      * @param tokenLines The program tokens to parse
