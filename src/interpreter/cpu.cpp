@@ -182,8 +182,6 @@ void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs,
         case InstructionCode::JALR: {
             // Link current PC to RA register
             registers[Register::RA] = registers[Register::PC]; // Already incremented
-            // Save stack pointer to frame pointer
-            registers[Register::FP] = registers[Register::SP];
             // Jump to the address in rs
             registers[Register::PC] = registers[rs];
             break;
@@ -285,8 +283,6 @@ void execJType(RegisterFile& registers, const uint32_t opCode, const uint32_t ad
     if (opCode == InstructionCode::JAL) {
         // Link current PC to RA register
         registers[Register::RA] = registers[Register::PC]; // PC incremented earlier
-        // Save stack pointer to frame pointer
-        registers[Register::FP] = registers[Register::SP];
     }
 
     // Jump to the target address
