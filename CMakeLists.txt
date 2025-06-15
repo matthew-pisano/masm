@@ -85,7 +85,7 @@ FetchContent_MakeAvailable(cli11)
 
 ## MASM Main Executables ##
 
-add_executable(masm-exec src/main.cpp
+add_executable(masm-exec src/masm.cpp
         src/io/fileio.cpp
 )
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
@@ -97,6 +97,22 @@ if (CMAKE_CROSSCOMPILING AND WIN32)
 endif ()
 
 
+## MASM Debugger Executables ##
+
+add_executable(masm-dbg src/mdb.cpp
+        src/io/fileio.cpp
+        src/debug/debug_interpreter.cpp
+)
+target_link_libraries(masm-dbg PRIVATE masm CLI11::CLI11)
+set_target_properties(masm-dbg PROPERTIES OUTPUT_NAME "mdb")
+
+# Static linking for Windows cross-compilation (ensures dlls are packaged in)
+if (CMAKE_CROSSCOMPILING AND WIN32)
+    target_link_libraries(masm-dbg PRIVATE -static)
+endif ()
+
+
+# No tests or Python bindings for cross-compilation on Windows
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     ## Python Bindings ##
@@ -120,6 +136,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     find_package(Catch2 3 REQUIRED)
     add_executable(masm-tests
+            src/debug/debug_interpreter.cpp
             src/io/fileio.cpp
             test/testing_utilities.cpp
             test/test_components/test_tokenizer.cpp
