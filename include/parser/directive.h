@@ -32,11 +32,14 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
  * @param loc The location in which the directive will be placed into memory
  * @param dirToken The token for the directive
  * @param args Any argument tokens to pass to the directive
+ * @param useLittleEndian Whether to use little-endian byte order for the directive
  * @return A tuple containing the memory allocation associated with the directive and any padding
  * @throw runtime_error When the arguments for a directive are malformed
  */
-std::tuple<std::vector<std::byte>, size_t>
-parsePaddedAllocDirective(uint32_t loc, const Token& dirToken, const std::vector<Token>& args);
+std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(uint32_t loc,
+                                                                     const Token& dirToken,
+                                                                     const std::vector<Token>& args,
+                                                                     bool useLittleEndian = false);
 
 
 /**
@@ -44,11 +47,13 @@ parsePaddedAllocDirective(uint32_t loc, const Token& dirToken, const std::vector
  * @param loc The location in which the directive will be placed into memory
  * @param dirToken The token for the directive
  * @param args Any argument tokens to pass to the directive
+ * @param useLittleEndian Whether to use little-endian byte order for the directive
  * @return The memory allocation associated with the directive
  * @throw runtime_error When the arguments for a directive are malformed
  */
 std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
-                                           const std::vector<Token>& args);
+                                           const std::vector<Token>& args,
+                                           bool useLittleEndian = false);
 
 
 /**
@@ -82,33 +87,36 @@ void populateMemBlock(std::byte& block, uint8_t integer);
  * Populates a given vector of bytes with the given half word
  * @param block The vector of bytes to populate
  * @param integer The integer to populate the vector with
+ * @param useLittleEndian Whether to use little-endian byte order for the half word
  */
-void populateMemBlock(std::vector<std::byte>& block, uint16_t integer);
+void populateMemBlock(std::vector<std::byte>& block, uint16_t integer, bool useLittleEndian);
 
 
 /**
  * Populates a given vector of bytes with the given word
  * @param block The vector of bytes to populate
  * @param integer The integer to populate the vector with
- * @throw runtime_error When the integer is out of range for the bytes within the vector
+ * @param useLittleEndian Whether to use little-endian byte order for the word
  */
-void populateMemBlock(std::vector<std::byte>& block, uint32_t integer);
+void populateMemBlock(std::vector<std::byte>& block, uint32_t integer, bool useLittleEndian);
 
 
 /**
  * Populates a given vector of bytes with the given single-precision floating point number
  * @param block The vector of bytes to populate
  * @param decimal The single-precision floating point number to populate the vector with
+ * @param useLittleEndian Whether to use little-endian byte order for the floating point number
  */
-void populateMemBlock(std::vector<std::byte>& block, float decimal);
+void populateMemBlock(std::vector<std::byte>& block, float decimal, bool useLittleEndian);
 
 
 /**
  * Populates a given vector of bytes with the given double-precision floating point number
  * @param block The vector of bytes to populate
  * @param decimal The double-precision floating point number to populate the vector with
+ * @param useLittleEndian Whether to use little-endian byte order for the floating point number
  */
-void populateMemBlock(std::vector<std::byte>& block, double decimal);
+void populateMemBlock(std::vector<std::byte>& block, double decimal, bool useLittleEndian);
 
 
 #endif // DIRECTIVE_H

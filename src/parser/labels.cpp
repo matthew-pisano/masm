@@ -61,6 +61,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                         if (arg.category == TokenCategory::LABEL_REF)
                             arg = {TokenCategory::IMMEDIATE, "0"};
 
+                    // Endianness does not matter here since we only care about the size
                     const std::tuple<std::vector<std::byte>, size_t> alloc =
                             parsePaddedAllocDirective(memSizes[currSection], firstToken, args);
                     // Assign labels to the following byte allocation plus the section offset

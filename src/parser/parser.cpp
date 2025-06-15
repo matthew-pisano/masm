@@ -62,7 +62,8 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             // Resolve label references to their integer values before parsing
             labelMap.resolveLabels(args);
 
-            std::vector<std::byte> directiveBytes = parseAllocDirective(memLoc, firstToken, args);
+            std::vector<std::byte> directiveBytes =
+                    parseAllocDirective(memLoc, firstToken, args, useLittleEndian);
             memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
             break;
         }
@@ -273,7 +274,8 @@ std::vector<std::byte> Parser::parseCP1RegImmInstruction(const uint32_t sub, con
 
 
 std::vector<std::byte> Parser::parseCP1ImmInstruction(const uint32_t op, const uint32_t base,
-                                                      const uint32_t ft, const uint32_t offset) const {
+                                                      const uint32_t ft,
+                                                      const uint32_t offset) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction =
             (op & 0x3F) << 26 | (base & 0x1F) << 21 | (ft & 0x1F) << 16 | (offset & 0xFFFF);
@@ -281,7 +283,8 @@ std::vector<std::byte> Parser::parseCP1ImmInstruction(const uint32_t op, const u
 }
 
 std::vector<std::byte> Parser::parseCP1CondInstruction(const uint32_t fmt, const uint32_t ft,
-                                                       const uint32_t fs, const uint32_t cond) const {
+                                                       const uint32_t fs,
+                                                       const uint32_t cond) const {
     // Combine fields into 32-bit instruction code
     const uint32_t instruction = (0x11 & 0x3F) << 26 | (fmt & 0x1F) << 21 | (ft & 0x1F) << 16 |
                                  (fs & 0x1F) << 11 | (0x00 & 0x07) << 8 | (0x00 & 0x03) << 6 |
