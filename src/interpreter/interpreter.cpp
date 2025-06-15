@@ -23,7 +23,7 @@ void Interpreter::initProgram(const MemLayout& layout) {
     // Initialize the global pointer to the start of the global section
     state.registers[Register::GP] = static_cast<int32_t>(memSectionOffset(MemSection::GLOBAL));
     // Set MMIO output ready bit to 1
-    state.memory[memSectionOffset(MemSection::MMIO) + 8 + 3] = std::byte{1};
+    state.memory._sysWordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
     // Enable interrupts
     // Enable MMIO interrupt bits for keyboard and display
     state.cp0[Coproc0Register::STATUS] |= static_cast<int32_t>(INTERP_CODE::DISPLAY_INTERP) |
@@ -65,9 +65,9 @@ bool Interpreter::readMMIO() {
 
     if (c) {
         // Set the ready bit
-        state.memory[input_ready + 3] = std::byte{1};
+        state.memory._sysWordTo(input_ready, 1);
         // Set the input data byte
-        state.memory[input_data + 3] = static_cast<std::byte>(c);
+        state.memory._sysWordTo(input_data, c);
     }
 
     // Return true if a character was read, false otherwise
@@ -91,9 +91,9 @@ bool Interpreter::writeMMIO() {
     streamHandle.putChar(c);
 
     // Reset ready bit
-    state.memory[output_ready + 3] = std::byte{1};
+    state.memory._sysWordTo(output_ready, 1);
     // Reset data word
-    state.memory[output_data + 3] = std::byte{0};
+    state.memory._sysWordTo(output_data, 0);
 
     return true;
 }

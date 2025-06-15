@@ -20,7 +20,7 @@ TEST_CASE("Test j Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -48,7 +48,7 @@ TEST_CASE("Test jal Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -139,7 +139,7 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -181,7 +181,7 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -221,7 +221,7 @@ TEST_CASE("Test bgtz Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -267,7 +267,7 @@ TEST_CASE("Test bltz Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -313,7 +313,7 @@ TEST_CASE("Test bgez Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
@@ -359,7 +359,7 @@ TEST_CASE("Test blez Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {

@@ -10,11 +10,43 @@
 #include "utils.h"
 
 
-std::byte Memory::memAt(const uint32_t index) const {
+std::byte Memory::_sysByteAt(const uint32_t index) const {
     if (!memory.contains(index))
         // Default of zero if not found
         return static_cast<std::byte>(0);
     return memory.at(index);
+}
+
+
+int32_t Memory::_sysWordAt(const uint32_t index) const {
+    if (useLittleEndian)
+        // If little-endian, read bytes in little endian order
+        return static_cast<int32_t>(_sysByteAt(index + 3)) << 24 |
+               static_cast<int32_t>(_sysByteAt(index + 2)) << 16 |
+               static_cast<int32_t>(_sysByteAt(index + 1)) << 8 |
+               static_cast<int32_t>(_sysByteAt(index));
+
+    // If big-endian, read bytes in big endian order
+    return static_cast<int32_t>(_sysByteAt(index)) << 24 |
+           static_cast<int32_t>(_sysByteAt(index + 1)) << 16 |
+           static_cast<int32_t>(_sysByteAt(index + 2)) << 8 |
+           static_cast<int32_t>(_sysByteAt(index + 3));
+}
+
+
+void Memory::_sysWordTo(const uint32_t index, const int32_t value) {
+    if (useLittleEndian) {
+        // If little-endian, write bytes in little endian order
+        memory[index] = static_cast<std::byte>(value);
+        memory[index + 1] = static_cast<std::byte>(value >> 8);
+        memory[index + 2] = static_cast<std::byte>(value >> 16);
+        memory[index + 3] = static_cast<std::byte>(value >> 24);
+    } else {
+        memory[index] = static_cast<std::byte>(value >> 24);
+        memory[index + 1] = static_cast<std::byte>(value >> 16);
+        memory[index + 2] = static_cast<std::byte>(value >> 8);
+        memory[index + 3] = static_cast<std::byte>(value);
+    }
 }
 
 
@@ -25,7 +57,7 @@ void Memory::readSideEffect(const uint32_t index) {
     // Check if reading from input data word
     if (index >= input_data && index < input_data + 4)
         // Reset input ready bit
-        memory[input_ready + 3] = std::byte{0};
+        _sysWordTo(input_ready, 0);
 }
 
 
@@ -44,7 +76,7 @@ void Memory::writeSideEffect(const uint32_t index) {
     // Check if writing to output data word
     if (index >= output_data && index < output_data + 4)
         // Reset output ready bit
-        memory[output_ready + 3] = std::byte{0};
+        _sysWordTo(output_ready, 0);
 }
 
 
@@ -54,8 +86,7 @@ int32_t Memory::wordAt(const uint32_t index) {
                          EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
-    return static_cast<int32_t>(memAt(index)) << 24 | static_cast<int32_t>(memAt(index + 1)) << 16 |
-           static_cast<int32_t>(memAt(index + 2)) << 8 | static_cast<int32_t>(memAt(index + 3));
+    return _sysWordAt(index);
 }
 
 
@@ -65,13 +96,19 @@ uint16_t Memory::halfAt(const uint32_t index) {
                          EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
-    return static_cast<uint16_t>(memAt(index)) << 8 | static_cast<uint16_t>(memAt(index + 1));
+    if (useLittleEndian)
+        // If little-endian, read bytes in little endian order
+        return static_cast<uint16_t>(_sysByteAt(index + 1)) << 8 |
+               static_cast<uint16_t>(_sysByteAt(index));
+
+    return static_cast<uint16_t>(_sysByteAt(index)) << 8 |
+           static_cast<uint16_t>(_sysByteAt(index + 1));
 }
 
 
 uint8_t Memory::byteAt(const uint32_t index) {
     readSideEffect(index);
-    return static_cast<uint8_t>(memAt(index));
+    return static_cast<uint8_t>(_sysByteAt(index));
 }
 
 
@@ -81,10 +118,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
                          EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
-    memory[index] = static_cast<std::byte>(value >> 24);
-    memory[index + 1] = static_cast<std::byte>(value >> 16);
-    memory[index + 2] = static_cast<std::byte>(value >> 8);
-    memory[index + 3] = static_cast<std::byte>(value);
+    _sysWordTo(index, value);
 }
 
 
@@ -94,8 +128,15 @@ void Memory::halfTo(const uint32_t index, const int16_t value) {
                          EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
-    memory[index] = static_cast<std::byte>(value >> 8);
-    memory[index + 1] = static_cast<std::byte>(value);
+    if (useLittleEndian) {
+        // If little-endian, write bytes in little endian order
+        memory[index] = static_cast<std::byte>(value);
+        memory[index + 1] = static_cast<std::byte>(value >> 8);
+    } else {
+        // If big-endian, write bytes in big endian order
+        memory[index] = static_cast<std::byte>(value >> 8);
+        memory[index + 1] = static_cast<std::byte>(value);
+    }
 }
 
 

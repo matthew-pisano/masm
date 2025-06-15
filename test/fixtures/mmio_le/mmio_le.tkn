@@ -1,0 +1,43 @@
+01data
+04buffer@masm_mangle_file_mmio_le.asm
+02space0832
+01text
+04main@masm_mangle_file_mmio_le.asm
+06la07a009,05buffer@masm_mangle_file_mmio_le.asm
+06li07a109,084
+06jal05getNChar@masm_mangle_file_mmio_le.asm
+06la07a009,05buffer@masm_mangle_file_mmio_le.asm
+06li07a109,084
+06jal05putNChar@masm_mangle_file_mmio_le.asm
+06li07v009,0810
+06syscall
+04getNChar@masm_mangle_file_mmio_le.asm
+06la07t009,084294901764
+06la07t109,084294901760
+06li07t209,080
+04getLoop@masm_mangle_file_mmio_le.asm
+06lb07t309,07t109,080
+06andi07t309,07t309,081
+06beq07t309,07009,05getLoop@masm_mangle_file_mmio_le.asm
+06lb07t409,07t009,080
+06add07t509,07a009,07t2
+06sb07t409,07t509,080
+06addi07t209,07t209,081
+06slt07t509,07t209,07a1
+06bne07t509,07zero09,05getLoop@masm_mangle_file_mmio_le.asm
+06jr07ra
+04putNChar@masm_mangle_file_mmio_le.asm
+06la07t109,084294901768
+06la07t509,084294901772
+06li07t209,080
+04putLoop@masm_mangle_file_mmio_le.asm
+06lb07t309,07t109,080
+06andi07t309,07t309,081
+06beq07t309,07009,05putLoop@masm_mangle_file_mmio_le.asm
+06add07t409,07a009,07t2
+06lbu07t609,07t409,080
+06sb07t609,07t509,080
+06addi07t209,07t209,081
+06slt07t709,07t209,07a1
+06bne07t709,07zero09,05putLoop@masm_mangle_file_mmio_le.asm
+06jr07ra

@@ -19,7 +19,7 @@ TEST_CASE("Test Eret Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x42, 0x00, 0x00, 0x18});
@@ -52,7 +52,7 @@ TEST_CASE("Test Mtc0 Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x40, 0x89, 0x40, 0x00});
@@ -79,7 +79,7 @@ TEST_CASE("Test Mfc0 Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser{};
+    DebugParser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x40, 0x09, 0x40, 0x00});

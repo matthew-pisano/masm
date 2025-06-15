@@ -78,11 +78,17 @@ class Memory {
     std::unordered_map<uint32_t, std::byte> memory;
 
     /**
-     * Gets the byte at the given address or zero if not allocated (without triggering side effects)
+     * Whether to use a little endian memory layout
+     */
+    bool useLittleEndian;
+
+    /**
+     * Gets the byte at the given address or zero if not allocated (without triggering side
+     * effects). Only to be used for privileged reads
      * @param index The address to read from
      * @return The byte stored at the given address or zero if not allocated
      */
-    std::byte memAt(uint32_t index) const;
+    std::byte _sysByteAt(uint32_t index) const;
 
     /**
      * Processes any side effects from reading from an address, such as updating the MMIO ready bit
@@ -97,6 +103,28 @@ class Memory {
     void writeSideEffect(uint32_t index);
 
 public:
+    /**
+     * Constructor for the Memory class
+     * @param useLittleEndian Whether to use little endian memory layout
+     */
+    explicit Memory(const bool useLittleEndian = false) : useLittleEndian(useLittleEndian) {}
+
+    /**
+     * Gets the word stored at the given word-aligned memory address (without triggering side
+     * effects).  Only to be used for privileged reads
+     * @param index The word-aligned address to read from
+     * @return The word stored at the given address
+     */
+    int32_t _sysWordAt(uint32_t index) const;
+
+    /**
+     * Sets the word at the given word-aligned memory address (without triggering side effects).
+     * Only to be used for privileged writes
+     * @param index The word-aligned address to write to
+     * @param value The word to write
+     */
+    void _sysWordTo(uint32_t index, int32_t value);
+
     /**
      * Gets the word stored at the given word-aligned memory address
      * @param index The word-aligned address to read from

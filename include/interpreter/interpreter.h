@@ -73,8 +73,11 @@ protected:
     State state;
 
 public:
-    explicit Interpreter(const IOMode ioMode, StreamHandle& streamHandle) :
+    Interpreter(const IOMode ioMode, StreamHandle& streamHandle) :
         ioMode(ioMode), streamHandle(streamHandle) {}
+
+    Interpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
+        ioMode(ioMode), streamHandle(streamHandle), state(useLittleEndian) {}
 
     /**
      * Initializes the program in the interpreter with the given memory layout

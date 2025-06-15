@@ -19,9 +19,10 @@
  * Validates the memory layout of a parsed file against the loaded, expected memory
  * @param sourceFileNames The name sof the source files to parse
  * @param parsedFileName The name of the parsed file to compare against
+ * @param useLittleEndian Whether to use little-endian byte order
  */
 void validateMemLayout(const std::vector<std::string>& sourceFileNames,
-                       const std::string& parsedFileName) {
+                       const std::string& parsedFileName, const bool useLittleEndian = false) {
     const std::vector<std::byte> parsedBytes = readFileBytes(parsedFileName);
 
     std::vector memSecBytes = {
@@ -48,12 +49,11 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
 
     const std::vector<LineTokens> program = Tokenizer::tokenize(sourceLines);
 
-    Parser parser{};
+    Parser parser(useLittleEndian);
     MemLayout actualMem = parser.parse(program);
     REQUIRE(expectedMem.data.size() == actualMem.data.size());
     for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem.data) {
         REQUIRE(actualMem.data.contains(pair.first));
-
         REQUIRE(pair.second == actualMem.data[pair.first]);
     }
 }
@@ -62,8 +62,9 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
 TEST_CASE("Test Directive Allocation") {
     SECTION("Test Align") {
         std::vector<std::byte> expected = {};
-        std::vector<std::byte> actual = parseAllocDirective(
-                1, Token{TokenCategory::ALLOC_DIRECTIVE, "align"}, {Token{TokenCategory::IMMEDIATE, "0"}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "align"},
+                                    {Token{TokenCategory::IMMEDIATE, "0"}});
         REQUIRE(expected == actual);
 
         expected = intVec2ByteVec({0});
@@ -89,8 +90,9 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Ascii") {
         std::vector<std::byte> expected = {};
-        std::vector<std::byte> actual = parseAllocDirective(
-                1, Token{TokenCategory::ALLOC_DIRECTIVE, "ascii"}, {Token{TokenCategory::STRING, ""}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "ascii"},
+                                    {Token{TokenCategory::STRING, ""}});
         REQUIRE(expected == actual);
 
         expected = intVec2ByteVec({'h', 'e', 'l', 'l', 'o'});
@@ -101,8 +103,9 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Asciiz") {
         std::vector<std::byte> expected = intVec2ByteVec({0});
-        std::vector<std::byte> actual = parseAllocDirective(
-                1, Token{TokenCategory::ALLOC_DIRECTIVE, "asciiz"}, {Token{TokenCategory::STRING, ""}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "asciiz"},
+                                    {Token{TokenCategory::STRING, ""}});
         REQUIRE(expected == actual);
 
         expected = intVec2ByteVec({'h', 'e', 'l', 'l', 'o', 0});
@@ -113,8 +116,9 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Byte") {
         std::vector<std::byte> expected = intVec2ByteVec({69});
-        std::vector<std::byte> actual = parseAllocDirective(
-                1, Token{TokenCategory::ALLOC_DIRECTIVE, "byte"}, {Token{TokenCategory::IMMEDIATE, "69"}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "byte"},
+                                    {Token{TokenCategory::IMMEDIATE, "69"}});
         REQUIRE(expected == actual);
     }
 
@@ -138,15 +142,17 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Half") {
         std::vector<std::byte> expected = intVec2ByteVec({0x00, 0x01, 0xa4});
-        std::vector<std::byte> actual = parseAllocDirective(
-                3, Token{TokenCategory::ALLOC_DIRECTIVE, "half"}, {Token{TokenCategory::IMMEDIATE, "420"}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "half"},
+                                    {Token{TokenCategory::IMMEDIATE, "420"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Space") {
         std::vector<std::byte> expected = intVec2ByteVec({0, 0, 0, 0, 0, 0, 0, 0, 0});
-        std::vector<std::byte> actual = parseAllocDirective(
-                3, Token{TokenCategory::ALLOC_DIRECTIVE, "space"}, {Token{TokenCategory::IMMEDIATE, "9"}});
+        std::vector<std::byte> actual =
+                parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "space"},
+                                    {Token{TokenCategory::IMMEDIATE, "9"}});
         REQUIRE(expected == actual);
     }
 
@@ -165,7 +171,9 @@ TEST_CASE("Test Parser Syntax Errors") {
     SECTION("Test Unknown Label Reference") {
         Parser parser{};
         const std::vector<LineTokens> program = {
-                {"test.asm", 1, {{TokenCategory::INSTRUCTION, "j"}, {TokenCategory::LABEL_REF, "ref"}}}};
+                {"test.asm",
+                 1,
+                 {{TokenCategory::INSTRUCTION, "j"}, {TokenCategory::LABEL_REF, "ref"}}}};
         REQUIRE_THROWS_MATCHES(
                 parser.parse(program), MasmSyntaxError,
                 Catch::Matchers::Message("Syntax error at test.asm:1 -> Unknown label 'ref'"));
@@ -209,7 +217,9 @@ TEST_CASE("Test Word Allocation from Label") {
     const std::vector<LineTokens> program = {
             {"test.asm", 1, {{TokenCategory::SEC_DIRECTIVE, "data"}}},
             {"test.asm", 2, {{TokenCategory::LABEL_DEF, "label"}}},
-            {"test.asm", 2, {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::IMMEDIATE, "0"}}},
+            {"test.asm",
+             2,
+             {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::IMMEDIATE, "0"}}},
             {"test.asm",
              3,
              {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::LABEL_REF, "label"}}}};
@@ -274,6 +284,13 @@ TEST_CASE("Test Parse MMIO Input Output") {
     const std::string test_case = "mmio";
     validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
                       "test/fixtures/" + test_case + "/" + test_case + ".pse");
+}
+
+
+TEST_CASE("Test Parse MMIO Input Output Little Endian") {
+    const std::string test_case = "mmio_le";
+    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "test/fixtures/" + test_case + "/" + test_case + ".pse", true);
 }
 
 

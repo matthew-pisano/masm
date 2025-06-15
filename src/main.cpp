@@ -18,11 +18,14 @@ int main(const int argc, char* argv[]) {
 
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
+    bool useLittleEndian = false;
 
     CLI::App app{version + " - MIPS Interpreter", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
-    app.add_flag("--mmio", useMMIO,
+    app.add_flag("-m,--mmio", useMMIO,
                  "Use memory-mapped I/O instead of system calls for input/output operations");
+    app.add_flag("-l,--little-endian", useLittleEndian,
+                 "Use little-endian byte order for memory layout (default is big-endian)");
     app.set_version_flag("--version", version);
 
     // Set up help message
@@ -49,11 +52,11 @@ int main(const int argc, char* argv[]) {
 
         const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
-        Parser parser{};
+        Parser parser(useLittleEndian);
         const MemLayout layout = parser.parse(program);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        Interpreter interpreter(ioMode, conHandle);
+        Interpreter interpreter(ioMode, conHandle, useLittleEndian);
         exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

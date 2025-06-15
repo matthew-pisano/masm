@@ -104,7 +104,8 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
 }
 
 
-bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens) {
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern,
+                        const std::vector<Token>& tokens) {
     if (pattern.size() != tokens.size())
         return false;
 
@@ -146,6 +147,41 @@ std::vector<std::byte> f64ToBEByte(double f64) {
     const uint64_t i64 = *reinterpret_cast<uint64_t*>(&f64);
     std::vector<std::byte> upperBytes = i32ToBEByte(i64 >> 32 & 0xFFFFFFFF);
     std::vector<std::byte> lowerBytes = i32ToBEByte(i64 & 0xFFFFFFFF);
+    upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
+    return upperBytes;
+}
+
+
+std::vector<std::byte> i32ToLEByte(const uint32_t i32) {
+    // Break the instruction into 4 bytes (little-endian)
+    std::vector<std::byte> bytes(4);
+    bytes[0] = static_cast<std::byte>(i32 & 0xFF); // Least significant byte
+    bytes[1] = static_cast<std::byte>(i32 >> 8 & 0xFF);
+    bytes[2] = static_cast<std::byte>(i32 >> 16 & 0xFF);
+    bytes[3] = static_cast<std::byte>(i32 >> 24 & 0xFF); // Most significant byte
+    return bytes;
+}
+
+
+std::vector<std::byte> i16ToLEByte(const uint16_t i16) {
+    // Break the instruction into 2 bytes (little-endian)
+    std::vector<std::byte> bytes(2);
+    bytes[0] = static_cast<std::byte>(i16 & 0xFF); // Least significant byte
+    bytes[1] = static_cast<std::byte>(i16 >> 8 & 0xFF); // Most significant byte
+    return bytes;
+}
+
+
+std::vector<std::byte> f32ToLEByte(float f32) {
+    const uint32_t i32 = *reinterpret_cast<uint32_t*>(&f32);
+    return i32ToLEByte(i32);
+}
+
+
+std::vector<std::byte> f64ToLEByte(double f64) {
+    const uint64_t i64 = *reinterpret_cast<uint64_t*>(&f64);
+    std::vector<std::byte> upperBytes = i32ToLEByte(i64 >> 32 & 0xFFFFFFFF);
+    std::vector<std::byte> lowerBytes = i32ToLEByte(i64 & 0xFFFFFFFF);
     upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
     return upperBytes;
 }
