@@ -49,7 +49,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     initProgram(layout);
 
     // Set initial breakpoint at start of program
-    breakpoints[0] = state.registers[Register::PC];
+    breakpoints[state.registers[Register::PC]] = 0;
 
     while (true) {
         try {
@@ -60,7 +60,12 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                 bool getCommand = breakpoints.contains(pc) || breakpoints[0] == 0;
 
                 // Clear system breakpoint
-                breakpoints.erase(0);
+                for (const auto& [addr, id] : breakpoints)
+                    if (id == 0) {
+                        // Clear system breakpoint
+                        breakpoints.erase(addr);
+                        break;
+                    }
                 // Get user commands until none are expected
                 while (getCommand) {
                     streamHandle.putStr(prompt);
@@ -96,7 +101,7 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         // Reinitialize program with the current memory layout
         initProgram(layout);
         // Set initial breakpoint at start of program
-        breakpoints[0] = state.registers[Register::PC];
+        breakpoints[state.registers[Register::PC]] = 0;
         return false;
     }
     if (cmd == "help" || cmd == "h") {
@@ -111,7 +116,7 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
     }
     if (cmd == "next" || cmd == "n") {
         // Set breakpoint to be next instruction in sequence, skips over jumps
-        breakpoints[0] = state.registers[Register::PC] + 4;
+        breakpoints[state.registers[Register::PC] + 4] = 0;
         return false;
     }
     if (cmd == "continue" || cmd == "cont" || cmd == "c")
@@ -138,10 +143,10 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
             if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
                 continue; // Skip invalid addresses
             const SourceLocator src = state.getDebugInfo(i);
-            if (i == pc)
-                streamHandle.putStr("--> ");
-            streamHandle.putStr(
-                    std::format("{} (0x{:x}): 0x{:x}\n", src.lineno, i, state.memory.wordAt(i)));
+
+            streamHandle.putStr(i == pc ? "--> " : "    ");
+            streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n", src.lineno, i,
+                                            state.memory.wordAt(i)));
         }
         return true;
     }
@@ -150,12 +155,12 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         const uint32_t fp = state.registers[Register::FP];
         const uint32_t sp = state.registers[Register::SP];
         for (uint32_t i = fp; i <= sp; i -= 4)
-            streamHandle.putStr(std::format("0x{:x}: 0x{:x}\n", i, state.memory.wordAt(i)));
+            streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
         return true;
     }
     if (cmd == "finish") {
         // Execute until the end of the current procedure
-        breakpoints[0] = state.registers[Register::RA];
+        breakpoints[state.registers[Register::RA]] = 0;
         return false;
     }
     if (cmd == "info" || cmd == "i") {
@@ -301,7 +306,7 @@ void DebugInterpreter::examineAddress(const std::string& arg) {
             return;
         }
         const int32_t value = state.memory.wordAt(addr);
-        streamHandle.putStr(std::format("0x{:x}: 0x{:x}\n", addr, value));
+        streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", addr, value));
     } catch (const std::invalid_argument&) {
         streamHandle.putStr("Invalid address format: " + arg + "\n");
     }
