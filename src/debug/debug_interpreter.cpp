@@ -195,6 +195,8 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         // Show information about registers, breakpoints, etc.
         if (args[1] == "breakpoints")
             listBreakpoints();
+        else if (args[1] == "labels")
+            listLabels();
         else if (args[1] == "registers")
             listRegisters();
         else if (args[1] == "cp0")
@@ -361,7 +363,15 @@ void DebugInterpreter::listBreakpoints() {
     }
 }
 
-void DebugInterpreter::listLabels() {}
+void DebugInterpreter::listLabels() {
+    for (const auto& [addr, debugInfo] : state.debugInfo)
+        if (!debugInfo.label.empty() && debugInfo.source) {
+            const SourceLocator src = *debugInfo.source;
+            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", debugInfo.label, addr,
+                                            src.filename, src.lineno));
+        } else if (!debugInfo.label.empty())
+            streamHandle.putStr(std::format("{} -> 0x{:08x}\n", debugInfo.label, addr));
+}
 
 void DebugInterpreter::listRegisters() {
     for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
@@ -434,7 +444,22 @@ void DebugInterpreter::printRegister(const std::string& arg) {
     }
 }
 
-void DebugInterpreter::printLabel(const std::string& arg) {}
+void DebugInterpreter::printLabel(const std::string& arg) {
+    // Check if the label exists in the debug info
+    const auto it = std::ranges::find_if(
+            state.debugInfo, [&arg](const auto& pair) { return pair.second.label == arg; });
+    if (it != state.debugInfo.end()) {
+        const uint32_t addr = it->first;
+        const DebugInfo& debugInfo = it->second;
+        if (debugInfo.source)
+            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", arg, addr,
+                                            debugInfo.source->filename, debugInfo.source->lineno));
+        else
+            streamHandle.putStr(std::format("{} -> 0x{:08x}\n", arg, addr));
+    } else {
+        streamHandle.putStr("Label not found: " + arg + "\n");
+    }
+}
 
 bool DebugInterpreter::validateArguments(const std::string& cmd,
                                          const std::vector<std::string>& args) {
