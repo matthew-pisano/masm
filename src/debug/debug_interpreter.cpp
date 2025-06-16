@@ -37,6 +37,7 @@ const std::string debuggerHelp =
         "next, n - Execute the next instruction, skipping over procedure calls\n"
         "print, p <$register> - Print the value of the specified register\n"
         "print, p <label> - Print the value of the specified label\n"
+        "run, r - Run the program from the beginning until the next breakpoint or end of program\n"
         "step, s - Execute the next instruction\n";
 
 
@@ -64,7 +65,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                 while (getCommand) {
                     streamHandle.putStr(prompt);
                     const std::string cmdStr = readSeq(streamHandle);
-                    getCommand = parseCommand(cmdStr);
+                    getCommand = parseCommand(cmdStr, layout);
                 }
             }
 
@@ -79,7 +80,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
 }
 
 
-bool DebugInterpreter::parseCommand(const std::string& cmdStr) {
+bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& layout) {
     std::vector<std::string> args;
     std::istringstream iss(cmdStr);
     std::string arg;
@@ -87,6 +88,17 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr) {
         args.push_back(arg);
 
     const std::string cmd = args[0];
+    if (cmd == "run" || cmd == "r") {
+        // Clear state
+        state = State(state.memory.isLittleEndian());
+        // Clear Syscall State
+        sysHandle = SystemHandle();
+        // Reinitialize program with the current memory layout
+        initProgram(layout);
+        // Set initial breakpoint at start of program
+        breakpoints[0] = state.registers[Register::PC];
+        return false;
+    }
     if (cmd == "help" || cmd == "h") {
         // Display help message with available commands
         streamHandle.putStr(debuggerHelp);
@@ -188,6 +200,7 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr) {
         throw ExecExit("Exiting debugger", 0);
     }
     streamHandle.putStr("Unknown command: " + cmd + "\n");
+    return true;
 }
 
 void DebugInterpreter::setBreakpoint(const std::string& arg) {

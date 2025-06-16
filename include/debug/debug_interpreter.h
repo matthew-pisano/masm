@@ -31,9 +31,10 @@ class DebugInterpreter final : public Interpreter {
     /**
      * Parses a debug command from th user
      * @param cmdStr The command to parse
+     * @param layout The memory layout to use for the command
      * @return Whether to prompt the user for another command
      */
-    bool parseCommand(const std::string& cmdStr);
+    bool parseCommand(const std::string& cmdStr, const MemLayout& layout);
 
     /**
      * Validates the arguments for a given command
