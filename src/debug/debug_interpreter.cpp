@@ -167,11 +167,13 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
             if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
                 continue; // Skip invalid addresses
-            const SourceLocator src = state.getDebugInfo(i);
 
+            const DebugInfo debugInfo = state.getDebugInfo(i);
+            if (!debugInfo.label.empty())
+                streamHandle.putStr("(" + debugInfo.label + ")\n");
             streamHandle.putStr(i == pc ? "--> " : "    ");
-            streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n", src.lineno, i,
-                                            state.memory.wordAt(i)));
+            streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n",
+                                            debugInfo.source->lineno, i, state.memory.wordAt(i)));
         }
         return true;
     }
@@ -267,7 +269,7 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
         }
     } else {
         const uint32_t pc = state.registers[Register::PC];
-        breakFile = state.getDebugInfo(pc).filename;
+        breakFile = state.getDebugInfo(pc).source->filename;
         try {
             breakLine = std::stoul(arg);
         } catch (const std::invalid_argument&) {
@@ -277,10 +279,10 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
     }
 
     // Find debug info that matches file and line
-    const auto it =
-            std::ranges::find_if(state.debugInfo, [&breakFile, breakLine](const auto& pair) {
-                return pair.second->filename == breakFile && pair.second->lineno == breakLine;
-            });
+    const auto it = std::ranges::find_if(state.debugInfo, [breakFile, breakLine](const auto& pair) {
+        const SourceLocator src = *pair.second.source;
+        return src.filename == breakFile && src.lineno == breakLine;
+    });
     if (it == state.debugInfo.end())
         streamHandle.putStr("Cannot find line " + std::to_string(breakLine) + " in file " +
                             breakFile + "\n");
@@ -353,7 +355,7 @@ void DebugInterpreter::listBreakpoints() {
     for (const auto& [addr, id] : breakpoints) {
         if (id == 0)
             continue; // Skip system breakpoint
-        const SourceLocator src = state.getDebugInfo(addr);
+        const SourceLocator src = *state.getDebugInfo(addr).source;
         streamHandle.putStr(
                 std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
     }

@@ -66,6 +66,7 @@ add_library(masm STATIC
         src/interpreter/cp1.cpp
         src/interpreter/state.cpp
         src/io/streamio.cpp
+        include/debug/debug_info.h
 )
 
 # -fPIC only needed for native Linux builds (not Windows cross-compilation)

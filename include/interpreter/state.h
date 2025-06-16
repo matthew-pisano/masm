@@ -10,6 +10,7 @@
 #include "cp0.h"
 #include "cp1.h"
 #include "cpu.h"
+#include "debug/debug_info.h"
 #include "heap.h"
 
 
@@ -66,16 +67,16 @@ struct State {
     HeapAllocator heapAllocator;
 
     /**
-     * The main memory map between indices and the locators for their source code, used for errors
+     * The main memory map between indices and the debug info for each instruction or data
      */
-    std::map<uint32_t, std::shared_ptr<SourceLocator>> debugInfo;
+    std::map<uint32_t, DebugInfo> debugInfo;
 
     /**
-     * Gets the source line locator for the given executable address
+     * Gets the debug info for the given executable address
      * @param addr The address to get the source line for
-     * @return The source line locator corresponding to the given address
+     * @return The debug info corresponding to the given address
      */
-    SourceLocator getDebugInfo(uint32_t addr) const;
+    DebugInfo getDebugInfo(uint32_t addr) const;
 
     /**
      * Loads a program and initial static data into memory, along with source locators for text

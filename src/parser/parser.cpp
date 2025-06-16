@@ -20,7 +20,6 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
 
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
-    layout.debugInfo[MemSection::TEXT] = {};
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(tokenLines);
 
@@ -48,29 +47,42 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
     const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
+    DebugInfo debugInfo;
     std::vector<std::byte> memBytes;
     switch (firstToken.category) {
         case TokenCategory::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
             // If the section does not exist in the layout, create it
-            if (!layout.data.contains(currSection)) {
+            if (!layout.data.contains(currSection))
                 layout.data[currSection] = {};
-                layout.debugInfo[currSection] = {};
-            }
             break;
         }
         case TokenCategory::ALLOC_DIRECTIVE: {
             // Resolve label references to their integer values before parsing
             labelMap.resolveLabels(args);
 
-            std::vector<std::byte> directiveBytes =
-                    parseAllocDirective(memLoc, firstToken, args, useLittleEndian);
-            memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
+            const std::tuple<std::vector<std::byte>, size_t> alloc =
+                    parsePaddedAllocDirective(memLoc, firstToken, args, useLittleEndian);
+            memBytes.insert(memBytes.end(), std::get<0>(alloc).begin(), std::get<0>(alloc).end());
+            const size_t paddedMemLoc = memLoc + std::get<1>(alloc);
+            try {
+                debugInfo.label = labelMap.lookupLabel(paddedMemLoc);
+            } catch (const std::runtime_error&) {
+            }
+            layout.debugInfo[paddedMemLoc] = debugInfo;
             break;
         }
         case TokenCategory::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
+            const std::shared_ptr<SourceLocator> tokenLinePtr =
+                    std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
+            debugInfo.source = tokenLinePtr;
+            try {
+                debugInfo.label = labelMap.lookupLabel(memLoc);
+            } catch (const std::runtime_error&) {
+            }
+            layout.debugInfo[memLoc] = debugInfo;
             break;
         }
         case TokenCategory::LABEL_DEF:
@@ -84,14 +96,6 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 
     layout.data[currSection].insert(layout.data[currSection].end(), memBytes.begin(),
                                     memBytes.end());
-
-    // If the section is executable, add debug info for the instruction
-    if (isSectionExecutable(currSection)) {
-        const std::shared_ptr<SourceLocator> tokenLinePtr =
-                std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
-        layout.debugInfo[currSection].insert(layout.debugInfo[currSection].end(), memBytes.size(),
-                                             tokenLinePtr);
-    }
 }
 
 

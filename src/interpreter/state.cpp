@@ -39,20 +39,14 @@ std::string causeToString(const uint32_t cause) {
 }
 
 
-SourceLocator State::getDebugInfo(const uint32_t addr) const { return *debugInfo.at(addr); }
+DebugInfo State::getDebugInfo(const uint32_t addr) const { return debugInfo.at(addr); }
 
 
 void State::loadProgram(const MemLayout& layout) {
     for (const std::pair<MemSection, std::vector<std::byte>> pair : layout.data)
         for (size_t i = 0; i < pair.second.size(); i++) {
-            uint32_t memOffset = memSectionOffset(pair.first) + i;
+            const uint32_t memOffset = memSectionOffset(pair.first) + i;
             memory[memOffset] = pair.second[i];
-
-            // Add debug info from layout if the address is executable text
-            if (isSectionExecutable(pair.first)) {
-                const std::shared_ptr<SourceLocator> sourceLine =
-                        layout.debugInfo.at(pair.first).at(i);
-                debugInfo[memOffset] = sourceLine;
-            }
         }
+    debugInfo = layout.debugInfo;
 }

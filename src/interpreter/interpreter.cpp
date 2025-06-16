@@ -108,7 +108,7 @@ void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
     const uint32_t handlerAddress = memSectionOffset(MemSection::KTEXT);
     const int32_t pc = state.registers[Register::PC] - 4;
     if (!state.memory.isValid(handlerAddress)) {
-        const SourceLocator pcSrc = state.getDebugInfo(pc);
+        const SourceLocator pcSrc = *state.getDebugInfo(pc).source;
         const std::string what = std::format("{}: {} (unhandled)", causeToString(cause), excMsg);
         throw MasmRuntimeError(what, pc, pcSrc.filename, pcSrc.lineno);
     }
@@ -139,7 +139,7 @@ void Interpreter::step() {
 
     if (!state.memory.isValid(pc))
         throw ExecExit("Execution terminated (fell off end of program)", -1);
-    const SourceLocator pcSrc = state.getDebugInfo(pc);
+    const SourceLocator pcSrc = *state.getDebugInfo(pc).source;
     if (pc >= TEXT_SEC_END)
         throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
     const int32_t instruction = state.memory.wordAt(pc);
