@@ -134,6 +134,14 @@ public:
      */
     void setDouble(Coproc1Register index, float64_t value);
 
+    /**
+     * Returns the register number associated with a name
+     * @param name The name of a register
+     * @return The associated register number
+     * @throw runtime_error When an invalid register is requested
+     */
+    static int indexFromName(const std::string& name);
+
     int32_t operator[](uint32_t index) const;
     int32_t& operator[](uint32_t index);
 

@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include "exceptions.h"
+#include "interpreter/cp1.h"
 #include "interpreter/cpu.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
@@ -115,9 +116,13 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
                 if (isSignedInteger(arg.value))
                     // If the register is an integer, use it as the register index
                     argCodes.push_back(stoui32(arg.value));
-                else
+                else {
                     // Otherwise, use the register name to get the index
-                    argCodes.push_back(RegisterFile::indexFromName(arg.value));
+                    if (arg.value.starts_with("f"))
+                        argCodes.push_back(Coproc1RegisterFile::indexFromName(arg.value));
+                    else
+                        argCodes.push_back(RegisterFile::indexFromName(arg.value));
+                }
                 break;
             }
             default:

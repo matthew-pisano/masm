@@ -56,6 +56,15 @@ void Coproc1RegisterFile::setDouble(const Coproc1Register index, const float64_t
     setDouble(static_cast<uint32_t>(index), value);
 }
 
+int Coproc1RegisterFile::indexFromName(const std::string& name) {
+    if (name.starts_with("f") && isSignedInteger(name.substr(1)) &&
+        std::stoi(name.substr(1)) >= 0) {
+        // Handle floating point registers ($f0-$f31)
+        return std::stoi(name.substr(1));
+    }
+    throw std::runtime_error("Unknown register " + name);
+}
+
 int32_t Coproc1RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& Coproc1RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
 int32_t Coproc1RegisterFile::operator[](const Coproc1Register index) const {

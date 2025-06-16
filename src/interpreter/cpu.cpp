@@ -23,11 +23,6 @@ std::map<std::string, Register> RegisterFile::nameToIndex = {
 
 
 int RegisterFile::indexFromName(const std::string& name) {
-    if (name.starts_with("f") && isSignedInteger(name.substr(1)) &&
-        std::stoi(name.substr(1)) >= 0) {
-        // Handle floating point registers ($f0-$f31)
-        return std::stoi(name.substr(1));
-    }
     if (!nameToIndex.contains(name))
         throw std::runtime_error("Unknown register " + name);
 

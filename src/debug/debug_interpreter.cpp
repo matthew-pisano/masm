@@ -367,7 +367,41 @@ void DebugInterpreter::listCP0Registers() {}
 
 void DebugInterpreter::listCP1Registers() {}
 
-void DebugInterpreter::printRegister(const std::string& arg) {}
+void DebugInterpreter::printRegister(const std::string& arg) {
+    if (arg.size() > 1 && arg[0] == 'f') {
+        // Co-Processor 1 register
+        try {
+            const size_t index = Coproc1RegisterFile::indexFromName(arg);
+            int32_t value = state.cp1[index];
+            streamHandle.putStr(std::format("$f{}: 0x{:08x}\n", index, value));
+        } catch (const std::exception&) {
+            streamHandle.putStr("Invalid Co-Processor 1 register: " + arg + "\n");
+        }
+    } else if (arg == "8" || arg == "12" || arg == "13" || arg == "14") {
+        // Special Co-Processor 0 registers
+        const size_t index = std::stoi(arg);
+        int32_t value = state.cp0[index];
+        streamHandle.putStr(std::format("${}: 0x{:08x}\n", index, value));
+    } else {
+        // General-purpose register
+        try {
+            size_t index;
+            if (arg == "pc")
+                index = static_cast<size_t>(Register::PC);
+            else if (arg == "hi")
+                index = static_cast<size_t>(Register::HI);
+            else if (arg == "lo")
+                index = static_cast<size_t>(Register::LO);
+            else
+                index = RegisterFile::indexFromName(arg);
+
+            int32_t value = state.registers[index];
+            streamHandle.putStr(std::format("${}: 0x{:08x}\n", arg, value));
+        } catch (const std::exception&) {
+            streamHandle.putStr("Invalid register: " + arg + "\n");
+        }
+    }
+}
 
 void DebugInterpreter::printLabel(const std::string& arg) {}
 
