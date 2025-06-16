@@ -68,7 +68,7 @@ struct State {
     /**
      * The main memory map between indices and the locators for their source code, used for errors
      */
-    std::unordered_map<uint32_t, std::shared_ptr<SourceLocator>> debugInfo;
+    std::map<uint32_t, std::shared_ptr<SourceLocator>> debugInfo;
 
     /**
      * Gets the source line locator for the given executable address

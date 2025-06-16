@@ -57,7 +57,8 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
             if (isInteractive) {
                 uint32_t pc = state.registers[Register::PC];
                 // Always get command if system breakpoint is zero
-                bool getCommand = breakpoints.contains(pc) || breakpoints[0] == 0;
+                bool getCommand = breakpoints.contains(pc) ||
+                                  (breakpoints.contains(0) && breakpoints[0] == 0);
 
                 // Clear system breakpoint
                 for (const auto& [addr, id] : breakpoints)
@@ -102,7 +103,7 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         initProgram(layout);
         // Set initial breakpoint at start of program
         breakpoints[state.registers[Register::PC]] = 0;
-        return false;
+        return true;
     }
     if (cmd == "help" || cmd == "h") {
         // Display help message with available commands
@@ -269,11 +270,12 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
 void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
     // Delete breakpoints
     if (arg.empty()) {
-        for (const auto& [addr, id] : breakpoints) {
-            // Do not delete the system breakpoint
-            if (id == 0)
-                continue;
-            breakpoints.erase(addr);
+        std::vector<uint32_t> breakAddrs;
+        for (auto it = breakpoints.begin(); it != breakpoints.end();) {
+            if (it->second == 0)
+                ++it;
+            else
+                it = breakpoints.erase(it);
         }
         return;
     }
