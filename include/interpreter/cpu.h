@@ -83,6 +83,9 @@ enum class Register {
 };
 
 
+constexpr size_t NUM_CPU_REGISTERS = static_cast<size_t>(Register::LO) + 1;
+
+
 /**
  * Class representing the state and labels of registers
  */
@@ -90,7 +93,7 @@ class RegisterFile {
     /**
      * A mapping between register numbers and values stored in the 32 registers + PC, HI, and LO
      */
-    std::array<int32_t, 35> registers = {};
+    std::array<int32_t, NUM_CPU_REGISTERS> registers = {};
 
     /**
      * A mapping between the common names of registers and their register numbers
@@ -105,6 +108,13 @@ public:
      * @throw runtime_error When an invalid register is requested
      */
     static int indexFromName(const std::string& name);
+
+    /**
+     * Returns the name of a register from its index
+     * @param index The index of the register
+     * @return The name of the register
+     */
+    static std::string nameFromIndex(uint32_t index);
 
     int32_t operator[](uint32_t index) const;
     int32_t& operator[](uint32_t index);

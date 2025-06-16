@@ -65,6 +65,13 @@ int Coproc1RegisterFile::indexFromName(const std::string& name) {
     throw std::runtime_error("Unknown register " + name);
 }
 
+std::string Coproc1RegisterFile::nameFromIndex(const uint32_t index) {
+    if (index >= NUM_CP1_REGISTERS)
+        throw std::runtime_error("Invalid register index: " + std::to_string(index));
+
+    return "f" + std::to_string(index);
+}
+
 int32_t Coproc1RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& Coproc1RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
 int32_t Coproc1RegisterFile::operator[](const Coproc1Register index) const {

@@ -30,6 +30,25 @@ int RegisterFile::indexFromName(const std::string& name) {
 }
 
 
+std::string RegisterFile::nameFromIndex(const uint32_t index) {
+    if (index >= NUM_CPU_REGISTERS)
+        throw std::runtime_error("Invalid register index: " + std::to_string(index));
+
+    for (const auto& pair : nameToIndex)
+        if (static_cast<uint32_t>(pair.second) == index)
+            return pair.first;
+
+    if (index == static_cast<uint32_t>(Register::PC))
+        return "pc";
+    if (index == static_cast<uint32_t>(Register::HI))
+        return "hi";
+    if (index == static_cast<uint32_t>(Register::LO))
+        return "lo";
+
+    throw std::runtime_error("Invalid register index: " + std::to_string(index));
+}
+
+
 // Core register access
 int32_t RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& RegisterFile::operator[](const uint32_t index) { return registers.at(index); }

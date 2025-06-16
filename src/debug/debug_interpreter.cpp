@@ -361,11 +361,40 @@ void DebugInterpreter::listBreakpoints() {
 
 void DebugInterpreter::listLabels() {}
 
-void DebugInterpreter::listRegisters() {}
+void DebugInterpreter::listRegisters() {
+    for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
+        const int32_t value = state.registers[i];
+        streamHandle.putStr(
+                std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
+    }
+}
 
-void DebugInterpreter::listCP0Registers() {}
+void DebugInterpreter::listCP0Registers() {
+    const int32_t vaddrValue = state.cp0[Coproc0Register::VADDR];
+    streamHandle.putStr(std::format("$8  : 0x{:08x}\n", vaddrValue));
+    const int32_t statusValue = state.cp0[Coproc0Register::STATUS];
+    streamHandle.putStr(std::format("$12 : 0x{:08x}\n", statusValue));
+    const int32_t causeValue = state.cp0[Coproc0Register::CAUSE];
+    streamHandle.putStr(std::format("$13 : 0x{:08x}\n", causeValue));
+    const int32_t epcValue = state.cp0[Coproc0Register::EPC];
+    streamHandle.putStr(std::format("$14 : 0x{:08x}\n", epcValue));
+}
 
-void DebugInterpreter::listCP1Registers() {}
+void DebugInterpreter::listCP1Registers() {
+    for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
+        const int32_t value = state.cp1[i];
+        const float32_t floatValue = state.cp1.getFloat(i);
+        if (i % 2 == 0) {
+            const float64_t doubleValue = state.cp1.getDouble(i);
+            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
+                                            Coproc1RegisterFile::nameFromIndex(i), value,
+                                            floatValue, doubleValue));
+        } else
+            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n",
+                                            Coproc1RegisterFile::nameFromIndex(i), value,
+                                            floatValue));
+    }
+}
 
 void DebugInterpreter::printRegister(const std::string& arg) {
     if (arg.size() > 1 && arg[0] == 'f') {
@@ -398,7 +427,7 @@ void DebugInterpreter::printRegister(const std::string& arg) {
             int32_t value = state.registers[index];
             streamHandle.putStr(std::format("${}: 0x{:08x}\n", arg, value));
         } catch (const std::exception&) {
-            streamHandle.putStr("Invalid register: " + arg + "\n");
+            streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)\n");
         }
     }
 }
