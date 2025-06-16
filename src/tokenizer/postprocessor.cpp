@@ -12,6 +12,28 @@
 #include "utils.h"
 
 
+std::string mangleLabel(const std::string& label, const std::string& filename) {
+    return std::format("{}@masm_mangle_file_{}", label, filename);
+}
+
+
+std::string mangleMacroLabel(const std::string& label, const std::string& filename,
+                             const std::string& macroname, size_t pos) {
+    return std::format("{}@masm_mangle_file_{}:{}:{}", label, filename, macroname, pos);
+}
+
+
+std::string unmangleLabel(const std::string& mangledLabel) {
+    // Find the last '@' in the mangled label
+    const size_t atPos = mangledLabel.find_last_of('@');
+    if (atPos == std::string::npos)
+        return mangledLabel; // No mangling found, return original label
+
+    // Return the label part before the '@'
+    return mangledLabel.substr(0, atPos);
+}
+
+
 void Postprocessor::mangleLabels(std::map<std::string, std::vector<LineTokens>>& programMap) {
     // Stores globals that have not yet been matched to declarations
     std::vector<std::pair<std::string, LineTokens>> globals;
@@ -56,7 +78,8 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
                                               LineTokens& lineTokens, const std::string& fileId) {
     std::string lineDeclaration;
     for (Token& lineToken : lineTokens.tokens) {
-        if (lineToken.category != TokenCategory::LABEL_DEF && lineToken.category != TokenCategory::LABEL_REF)
+        if (lineToken.category != TokenCategory::LABEL_DEF &&
+            lineToken.category != TokenCategory::LABEL_REF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
@@ -65,7 +88,7 @@ std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
 
         // If the label is not a global, mangle it
         if (std::ranges::find(globals, lineToken.value) == globals.end())
-            lineToken.value = lineToken.value + "@" + fileId;
+            lineToken.value = mangleLabel(lineToken.value, fileId);
     }
 
     return lineDeclaration;
@@ -184,14 +207,14 @@ std::vector<Token> Postprocessor::parseMacroParams(const LineTokens& line) {
 Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const size_t pos) {
     Macro mangledMacro(macro);
     std::vector<Token> macroLabelDefs;
-    const std::string posStr = std::to_string(pos);
 
     // Gather and mangle label definitions first
     for (LineTokens& bodyLine : mangledMacro.body)
         for (Token& bodyToken : bodyLine.tokens)
             if (bodyToken.category == TokenCategory::LABEL_DEF) {
                 macroLabelDefs.emplace_back(TokenCategory::LABEL_REF, bodyToken.value);
-                bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
+                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename,
+                                                   mangledMacro.name, pos);
             }
 
     // Next mangle label references
@@ -203,7 +226,8 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
                 if (it == macroLabelDefs.end())
                     continue;
 
-                bodyToken.value = bodyToken.value + "@" + mangledMacro.name + "_" + posStr;
+                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename,
+                                                   mangledMacro.name, pos);
             }
 
     return mangledMacro;
@@ -254,12 +278,13 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
         // If the line is a macro declaration
-        if (line.tokens[0].category == TokenCategory::META_DIRECTIVE && line.tokens[0].value == "macro") {
+        if (line.tokens[0].category == TokenCategory::META_DIRECTIVE &&
+            line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].category != TokenCategory::LABEL_REF)
                 throw MasmSyntaxError("Invalid macro declaration", line.filename, line.lineno);
 
-            Macro macro = {line.tokens[1].value, {}, {}};
+            Macro macro = {line.tokens[1].value, {}, {}, line.filename};
             // If the macro has parameters, parse them
             macro.params = parseMacroParams(line);
             // Process the macro body until the end_macro directive

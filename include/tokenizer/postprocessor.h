@@ -12,6 +12,35 @@
 
 
 /**
+ * Mangles a label by adding the file ID to it, ensuring that labels are unique across files.
+ * @param label The label to mangle
+ * @param filename The name of the file the label is in, used to create a unique identifier
+ * @return The mangled label
+ */
+std::string mangleLabel(const std::string& label, const std::string& filename);
+
+
+/**
+ * Mangles a label within a macro by adding the filename, macro name, and macro location to it
+ * @param label The label to mangle
+ * @param filename The name of the file the label is in
+ * @param macroname The name of the macro the label is in
+ * @param pos The position of the macro in the file
+ * @return The mangled label
+ */
+std::string mangleMacroLabel(const std::string& label, const std::string& filename,
+                             const std::string& macroname, size_t pos);
+
+
+/**
+ * Unmangles a label by removing the file ID from it, restoring the original label name.
+ * @param mangledLabel The mangled label to unmangle
+ * @return The unmangled label
+ */
+std::string unmangleLabel(const std::string& mangledLabel);
+
+
+/**
  * A class that post-processes a tokenized file to perform various transformations like managing
  * global definitions and defining/expanding macros
  */
@@ -60,6 +89,11 @@ class Postprocessor {
          * The original line of tokens that declared the macro
          */
         std::vector<LineTokens> body;
+
+        /**
+         * The filename the macro was defined in
+         */
+        std::string filename;
     };
 
     /**

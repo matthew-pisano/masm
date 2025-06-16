@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "exceptions.h"
+#include "tokenizer/postprocessor.h"
 
 /**
  * The prompt string for the debugger, displayed before each command input
@@ -170,7 +171,7 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
 
             const DebugInfo debugInfo = state.getDebugInfo(i);
             if (!debugInfo.label.empty())
-                streamHandle.putStr("(" + debugInfo.label + ")\n");
+                streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
             streamHandle.putStr(i == pc ? "--> " : "    ");
             streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n",
                                             debugInfo.source->lineno, i, state.memory.wordAt(i)));
@@ -367,10 +368,12 @@ void DebugInterpreter::listLabels() {
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty() && debugInfo.source) {
             const SourceLocator src = *debugInfo.source;
-            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", debugInfo.label, addr,
-                                            src.filename, src.lineno));
+            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
+                                            unmangleLabel(debugInfo.label), addr, src.filename,
+                                            src.lineno));
         } else if (!debugInfo.label.empty())
-            streamHandle.putStr(std::format("{} -> 0x{:08x}\n", debugInfo.label, addr));
+            streamHandle.putStr(
+                    std::format("{} -> 0x{:08x}\n", unmangleLabel(debugInfo.label), addr));
 }
 
 void DebugInterpreter::listRegisters() {
@@ -446,8 +449,9 @@ void DebugInterpreter::printRegister(const std::string& arg) {
 
 void DebugInterpreter::printLabel(const std::string& arg) {
     // Check if the label exists in the debug info
-    const auto it = std::ranges::find_if(
-            state.debugInfo, [&arg](const auto& pair) { return pair.second.label == arg; });
+    const auto it = std::ranges::find_if(state.debugInfo, [&arg](const auto& pair) {
+        return unmangleLabel(pair.second.label) == arg;
+    });
     if (it != state.debugInfo.end()) {
         const uint32_t addr = it->first;
         const DebugInfo& debugInfo = it->second;
