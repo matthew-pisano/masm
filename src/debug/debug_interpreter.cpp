@@ -42,6 +42,24 @@ const std::string debuggerHelp =
         "step, s - Execute the next instruction\n";
 
 
+/**
+ * Converts a word into a 4 character string by translating the bytes
+ * @param word The word to convert
+ * @return A string representation of the word, with each byte represented as a character
+ */
+std::string wordAsString(const uint32_t word) {
+    std::string result;
+    for (int i = 0; i < 4; ++i) {
+        const char c = static_cast<char>(word >> (i * 8) & 0xFF);
+        if (c >= 32 && c < 127)
+            result += c;
+        else
+            result += '.';
+    }
+    return result;
+}
+
+
 State& DebugInterpreter::getState() { return state; }
 
 void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = interactive; }
@@ -315,7 +333,8 @@ void DebugInterpreter::examineAddress(const std::string& arg) {
             return;
         }
         const int32_t value = state.memory.wordAt(addr);
-        streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", addr, value));
+        streamHandle.putStr(
+                std::format("0x{:08x}: 0x{:08x} ({})\n", addr, value, wordAsString(value)));
     } catch (const std::invalid_argument&) {
         streamHandle.putStr("Invalid address format: " + arg + "\n");
     }
