@@ -5,34 +5,11 @@
 #include "interpreter/syscalls.h"
 
 #include <chrono>
-#include <iostream>
-#include <ostream>
 #include <unistd.h>
 
 #include "exceptions.h"
 #include "interpreter/cpu.h"
 #include "io/consoleio.h"
-
-
-/**
- * Reads a sequence of characters from the input stream until a newline character is encountered.
- * @param streamHandle The stream handle to read from
- * @return A string containing the characters read from the input stream
- */
-std::string readSeq(StreamHandle& streamHandle) {
-    std::string input;
-    while (true) {
-        const char c = streamHandle.getCharBlocking();
-        if (c == '\n')
-            break;
-
-        if (c != '\b')
-            input += c;
-        else if (!input.empty())
-            input.pop_back(); // Handle backspace
-    }
-    return input;
-}
 
 
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {

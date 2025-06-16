@@ -147,6 +147,8 @@ void Memory::byteTo(const uint32_t index, const int8_t value) {
 
 bool Memory::isValid(const uint32_t index) const { return memory.contains(index); }
 
+bool Memory::isLittleEndian() const { return useLittleEndian; }
+
 
 std::byte Memory::operator[](const uint32_t index) const { return memory.at(index); }
 std::byte& Memory::operator[](const uint32_t index) { return memory[index]; }

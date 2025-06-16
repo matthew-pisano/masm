@@ -14,6 +14,12 @@
 
 
 void Interpreter::initProgram(const MemLayout& layout) {
+    // Clear state
+    state = State(state.memory.isLittleEndian());
+    // Clear Syscall State
+    sysHandle = SystemHandle();
+
+    // Load the program into memory
     state.loadProgram(layout);
     // Initialize PC to the start of the text section
     state.registers[Register::PC] = static_cast<int32_t>(memSectionOffset(MemSection::TEXT));

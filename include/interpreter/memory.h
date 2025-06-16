@@ -174,6 +174,12 @@ public:
      */
     bool isValid(uint32_t index) const;
 
+    /**
+     * Checks if the memory is using little-endian byte order
+     * @return True if the memory is little-endian, false if it is big-endian
+     */
+    bool isLittleEndian() const;
+
     std::byte operator[](uint32_t index) const;
     std::byte& operator[](uint32_t index);
 };

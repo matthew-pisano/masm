@@ -6,6 +6,7 @@
 #define STREAMIO_H
 #include <iostream>
 
+
 class StreamHandle {
 protected:
     /**
