@@ -17,6 +17,12 @@ class DebugInterpreter final : public Interpreter {
     bool isInteractive = false;
 
     /**
+     * The ID of the next breakpoint to be set.  This is used to ensure that each breakpoint has a
+     * unique ID
+     */
+    size_t nextBreakpoint = 1;
+
+    /**
      * A map of breakpoints, where the key is the instruction address and the value is the
      * breakpoint ID
      */
@@ -24,10 +30,68 @@ class DebugInterpreter final : public Interpreter {
 
     /**
      * Parses a debug command from th user
-     * @param cmd The command to parse
+     * @param cmdStr The command to parse
      * @return Whether to prompt the user for another command
      */
-    bool parseCommand(std::string cmd);
+    bool parseCommand(const std::string& cmdStr);
+
+    /**
+     * Validates the arguments for a given command
+     * @param cmd The command to validate arguments for
+     * @param args The arguments to validate
+     * @return True if the arguments are valid, false otherwise
+     */
+    bool validateArguments(const std::string& cmd, const std::vector<std::string>& args);
+
+    /**
+     * Sets a breakpoint at the given address or source location
+     * @param arg
+     */
+    void setBreakpoint(const std::string& arg);
+
+    /**
+     * Deletes a breakpoint by its ID
+     * @param arg The ID of the breakpoint to delete, or an empty string to delete all breakpoints
+     */
+    void deleteBreakpoint(const std::string& arg);
+
+    /**
+     * Lists all breakpoints currently set in the interpreter
+     */
+    void listBreakpoints();
+
+    /**
+     * Lists all registers in the interpreter, including general-purpose and special-purpose
+     */
+    void listRegisters();
+
+    /**
+     * Lists all Co-Processor 0 registers
+     */
+    void listCP0Registers();
+
+    /**
+     * Lists all Co-Processor 1 registers
+     */
+    void listCP1Registers();
+
+    /**
+     * Examines the memory at the specified address and prints its value
+     * @param arg The address to examine, in hex format (0x...)
+     */
+    void examineAddress(const std::string& arg);
+
+    /**
+     * Prints the value of a register
+     * @param arg The name of the register to print
+     */
+    void printRegister(const std::string& arg);
+
+    /**
+     * Prints the value of a label in the program
+     * @param arg The name of the label to print
+     */
+    void printLabel(const std::string& arg);
 
 public:
     /**
