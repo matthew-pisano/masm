@@ -286,9 +286,13 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
                             breakFile + "\n");
     else {
         const uint32_t addr = it->first;
-        // Set breakpoint at the found address
-        breakpoints[addr] = nextBreakpoint;
-        nextBreakpoint++;
+        if (!breakpoints.contains(addr)) {
+            // Set breakpoint at the found address
+            breakpoints[addr] = nextBreakpoint;
+            nextBreakpoint++;
+        } else
+            streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n",
+                                            breakpoints[addr], addr));
     }
 }
 
@@ -340,7 +344,20 @@ void DebugInterpreter::examineAddress(const std::string& arg) {
     }
 }
 
-void DebugInterpreter::listBreakpoints() {}
+void DebugInterpreter::listBreakpoints() {
+    if (breakpoints.empty()) {
+        streamHandle.putStr("No breakpoints set.\n");
+        return;
+    }
+
+    for (const auto& [addr, id] : breakpoints) {
+        if (id == 0)
+            continue; // Skip system breakpoint
+        const SourceLocator src = state.getDebugInfo(addr);
+        streamHandle.putStr(
+                std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
+    }
+}
 
 void DebugInterpreter::listLabels() {}
 
