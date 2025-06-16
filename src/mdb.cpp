@@ -14,8 +14,8 @@
 
 int main(const int argc, char* argv[]) {
     std::string name = "mdb";
-    std::string _computedVersionString(Version::VERSION);
-    std::string version = name + " " + _computedVersionString;
+    const std::string _computedVersionString(Version::VERSION);
+    const std::string version = name + " " + _computedVersionString;
 
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
@@ -58,6 +58,7 @@ int main(const int argc, char* argv[]) {
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
         DebugInterpreter interpreter(ioMode, conHandle, useLittleEndian);
+        interpreter.setInteractive(true);
         exitCode = interpreter.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
