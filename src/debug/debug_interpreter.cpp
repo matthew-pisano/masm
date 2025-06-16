@@ -30,6 +30,7 @@ const std::string debuggerHelp =
         "frame, f - Show the current stack frame\n"
         "help, h - Show this help message\n"
         "info, i breakpoints - List all breakpoints\n"
+        "info, i labels - List all labels\n"
         "info, i registers - List all registers and their values\n"
         "info, i cp0 - List all Co-Processor 0 registers and their values\n"
         "info, i cp1 - List all Co-Processor 1 registers and their values\n"
@@ -59,14 +60,19 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                 // Always get command if system breakpoint is zero
                 bool getCommand = breakpoints.contains(pc) ||
                                   (breakpoints.contains(0) && breakpoints[0] == 0);
+                // If execution has reached the system breakpoint
+                const bool atSystemBreakpoint =
+                        (breakpoints.contains(pc) && breakpoints[pc] == 0) ||
+                        (breakpoints.contains(0) && breakpoints[0] == 0);
 
-                // Clear system breakpoint
-                for (const auto& [addr, id] : breakpoints)
-                    if (id == 0) {
-                        // Clear system breakpoint
-                        breakpoints.erase(addr);
-                        break;
-                    }
+                if (atSystemBreakpoint)
+                    // Clear system breakpoint
+                    for (const auto& [addr, id] : breakpoints)
+                        if (id == 0) {
+                            // Clear system breakpoint
+                            breakpoints.erase(addr);
+                            break;
+                        }
                 // Get user commands until none are expected
                 while (getCommand) {
                     streamHandle.putStr(prompt);
@@ -155,13 +161,14 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         // Show current stack frame
         const uint32_t fp = state.registers[Register::FP];
         const uint32_t sp = state.registers[Register::SP];
-        for (uint32_t i = fp; i <= sp; i -= 4)
+        for (uint32_t i = fp; i >= sp; i -= 4)
             streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
         return true;
     }
     if (cmd == "finish") {
         // Execute until the end of the current procedure
-        breakpoints[state.registers[Register::RA]] = 0;
+        if (state.registers[Register::RA] != 0)
+            breakpoints[state.registers[Register::RA]] = 0;
         return false;
     }
     if (cmd == "info" || cmd == "i") {
@@ -315,6 +322,8 @@ void DebugInterpreter::examineAddress(const std::string& arg) {
 }
 
 void DebugInterpreter::listBreakpoints() {}
+
+void DebugInterpreter::listLabels() {}
 
 void DebugInterpreter::listRegisters() {}
 

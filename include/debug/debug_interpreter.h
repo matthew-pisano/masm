@@ -62,6 +62,11 @@ class DebugInterpreter final : public Interpreter {
     void listBreakpoints();
 
     /**
+     * Lists all labels in the program, including their addresses and names
+     */
+    void listLabels();
+
+    /**
      * Lists all registers in the interpreter, including general-purpose and special-purpose
      */
     void listRegisters();
