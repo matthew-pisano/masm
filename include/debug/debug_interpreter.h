@@ -6,6 +6,34 @@
 #define DEBUG_INTERPRETER_H
 #include "interpreter/interpreter.h"
 
+
+enum class DebugCommand {
+    BREAK,
+    CONTINUE,
+    DELETE,
+    EXAMINE,
+    EXIT,
+    FINISH,
+    FRAME,
+    HELP,
+    INFO,
+    LIST,
+    NEXT,
+    PRINT,
+    RUN,
+    STEP
+};
+
+
+/**
+ * Converts a string representation of a debug command into a DebugCommand enum value
+ * @param cmd The command string to convert, e.g. "break", "continue", etc.
+ * @return The corresponding DebugCommand enum value
+ * @throw invalid_argument if the command string is not recognized
+ */
+DebugCommand debugCmdFromStr(const std::string& cmd);
+
+
 /**
  * Utility class that allows tests to access the internal state of an interpreter
  */

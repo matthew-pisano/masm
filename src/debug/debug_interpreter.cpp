@@ -61,6 +61,39 @@ std::string wordAsString(const uint32_t word) {
 }
 
 
+DebugCommand debugCmdFromStr(const std::string& cmd) {
+    if (cmd == "break" || cmd == "b")
+        return DebugCommand::BREAK;
+    if (cmd == "continue" || cmd == "cont" || cmd == "c")
+        return DebugCommand::CONTINUE;
+    if (cmd == "delete" || cmd == "d")
+        return DebugCommand::DELETE;
+    if (cmd == "examine" || cmd == "x")
+        return DebugCommand::EXAMINE;
+    if (cmd == "exit" || cmd == "quit" || cmd == "q")
+        return DebugCommand::EXIT;
+    if (cmd == "finish")
+        return DebugCommand::FINISH;
+    if (cmd == "frame" || cmd == "f")
+        return DebugCommand::FRAME;
+    if (cmd == "help" || cmd == "h")
+        return DebugCommand::HELP;
+    if (cmd == "info" || cmd == "i")
+        return DebugCommand::INFO;
+    if (cmd == "list" || cmd == "ls" || cmd == "l")
+        return DebugCommand::LIST;
+    if (cmd == "next" || cmd == "n")
+        return DebugCommand::NEXT;
+    if (cmd == "print" || cmd == "p")
+        return DebugCommand::PRINT;
+    if (cmd == "run" || cmd == "r")
+        return DebugCommand::RUN;
+    if (cmd == "step" || cmd == "s")
+        return DebugCommand::STEP;
+    throw std::invalid_argument("Unknown debug command: " + cmd);
+}
+
+
 State& DebugInterpreter::getState() { return state; }
 
 void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = interactive; }
