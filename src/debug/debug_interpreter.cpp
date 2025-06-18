@@ -4,6 +4,7 @@
 
 #include "debug/debug_interpreter.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include "exceptions.h"

@@ -4,6 +4,7 @@
 
 #include "parser/instruction.h"
 
+#include <algorithm>
 #include <map>
 #include <stdexcept>
 

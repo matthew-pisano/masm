@@ -4,6 +4,8 @@
 
 #include "utils.h"
 
+#include <algorithm>
+#include <sstream>
 #include <filesystem>
 #include <regex>
 

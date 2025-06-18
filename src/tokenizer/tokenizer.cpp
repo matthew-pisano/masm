@@ -8,6 +8,8 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <sstream>
 
 #include "exceptions.h"
 #include "parser/directive.h"
