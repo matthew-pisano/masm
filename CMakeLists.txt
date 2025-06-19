@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 
 # Function to extract value from JSON
@@ -135,7 +136,13 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     ## Unit Tests ##
 
-    find_package(Catch2 3 REQUIRED)
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG        v3.8.1 # or a later release
+    )
+    FetchContent_MakeAvailable(Catch2)
+
     add_executable(masm-tests
             src/debug/debug_interpreter.cpp
             src/io/fileio.cpp
@@ -158,6 +165,8 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     include(CTest)
     include(Catch)
-    catch_discover_tests(masm-tests)
+    catch_discover_tests(masm-tests
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
 
 endif ()
