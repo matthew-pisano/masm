@@ -110,12 +110,12 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
             streamHandle.putStr(std::format("\n{}", e.what()));
             return e.code();
         } catch (MasmRuntimeError& e) {
-            if (isInteractive) {
-                streamHandle.putStr(std::format("\n{}", e.what()));
-                isRunning = false;
-                // Decrement PC to offending instruction
-                state.registers[Register::PC] -= 4;
-            }
+            if (!isInteractive)
+                throw;
+            streamHandle.putStr(std::format("\n{}", e.what()));
+            isRunning = false;
+            // Decrement PC to offending instruction
+            state.registers[Register::PC] -= 4;
         } catch (ExecExit& e) {
             streamHandle.putStr(std::format("\n{}", e.what()));
             isRunning = false;
@@ -575,7 +575,6 @@ void DebugInterpreter::printLabel(const std::string& arg) {
                                             debugInfo.source->filename, debugInfo.source->lineno));
         else
             streamHandle.putStr(std::format("{} -> 0x{:08x}\n", arg, addr));
-    } else {
+    } else
         streamHandle.putStr("Label not found: " + arg + "\n");
-    }
 }
