@@ -12,6 +12,7 @@
 #include "interpreter/cpu.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
+#include "tokenizer/postprocessor.h"
 #include "utils.h"
 
 
@@ -83,10 +84,26 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             } catch (const std::runtime_error&) {
             }
 
+            // Add the source code text the debug info
+            for (const Token& token : tokenLine.tokens) {
+                if (token.category == TokenCategory::SEPERATOR)
+                    debugInfo.source->text += token.value;
+                else if (token.category == TokenCategory::REGISTER)
+                    debugInfo.source->text += " $" + token.value;
+                else if (token.category != TokenCategory::LABEL_REF)
+                    debugInfo.source->text += " " + token.value;
+                else
+                    debugInfo.source->text += " " + unmangleLabel(token.value);
+            }
+
             // Assign debug info to all allocated instructions (including multi-instruction
             // pseudo-instructions)
-            for (int i = 0; i < instrBytes.size(); i += 4)
+            for (int i = 0; i < instrBytes.size(); i += 4) {
                 layout.debugInfo[memLoc + i] = debugInfo;
+                // Only label the first instruction in a pseudo-instruction
+                if (i > 0)
+                    layout.debugInfo[memLoc + i].label = "";
+            }
             break;
         }
         case TokenCategory::LABEL_DEF:

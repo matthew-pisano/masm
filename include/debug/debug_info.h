@@ -14,6 +14,7 @@
 struct SourceLocator {
     std::string filename;
     size_t lineno;
+    std::string text;
 };
 
 
