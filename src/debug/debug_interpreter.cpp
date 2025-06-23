@@ -324,9 +324,9 @@ void DebugInterpreter::listLines() {
         if (!debugInfo.label.empty())
             streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
         streamHandle.putStr(i == pc ? "--> " : "    ");
-        streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}    {}\n",
-                                        debugInfo.source->lineno, i, state.memory.wordAt(i),
-                                        debugInfo.source->text));
+        streamHandle.putStr(
+                std::format("{:<6} (0x{:08x}): 0x{:08x}    {}\n", debugInfo.source->lineno, i,
+                            static_cast<uint32_t>(state.memory.wordAt(i)), debugInfo.source->text));
     }
 }
 
