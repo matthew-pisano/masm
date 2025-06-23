@@ -68,7 +68,6 @@ void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = 
 
 int DebugInterpreter::interpret(const MemLayout& layout) {
     initProgram(layout);
-
     // Set initial breakpoint at start of program
     breakpoints[state.registers[Register::PC]] = 0;
 
@@ -216,14 +215,8 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
 
     switch (cmd) {
         case DebugCommand::RUN: {
-            // Clear state
-            state = State(state.memory.isLittleEndian());
-            // Clear Syscall State
-            sysHandle = SystemHandle();
-            // Reinitialize program with the current memory layout
-            initProgram(layout);
-            // Set initial breakpoint at start of program
-            breakpoints[state.registers[Register::PC]] = 0;
+            // Reset the interpreter and run the program from the beginning
+            resetInterpreter(layout);
             return true;
         }
         case DebugCommand::HELP: {
@@ -257,27 +250,12 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
         }
         case DebugCommand::LIST: {
             // List surrounding lines of code
-            const uint32_t pc = state.registers[Register::PC];
-            for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
-                if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
-                    continue; // Skip invalid addresses
-
-                const DebugInfo debugInfo = state.getDebugInfo(i);
-                if (!debugInfo.label.empty())
-                    streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
-                streamHandle.putStr(i == pc ? "--> " : "    ");
-                streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n",
-                                                debugInfo.source->lineno, i,
-                                                state.memory.wordAt(i)));
-            }
+            listLines();
             return true;
         }
         case DebugCommand::FRAME: {
             // Show current stack frame
-            const uint32_t fp = state.registers[Register::FP];
-            const uint32_t sp = state.registers[Register::SP];
-            for (uint32_t i = fp; i >= sp; i -= 4)
-                streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
+            getFrame();
             return true;
         }
         case DebugCommand::FINISH: {
@@ -323,6 +301,39 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
     }
     // Should never be reached
     return false;
+}
+
+void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
+    // Clear state
+    state = State(state.memory.isLittleEndian());
+    // Clear Syscall State
+    sysHandle = SystemHandle();
+    // Reinitialize program with the current memory layout
+    initProgram(layout);
+    // Set initial breakpoint at start of program
+    breakpoints[state.registers[Register::PC]] = 0;
+}
+
+void DebugInterpreter::listLines() {
+    const uint32_t pc = state.registers[Register::PC];
+    for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
+        if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
+            continue; // Skip invalid addresses
+
+        const DebugInfo debugInfo = state.getDebugInfo(i);
+        if (!debugInfo.label.empty())
+            streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
+        streamHandle.putStr(i == pc ? "--> " : "    ");
+        streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n", debugInfo.source->lineno, i,
+                                        state.memory.wordAt(i)));
+    }
+}
+
+void DebugInterpreter::getFrame() {
+    const uint32_t fp = state.registers[Register::FP];
+    const uint32_t sp = state.registers[Register::SP];
+    for (uint32_t i = fp; i >= sp; i -= 4)
+        streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
 }
 
 void DebugInterpreter::setBreakpoint(const std::string& arg) {

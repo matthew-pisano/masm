@@ -67,6 +67,23 @@ class DebugInterpreter final : public Interpreter {
     bool execCommand(const std::string& cmdStr, const MemLayout& layout);
 
     /**
+     * Initializes the program with the given memory layout, setting up the initial state and
+     * loading the program into memory
+     * @param layout The memory layout to use for loading the program and data
+     */
+    void resetInterpreter(const MemLayout& layout);
+
+    /**
+     * Lists the source lines surrounding the current program counter
+     */
+    void listLines();
+
+    /**
+     * Lists the words contained within the current stack frame
+     */
+    void getFrame();
+
+    /**
      * Sets a breakpoint at the given address or source location
      * @param arg
      */
