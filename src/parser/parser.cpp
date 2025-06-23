@@ -82,7 +82,11 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                 debugInfo.label = labelMap.lookupLabel(memLoc);
             } catch (const std::runtime_error&) {
             }
-            layout.debugInfo[memLoc] = debugInfo;
+
+            // Assign debug info to all allocated instructions (including multi-instruction
+            // pseudo-instructions)
+            for (int i = 0; i < instrBytes.size(); i += 4)
+                layout.debugInfo[memLoc + i] = debugInfo;
             break;
         }
         case TokenCategory::LABEL_DEF:
@@ -99,7 +103,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 }
 
 
-std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& instrToken,
+std::vector<std::byte> Parser::parseInstruction(uint32_t loc, const Token& instrToken,
                                                 std::vector<Token>& args) {
 
     // Throw error if pattern for instruction is invalid
@@ -317,7 +321,7 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 }
 
 
-std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
+std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t loc,
                                                       const std::string& instructionName,
                                                       const std::vector<Token>& args) {
     // li $t0, imm -> addiu $t0, $zero, imm
