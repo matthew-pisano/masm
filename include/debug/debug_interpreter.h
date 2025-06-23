@@ -91,7 +91,8 @@ class DebugInterpreter final : public Interpreter {
 
     /**
      * Sets a breakpoint at the given address or source location
-     * @param arg
+     * @param arg The address or source location to set the breakpoint at, in hex format (0x...) or
+     * as a source line number
      */
     void setBreakpoint(const std::string& arg);
 
