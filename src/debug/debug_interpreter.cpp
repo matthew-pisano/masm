@@ -62,39 +62,6 @@ std::string wordAsString(const uint32_t word) {
 }
 
 
-DebugCommand debugCmdFromStr(const std::string& cmd) {
-    if (cmd == "break" || cmd == "b")
-        return DebugCommand::BREAK;
-    if (cmd == "continue" || cmd == "cont" || cmd == "c")
-        return DebugCommand::CONTINUE;
-    if (cmd == "delete" || cmd == "d")
-        return DebugCommand::DELETE;
-    if (cmd == "examine" || cmd == "x")
-        return DebugCommand::EXAMINE;
-    if (cmd == "exit" || cmd == "quit" || cmd == "q")
-        return DebugCommand::EXIT;
-    if (cmd == "finish")
-        return DebugCommand::FINISH;
-    if (cmd == "frame" || cmd == "f")
-        return DebugCommand::FRAME;
-    if (cmd == "help" || cmd == "h")
-        return DebugCommand::HELP;
-    if (cmd == "info" || cmd == "i")
-        return DebugCommand::INFO;
-    if (cmd == "list" || cmd == "ls" || cmd == "l")
-        return DebugCommand::LIST;
-    if (cmd == "next" || cmd == "n")
-        return DebugCommand::NEXT;
-    if (cmd == "print" || cmd == "p")
-        return DebugCommand::PRINT;
-    if (cmd == "run" || cmd == "r")
-        return DebugCommand::RUN;
-    if (cmd == "step" || cmd == "s")
-        return DebugCommand::STEP;
-    throw std::invalid_argument("Unknown debug command: " + cmd);
-}
-
-
 State& DebugInterpreter::getState() { return state; }
 
 void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = interactive; }
@@ -130,7 +97,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                 while (getCommand) {
                     streamHandle.putStr(prompt);
                     const std::string cmdStr = readSeq(streamHandle);
-                    getCommand = parseCommand(cmdStr, layout);
+                    getCommand = execCommand(cmdStr, layout);
                 }
             }
 
@@ -144,8 +111,11 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     }
 }
 
+std::tuple<DebugCommand, std::vector<std::string>>
+DebugInterpreter::parseCommand(const std::string& cmdStr) {
+    if (cmdStr.empty())
+        throw std::invalid_argument("Command cannot be empty");
 
-bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& layout) {
     std::vector<std::string> args;
     std::istringstream iss(cmdStr);
     std::string arg;
@@ -153,124 +123,206 @@ bool DebugInterpreter::parseCommand(const std::string& cmdStr, const MemLayout& 
         args.push_back(arg);
 
     const std::string cmd = args[0];
+    // Remove the command from the arguments
+    args.erase(args.begin());
     if (cmd == "run" || cmd == "r") {
-        // Clear state
-        state = State(state.memory.isLittleEndian());
-        // Clear Syscall State
-        sysHandle = SystemHandle();
-        // Reinitialize program with the current memory layout
-        initProgram(layout);
-        // Set initial breakpoint at start of program
-        breakpoints[state.registers[Register::PC]] = 0;
-        return true;
+        if (args.size() > 0)
+            throw std::invalid_argument("Run command does not take any arguments");
+        return {DebugCommand::RUN, args};
     }
     if (cmd == "help" || cmd == "h") {
-        // Display help message with available commands
-        streamHandle.putStr(debuggerHelp);
-        return true;
+        if (args.size() > 0)
+            throw std::invalid_argument("Help command does not take any arguments");
+        return {DebugCommand::HELP, args};
     }
     if (cmd == "step" || cmd == "s") {
-        // Signals that execution should stop after next executed instruction (not next in sequence)
-        breakpoints[0] = 0;
-        return false;
+        if (args.size() > 0)
+            throw std::invalid_argument("Step command does not take any arguments");
+        return {DebugCommand::STEP, args};
     }
     if (cmd == "next" || cmd == "n") {
-        // Set breakpoint to be next instruction in sequence, skips over jumps
-        breakpoints[state.registers[Register::PC] + 4] = 0;
-        return false;
+        if (args.size() > 0)
+            throw std::invalid_argument("Next command does not take any arguments");
+        return {DebugCommand::NEXT, args};
     }
-    if (cmd == "continue" || cmd == "cont" || cmd == "c")
-        // Continue execution until the next breakpoint
-        return false;
-
+    if (cmd == "continue" || cmd == "cont" || cmd == "c") {
+        if (args.size() > 0)
+            throw std::invalid_argument("Continue command does not take any arguments");
+        return {DebugCommand::CONTINUE, args};
+    }
     if (cmd == "break" || cmd == "b") {
-        // Set a breakpoint at the specified address or line number
-        if (args.size() < 2)
-            streamHandle.putStr("Break requires an argument\n");
-        else
-            setBreakpoint(args[1]);
-        return true;
+        if (args.size() != 1)
+            throw std::invalid_argument("Break command requires one argument");
+        return {DebugCommand::BREAK, args};
     }
     if (cmd == "delete" || cmd == "d") {
-        // Delete breakpoints
-        deleteBreakpoint(args.size() < 2 ? "" : args[1]);
-        return true;
+        if (args.size() > 1)
+            throw std::invalid_argument("Delete command requires zero or one argument");
+        return {DebugCommand::DELETE, {args}};
     }
     if (cmd == "list" || cmd == "ls" || cmd == "l") {
-        // List surrounding lines of code
-        const uint32_t pc = state.registers[Register::PC];
-        for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
-            if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
-                continue; // Skip invalid addresses
-
-            const DebugInfo debugInfo = state.getDebugInfo(i);
-            if (!debugInfo.label.empty())
-                streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
-            streamHandle.putStr(i == pc ? "--> " : "    ");
-            streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n",
-                                            debugInfo.source->lineno, i, state.memory.wordAt(i)));
-        }
-        return true;
+        if (args.size() > 0)
+            throw std::invalid_argument("List command does not take any arguments");
+        return {DebugCommand::LIST, args};
     }
     if (cmd == "frame" || cmd == "f") {
-        // Show current stack frame
-        const uint32_t fp = state.registers[Register::FP];
-        const uint32_t sp = state.registers[Register::SP];
-        for (uint32_t i = fp; i >= sp; i -= 4)
-            streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
-        return true;
+        if (args.size() > 0)
+            throw std::invalid_argument("Frame command does not take any arguments");
+        return {DebugCommand::FRAME, args};
     }
     if (cmd == "finish") {
-        // Execute until the end of the current procedure
-        if (state.registers[Register::RA] != 0)
-            breakpoints[state.registers[Register::RA]] = 0;
-        return false;
+        if (args.size() > 0)
+            throw std::invalid_argument("Finish command does not take any arguments");
+        return {DebugCommand::FINISH, args};
     }
     if (cmd == "info" || cmd == "i") {
-        // Show information about registers, breakpoints, etc.
-        if (args[1] == "breakpoints")
-            listBreakpoints();
-        else if (args[1] == "labels")
-            listLabels();
-        else if (args[1] == "registers")
-            listRegisters();
-        else if (args[1] == "cp0")
-            listCP0Registers();
-        else if (args[1] == "cp1")
-            listCP1Registers();
-        else
-            streamHandle.putStr("Unknown info command: " + args[1] + "\n");
-        return true;
+        if (args.size() != 1)
+            throw std::invalid_argument("Info command requires one argument");
+        return {DebugCommand::INFO, args};
     }
     if (cmd == "examine" || cmd == "x") {
-        // Examine memory at the specified address
-        if (args.size() < 2) {
-            streamHandle.putStr("Examine requires an address argument\n");
-            return true;
-        }
-        examineAddress(args[1]);
-        return true;
+        if (args.size() != 1)
+            throw std::invalid_argument("Examine command requires one argument");
+        return {DebugCommand::EXAMINE, args};
     }
     if (cmd == "print" || cmd == "p") {
-        // Print register or label value
-        if (args.size() < 2) {
-            streamHandle.putStr("Print requires a register or label argument\n");
-            return true;
-        }
-
-        if (args[1].starts_with("$"))
-            // Print register value
-            printRegister(args[1].substr(1)); // Remove '$' prefix
-        else
-            // Print label value
-            printLabel(args[1]);
-        return true;
+        if (args.size() != 1)
+            throw std::invalid_argument("Print command requires one argument");
+        return {DebugCommand::PRINT, args};
     }
     if (cmd == "exit" || cmd == "quit" || cmd == "q") {
-        throw ExecExit("Exiting debugger", 0);
+        if (args.size() > 0)
+            throw std::invalid_argument("Exit command does not take any arguments");
+        return {DebugCommand::EXIT, args};
     }
-    streamHandle.putStr("Unknown command: " + cmd + "\n");
-    return true;
+
+    throw std::invalid_argument("Unknown debug command: " + cmd);
+}
+
+bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& layout) {
+    // Parse the command string into a command and its arguments
+    DebugCommand cmd;
+    std::vector<std::string> args;
+    try {
+        const std::tuple<DebugCommand, std::vector<std::string>> parsedCmd = parseCommand(cmdStr);
+        cmd = std::get<0>(parsedCmd);
+        args = std::get<1>(parsedCmd);
+    } catch (const std::invalid_argument& e) {
+        std::ostringstream oss;
+        oss << "\n" << e.what() << std::endl;
+        streamHandle.putStr(oss.str());
+        return true; // Continue prompting for commands
+    }
+
+    switch (cmd) {
+        case DebugCommand::RUN: {
+            // Clear state
+            state = State(state.memory.isLittleEndian());
+            // Clear Syscall State
+            sysHandle = SystemHandle();
+            // Reinitialize program with the current memory layout
+            initProgram(layout);
+            // Set initial breakpoint at start of program
+            breakpoints[state.registers[Register::PC]] = 0;
+            return true;
+        }
+        case DebugCommand::HELP: {
+            // Display help message with available commands
+            streamHandle.putStr(debuggerHelp);
+            return true;
+        }
+        case DebugCommand::STEP: {
+            // Signals that execution should stop after next executed instruction (not next in
+            // sequence)
+            breakpoints[0] = 0;
+            return false;
+        }
+        case DebugCommand::NEXT: {
+            // Set breakpoint to be next instruction in sequence, skips over jumps
+            breakpoints[state.registers[Register::PC] + 4] = 0;
+            return false;
+        }
+        case DebugCommand::CONTINUE:
+            // Continue execution until the next breakpoint
+            return false;
+        case DebugCommand::BREAK: {
+            // Set a breakpoint at the specified address or line number
+            setBreakpoint(args[0]);
+            return true;
+        }
+        case DebugCommand::DELETE: {
+            // Delete breakpoints
+            deleteBreakpoint(args.empty() ? "" : args[0]);
+            return true;
+        }
+        case DebugCommand::LIST: {
+            // List surrounding lines of code
+            const uint32_t pc = state.registers[Register::PC];
+            for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
+                if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
+                    continue; // Skip invalid addresses
+
+                const DebugInfo debugInfo = state.getDebugInfo(i);
+                if (!debugInfo.label.empty())
+                    streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
+                streamHandle.putStr(i == pc ? "--> " : "    ");
+                streamHandle.putStr(std::format("{:<6} (0x{:08x}): 0x{:08x}\n",
+                                                debugInfo.source->lineno, i,
+                                                state.memory.wordAt(i)));
+            }
+            return true;
+        }
+        case DebugCommand::FRAME: {
+            // Show current stack frame
+            const uint32_t fp = state.registers[Register::FP];
+            const uint32_t sp = state.registers[Register::SP];
+            for (uint32_t i = fp; i >= sp; i -= 4)
+                streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
+            return true;
+        }
+        case DebugCommand::FINISH: {
+            // Execute until the end of the current procedure
+            if (state.registers[Register::RA] != 0)
+                breakpoints[state.registers[Register::RA]] = 0;
+            return false;
+        }
+        case DebugCommand::INFO: {
+            // Show information about registers, breakpoints, etc.
+            if (args[0] == "breakpoints")
+                listBreakpoints();
+            else if (args[0] == "labels")
+                listLabels();
+            else if (args[0] == "registers")
+                listRegisters();
+            else if (args[0] == "cp0")
+                listCP0Registers();
+            else if (args[0] == "cp1")
+                listCP1Registers();
+            else
+                streamHandle.putStr("Unknown info command: " + args[0] + "\n");
+            return true;
+        }
+        case DebugCommand::EXAMINE: {
+            // Examine memory at the specified address
+            examineAddress(args[0]);
+            return true;
+        }
+        case DebugCommand::PRINT: {
+            // Print register or label value
+            if (args[0].starts_with("$"))
+                // Print register value
+                printRegister(args[0].substr(1)); // Remove '$' prefix
+            else
+                // Print label value
+                printLabel(args[0]);
+            return true;
+        }
+        case DebugCommand::EXIT: {
+            throw ExecExit("Exiting debugger", 0);
+        }
+    }
+    // Should never be reached
+    return false;
 }
 
 void DebugInterpreter::setBreakpoint(const std::string& arg) {
@@ -497,9 +549,4 @@ void DebugInterpreter::printLabel(const std::string& arg) {
     } else {
         streamHandle.putStr("Label not found: " + arg + "\n");
     }
-}
-
-bool DebugInterpreter::validateArguments(const std::string& cmd,
-                                         const std::vector<std::string>& args) {
-    return true;
 }

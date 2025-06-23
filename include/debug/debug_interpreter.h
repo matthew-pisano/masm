@@ -7,6 +7,9 @@
 #include "interpreter/interpreter.h"
 
 
+/**
+ * Enum representing the various debug commands that can be issued to the DebugInterpreter
+ */
 enum class DebugCommand {
     BREAK,
     CONTINUE,
@@ -23,15 +26,6 @@ enum class DebugCommand {
     RUN,
     STEP
 };
-
-
-/**
- * Converts a string representation of a debug command into a DebugCommand enum value
- * @param cmd The command string to convert, e.g. "break", "continue", etc.
- * @return The corresponding DebugCommand enum value
- * @throw invalid_argument if the command string is not recognized
- */
-DebugCommand debugCmdFromStr(const std::string& cmd);
 
 
 /**
@@ -57,20 +51,20 @@ class DebugInterpreter final : public Interpreter {
     std::map<uint32_t, size_t> breakpoints;
 
     /**
-     * Parses a debug command from th user
+     * Parses a command string into a DebugCommand and its validated arguments
+     * @param cmdStr The command string to parse, e.g. "break 0x1234"
+     * @return A tuple containing the DebugCommand enum value and a vector of arguments
+     */
+    static std::tuple<DebugCommand, std::vector<std::string>>
+    parseCommand(const std::string& cmdStr);
+
+    /**
+     * Executes a debug command from the user
      * @param cmdStr The command to parse
      * @param layout The memory layout to use for the command
      * @return Whether to prompt the user for another command
      */
-    bool parseCommand(const std::string& cmdStr, const MemLayout& layout);
-
-    /**
-     * Validates the arguments for a given command
-     * @param cmd The command to validate arguments for
-     * @param args The arguments to validate
-     * @return True if the arguments are valid, false otherwise
-     */
-    bool validateArguments(const std::string& cmd, const std::vector<std::string>& args);
+    bool execCommand(const std::string& cmdStr, const MemLayout& layout);
 
     /**
      * Sets a breakpoint at the given address or source location
