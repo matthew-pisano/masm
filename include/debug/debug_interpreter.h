@@ -32,6 +32,12 @@ enum class DebugCommand {
  * Utility class that allows tests to access the internal state of an interpreter
  */
 class DebugInterpreter final : public Interpreter {
+
+    /**
+     * Whether a program is currently running and has not finished
+     */
+    bool isRunning = false;
+
     /**
      * Whether the debug interpreter is in interactive mode, allowing user input to control the flow
      * of the program

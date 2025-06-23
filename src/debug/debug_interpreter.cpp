@@ -70,6 +70,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     initProgram(layout);
     // Set initial breakpoint at start of program
     breakpoints[state.registers[Register::PC]] = 0;
+    isRunning = true;
 
     while (true) {
         try {
@@ -84,14 +85,13 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                         (breakpoints.contains(pc) && breakpoints[pc] == 0) ||
                         (breakpoints.contains(0) && breakpoints[0] == 0);
 
-                if (atSystemBreakpoint)
+                if (atSystemBreakpoint) {
                     // Clear system breakpoint
-                    for (const auto& [addr, id] : breakpoints)
-                        if (id == 0) {
-                            // Clear system breakpoint
-                            breakpoints.erase(addr);
-                            break;
-                        }
+                    const auto it = std::ranges::find_if(
+                            breakpoints, [](const auto& pair) { return pair.second == 0; });
+                    if (it != breakpoints.end())
+                        breakpoints.erase(it);
+                }
                 // Get user commands until none are expected
                 while (getCommand) {
                     streamHandle.putStr(prompt);
@@ -100,12 +100,30 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
                 }
             }
 
-            step();
-        } catch (ExecExit& e) {
-            std::ostringstream oss;
-            oss << "\n" << e.what() << std::endl;
-            streamHandle.putStr(oss.str());
+            if (!isRunning) {
+                streamHandle.putStr("\nThere is no program running.  Use 'run' to restart\n");
+                // Set system breakpoint to PC
+                breakpoints[state.registers[Register::PC]] = 0;
+            } else
+                step();
+        } catch (DebuggerExit& e) {
+            streamHandle.putStr(std::format("\n{}", e.what()));
             return e.code();
+        } catch (MasmRuntimeError& e) {
+            if (isInteractive) {
+                streamHandle.putStr(std::format("\n{}", e.what()));
+                isRunning = false;
+                // Decrement PC to offending instruction
+                state.registers[Register::PC] -= 4;
+            }
+        } catch (ExecExit& e) {
+            streamHandle.putStr(std::format("\n{}", e.what()));
+            isRunning = false;
+            if (!isInteractive)
+                return e.code();
+
+            // Decrement PC
+            state.registers[Register::PC] -= 4;
         }
     }
 }
@@ -207,9 +225,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
         cmd = std::get<0>(parsedCmd);
         args = std::get<1>(parsedCmd);
     } catch (const std::invalid_argument& e) {
-        std::ostringstream oss;
-        oss << "\n" << e.what() << std::endl;
-        streamHandle.putStr(oss.str());
+        streamHandle.putStr(std::format("\n{}", e.what()));
         return true; // Continue prompting for commands
     }
 
@@ -296,7 +312,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             return true;
         }
         case DebugCommand::EXIT: {
-            throw ExecExit("Exiting debugger", 0);
+            throw DebuggerExit("Exiting debugger", 0);
         }
     }
     // Should never be reached
@@ -312,6 +328,7 @@ void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
     initProgram(layout);
     // Set initial breakpoint at start of program
     breakpoints[state.registers[Register::PC]] = 0;
+    isRunning = true;
 }
 
 void DebugInterpreter::listLines() {
