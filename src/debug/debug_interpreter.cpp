@@ -143,27 +143,27 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
     // Remove the command from the arguments
     args.erase(args.begin());
     if (cmd == "run" || cmd == "r") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Run command does not take any arguments");
         return {DebugCommand::RUN, args};
     }
     if (cmd == "help" || cmd == "h") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Help command does not take any arguments");
         return {DebugCommand::HELP, args};
     }
     if (cmd == "step" || cmd == "s") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Step command does not take any arguments");
         return {DebugCommand::STEP, args};
     }
     if (cmd == "next" || cmd == "n") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Next command does not take any arguments");
         return {DebugCommand::NEXT, args};
     }
     if (cmd == "continue" || cmd == "cont" || cmd == "c") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Continue command does not take any arguments");
         return {DebugCommand::CONTINUE, args};
     }
@@ -178,17 +178,17 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
         return {DebugCommand::DELETE, {args}};
     }
     if (cmd == "list" || cmd == "ls" || cmd == "l") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("List command does not take any arguments");
         return {DebugCommand::LIST, args};
     }
     if (cmd == "frame" || cmd == "f") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Frame command does not take any arguments");
         return {DebugCommand::FRAME, args};
     }
     if (cmd == "finish") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Finish command does not take any arguments");
         return {DebugCommand::FINISH, args};
     }
@@ -208,7 +208,7 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
         return {DebugCommand::PRINT, args};
     }
     if (cmd == "exit" || cmd == "quit" || cmd == "q") {
-        if (args.size() > 0)
+        if (!args.empty())
             throw std::invalid_argument("Exit command does not take any arguments");
         return {DebugCommand::EXIT, args};
     }
