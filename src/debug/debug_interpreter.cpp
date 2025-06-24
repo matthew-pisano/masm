@@ -356,23 +356,33 @@ void DebugInterpreter::getFrame() {
 }
 
 void DebugInterpreter::setBreakpoint(const std::string& arg) {
+    size_t breakLine;
+    std::string breakFile;
+
     // Check if the argument is a valid hex address
     if (arg.starts_with("0x")) {
+        uint32_t addr;
         try {
-            const uint32_t addr = std::stoul(arg.substr(2), nullptr, 16);
-            breakpoints[addr] = nextBreakpoint;
-            nextBreakpoint++;
-            return;
+            addr = std::stoul(arg.substr(2), nullptr, 16);
         } catch (const std::invalid_argument&) {
             streamHandle.putStr("Invalid address: " + arg + "\n");
             return;
         }
+
+        if (!state.debugInfo.contains(addr)) {
+            streamHandle.putStr("Cannot find debug info for address: " + arg + "\n");
+            return;
+        }
+        const std::shared_ptr<SourceLocator> srcPtr = state.getDebugInfo(addr).source;
+        if (!srcPtr) {
+            streamHandle.putStr("Cannot find debug info for address: " + arg + "\n");
+            return;
+        }
+        breakFile = srcPtr->filename;
+        breakLine = srcPtr->lineno;
     }
-
-    size_t breakLine;
-    std::string breakFile;
-
-    if (arg.contains(":")) {
+    // If the argument is in file:line format
+    else if (arg.contains(":")) {
         // Check if the argument is a file:line format
         const size_t colonPos = arg.find(':');
         if (colonPos == std::string::npos) {
@@ -386,7 +396,9 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             streamHandle.putStr("Invalid line number: " + arg.substr(colonPos + 1) + "\n");
             return;
         }
-    } else if (isSignedInteger(arg)) {
+    }
+    // If the argument is just a line number
+    else if (isSignedInteger(arg)) {
         const uint32_t pc = state.registers[Register::PC];
         breakFile = state.getDebugInfo(pc).source->filename;
         try {
@@ -395,7 +407,9 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             streamHandle.putStr("Invalid line number: " + arg + "\n");
             return;
         }
-    } else {
+    }
+    // If the argument is a label
+    else {
         // Find debug info that matches the given label
         const auto it = std::ranges::find_if(state.debugInfo, [arg](const auto& pair) {
             return unmangleLabel(pair.second.label) == arg && pair.second.source;
@@ -404,6 +418,7 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             streamHandle.putStr("Cannot find instruction label: " + arg + "\n");
             return;
         }
+        // Get the file and line for the label
         const SourceLocator src = *it->second.source;
         breakFile = src.filename;
         breakLine = src.lineno;
@@ -417,8 +432,8 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
         return src.filename == breakFile && src.lineno == breakLine;
     });
     if (it == state.debugInfo.end())
-        streamHandle.putStr("Cannot find line " + std::to_string(breakLine) + " in file " +
-                            breakFile + "\n");
+        streamHandle.putStr("No debug info associated with line " + std::to_string(breakLine) +
+                            " in file " + breakFile + "\n");
     else {
         const uint32_t addr = it->first;
         if (!breakpoints.contains(addr)) {
