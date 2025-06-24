@@ -98,7 +98,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 
             // Assign debug info to all allocated instructions (including multi-instruction
             // pseudo-instructions)
-            for (int i = 0; i < instrBytes.size(); i += 4) {
+            for (size_t i = 0; i < instrBytes.size(); i += 4) {
                 layout.debugInfo[memLoc + i] = debugInfo;
                 // Only label the first instruction in a pseudo-instruction
                 if (i > 0)
