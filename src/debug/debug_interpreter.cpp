@@ -23,6 +23,7 @@ const std::string debuggerHelp =
         "break, b <address> - Set a breakpoint at the specified hex address\n"
         "break, b <line> - Set a breakpoint at the specified line number within the current file\n"
         "break, b <file:line> - Set a breakpoint at the specified file and line number\n"
+        "break, b <label> - Set a breakpoint at the specified label\n"
         "continue, cont, c - Continue execution until the next breakpoint\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
@@ -255,7 +256,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             // Continue execution until the next breakpoint
             return false;
         case DebugCommand::BREAK: {
-            // Set a breakpoint at the specified address or line number
+            // Set a breakpoint at the specified address, line number, or label
             setBreakpoint(args[0]);
             return true;
         }
@@ -385,7 +386,7 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             streamHandle.putStr("Invalid line number: " + arg.substr(colonPos + 1) + "\n");
             return;
         }
-    } else {
+    } else if (isSignedInteger(arg)) {
         const uint32_t pc = state.registers[Register::PC];
         breakFile = state.getDebugInfo(pc).source->filename;
         try {
@@ -394,6 +395,18 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             streamHandle.putStr("Invalid line number: " + arg + "\n");
             return;
         }
+    } else {
+        // Find debug info that matches the given label
+        const auto it = std::ranges::find_if(state.debugInfo, [arg](const auto& pair) {
+            return unmangleLabel(pair.second.label) == arg && pair.second.source;
+        });
+        if (it == state.debugInfo.end()) {
+            streamHandle.putStr("Cannot find instruction label: " + arg + "\n");
+            return;
+        }
+        const SourceLocator src = *it->second.source;
+        breakFile = src.filename;
+        breakLine = src.lineno;
     }
 
     // Find debug info that matches file and line
@@ -412,6 +425,8 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
             // Set breakpoint at the found address
             breakpoints[addr] = nextBreakpoint;
             nextBreakpoint++;
+            streamHandle.putStr(std::format("Breakpoint {} set at 0x{:08x} ({}:{})\n",
+                                            breakpoints[addr], addr, breakFile, breakLine));
         } else
             streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n",
                                             breakpoints[addr], addr));

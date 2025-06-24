@@ -90,9 +90,9 @@ class DebugInterpreter final : public Interpreter {
     void getFrame();
 
     /**
-     * Sets a breakpoint at the given address or source location
+     * Sets a breakpoint at the given address, source location, or label
      * @param arg The address or source location to set the breakpoint at, in hex format (0x...) or
-     * as a source line number
+     * as a source line number or label
      */
     void setBreakpoint(const std::string& arg);
 
