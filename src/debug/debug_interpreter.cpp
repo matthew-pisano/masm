@@ -398,6 +398,8 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
 
     // Find debug info that matches file and line
     const auto it = std::ranges::find_if(state.debugInfo, [breakFile, breakLine](const auto& pair) {
+        if (!pair.second.source)
+            return false;
         const SourceLocator src = *pair.second.source;
         return src.filename == breakFile && src.lineno == breakLine;
     });
