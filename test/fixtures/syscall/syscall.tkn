@@ -1,10 +1,20 @@
 01data
 04string@masm_mangle_file_syscall.asm
-02asciiz12hello
+02asciiz12hello\n
 01text
 04main@masm_mangle_file_syscall.asm
 06li07v009,084
 06la07a009,05string@masm_mangle_file_syscall.asm
+06syscall
+06li07v009,0840
+06li07a009,080
+06li07a109,0842
+06syscall
+06li07v009,0843
+06li07a009,080
+06syscall
+06mov.s07f1209,07f0
+06li07v009,082
 06syscall
 06li07v009,0810
 06syscall
