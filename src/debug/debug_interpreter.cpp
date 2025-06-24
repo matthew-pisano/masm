@@ -176,7 +176,7 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
     if (cmd == "delete" || cmd == "d") {
         if (args.size() > 1)
             throw std::invalid_argument("Delete command requires zero or one argument");
-        return {DebugCommand::DELETE, {args}};
+        return {DebugCommand::DEL_BP, {args}};
     }
     if (cmd == "list" || cmd == "ls" || cmd == "l") {
         if (!args.empty())
@@ -260,7 +260,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             setBreakpoint(args[0]);
             return true;
         }
-        case DebugCommand::DELETE: {
+        case DebugCommand::DEL_BP: {
             // Delete breakpoints
             deleteBreakpoint(args.empty() ? "" : args[0]);
             return true;

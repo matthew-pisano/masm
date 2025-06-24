@@ -13,7 +13,7 @@
 enum class DebugCommand {
     BREAK,
     CONTINUE,
-    DELETE,
+    DEL_BP,
     EXAMINE,
     EXIT,
     FINISH,
