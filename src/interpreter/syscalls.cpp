@@ -4,8 +4,8 @@
 
 #include "interpreter/syscalls.h"
 
-#include <iomanip>
 #include <chrono>
+#include <iomanip>
 #include <unistd.h>
 
 #include "exceptions.h"
@@ -27,6 +27,14 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
             requiresSyscallMode(ioMode, "PRINT_INT");
             printInt(state, streamHandle);
             break;
+        case Syscall::PRINT_FLOAT:
+            requiresSyscallMode(ioMode, "PRINT_FLOAT");
+            printFloat(state, streamHandle);
+            break;
+        case Syscall::PRINT_DOUBLE:
+            requiresSyscallMode(ioMode, "PRINT_DOUBLE");
+            printDouble(state, streamHandle);
+            break;
         case Syscall::PRINT_STRING:
             requiresSyscallMode(ioMode, "PRINT_STRING");
             printString(state, streamHandle);
@@ -34,6 +42,14 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
         case Syscall::READ_INT:
             requiresSyscallMode(ioMode, "READ_INT");
             readInt(state, streamHandle);
+            break;
+        case Syscall::READ_FLOAT:
+            requiresSyscallMode(ioMode, "READ_FLOAT");
+            readFloat(state, streamHandle);
+            break;
+        case Syscall::READ_DOUBLE:
+            requiresSyscallMode(ioMode, "READ_DOUBLE");
+            readDouble(state, streamHandle);
             break;
         case Syscall::READ_STRING:
             requiresSyscallMode(ioMode, "READ_STRING");
@@ -82,6 +98,12 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
             break;
         case Syscall::RAND_INT_RANGE:
             randIntRange(state);
+            break;
+        case Syscall::RAND_FLOAT:
+            randFloat(state);
+            break;
+        case Syscall::RAND_DOUBLE:
+            randDouble(state);
             break;
         default:
             throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));

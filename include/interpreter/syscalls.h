@@ -65,8 +65,12 @@ public:
 enum class Syscall {
     // Keyboard/Display Syscalls
     PRINT_INT = 1,
+    PRINT_FLOAT = 2,
+    PRINT_DOUBLE = 3,
     PRINT_STRING = 4,
     READ_INT = 5,
+    READ_FLOAT = 6,
+    READ_DOUBLE = 7,
     READ_STRING = 8,
     HEAP_ALLOC = 9,
     EXIT = 10,
@@ -82,7 +86,9 @@ enum class Syscall {
     PRINT_UINT = 36,
     SET_SEED = 40,
     RAND_INT = 41,
-    RAND_INT_RANGE = 42
+    RAND_INT_RANGE = 42,
+    RAND_FLOAT = 43,
+    RAND_DOUBLE = 44
 };
 
 
