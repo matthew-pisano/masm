@@ -399,8 +399,7 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
     }
     // If the argument is just a line number
     else if (isSignedInteger(arg)) {
-        const uint32_t pc = state.registers[Register::PC];
-        breakFile = state.getDebugInfo(pc).source->filename;
+        breakFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
         try {
             breakLine = std::stoul(arg);
         } catch (const std::invalid_argument&) {
@@ -410,18 +409,19 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
     }
     // If the argument is a label
     else {
-        // Find debug info that matches the given label
-        const auto it = std::ranges::find_if(state.debugInfo, [arg](const auto& pair) {
-            return unmangleLabel(pair.second.label) == arg && pair.second.source;
+        breakFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
+        // Find debug info that matches the given label in the current file
+        const auto it = std::ranges::find_if(state.debugInfo, [arg, breakFile](const auto& pair) {
+            return unmangleLabel(pair.second.label) == arg && pair.second.source &&
+                   pair.second.source->filename == breakFile;
         });
         if (it == state.debugInfo.end()) {
-            streamHandle.putStr("Cannot find instruction label: " + arg + "\n");
+            streamHandle.putStr("Cannot find instruction label: " + arg + " in file " + breakFile +
+                                "\n");
             return;
         }
-        // Get the file and line for the label
-        const SourceLocator src = *it->second.source;
-        breakFile = src.filename;
-        breakLine = src.lineno;
+        // Get the line for the label
+        breakLine = it->second.source->lineno;
     }
 
     // Find debug info that matches file and line
