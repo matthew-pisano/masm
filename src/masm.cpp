@@ -13,8 +13,8 @@
 
 int main(const int argc, char* argv[]) {
     std::string name = "masm";
-    std::string _computedVersionString(Version::VERSION);
-    std::string version = name + " " + _computedVersionString;
+    const std::string _computedVersionString(Version::VERSION);
+    const std::string version = name + " " + _computedVersionString;
 
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;

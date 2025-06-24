@@ -49,6 +49,9 @@ enum class Coproc1Register {
 };
 
 
+constexpr size_t NUM_CP1_REGISTERS = static_cast<size_t>(Coproc1Register::F31) + 1;
+
+
 /**
  * Class representing the state of the coprocessor 1 (floating point) register file
  */
@@ -56,7 +59,7 @@ class Coproc1RegisterFile {
     /**
      * A mapping between CP1 register numbers and values stored in the 32 CP1 registers
      */
-    std::array<int32_t, 32> registers = {};
+    std::array<int32_t, NUM_CP1_REGISTERS> registers = {};
 
     /**
      * A mapping between CP1 flag numbers and the values stored in the 8 CP1 flags
@@ -133,6 +136,21 @@ public:
      * @param value The new value of the registers
      */
     void setDouble(Coproc1Register index, float64_t value);
+
+    /**
+     * Returns the register number associated with a name
+     * @param name The name of a register
+     * @return The associated register number
+     * @throw runtime_error When an invalid register is requested
+     */
+    static int indexFromName(const std::string& name);
+
+    /**
+     * Returns the name of a register from its index
+     * @param index The index of the register
+     * @return The name of the register
+     */
+    static std::string nameFromIndex(uint32_t index);
 
     int32_t operator[](uint32_t index) const;
     int32_t& operator[](uint32_t index);

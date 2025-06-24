@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
+# Fixture Generation Script
+# Executes the fixture generator on all assembly files within the fixtures directory.
+
 # Loop over directories in test/fixtures
 for dir in test/fixtures/*; do
   if [ -d "$dir" ]; then
     # Get the directory name without the path
     dir_name=$(basename "$dir")
-
+    
+    # Exit if the directory is not found
     cd "$dir" || exit 1
 
     # The assembly fixture files

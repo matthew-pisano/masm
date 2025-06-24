@@ -23,15 +23,29 @@ std::map<std::string, Register> RegisterFile::nameToIndex = {
 
 
 int RegisterFile::indexFromName(const std::string& name) {
-    if (name.starts_with("f") && isSignedInteger(name.substr(1)) &&
-        std::stoi(name.substr(1)) >= 0) {
-        // Handle floating point registers ($f0-$f31)
-        return std::stoi(name.substr(1));
-    }
     if (!nameToIndex.contains(name))
         throw std::runtime_error("Unknown register " + name);
 
     return static_cast<int>(nameToIndex[name]);
+}
+
+
+std::string RegisterFile::nameFromIndex(const uint32_t index) {
+    if (index >= NUM_CPU_REGISTERS)
+        throw std::runtime_error("Invalid register index: " + std::to_string(index));
+
+    for (const auto& pair : nameToIndex)
+        if (static_cast<uint32_t>(pair.second) == index)
+            return pair.first;
+
+    if (index == static_cast<uint32_t>(Register::PC))
+        return "pc";
+    if (index == static_cast<uint32_t>(Register::HI))
+        return "hi";
+    if (index == static_cast<uint32_t>(Register::LO))
+        return "lo";
+
+    throw std::runtime_error("Invalid register index: " + std::to_string(index));
 }
 
 
@@ -182,8 +196,6 @@ void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs,
         case InstructionCode::JALR: {
             // Link current PC to RA register
             registers[Register::RA] = registers[Register::PC]; // Already incremented
-            // Save stack pointer to frame pointer
-            registers[Register::FP] = registers[Register::SP];
             // Jump to the address in rs
             registers[Register::PC] = registers[rs];
             break;
@@ -285,8 +297,6 @@ void execJType(RegisterFile& registers, const uint32_t opCode, const uint32_t ad
     if (opCode == InstructionCode::JAL) {
         // Link current PC to RA register
         registers[Register::RA] = registers[Register::PC]; // PC incremented earlier
-        // Save stack pointer to frame pointer
-        registers[Register::FP] = registers[Register::SP];
     }
 
     // Jump to the target address

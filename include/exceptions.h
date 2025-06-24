@@ -67,7 +67,7 @@ public:
 /**
  * Execution to indicate that the program has terminated successfully with the given code
  */
-class ExecExit final : public std::runtime_error {
+class ExecExit : public std::runtime_error {
     int errorCode;
 
 public:
@@ -79,6 +79,15 @@ public:
      * @return The error code
      */
     [[nodiscard]] int code() const { return errorCode; }
+};
+
+
+/**
+ * Execution exit to indicate that the debugging program has terminated due to a debugger command
+ */
+class DebuggerExit final : public ExecExit {
+public:
+    explicit DebuggerExit(const std::string& message, const int code) : ExecExit(message, code) {}
 };
 
 

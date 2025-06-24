@@ -6,7 +6,6 @@
 #define INTERPRETER_H
 
 #include <iostream>
-#include <memory>
 
 
 #include "memory.h"
@@ -18,21 +17,6 @@
  * The interpreter class, which is responsible for executing MIPS instructions
  */
 class Interpreter {
-
-    /**
-     * The I/O mode of the interpreter, which determines how input/output is handled
-     */
-    IOMode ioMode;
-
-    /**
-     * The console handle for reading input and writing output to the console
-     */
-    StreamHandle& streamHandle;
-
-    /**
-     * The system handle for executing system calls
-     */
-    SystemHandle sysHandle;
 
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
@@ -68,6 +52,21 @@ class Interpreter {
 
 protected:
     /**
+     * The I/O mode of the interpreter, which determines how input/output is handled
+     */
+    IOMode ioMode;
+
+    /**
+     * The console handle for reading input and writing output to the console
+     */
+    StreamHandle& streamHandle;
+
+    /**
+     * The system handle for executing system calls
+     */
+    SystemHandle sysHandle;
+
+    /**
      * The current state of program memory and registers
      */
     State state;
@@ -78,6 +77,8 @@ public:
 
     Interpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
         ioMode(ioMode), streamHandle(streamHandle), state(useLittleEndian) {}
+
+    virtual ~Interpreter() = default;
 
     /**
      * Initializes the program in the interpreter with the given memory layout
@@ -97,7 +98,7 @@ public:
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */
-    int interpret(const MemLayout& layout);
+    virtual int interpret(const MemLayout& layout);
 };
 
 #endif // INTERPRETER_H

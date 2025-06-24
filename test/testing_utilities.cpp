@@ -10,9 +10,6 @@
 LabelMap& DebugParser::getLabels() { return labelMap; }
 
 
-State& DebugInterpreter::getState() { return state; }
-
-
 std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
     std::vector<std::byte> byteVec(intVec.size());
     for (size_t i = 0; i < intVec.size(); ++i)

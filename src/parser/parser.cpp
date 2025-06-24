@@ -8,9 +8,11 @@
 #include <stdexcept>
 
 #include "exceptions.h"
+#include "interpreter/cp1.h"
 #include "interpreter/cpu.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
+#include "tokenizer/postprocessor.h"
 #include "utils.h"
 
 
@@ -19,7 +21,6 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
 
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
-    layout.debugInfo[MemSection::TEXT] = {};
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(tokenLines);
 
@@ -47,29 +48,62 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
     const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
     std::vector<Token> args = filterTokenList(unfilteredArgs);
 
+    DebugInfo debugInfo;
     std::vector<std::byte> memBytes;
     switch (firstToken.category) {
         case TokenCategory::SEC_DIRECTIVE: {
             currSection = nameToMemSection(firstToken.value);
             // If the section does not exist in the layout, create it
-            if (!layout.data.contains(currSection)) {
+            if (!layout.data.contains(currSection))
                 layout.data[currSection] = {};
-                layout.debugInfo[currSection] = {};
-            }
             break;
         }
         case TokenCategory::ALLOC_DIRECTIVE: {
             // Resolve label references to their integer values before parsing
             labelMap.resolveLabels(args);
 
-            std::vector<std::byte> directiveBytes =
-                    parseAllocDirective(memLoc, firstToken, args, useLittleEndian);
-            memBytes.insert(memBytes.end(), directiveBytes.begin(), directiveBytes.end());
+            const std::tuple<std::vector<std::byte>, size_t> alloc =
+                    parsePaddedAllocDirective(memLoc, firstToken, args, useLittleEndian);
+            memBytes.insert(memBytes.end(), std::get<0>(alloc).begin(), std::get<0>(alloc).end());
+            const size_t paddedMemLoc = memLoc + std::get<1>(alloc);
+            try {
+                debugInfo.label = labelMap.lookupLabel(paddedMemLoc);
+            } catch (const std::runtime_error&) {
+            }
+            layout.debugInfo[paddedMemLoc] = debugInfo;
             break;
         }
         case TokenCategory::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
+            const std::shared_ptr<SourceLocator> tokenLinePtr =
+                    std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
+            debugInfo.source = tokenLinePtr;
+            try {
+                debugInfo.label = labelMap.lookupLabel(memLoc);
+            } catch (const std::runtime_error&) {
+            }
+
+            // Add the source code text the debug info
+            for (const Token& token : tokenLine.tokens) {
+                if (token.category == TokenCategory::SEPERATOR)
+                    debugInfo.source->text += token.value;
+                else if (token.category == TokenCategory::REGISTER)
+                    debugInfo.source->text += " $" + token.value;
+                else if (token.category != TokenCategory::LABEL_REF)
+                    debugInfo.source->text += " " + token.value;
+                else
+                    debugInfo.source->text += " " + unmangleLabel(token.value);
+            }
+
+            // Assign debug info to all allocated instructions (including multi-instruction
+            // pseudo-instructions)
+            for (size_t i = 0; i < instrBytes.size(); i += 4) {
+                layout.debugInfo[memLoc + i] = debugInfo;
+                // Only label the first instruction in a pseudo-instruction
+                if (i > 0)
+                    layout.debugInfo[memLoc + i].label = "";
+            }
             break;
         }
         case TokenCategory::LABEL_DEF:
@@ -83,18 +117,10 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 
     layout.data[currSection].insert(layout.data[currSection].end(), memBytes.begin(),
                                     memBytes.end());
-
-    // If the section is executable, add debug info for the instruction
-    if (isSectionExecutable(currSection)) {
-        const std::shared_ptr<SourceLocator> tokenLinePtr =
-                std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
-        layout.debugInfo[currSection].insert(layout.debugInfo[currSection].end(), memBytes.size(),
-                                             tokenLinePtr);
-    }
 }
 
 
-std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& instrToken,
+std::vector<std::byte> Parser::parseInstruction(uint32_t loc, const Token& instrToken,
                                                 std::vector<Token>& args) {
 
     // Throw error if pattern for instruction is invalid
@@ -115,9 +141,13 @@ std::vector<std::byte> Parser::parseInstruction(uint32_t& loc, const Token& inst
                 if (isSignedInteger(arg.value))
                     // If the register is an integer, use it as the register index
                     argCodes.push_back(stoui32(arg.value));
-                else
+                else {
                     // Otherwise, use the register name to get the index
-                    argCodes.push_back(RegisterFile::indexFromName(arg.value));
+                    if (arg.value.starts_with("f"))
+                        argCodes.push_back(Coproc1RegisterFile::indexFromName(arg.value));
+                    else
+                        argCodes.push_back(RegisterFile::indexFromName(arg.value));
+                }
                 break;
             }
             default:
@@ -308,7 +338,7 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 }
 
 
-std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t& loc,
+std::vector<std::byte> Parser::parsePseudoInstruction(uint32_t loc,
                                                       const std::string& instructionName,
                                                       const std::vector<Token>& args) {
     // li $t0, imm -> addiu $t0, $zero, imm

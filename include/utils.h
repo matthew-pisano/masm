@@ -10,10 +10,20 @@
 #include <tokenizer/tokenizer.h>
 #include <vector>
 
+#include "io/streamio.h"
+
 
 // Stand-in for fixed-width floating point types
 using float32_t = float;
 using float64_t = double;
+
+
+/**
+ * Reads a sequence of characters from the input stream until a newline character is encountered.
+ * @param streamHandle The stream handle to read from
+ * @return A string containing the characters read from the input stream
+ */
+std::string readSeq(StreamHandle& streamHandle);
 
 
 /**

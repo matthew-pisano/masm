@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "../testing_utilities.h"
+#include "debug/debug_interpreter.h"
 #include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "io/fileio.h"

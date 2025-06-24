@@ -11,6 +11,7 @@
 #include "interpreter/memory.h"
 #include "parser/directive.h"
 #include "parser/instruction.h"
+#include "tokenizer/postprocessor.h"
 #include "utils.h"
 
 
@@ -18,7 +19,7 @@ void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
     for (Token& arg : instructionArgs)
         if (arg.category == TokenCategory::LABEL_REF) {
             if (!labelMap.contains(arg.value))
-                throw std::runtime_error("Unknown label '" + arg.value + "'");
+                throw std::runtime_error("Unknown label '" + unmangleLabel(arg.value) + "'");
             arg = {TokenCategory::IMMEDIATE, std::to_string(labelMap[arg.value])};
         }
 }
@@ -83,7 +84,8 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                 case TokenCategory::LABEL_DEF: {
                     if (labelMap.contains(firstToken.value) ||
                         std::ranges::find(pendingLabels, firstToken.value) != pendingLabels.end())
-                        throw std::runtime_error("Duplicate label '" + firstToken.value + "'");
+                        throw std::runtime_error("Duplicate label '" +
+                                                 unmangleLabel(firstToken.value) + "'");
                     // Add to pending labels (address resolved to next instruction/directive)
                     pendingLabels.push_back(firstToken.value);
                     break;

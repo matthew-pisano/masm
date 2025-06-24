@@ -32,6 +32,9 @@ enum class Coproc0Register {
 };
 
 
+constexpr size_t NUM_CP0_REGISTERS = static_cast<size_t>(Coproc0Register::EPC) + 1;
+
+
 /**
  * Class representing the state of the coprocessor 0 register file
  */
@@ -39,7 +42,7 @@ class Coproc0RegisterFile {
     /**
      * A mapping between CP0, register numbers and values stored in the 4 CP0 registers
      */
-    std::array<int32_t, 16> registers = {};
+    std::array<int32_t, NUM_CP0_REGISTERS> registers = {};
 
 public:
     int32_t operator[](uint32_t index) const;

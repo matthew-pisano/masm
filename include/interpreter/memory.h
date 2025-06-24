@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "debug/debug_info.h"
+
 
 /**
  * The upper bound for the text segment address space
@@ -44,15 +46,6 @@ uint32_t memSectionOffset(MemSection section);
 
 
 /**
- * Struct representing the location of a source line in the program
- */
-struct SourceLocator {
-    std::string filename;
-    size_t lineno;
-};
-
-
-/**
  * Struct representing the memory layout of a program along with the locations in the source files
  */
 struct MemLayout {
@@ -62,9 +55,9 @@ struct MemLayout {
     std::map<MemSection, std::vector<std::byte>> data;
 
     /**
-     * The source line locators associated with each byte of memory
+     * The debug info associated with each byte of memory
      */
-    std::map<MemSection, std::vector<std::shared_ptr<SourceLocator>>> debugInfo;
+    std::map<uint32_t, DebugInfo> debugInfo;
 };
 
 
@@ -173,6 +166,12 @@ public:
      * @return True if the index is valid, false otherwise
      */
     bool isValid(uint32_t index) const;
+
+    /**
+     * Checks if the memory is using little-endian byte order
+     * @return True if the memory is little-endian, false if it is big-endian
+     */
+    bool isLittleEndian() const;
 
     std::byte operator[](uint32_t index) const;
     std::byte& operator[](uint32_t index);

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 project(masm)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 
 # Function to extract value from JSON
@@ -66,6 +67,7 @@ add_library(masm STATIC
         src/interpreter/cp1.cpp
         src/interpreter/state.cpp
         src/io/streamio.cpp
+        include/debug/debug_info.h
 )
 
 # -fPIC only needed for native Linux builds (not Windows cross-compilation)
@@ -85,7 +87,7 @@ FetchContent_MakeAvailable(cli11)
 
 ## MASM Main Executables ##
 
-add_executable(masm-exec src/main.cpp
+add_executable(masm-exec src/masm.cpp
         src/io/fileio.cpp
 )
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
@@ -97,6 +99,22 @@ if (CMAKE_CROSSCOMPILING AND WIN32)
 endif ()
 
 
+## MASM Debugger Executables ##
+
+add_executable(masm-dbg src/mdb.cpp
+        src/io/fileio.cpp
+        src/debug/debug_interpreter.cpp
+)
+target_link_libraries(masm-dbg PRIVATE masm CLI11::CLI11)
+set_target_properties(masm-dbg PROPERTIES OUTPUT_NAME "mdb")
+
+# Static linking for Windows cross-compilation (ensures dlls are packaged in)
+if (CMAKE_CROSSCOMPILING AND WIN32)
+    target_link_libraries(masm-dbg PRIVATE -static)
+endif ()
+
+
+# No tests or Python bindings for cross-compilation on Windows
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     ## Python Bindings ##
@@ -118,8 +136,15 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     ## Unit Tests ##
 
-    find_package(Catch2 3 REQUIRED)
+    FetchContent_Declare(
+            Catch2
+            GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+            GIT_TAG        v3.8.1 # or a later release
+    )
+    FetchContent_MakeAvailable(Catch2)
+
     add_executable(masm-tests
+            src/debug/debug_interpreter.cpp
             src/io/fileio.cpp
             test/testing_utilities.cpp
             test/test_components/test_tokenizer.cpp
@@ -140,6 +165,8 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     include(CTest)
     include(Catch)
-    catch_discover_tests(masm-tests)
+    catch_discover_tests(masm-tests
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
 
 endif ()

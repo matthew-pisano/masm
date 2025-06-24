@@ -8,6 +8,8 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <sstream>
 
 #include "exceptions.h"
 #include "parser/directive.h"
@@ -65,7 +67,7 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
     for (std::pair<const std::string, std::vector<LineTokens>>& fileTokens : rawProgramMap) {
         Postprocessor::replaceEqv(fileTokens.second);
         Postprocessor::processMacros(fileTokens.second);
-        programMap["masm_mangle_file_" + fileTokens.first] = fileTokens.second;
+        programMap[fileTokens.first] = fileTokens.second;
     }
 
     // Mangle labels in files
@@ -74,7 +76,7 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
     // Combine all tokenized lines into a single program vector
     std::vector<LineTokens> program;
     for (const SourceFile& sourceFile : sourceFiles) {
-        std::vector<LineTokens> fileLines = programMap["masm_mangle_file_" + sourceFile.name];
+        std::vector<LineTokens> fileLines = programMap[sourceFile.name];
         program.insert(program.end(), fileLines.begin(), fileLines.end());
     }
 

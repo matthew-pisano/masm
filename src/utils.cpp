@@ -4,8 +4,26 @@
 
 #include "utils.h"
 
+#include <algorithm>
+#include <sstream>
 #include <filesystem>
 #include <regex>
+
+
+std::string readSeq(StreamHandle& streamHandle) {
+    std::string input;
+    while (true) {
+        const char c = streamHandle.getCharBlocking();
+        if (c == '\n')
+            break;
+
+        if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
+    }
+    return input;
+}
 
 
 std::string getFileBasename(const std::string& path) {
