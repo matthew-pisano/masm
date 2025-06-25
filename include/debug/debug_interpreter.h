@@ -57,6 +57,12 @@ class DebugInterpreter final : public Interpreter {
     std::map<uint32_t, size_t> breakpoints;
 
     /**
+     * Detects if the debugger must pause execution due to a breakpoint and gather user input
+     * @param layout The initial memory layout to use for resetting the debugger
+     */
+    void interactiveStep(const MemLayout& layout);
+
+    /**
      * Parses a command string into a DebugCommand and its validated arguments
      * @param cmdStr The command string to parse, e.g. "break 0x1234"
      * @return A tuple containing the DebugCommand enum value and a vector of arguments
@@ -67,7 +73,7 @@ class DebugInterpreter final : public Interpreter {
     /**
      * Executes a debug command from the user
      * @param cmdStr The command to parse
-     * @param layout The memory layout to use for the command
+     * @param layout The initial memory layout to use for resetting the debugger
      * @return Whether to prompt the user for another command
      */
     bool execCommand(const std::string& cmdStr, const MemLayout& layout);

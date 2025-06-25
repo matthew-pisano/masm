@@ -67,6 +67,29 @@ State& DebugInterpreter::getState() { return state; }
 
 void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = interactive; }
 
+void DebugInterpreter::interactiveStep(const MemLayout& layout) {
+    const uint32_t pc = state.registers[Register::PC];
+    // Always get command if system breakpoint is zero
+    bool getCommand = breakpoints.contains(pc) || (breakpoints.contains(0) && breakpoints[0] == 0);
+    // If execution has reached the system breakpoint
+    const bool atSystemBreakpoint = (breakpoints.contains(pc) && breakpoints[pc] == 0) ||
+                                    (breakpoints.contains(0) && breakpoints[0] == 0);
+
+    if (atSystemBreakpoint) {
+        // Clear system breakpoint
+        const auto it = std::ranges::find_if(breakpoints,
+                                             [](const auto& pair) { return pair.second == 0; });
+        if (it != breakpoints.end())
+            breakpoints.erase(it);
+    }
+    // Get user commands until none are expected
+    while (getCommand) {
+        streamHandle.putStr(prompt);
+        const std::string cmdStr = readSeq(streamHandle);
+        getCommand = execCommand(cmdStr, layout);
+    }
+}
+
 int DebugInterpreter::interpret(const MemLayout& layout) {
     initProgram(layout);
     // Set initial breakpoint at start of program
@@ -76,30 +99,8 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     while (true) {
         try {
             // Skip interactive debug command input if not in interactive mode
-            if (isInteractive) {
-                uint32_t pc = state.registers[Register::PC];
-                // Always get command if system breakpoint is zero
-                bool getCommand = breakpoints.contains(pc) ||
-                                  (breakpoints.contains(0) && breakpoints[0] == 0);
-                // If execution has reached the system breakpoint
-                const bool atSystemBreakpoint =
-                        (breakpoints.contains(pc) && breakpoints[pc] == 0) ||
-                        (breakpoints.contains(0) && breakpoints[0] == 0);
-
-                if (atSystemBreakpoint) {
-                    // Clear system breakpoint
-                    const auto it = std::ranges::find_if(
-                            breakpoints, [](const auto& pair) { return pair.second == 0; });
-                    if (it != breakpoints.end())
-                        breakpoints.erase(it);
-                }
-                // Get user commands until none are expected
-                while (getCommand) {
-                    streamHandle.putStr(prompt);
-                    const std::string cmdStr = readSeq(streamHandle);
-                    getCommand = execCommand(cmdStr, layout);
-                }
-            }
+            if (isInteractive)
+                interactiveStep(layout);
 
             if (!isRunning) {
                 streamHandle.putStr("\nThere is no program running.  Use 'run' to restart\n");
