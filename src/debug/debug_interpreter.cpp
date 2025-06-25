@@ -280,6 +280,12 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             // Execute until the end of the current procedure
             if (state.registers[Register::RA] != 0)
                 breakpoints[state.registers[Register::RA]] = 0;
+            else if (state.cp0[Coproc0Register::EPC] != 0)
+                breakpoints[state.cp0[Coproc0Register::EPC]] = 0;
+            else {
+                streamHandle.putStr("No return address found to finish execution\n");
+                return true;
+            }
             return false;
         }
         case DebugCommand::INFO: {
