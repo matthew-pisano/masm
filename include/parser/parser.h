@@ -141,29 +141,25 @@ class Parser {
                                                       int32_t offset) const;
 
     /**
-     * A more generalized function to parse pseudo instructions
-     * @param loc The location in which the instruction will be placed into memory
-     * @param instructionName The name of the pseudo instruction
-     * @param args The argument tokens for the pseudo instruction
-     * @return The memory allocation associated with the pseudo instruction
+     * Replaces all pseudo instructions in the given lines with their concrete counterparts
+     * @param tokens The lines of tokens to resolve pseudo instructions for
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
-    std::vector<std::byte> parsePseudoInstruction(uint32_t loc, const std::string& instructionName,
-                                                  const std::vector<Token>& args);
+    void resolvePseudoInstructions(std::vector<LineTokens>& tokens);
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions
-     * @param loc The location in which the instruction will be placed into memory
      * @param reg1 The first register token
      * @param reg2 The second register token
-     * @param labelAddr The label address token for the branch
+     * @param label The label address token for the branch
      * @param checkLt Whether the set less than instruction is used for this branch type
      * @param checkEq Whether the branch equal instruction is used for this branch type
-     * @return The memory allocation associated with the branch pseudo instruction
+     * @return The lines of tokens that represent the parsed branch pseudo instruction
      */
-    std::vector<std::byte> parseBranchPseudoInstruction(uint32_t& loc, const Token& reg1,
-                                                        const Token& reg2, const Token& labelAddr,
-                                                        bool checkLt, bool checkEq);
+    std::vector<std::vector<Token>> parseBranchPseudoInstruction(const Token& reg1,
+                                                                 const Token& reg2,
+                                                                 const Token& label, bool checkLt,
+                                                                 bool checkEq);
 
     /**
      * Parse a single line of tokens into memory allocations
