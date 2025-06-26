@@ -47,7 +47,7 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
 
 void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine) {
     // Get next open location in memory
-    uint32_t memLoc = memSectionOffset(currSection) + layout.data[currSection].size();
+    const uint32_t memLoc = memSectionOffset(currSection) + layout.data[currSection].size();
 
     const Token& firstToken = tokenLine.tokens[0];
     const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
@@ -113,8 +113,12 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
         }
         case TokenCategory::LABEL_DEF:
             break; // Ignore label definitions, they do not add any additional memory allocations
-        default:
-            throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
+        default: {
+            if (firstToken.category != TokenCategory::LABEL_REF)
+                throw std::runtime_error("Encountered unexpected token '" + firstToken.value + "'");
+            throw std::runtime_error("Encountered unexpected token '" +
+                                     unmangleLabel(firstToken.value) + "'");
+        }
     }
 
     if (memBytes.empty())
@@ -346,125 +350,137 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
     auto it = tokens.begin();
     while (it != tokens.end()) {
         LineTokens& tokenLine = *it;
-
-        const Token& firstToken = tokenLine.tokens[0];
-        if (firstToken.category != TokenCategory::INSTRUCTION ||
-            nameToInstructionOp(firstToken.value).type != InstructionType::PSEUDO) {
-            // If the first token is not an instruction, continue to the next line
-            ++it;
-            continue;
-        }
-        const std::string instructionName = firstToken.value;
-        const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
-        std::vector<Token> args = filterTokenList(unfilteredArgs);
-
-        // li $t0, imm -> addiu $t0, $zero, imm
-        if (instructionName == "li") {
-            tokenLine.tokens = {
-                    {TokenCategory::INSTRUCTION, "addiu"}, args[0],
-                    {TokenCategory::SEPERATOR, ","},       {TokenCategory::REGISTER, "zero"},
-                    {TokenCategory::SEPERATOR, ","},       args[1]};
-        }
-        // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
-        else if (instructionName == "la") {
-            uint32_t value;
-            if (args[1].category == TokenCategory::LABEL_REF) {
-                if (!labelMap.labelMap.contains(args[1].value))
-                    throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
-                                             "'");
-                value = labelMap.labelMap[args[1].value];
-            } else
-                value = stoui32(args[1].value);
-
-            const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
-            const unsigned int lowerBytes = value & 0x0000FFFF;
-
-            tokenLine.tokens = {{TokenCategory::INSTRUCTION, "lui"},
-                                {TokenCategory::REGISTER, "at"},
-                                {TokenCategory::SEPERATOR, ","},
-                                {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
-
-            LineTokens secondLine = tokenLine;
-            ++it; // Increment iterator since we have added an instruction
-
-            secondLine.tokens = {{TokenCategory::INSTRUCTION, "ori"},
-                                 args[0],
-                                 {TokenCategory::SEPERATOR, ","},
-                                 {TokenCategory::REGISTER, "at"},
-                                 {TokenCategory::SEPERATOR, ","},
-                                 {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
-            it = tokens.insert(it, secondLine);
-        }
-        // move $tx, $ty -> addu $tx, $ty, $zero
-        else if (instructionName == "move") {
-            tokenLine.tokens = {
-                    {TokenCategory::INSTRUCTION, "addu"}, args[0],
-                    {TokenCategory::SEPERATOR, ","},      {TokenCategory::REGISTER, "zero"},
-                    {TokenCategory::SEPERATOR, ","},      args[1]};
-        }
-        // mul $tx, $ty, $tz -> mult $ty, $tz; mflo $tx
-        else if (instructionName == "mul") {
-            tokenLine.tokens = {{TokenCategory::INSTRUCTION, "mult"},
-                                args[1],
-                                {TokenCategory::SEPERATOR, ","},
-                                args[2]};
-
-            LineTokens secondLine = tokenLine;
-            ++it; // Increment iterator since we have added an instruction
-
-            secondLine.tokens = {{TokenCategory::INSTRUCTION, "mflo"},
-                                 {TokenCategory::REGISTER, args[0].value}};
-            tokens.insert(it, secondLine);
-        }
-        // nop -> sll $zero, $zero, 0
-        else if (instructionName == "nop") {
-            tokenLine.tokens = {
-                    {TokenCategory::INSTRUCTION, "sll"}, {TokenCategory::REGISTER, "zero"},
-                    {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
-                    {TokenCategory::SEPERATOR, ","},     {TokenCategory::IMMEDIATE, "0"}};
-        }
-
-        std::vector<std::vector<Token>> branchLines;
-        // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
-        std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
-        if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end()) {
-            if (instructionName == branchPseudoInstrs[0])
-                branchLines = parseBranchPseudoInstruction(args[0], args[1], args[2], true, false);
-            if (instructionName == branchPseudoInstrs[1])
-                branchLines = parseBranchPseudoInstruction(args[0], args[1], args[2], false, false);
-            if (instructionName == branchPseudoInstrs[2])
-                branchLines = parseBranchPseudoInstruction(args[0], args[1], args[2], false, true);
-            if (instructionName == branchPseudoInstrs[3])
-                branchLines = parseBranchPseudoInstruction(args[0], args[1], args[2], true, true);
-        }
-
-        // bxxz $tx, label -> slt $at, $zero, $tx; bxx $at, $zero, label
-        const Token regZero = {TokenCategory::REGISTER, "zero"};
-        std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
-        if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
-            branchZeroPseudoInstrs.end()) {
-            if (instructionName == branchZeroPseudoInstrs[0])
-                branchLines = parseBranchPseudoInstruction(args[0], regZero, args[1], true, false);
-            if (instructionName == branchZeroPseudoInstrs[1])
-                branchLines = parseBranchPseudoInstruction(args[0], regZero, args[1], false, false);
-            if (instructionName == branchZeroPseudoInstrs[2])
-                branchLines = parseBranchPseudoInstruction(args[0], regZero, args[1], false, true);
-            if (instructionName == branchZeroPseudoInstrs[3])
-                branchLines = parseBranchPseudoInstruction(args[0], regZero, args[1], true, true);
-        }
-
-        if (!branchLines.empty()) {
-            // Copy tokenLine since it will be updated along with the changing iterator
-            LineTokens tokenLineCopy = tokenLine;
-            // Insert the parsed branch pseudo instruction lines into the token list
-            for (const std::vector<Token>& branchLine : branchLines) {
-                LineTokens line = tokenLineCopy;
-                line.tokens = branchLine;
-                it = tokens.insert(it + 1, line);
+        // Copy tokenLine since it will be updated along with the changing iterator
+        LineTokens originalTokenLine = tokenLine;
+        try {
+            const Token& firstToken = tokenLine.tokens[0];
+            if (firstToken.category != TokenCategory::INSTRUCTION ||
+                nameToInstructionOp(firstToken.value).type != InstructionType::PSEUDO) {
+                // If the first token is not an instruction, continue to the next line
+                ++it;
+                continue;
             }
-            tokens.erase(it - 2); // Remove the pseudo instruction line
-        } else
-            ++it;
+            const std::string instructionName = firstToken.value;
+            const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
+            std::vector<Token> args = filterTokenList(unfilteredArgs);
+
+            // li $t0, imm -> addiu $t0, $zero, imm
+            if (instructionName == "li") {
+                tokenLine.tokens = {
+                        {TokenCategory::INSTRUCTION, "addiu"}, args[0],
+                        {TokenCategory::SEPERATOR, ","},       {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},       args[1]};
+            }
+            // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
+            else if (instructionName == "la") {
+                uint32_t value;
+                if (args[1].category == TokenCategory::LABEL_REF) {
+                    if (!labelMap.labelMap.contains(args[1].value))
+                        throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
+                                                 "'");
+                    value = labelMap.labelMap[args[1].value];
+                } else
+                    value = stoui32(args[1].value);
+
+                const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
+                const unsigned int lowerBytes = value & 0x0000FFFF;
+
+                tokenLine.tokens = {{TokenCategory::INSTRUCTION, "lui"},
+                                    {TokenCategory::REGISTER, "at"},
+                                    {TokenCategory::SEPERATOR, ","},
+                                    {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
+
+                LineTokens secondLine = tokenLine;
+                ++it; // Increment iterator since we have added an instruction
+
+                secondLine.tokens = {{TokenCategory::INSTRUCTION, "ori"},
+                                     args[0],
+                                     {TokenCategory::SEPERATOR, ","},
+                                     {TokenCategory::REGISTER, "at"},
+                                     {TokenCategory::SEPERATOR, ","},
+                                     {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
+                it = tokens.insert(it, secondLine);
+            }
+            // move $tx, $ty -> addu $tx, $ty, $zero
+            else if (instructionName == "move") {
+                tokenLine.tokens = {
+                        {TokenCategory::INSTRUCTION, "addu"}, args[0],
+                        {TokenCategory::SEPERATOR, ","},      {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},      args[1]};
+            }
+            // mul $tx, $ty, $tz -> mult $ty, $tz; mflo $tx
+            else if (instructionName == "mul") {
+                tokenLine.tokens = {{TokenCategory::INSTRUCTION, "mult"},
+                                    args[1],
+                                    {TokenCategory::SEPERATOR, ","},
+                                    args[2]};
+
+                LineTokens secondLine = tokenLine;
+                ++it; // Increment iterator since we have added an instruction
+
+                secondLine.tokens = {{TokenCategory::INSTRUCTION, "mflo"},
+                                     {TokenCategory::REGISTER, args[0].value}};
+                tokens.insert(it, secondLine);
+            }
+            // nop -> sll $zero, $zero, 0
+            else if (instructionName == "nop") {
+                tokenLine.tokens = {
+                        {TokenCategory::INSTRUCTION, "sll"}, {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},     {TokenCategory::IMMEDIATE, "0"}};
+            }
+
+            std::vector<std::vector<Token>> branchLines;
+            // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label
+            std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
+            if (std::ranges::find(branchPseudoInstrs, instructionName) !=
+                branchPseudoInstrs.end()) {
+                if (instructionName == branchPseudoInstrs[0])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], args[1], args[2], true, false);
+                if (instructionName == branchPseudoInstrs[1])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], args[1], args[2], false, false);
+                if (instructionName == branchPseudoInstrs[2])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], args[1], args[2], false, true);
+                if (instructionName == branchPseudoInstrs[3])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], args[1], args[2], true, true);
+            }
+
+            // bxxz $tx, label -> slt $at, $zero, $tx; bxx $at, $zero, label
+            const Token regZero = {TokenCategory::REGISTER, "zero"};
+            std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
+            if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
+                branchZeroPseudoInstrs.end()) {
+                if (instructionName == branchZeroPseudoInstrs[0])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], regZero, args[1], true, false);
+                if (instructionName == branchZeroPseudoInstrs[1])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], regZero, args[1], false, false);
+                if (instructionName == branchZeroPseudoInstrs[2])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], regZero, args[1], false, true);
+                if (instructionName == branchZeroPseudoInstrs[3])
+                    branchLines =
+                            parseBranchPseudoInstruction(args[0], regZero, args[1], true, true);
+            }
+
+            if (!branchLines.empty()) {
+                // Insert the parsed branch pseudo instruction lines into the token list
+                for (const std::vector<Token>& branchLine : branchLines) {
+                    LineTokens line = originalTokenLine;
+                    line.tokens = branchLine;
+                    it = tokens.insert(it + 1, line);
+                }
+                tokens.erase(it - 2); // Remove the pseudo instruction line
+            } else
+                ++it;
+        } catch (const std::runtime_error& e) {
+            throw MasmSyntaxError(e.what(), originalTokenLine.filename, originalTokenLine.lineno);
+        }
     }
 }
 
