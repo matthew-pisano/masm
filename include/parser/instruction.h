@@ -72,10 +72,12 @@ enum class InstructionCode {
     SW = 0x2b,
 
     // Remapped Instructions (supported by the ISA, but remapped for convenience of parsing)
-    BGTZ = 0x07,
-    BLEZ = 0x06,
-    BLTZ = 0x07,
-    BGEZ = 0x01,
+    BEQZ = 0x00,
+    BNEZ = 0x00,
+    BGTZ = 0x00,
+    BLEZ = 0x00,
+    BLTZ = 0x00,
+    BGEZ = 0x00,
 
     // Syscall
     SYSCALL = 0x00,

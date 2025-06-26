@@ -429,6 +429,20 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
                         {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
                         {TokenCategory::SEPERATOR, ","},     {TokenCategory::IMMEDIATE, "0"}};
             }
+            // beqz $t0, label -> beq $t0, $zero, label
+            else if (instructionName == "beqz") {
+                tokenLine.tokens = {
+                        {TokenCategory::INSTRUCTION, "beq"}, args[0],
+                        {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},     args[1]};
+            }
+            // bnez $t0, label -> bne $t0, $zero, label
+            else if (instructionName == "bnez") {
+                tokenLine.tokens = {
+                        {TokenCategory::INSTRUCTION, "bne"}, args[0],
+                        {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
+                        {TokenCategory::SEPERATOR, ","},     args[1]};
+            }
 
             std::vector<std::vector<Token>> branchLines;
             // bxx $tx, $tx, label -> slt $at, $tx, $tx; bxx $at, $zero, label

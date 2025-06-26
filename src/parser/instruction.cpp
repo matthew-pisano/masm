@@ -74,6 +74,8 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sw", {InstructionType::I_TYPE_T_S_I, InstructionCode::SW, 4}},
 
         // Remapped Instructions (supported by the ISA, but remapped for convenience of parsing)
+        {"beqz", {InstructionType::PSEUDO, InstructionCode::BEQZ, 4}},
+        {"bnez", {InstructionType::PSEUDO, InstructionCode::BNEZ, 4}},
         {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
         {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
         {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
@@ -270,7 +272,8 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
-    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez"};
+    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez",
+                                                       "bgez", "beqz", "bnez"};
     const std::string instructionName = instruction.value;
 
     if (instructionName == "li" &&
