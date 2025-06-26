@@ -12,8 +12,19 @@
  * Struct representing the location of a source line in the program
  */
 struct SourceLocator {
+    /**
+     * The name of the source file where the line is located
+     */
     std::string filename;
+
+    /**
+     * The line number in the source file where the line is located
+     */
     size_t lineno;
+
+    /**
+     * The text of the source line
+     */
     std::string text;
 };
 
