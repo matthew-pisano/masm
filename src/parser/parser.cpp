@@ -367,10 +367,15 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
         }
         // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
         else if (instructionName == "la") {
-            if (!labelMap.labelMap.contains(args[1].value))
-                throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) + "'");
+            uint32_t value;
+            if (args[1].category == TokenCategory::LABEL_REF) {
+                if (!labelMap.labelMap.contains(args[1].value))
+                    throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
+                                             "'");
+                value = labelMap.labelMap[args[1].value];
+            } else
+                value = stoui32(args[1].value);
 
-            const uint32_t value = labelMap.labelMap[args[1].value];
             const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
             const unsigned int lowerBytes = value & 0x0000FFFF;
 
@@ -379,9 +384,9 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
                                 {TokenCategory::SEPERATOR, ","},
                                 {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
 
+            LineTokens secondLine = tokenLine;
             ++it; // Increment iterator since we have added an instruction
 
-            LineTokens secondLine = tokenLine;
             secondLine.tokens = {{TokenCategory::INSTRUCTION, "ori"},
                                  args[0],
                                  {TokenCategory::SEPERATOR, ","},
@@ -404,9 +409,9 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
                                 {TokenCategory::SEPERATOR, ","},
                                 args[2]};
 
+            LineTokens secondLine = tokenLine;
             ++it; // Increment iterator since we have added an instruction
 
-            LineTokens secondLine = tokenLine;
             secondLine.tokens = {{TokenCategory::INSTRUCTION, "mflo"},
                                  {TokenCategory::REGISTER, args[0].value}};
             tokens.insert(it, secondLine);
@@ -449,13 +454,15 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
         }
 
         if (!branchLines.empty()) {
-            tokens.erase(it); // Remove the pseudo instruction line
+            // Copy tokenLine since it will be updated along with the changing iterator
+            LineTokens tokenLineCopy = tokenLine;
             // Insert the parsed branch pseudo instruction lines into the token list
             for (const std::vector<Token>& branchLine : branchLines) {
-                LineTokens line = tokenLine;
+                LineTokens line = tokenLineCopy;
                 line.tokens = branchLine;
-                it = tokens.insert(it, line);
+                it = tokens.insert(it + 1, line);
             }
+            tokens.erase(it - 2); // Remove the pseudo instruction line
         } else
             ++it;
     }
@@ -477,17 +484,13 @@ Parser::parseBranchPseudoInstruction(const Token& reg1, const Token& reg2, const
                            {TokenCategory::SEPERATOR, ","},     reg1};
 
     if (checkEq)
-        branchTokens[1] = {{TokenCategory::INSTRUCTION, "beq"},
-                           {TokenCategory::REGISTER, "at"},
-                           {TokenCategory::SEPERATOR, ","},
-                           {TokenCategory::REGISTER, "zero"},
-                           label};
+        branchTokens[1] = {{TokenCategory::INSTRUCTION, "beq"}, {TokenCategory::REGISTER, "at"},
+                           {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
+                           {TokenCategory::SEPERATOR, ","},     label};
     else
-        branchTokens[1] = {{TokenCategory::INSTRUCTION, "bne"},
-                           {TokenCategory::REGISTER, "at"},
-                           {TokenCategory::SEPERATOR, ","},
-                           {TokenCategory::REGISTER, "zero"},
-                           label};
+        branchTokens[1] = {{TokenCategory::INSTRUCTION, "bne"}, {TokenCategory::REGISTER, "at"},
+                           {TokenCategory::SEPERATOR, ","},     {TokenCategory::REGISTER, "zero"},
+                           {TokenCategory::SEPERATOR, ","},     label};
 
     return branchTokens;
 }
