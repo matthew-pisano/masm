@@ -364,14 +364,16 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
             std::vector<Token> args = filterTokenList(unfilteredArgs);
 
-            // li $t0, imm -> addiu $t0, $zero, imm
+            validatePseudoInstruction(firstToken, args);
+
+            // li $tx, imm -> addiu $tx, $zero, imm
             if (instructionName == "li") {
                 tokenLine.tokens = {
                         {TokenCategory::INSTRUCTION, "addiu"}, args[0],
                         {TokenCategory::SEPERATOR, ","},       {TokenCategory::REGISTER, "zero"},
                         {TokenCategory::SEPERATOR, ","},       args[1]};
             }
-            // la $t0, label -> lui $at, upperAddr; ori $t0, $at, lowerAddr
+            // la $tx, label -> lui $at, upperAddr; ori $tx, $at, lowerAddr
             else if (instructionName == "la") {
                 uint32_t value;
                 if (args[1].category == TokenCategory::LABEL_REF) {
@@ -421,6 +423,16 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
                 secondLine.tokens = {{TokenCategory::INSTRUCTION, "mflo"},
                                      {TokenCategory::REGISTER, args[0].value}};
                 tokens.insert(it, secondLine);
+            }
+            // subi $tx, $ty, imm  -> addi $tx, $ty, -imm
+            else if (instructionName == "subi") {
+                uint32_t immediate = -stoui32(args[2].value);
+                tokenLine.tokens = {{TokenCategory::INSTRUCTION, "addi"},
+                                    args[0],
+                                    {TokenCategory::SEPERATOR, ","},
+                                    args[1],
+                                    {TokenCategory::SEPERATOR, ","},
+                                    {TokenCategory::IMMEDIATE, std::to_string(immediate)}};
             }
             // nop -> sll $zero, $zero, 0
             else if (instructionName == "nop") {

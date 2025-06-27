@@ -144,6 +144,7 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"move", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"mul", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"nop", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
+        {"subi", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
         {"blt", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"bgt", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
         {"bge", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
@@ -263,9 +264,9 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
                                          instruction.value);
             break;
-        case InstructionType::PSEUDO:
-            validatePseudoInstruction(instruction, args);
-            break;
+        default:
+            // Should never be reached
+            throw std::runtime_error("Unknown instruction " + instruction.value);
     }
 }
 
@@ -294,6 +295,10 @@ void validatePseudoInstruction(const Token& instruction, const std::vector<Token
                 {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "nop" && !tokenCategoryMatch({}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "subi" &&
+        !tokenCategoryMatch(
+                {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
         !tokenCategoryMatch(
