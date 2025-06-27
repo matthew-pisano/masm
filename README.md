@@ -32,6 +32,35 @@ Note that program execution will begin at the first instruction in the text sect
 
 By default, *masm* will use *syscall I/O*. This means that the console input and output are only accessible through syscalls. Alternately, the `--mmio` option enables *memory-mapped I/O*. With this option, console I/O is routed through the MMIO registers (located at *0xffff0000* - *0xffff000f*). Reading from or writing to these registers passes that information to the program.
 
+### Interrupts
+
+*masm* handles interrupts differently from other *MIPS* simulators. Interrupts, by default, are disabled. Keyboard interrupts can be enabled by setting the interrupt enable bit (bit zero) of the coprocessor zero *status* ($12) register to 1. Once this is set, both keyboard and display interrupts will be enabled. Each interrupt can be selectively turned off by setting bit 8 (keyboard) or bit 9 (display) to 0. When an interrupt event is detected, control of the program will be transferred at the
+interrupt
+handler at `0x80000000`. If no such handler exists, an exception will be thrown and the program will halt.
+
+```asm
+# Modify interrupt status
+
+# Move interrupt status in $12 to $t0
+mfc0    $t0, $12
+# Set interrupt enable flag (keep all bits as they are, except last which gets set)
+ori     $t0, $t0, 0x0001
+# Set keyboard interrupt enable flag to zero to disable it
+andi    $t0, $t0, 0xfeff
+# Set display interrupt enable flag to zero to disable it
+andi    $t0, $t0, 0xfdff
+# Move new status with set enable flag back into $12
+mtc0    $t0, $12
+```
+
+### Exceptions
+
+Exceptions are handled similarly from interrupts. When a runtime exception is triggered, control is transferred to the interrupt handler at `0x80000000`. If no such handler exists, the exception is not handled and is thrown, halting the program.
+
+### Little Endian Compatibility
+
+By default, *masm* stores words in a *big endian* format to keep in line with the original *MIPS* standard. However, *little endian* compatibility can be enabled with the `--little-endian` option. This changes how words are stored, so certain programs, such as those working with MMIO, may not work without modification.
+
 ## Python Bindings
 
 In addition to the main executable, this project also builds a set of *Python* bindings accessible through the `pymasm` package. This allows for *Python* code to directly interact with *masm* to assemble and execute strings of assembly programs.
