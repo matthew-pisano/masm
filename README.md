@@ -78,4 +78,4 @@ This program uses a 32 element array composed of 32-bit integers to represent it
     - [X] Exceptions
 - [X] Floating Point Coprocessor
     - [X] Floating Point Syscalls
-- [ ] Interactive Debugger
+- [X] Interactive Debugger
