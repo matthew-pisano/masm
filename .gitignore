@@ -45,3 +45,4 @@ data
 dist
 *.egg-info
 build
+.venv
