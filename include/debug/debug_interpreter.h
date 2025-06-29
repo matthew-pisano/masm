@@ -96,6 +96,24 @@ class DebugInterpreter final : public Interpreter {
     void getFrame();
 
     /**
+     * Given a label name and filename, this locates the line at which the label appears in the file
+     * @param label The label to locate
+     * @param filename The name of the file in which to locate the label
+     * @return The line number at which the label appears in the file
+     * @throw std::invalid_argument if the label cannot be found in the file
+     */
+    size_t locateLabelInFile(const std::string& label, const std::string& filename);
+
+    /**
+     * Get the address associated with the reference string.  This could either be a hexadecimal
+     * number, a file:line locator, a file:label locator, a line number, or a label.
+     * @param ref The address reference string
+     * @return The address associated with that string
+     * @throw std::invalid_argument if the reference string is invalid or cannot be resolved
+     */
+    uint32_t addrFRomStr(const std::string& ref);
+
+    /**
      * Sets a breakpoint at the given address, source location, or label
      * @param arg The address or source location to set the breakpoint at, in hex format (0x...) or
      * as a source line number or label

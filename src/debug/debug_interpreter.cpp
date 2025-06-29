@@ -20,14 +20,13 @@ const std::string prompt = "\n(mdb) ";
  */
 const std::string debuggerHelp =
         "Debug Interpreter Commands:\n\n"
-        "break, b <address> - Set a breakpoint at the specified hex address\n"
-        "break, b <line> - Set a breakpoint at the specified line number within the current file\n"
-        "break, b <file:line> - Set a breakpoint at the specified file and line number\n"
-        "break, b <label> - Set a breakpoint at the specified label\n"
+        "break, b <ref> - Set a breakpoint at the given reference.  This can be in the form of a "
+        "hexadecimal address, a line number, a label, or a filename:line or filename:label pair\n"
         "continue, cont, c - Continue execution until the next breakpoint\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
-        "examine, x <address> - Examine memory at the specified address\n"
+        "examine, x <ref> - Examine memory at the given reference.  This can be in the form of "
+        "a hexadecimal address, a line number, a label, or a filename:line or filename:label pair\n"
         "exit, quit, q - Exit the debugger\n"
         "finish - Execute until the end of the current procedure (the location stored in $ra)\n"
         "frame, f - Show the current stack frame\n"
@@ -220,110 +219,107 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
 
 bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& layout) {
     // Parse the command string into a command and its arguments
-    DebugCommand cmd;
-    std::vector<std::string> args;
     try {
         const std::tuple<DebugCommand, std::vector<std::string>> parsedCmd = parseCommand(cmdStr);
-        cmd = std::get<0>(parsedCmd);
-        args = std::get<1>(parsedCmd);
+        const DebugCommand cmd = std::get<0>(parsedCmd);
+        const std::vector<std::string> args = std::get<1>(parsedCmd);
+
+        switch (cmd) {
+            case DebugCommand::RUN: {
+                // Reset the interpreter and run the program from the beginning
+                resetInterpreter(layout);
+                return true;
+            }
+            case DebugCommand::HELP: {
+                // Display help message with available commands
+                streamHandle.putStr(debuggerHelp);
+                return true;
+            }
+            case DebugCommand::STEP: {
+                // Signals that execution should stop after next executed instruction (not next in
+                // sequence)
+                breakpoints[0] = 0;
+                return false;
+            }
+            case DebugCommand::NEXT: {
+                // Set breakpoint to be next instruction in sequence, skips over jumps
+                breakpoints[state.registers[Register::PC] + 4] = 0;
+                return false;
+            }
+            case DebugCommand::CONTINUE:
+                // Continue execution until the next breakpoint
+                return false;
+            case DebugCommand::BREAK: {
+                // Set a breakpoint at the specified address, line number, or label
+                setBreakpoint(args[0]);
+                return true;
+            }
+            case DebugCommand::DEL_BP: {
+                // Delete breakpoints
+                deleteBreakpoint(args.empty() ? "" : args[0]);
+                return true;
+            }
+            case DebugCommand::LIST: {
+                // List surrounding lines of code
+                listLines();
+                return true;
+            }
+            case DebugCommand::FRAME: {
+                // Show current stack frame
+                getFrame();
+                return true;
+            }
+            case DebugCommand::FINISH: {
+                // Execute until the end of the current procedure
+                if (state.registers[Register::RA] != 0)
+                    breakpoints[state.registers[Register::RA]] = 0;
+                else if (state.cp0[Coproc0Register::EPC] != 0)
+                    breakpoints[state.cp0[Coproc0Register::EPC]] = 0;
+                else {
+                    streamHandle.putStr("No return address found to finish execution\n");
+                    return true;
+                }
+                return false;
+            }
+            case DebugCommand::INFO: {
+                // Show information about registers, breakpoints, etc.
+                if (args[0] == "breakpoints")
+                    listBreakpoints();
+                else if (args[0] == "labels")
+                    listLabels();
+                else if (args[0] == "registers")
+                    listRegisters();
+                else if (args[0] == "cp0")
+                    listCP0Registers();
+                else if (args[0] == "cp1")
+                    listCP1Registers();
+                else
+                    streamHandle.putStr("Unknown info command: " + args[0] + "\n");
+                return true;
+            }
+            case DebugCommand::EXAMINE: {
+                // Examine memory at the specified address
+                examineAddress(args[0]);
+                return true;
+            }
+            case DebugCommand::PRINT: {
+                // Print register or label value
+                if (args[0].starts_with("$"))
+                    // Print register value
+                    printRegister(args[0].substr(1)); // Remove '$' prefix
+                else
+                    // Print label value
+                    printLabel(args[0]);
+                return true;
+            }
+            case DebugCommand::EXIT: {
+                throw DebuggerExit("Exiting debugger", 0);
+            }
+        }
     } catch (const std::invalid_argument& e) {
         streamHandle.putStr(std::format("\n{}", e.what()));
         return true; // Continue prompting for commands
     }
-
-    switch (cmd) {
-        case DebugCommand::RUN: {
-            // Reset the interpreter and run the program from the beginning
-            resetInterpreter(layout);
-            return true;
-        }
-        case DebugCommand::HELP: {
-            // Display help message with available commands
-            streamHandle.putStr(debuggerHelp);
-            return true;
-        }
-        case DebugCommand::STEP: {
-            // Signals that execution should stop after next executed instruction (not next in
-            // sequence)
-            breakpoints[0] = 0;
-            return false;
-        }
-        case DebugCommand::NEXT: {
-            // Set breakpoint to be next instruction in sequence, skips over jumps
-            breakpoints[state.registers[Register::PC] + 4] = 0;
-            return false;
-        }
-        case DebugCommand::CONTINUE:
-            // Continue execution until the next breakpoint
-            return false;
-        case DebugCommand::BREAK: {
-            // Set a breakpoint at the specified address, line number, or label
-            setBreakpoint(args[0]);
-            return true;
-        }
-        case DebugCommand::DEL_BP: {
-            // Delete breakpoints
-            deleteBreakpoint(args.empty() ? "" : args[0]);
-            return true;
-        }
-        case DebugCommand::LIST: {
-            // List surrounding lines of code
-            listLines();
-            return true;
-        }
-        case DebugCommand::FRAME: {
-            // Show current stack frame
-            getFrame();
-            return true;
-        }
-        case DebugCommand::FINISH: {
-            // Execute until the end of the current procedure
-            if (state.registers[Register::RA] != 0)
-                breakpoints[state.registers[Register::RA]] = 0;
-            else if (state.cp0[Coproc0Register::EPC] != 0)
-                breakpoints[state.cp0[Coproc0Register::EPC]] = 0;
-            else {
-                streamHandle.putStr("No return address found to finish execution\n");
-                return true;
-            }
-            return false;
-        }
-        case DebugCommand::INFO: {
-            // Show information about registers, breakpoints, etc.
-            if (args[0] == "breakpoints")
-                listBreakpoints();
-            else if (args[0] == "labels")
-                listLabels();
-            else if (args[0] == "registers")
-                listRegisters();
-            else if (args[0] == "cp0")
-                listCP0Registers();
-            else if (args[0] == "cp1")
-                listCP1Registers();
-            else
-                streamHandle.putStr("Unknown info command: " + args[0] + "\n");
-            return true;
-        }
-        case DebugCommand::EXAMINE: {
-            // Examine memory at the specified address
-            examineAddress(args[0]);
-            return true;
-        }
-        case DebugCommand::PRINT: {
-            // Print register or label value
-            if (args[0].starts_with("$"))
-                // Print register value
-                printRegister(args[0].substr(1)); // Remove '$' prefix
-            else
-                // Print label value
-                printLabel(args[0]);
-            return true;
-        }
-        case DebugCommand::EXIT: {
-            throw DebuggerExit("Exiting debugger", 0);
-        }
-    }
-    // Should never be reached
     return false;
 }
 
@@ -362,101 +358,79 @@ void DebugInterpreter::getFrame() {
         streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
 }
 
-void DebugInterpreter::setBreakpoint(const std::string& arg) {
-    size_t breakLine;
-    std::string breakFile;
+size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::string& filename) {
+    // Find debug info that matches the given label in the current file
+    const auto it = std::ranges::find_if(state.debugInfo, [label, filename](const auto& pair) {
+        return unmangleLabel(pair.second.label) == label && pair.second.source &&
+               pair.second.source->filename == filename;
+    });
+    if (it == state.debugInfo.end()) {
+        throw std::invalid_argument("Cannot find labeled instruction: '" + label + "' in file " +
+                                    filename + "\n");
+    }
+    // Get the line for the label
+    return it->second.source->lineno;
+}
 
+uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
     // Check if the argument is a valid hex address
-    if (arg.starts_with("0x")) {
-        uint32_t addr;
+    if (ref.starts_with("0x")) {
         try {
-            addr = std::stoul(arg.substr(2), nullptr, 16);
+            return std::stoul(ref.substr(2), nullptr, 16);
         } catch (const std::invalid_argument&) {
-            streamHandle.putStr("Invalid address: " + arg + "\n");
-            return;
+            throw std::invalid_argument("Invalid hexadecimal address: " + ref);
         }
+    }
 
-        if (!state.debugInfo.contains(addr)) {
-            streamHandle.putStr("Cannot find debug info for address: " + arg + "\n");
-            return;
-        }
-        const std::shared_ptr<SourceLocator> srcPtr = state.getDebugInfo(addr).source;
-        if (!srcPtr) {
-            streamHandle.putStr("Cannot find debug info for address: " + arg + "\n");
-            return;
-        }
-        breakFile = srcPtr->filename;
-        breakLine = srcPtr->lineno;
-    }
-    // If the argument is in file:line format
-    else if (arg.contains(":")) {
-        // Check if the argument is a file:line format
-        const size_t colonPos = arg.find(':');
-        if (colonPos == std::string::npos) {
-            streamHandle.putStr("Invalid file:line format: " + arg + "\n");
-            return;
-        }
-        breakFile = arg.substr(0, colonPos);
+    size_t refLine;
+    // Current file, by default
+    std::string refFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
+    // If the argument is in file:line or file:label format
+    if (ref.contains(":")) {
+        const size_t colonPos = ref.find(':');
+        refFile = ref.substr(0, colonPos);
         try {
-            breakLine = std::stoul(arg.substr(colonPos + 1));
+            refLine = std::stoul(ref.substr(colonPos + 1));
         } catch (const std::invalid_argument&) {
-            streamHandle.putStr("Invalid line number: " + arg.substr(colonPos + 1) + "\n");
-            return;
+            // Treat portion after colon as a label
+            refLine = locateLabelInFile(ref.substr(colonPos + 1), refFile);
         }
     }
-    // If the argument is just a line number
-    else if (isSignedInteger(arg)) {
-        breakFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
-        try {
-            breakLine = std::stoul(arg);
-        } catch (const std::invalid_argument&) {
-            streamHandle.putStr("Invalid line number: " + arg + "\n");
-            return;
-        }
-    }
-    // If the argument is a label
+    // If the argument is just a line number or label
     else {
-        breakFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
-        // Find debug info that matches the given label in the current file
-        const auto it = std::ranges::find_if(state.debugInfo, [arg, breakFile](const auto& pair) {
-            return unmangleLabel(pair.second.label) == arg && pair.second.source &&
-                   pair.second.source->filename == breakFile;
-        });
-        if (it == state.debugInfo.end()) {
-            streamHandle.putStr("Cannot find instruction label: " + arg + " in file " + breakFile +
-                                "\n");
-            return;
+        try {
+            refLine = std::stoul(ref);
+        } catch (const std::invalid_argument&) {
+            // Treat the reference as a label
+            refLine = locateLabelInFile(ref, refFile);
         }
-        // Get the line for the label
-        breakLine = it->second.source->lineno;
     }
 
     // Find debug info that matches file and line
-    const auto it = std::ranges::find_if(state.debugInfo, [breakFile, breakLine](const auto& pair) {
+    const auto it = std::ranges::find_if(state.debugInfo, [refLine, refFile](const auto& pair) {
         if (!pair.second.source)
             return false;
         const SourceLocator src = *pair.second.source;
-        return src.filename == breakFile && src.lineno == breakLine;
+        return src.filename == refFile && src.lineno == refLine;
     });
-    if (it == state.debugInfo.end())
-        streamHandle.putStr("No debug info associated with line " + std::to_string(breakLine) +
-                            " in file " + breakFile + "\n");
-    else {
-        const uint32_t addr = it->first;
-        if (!breakpoints.contains(addr)) {
-            // Set breakpoint at the found address
-            breakpoints[addr] = nextBreakpoint;
-            nextBreakpoint++;
-            streamHandle.putStr(std::format("Breakpoint {} set at 0x{:08x} ({}:{})\n",
-                                            breakpoints[addr], addr, breakFile, breakLine));
-        } else
-            streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n",
-                                            breakpoints[addr], addr));
-    }
+    return it->first;
+}
+
+void DebugInterpreter::setBreakpoint(const std::string& arg) {
+    const uint32_t addr = addrFRomStr(arg);
+    if (!breakpoints.contains(addr)) {
+        // Set breakpoint at the found address
+        breakpoints[addr] = nextBreakpoint;
+        nextBreakpoint++;
+        streamHandle.putStr(
+                std::format("Breakpoint {} set at 0x{:08x}\n", breakpoints[addr], addr));
+    } else
+        streamHandle.putStr(
+                std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
 }
 
 void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
-    // Delete breakpoints
+    // Delete all breakpoints
     if (arg.empty()) {
         std::vector<uint32_t> breakAddrs;
         for (auto it = breakpoints.begin(); it != breakpoints.end();) {
@@ -484,23 +458,9 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
 
 
 void DebugInterpreter::examineAddress(const std::string& arg) {
-    if (!arg.starts_with("0x")) {
-        streamHandle.putStr("Address must be in hex format (0x...)\n");
-        return;
-    }
-
-    try {
-        const uint32_t addr = std::stoul(arg.substr(2), nullptr, 16);
-        if (!state.memory.isValid(addr)) {
-            streamHandle.putStr("Invalid address: " + arg + "\n");
-            return;
-        }
-        const int32_t value = state.memory.wordAt(addr);
-        streamHandle.putStr(
-                std::format("0x{:08x}: 0x{:08x} ({})\n", addr, value, wordAsString(value)));
-    } catch (const std::invalid_argument&) {
-        streamHandle.putStr("Invalid address format: " + arg + "\n");
-    }
+    const uint32_t addr = addrFRomStr(arg);
+    int32_t value = state.memory.wordAt(addr);
+    streamHandle.putStr(std::format("0x{:08x}: 0x{:08x} ({})\n", addr, value, wordAsString(value)));
 }
 
 void DebugInterpreter::listBreakpoints() {
@@ -512,9 +472,12 @@ void DebugInterpreter::listBreakpoints() {
     for (const auto& [addr, id] : breakpoints) {
         if (id == 0)
             continue; // Skip system breakpoint
-        const SourceLocator src = *state.getDebugInfo(addr).source;
-        streamHandle.putStr(
-                std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
+        const std::shared_ptr<SourceLocator> src = state.getDebugInfo(addr).source;
+        if (src)
+            streamHandle.putStr(
+                    std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src->filename, src->lineno));
+        else
+            streamHandle.putStr(std::format("{:<3}: 0x{:08x}\n", id, addr));
     }
 }
 
