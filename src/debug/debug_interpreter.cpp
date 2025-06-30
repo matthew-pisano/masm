@@ -179,8 +179,8 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
         return {DebugCommand::DEL_BP, {args}};
     }
     if (cmd == "list" || cmd == "ls" || cmd == "l") {
-        if (!args.empty())
-            throw std::invalid_argument("List command does not take any arguments");
+        if (args.size() > 1)
+            throw std::invalid_argument("List command requires zero or one argument");
         return {DebugCommand::LIST, args};
     }
     if (cmd == "frame" || cmd == "f") {
@@ -261,7 +261,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             }
             case DebugCommand::LIST: {
                 // List surrounding lines of code
-                listLines();
+                listLines(args.empty() ? "" : args[0]);
                 return true;
             }
             case DebugCommand::FRAME: {
@@ -335,19 +335,25 @@ void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
     isRunning = true;
 }
 
-void DebugInterpreter::listLines() {
+void DebugInterpreter::listLines(const std::string& arg) {
     const uint32_t pc = state.registers[Register::PC];
-    for (uint32_t i = pc - 40; i < pc + 40; i += 4) {
+    const uint32_t addr = arg.empty() ? pc : addrFRomStr(arg);
+
+    for (uint32_t i = addr - 40; i < addr + 40; i += 4) {
         if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
             continue; // Skip invalid addresses
 
         const DebugInfo debugInfo = state.getDebugInfo(i);
         if (!debugInfo.label.empty())
             streamHandle.putStr("(" + unmangleLabel(debugInfo.label) + ")\n");
-        streamHandle.putStr(i == pc ? "--> " : "    ");
-        streamHandle.putStr(
-                std::format("{:<6} (0x{:08x}): 0x{:08x}    {}\n", debugInfo.source->lineno, i,
-                            static_cast<uint32_t>(state.memory.wordAt(i)), debugInfo.source->text));
+        const std::string pointerString = i == pc ? "--->" : "";
+        // An indicator for when a breakpoint is present
+        const std::string bpString =
+                breakpoints.contains(i) ? "(*" + std::to_string(breakpoints[i]) + ")" : "";
+        streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
+                                        pointerString, debugInfo.source->lineno, i,
+                                        static_cast<uint32_t>(state.memory.wordAt(i)),
+                                        debugInfo.source->text));
     }
 }
 
@@ -413,6 +419,9 @@ uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
         const SourceLocator src = *pair.second.source;
         return src.filename == refFile && src.lineno == refLine;
     });
+    if (it == state.debugInfo.end())
+        throw std::invalid_argument("Cannot find instruction at " + refFile + ":" +
+                                    std::to_string(refLine) + "\n");
     return it->first;
 }
 

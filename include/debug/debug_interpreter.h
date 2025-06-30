@@ -88,7 +88,7 @@ class DebugInterpreter final : public Interpreter {
     /**
      * Lists the source lines surrounding the current program counter
      */
-    void listLines();
+    void listLines(const std::string& arg);
 
     /**
      * Lists the words contained within the current stack frame
