@@ -71,6 +71,9 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                     parsePaddedAllocDirective(memLoc, firstToken, args, useLittleEndian);
             memBytes.insert(memBytes.end(), std::get<0>(alloc).begin(), std::get<0>(alloc).end());
             const size_t paddedMemLoc = memLoc + std::get<1>(alloc);
+            const std::shared_ptr<SourceLocator> tokenLinePtr =
+                    std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
+            debugInfo.source = tokenLinePtr;
             try {
                 debugInfo.label = labelMap.lookupLabel(paddedMemLoc);
             } catch (const std::runtime_error&) {
