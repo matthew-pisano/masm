@@ -154,8 +154,9 @@ class DebugInterpreter final : public Interpreter {
     /**
      * Examines the memory at the specified address and prints its value
      * @param arg The address to examine, in hex format (0x...)
+     * @param numWords The number of bytes to examine at the address
      */
-    void examineAddress(const std::string& arg);
+    void examineAddress(const std::string& arg, size_t numWords);
 
     /**
      * Prints the value of a register

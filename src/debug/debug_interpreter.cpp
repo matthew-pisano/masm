@@ -25,8 +25,9 @@ const std::string debuggerHelp =
         "continue, cont, c - Continue execution until the next breakpoint\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
-        "examine, x <ref> - Examine memory at the given reference.  This can be in the form of "
-        "a hexadecimal address, a line number, a label, or a filename:line or filename:label pair\n"
+        "examine, x <ref> [words] - Examine memory at the given reference.  This can be in the "
+        "form of a hexadecimal address, a line number, a label, or a filename:line or "
+        "filename:label pair.  The number of words to print can also be specified; one by default\n"
         "exit, quit, q - Exit the debugger\n"
         "finish - Execute until the end of the current procedure (the location stored in $ra)\n"
         "frame, f - Show the current stack frame\n"
@@ -199,8 +200,8 @@ DebugInterpreter::parseCommand(const std::string& cmdStr) {
         return {DebugCommand::INFO, args};
     }
     if (cmd == "examine" || cmd == "x") {
-        if (args.size() != 1)
-            throw std::invalid_argument("Examine command requires one argument");
+        if (args.empty() || args.size() > 2)
+            throw std::invalid_argument("Examine command requires one or two arguments");
         return {DebugCommand::EXAMINE, args};
     }
     if (cmd == "print" || cmd == "p") {
@@ -299,7 +300,11 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
             }
             case DebugCommand::EXAMINE: {
                 // Examine memory at the specified address
-                examineAddress(args[0]);
+                size_t numWords = 1;
+                if (args.size() > 1)
+                    numWords = stoui32(args[1]);
+
+                examineAddress(args[0], numWords);
                 return true;
             }
             case DebugCommand::PRINT: {
@@ -465,10 +470,14 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
 }
 
 
-void DebugInterpreter::examineAddress(const std::string& arg) {
+void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWords) {
     const uint32_t addr = addrFRomStr(arg);
-    uint32_t value = state.memory._sysWordAt(addr);
-    streamHandle.putStr(std::format("0x{:08x}: 0x{:08x} ({})\n", addr, value, wordAsString(value)));
+
+    for (size_t i = 0; i < numWords; i++) {
+        uint32_t value = state.memory._sysWordAt(addr + i * 4);
+        streamHandle.putStr(
+                std::format("0x{:08x}: 0x{:08x} ({})\n", addr + i * 4, value, wordAsString(value)));
+    }
 }
 
 void DebugInterpreter::listBreakpoints() {
