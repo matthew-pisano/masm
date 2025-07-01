@@ -369,7 +369,7 @@ void DebugInterpreter::getFrame() {
 size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::string& filename) {
     // Find debug info that matches the given label in the current file
     const auto it = std::ranges::find_if(state.debugInfo, [label, filename](const auto& pair) {
-        return unmangleLabel(pair.second.label) == label;
+        return unmangleLabel(pair.second.label) == label && pair.second.source.filename == filename;
     });
     if (it == state.debugInfo.end()) {
         throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename +
@@ -419,7 +419,7 @@ uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
         return src.filename == refFile && src.lineno == refLine;
     });
     if (it == state.debugInfo.end())
-        throw std::invalid_argument("Cannot find instruction at " + refFile + ":" +
+        throw std::invalid_argument("Cannot find memory at " + refFile + ":" +
                                     std::to_string(refLine) + "\n");
     return it->first;
 }
