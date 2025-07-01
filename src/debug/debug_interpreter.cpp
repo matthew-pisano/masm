@@ -467,7 +467,7 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
 
 void DebugInterpreter::examineAddress(const std::string& arg) {
     const uint32_t addr = addrFRomStr(arg);
-    uint32_t value = state.memory.wordAt(addr);
+    uint32_t value = state.memory._sysWordAt(addr);
     streamHandle.putStr(std::format("0x{:08x}: 0x{:08x} ({})\n", addr, value, wordAsString(value)));
 }
 
