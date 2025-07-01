@@ -71,9 +71,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                     parsePaddedAllocDirective(memLoc, firstToken, args, useLittleEndian);
             memBytes.insert(memBytes.end(), std::get<0>(alloc).begin(), std::get<0>(alloc).end());
             const size_t paddedMemLoc = memLoc + std::get<1>(alloc);
-            const std::shared_ptr<SourceLocator> tokenLinePtr =
-                    std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
-            debugInfo.source = tokenLinePtr;
+            debugInfo.source = {tokenLine.filename, tokenLine.lineno};
             try {
                 debugInfo.label = labelMap.lookupLabel(paddedMemLoc);
             } catch (const std::runtime_error&) {
@@ -84,9 +82,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
         case TokenCategory::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
-            const std::shared_ptr<SourceLocator> tokenLinePtr =
-                    std::make_shared<SourceLocator>(tokenLine.filename, tokenLine.lineno);
-            debugInfo.source = tokenLinePtr;
+            debugInfo.source = {tokenLine.filename, tokenLine.lineno};
             try {
                 debugInfo.label = labelMap.lookupLabel(memLoc);
             } catch (const std::runtime_error&) {
@@ -95,13 +91,13 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
             // Add the source code text the debug info
             for (const Token& token : tokenLine.tokens) {
                 if (token.category == TokenCategory::SEPERATOR)
-                    debugInfo.source->text += token.value;
+                    debugInfo.source.text += token.value;
                 else if (token.category == TokenCategory::REGISTER)
-                    debugInfo.source->text += " $" + token.value;
+                    debugInfo.source.text += " $" + token.value;
                 else if (token.category != TokenCategory::LABEL_REF)
-                    debugInfo.source->text += " " + token.value;
+                    debugInfo.source.text += " " + token.value;
                 else
-                    debugInfo.source->text += " " + unmangleLabel(token.value);
+                    debugInfo.source.text += " " + unmangleLabel(token.value);
             }
 
             // Assign debug info to all allocated instructions (including multi-instruction

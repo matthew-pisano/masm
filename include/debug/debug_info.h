@@ -36,7 +36,7 @@ struct DebugInfo {
     /**
      * The source file locator for the instruction, which includes the filename and line number
      */
-    std::shared_ptr<SourceLocator> source;
+    SourceLocator source;
 
     /**
      * The label assigned to the given data, if any

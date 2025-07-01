@@ -316,7 +316,9 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
                 throw DebuggerExit("Exiting debugger", 0);
             }
         }
-    } catch (const std::invalid_argument& e) {
+    } catch (const DebuggerExit& e) {
+        throw;
+    } catch (const std::exception& e) {
         streamHandle.putStr(std::format("\n{}", e.what()));
         return true; // Continue prompting for commands
     }
@@ -351,9 +353,9 @@ void DebugInterpreter::listLines(const std::string& arg) {
         const std::string bpString =
                 breakpoints.contains(i) ? "(*" + std::to_string(breakpoints[i]) + ")" : "";
         streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
-                                        pointerString, debugInfo.source->lineno, i,
+                                        pointerString, debugInfo.source.lineno, i,
                                         static_cast<uint32_t>(state.memory.wordAt(i)),
-                                        debugInfo.source->text));
+                                        debugInfo.source.text));
     }
 }
 
@@ -374,7 +376,7 @@ size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::
                                     "\n");
     }
     // Get the line for the label
-    return it->second.source->lineno;
+    return it->second.source.lineno;
 }
 
 uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
@@ -389,7 +391,7 @@ uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
 
     size_t refLine;
     // Current file, by default
-    std::string refFile = state.getDebugInfo(state.registers[Register::PC]).source->filename;
+    std::string refFile = state.getDebugInfo(state.registers[Register::PC]).source.filename;
     // If the argument is in file:line or file:label format
     if (ref.contains(":")) {
         const size_t colonPos = ref.find(':');
@@ -413,9 +415,7 @@ uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
 
     // Find debug info that matches file and line
     const auto it = std::ranges::find_if(state.debugInfo, [refLine, refFile](const auto& pair) {
-        if (!pair.second.source)
-            return false;
-        const SourceLocator src = *pair.second.source;
+        const SourceLocator src = pair.second.source;
         return src.filename == refFile && src.lineno == refLine;
     });
     if (it == state.debugInfo.end())
@@ -480,19 +480,16 @@ void DebugInterpreter::listBreakpoints() {
     for (const auto& [addr, id] : breakpoints) {
         if (id == 0)
             continue; // Skip system breakpoint
-        const std::shared_ptr<SourceLocator> src = state.getDebugInfo(addr).source;
-        if (src)
-            streamHandle.putStr(
-                    std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src->filename, src->lineno));
-        else
-            streamHandle.putStr(std::format("{:<3}: 0x{:08x}\n", id, addr));
+        SourceLocator src = state.getDebugInfo(addr).source;
+        streamHandle.putStr(
+                std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
     }
 }
 
 void DebugInterpreter::listLabels() {
     for (const auto& [addr, debugInfo] : state.debugInfo)
-        if (!debugInfo.label.empty() && debugInfo.source) {
-            const SourceLocator src = *debugInfo.source;
+        if (!debugInfo.label.empty()) {
+            const SourceLocator src = debugInfo.source;
             streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
                                             unmangleLabel(debugInfo.label), addr, src.filename,
                                             src.lineno));
@@ -580,11 +577,8 @@ void DebugInterpreter::printLabel(const std::string& arg) {
     if (it != state.debugInfo.end()) {
         const uint32_t addr = it->first;
         const DebugInfo& debugInfo = it->second;
-        if (debugInfo.source)
-            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", arg, addr,
-                                            debugInfo.source->filename, debugInfo.source->lineno));
-        else
-            streamHandle.putStr(std::format("{} -> 0x{:08x}\n", arg, addr));
+        streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", arg, addr,
+                                        debugInfo.source.filename, debugInfo.source.lineno));
     } else
         streamHandle.putStr("Label not found: " + arg + "\n");
 }
