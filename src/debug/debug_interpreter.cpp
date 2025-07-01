@@ -40,9 +40,21 @@ const std::string debuggerHelp =
         "list, ls, l - List the lines surrounding the current instruction\n"
         "next, n - Execute the next instruction, skipping over procedure calls\n"
         "print, p <$register> - Print the value of the specified register\n"
-        "print, p <label> - Print the value of the specified label\n"
+        "print, p <ref> - Print the string value of the specified location reference\n"
         "run, r - Run the program from the beginning until the next breakpoint or end of program\n"
         "step, s - Execute the next instruction\n";
+
+
+/**
+ * Converts a byte into a single printable character
+ * @param byte The byte to convert
+ * @return A printable representation of the byte, with non-printable characters replaced by '.'
+ */
+char byteAsString(const int8_t byte) {
+    if (byte >= 32 && byte < 127)
+        return byte;
+    return '.';
+}
 
 
 /**
@@ -54,12 +66,25 @@ std::string wordAsString(const uint32_t word) {
     std::string result;
     for (int i = 0; i < 4; ++i) {
         const char c = static_cast<char>(word >> (i * 8) & 0xFF);
-        if (c >= 32 && c < 127)
-            result += c;
-        else
-            result += '.';
+        result += byteAsString(c);
     }
     return result;
+}
+
+
+std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
+    std::string result;
+    while (result.length() < maxLen) {
+        const uint8_t byte = state.memory.byteAt(addr + result.length());
+        if (byte == 0)
+            break; // Stop at null terminator
+        result += byteAsString(static_cast<int8_t>(byte));
+    }
+    return result;
+}
+
+std::string DebugInterpreter::strAt(const uint32_t addr) {
+    return strAt(addr, std::numeric_limits<size_t>::max());
 }
 
 
@@ -308,13 +333,13 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
                 return true;
             }
             case DebugCommand::PRINT: {
-                // Print register or label value
+                // Print register or reference value
                 if (args[0].starts_with("$"))
                     // Print register value
                     printRegister(args[0].substr(1)); // Remove '$' prefix
                 else
-                    // Print label value
-                    printLabel(args[0]);
+                    // Print reference value
+                    printRef(args[0]);
                 return true;
             }
             case DebugCommand::EXIT: {
@@ -571,23 +596,20 @@ void DebugInterpreter::printRegister(const std::string& arg) {
                 index = RegisterFile::indexFromName(arg);
 
             int32_t value = state.registers[index];
-            streamHandle.putStr(std::format("${}: 0x{:08x}\n", arg, value));
+            streamHandle.putStr(std::format("${} -> 0x{:08x}\n", arg, value));
         } catch (const std::exception&) {
             streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)\n");
         }
     }
 }
 
-void DebugInterpreter::printLabel(const std::string& arg) {
-    // Check if the label exists in the debug info
-    const auto it = std::ranges::find_if(state.debugInfo, [&arg](const auto& pair) {
-        return unmangleLabel(pair.second.label) == arg;
-    });
-    if (it != state.debugInfo.end()) {
-        const uint32_t addr = it->first;
-        const DebugInfo& debugInfo = it->second;
-        streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", arg, addr,
-                                        debugInfo.source.filename, debugInfo.source.lineno));
+void DebugInterpreter::printRef(const std::string& arg) {
+    const uint32_t addr = addrFRomStr(arg);
+
+    if (state.debugInfo.contains(addr)) {
+        const DebugInfo debugInfo = state.debugInfo[addr];
+        streamHandle.putStr(std::format("({}:{}) -> \"{}\" \n", debugInfo.source.filename,
+                                        debugInfo.source.lineno, strAt(addr)));
     } else
-        streamHandle.putStr("Label not found: " + arg + "\n");
+        streamHandle.putStr(std::format("\"{}\" \n", strAt(addr)));
 }

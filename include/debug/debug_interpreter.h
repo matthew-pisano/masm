@@ -165,10 +165,10 @@ class DebugInterpreter final : public Interpreter {
     void printRegister(const std::string& arg);
 
     /**
-     * Prints the value of a label in the program
-     * @param arg The name of the label to print
+     * Prints the value of a location reference in the program
+     * @param arg The reference to print
      */
-    void printLabel(const std::string& arg);
+    void printRef(const std::string& arg);
 
 public:
     /**
@@ -187,6 +187,21 @@ public:
      */
     DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
         Interpreter(ioMode, streamHandle, useLittleEndian) {}
+
+    /**
+     * Converts the bytes after e memory address to a string representation, stopping at a null byte
+     * @param addr The address at which to start reading the string
+     * @return A string representation of the bytes at the address
+     */
+    std::string strAt(uint32_t addr);
+
+    /**
+     * Converts the bytes after a memory address to a string representation with a maximum length
+     * @param addr The address at which to start reading the string
+     * @param maxLen The maximum length of the string to read
+     * @return A string representation of the bytes at the address, up to maxLen characters
+     */
+    std::string strAt(uint32_t addr, size_t maxLen);
 
     /**
      * Gets the current state of the interpreter
