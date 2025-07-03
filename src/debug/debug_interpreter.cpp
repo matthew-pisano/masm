@@ -20,14 +20,12 @@ const std::string prompt = "\n(mdb) ";
  */
 const std::string debuggerHelp =
         "Debug Interpreter Commands:\n\n"
-        "break, b <ref> - Set a breakpoint at the given reference.  This can be in the form of a "
-        "hexadecimal address, a line number, a label, or a filename:line or filename:label pair\n"
-        "continue, cont, c - Continue execution until the next breakpoint\n"
+        "break, b <ref> - Set a breakpoint at the given reference\n"
+        "continue, cont, c - Continue execution until the next breakpoint or program termination\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
-        "examine, x <ref> [words] - Examine memory at the given reference.  This can be in the "
-        "form of a hexadecimal address, a line number, a label, or a filename:line or "
-        "filename:label pair.  The number of words to print can also be specified; one by default\n"
+        "examine, x <ref> [words] - Examine memory at the given reference.  The number of words to "
+        "display can also be specified; one by default\n"
         "exit, quit, q - Exit the debugger\n"
         "finish - Execute until the end of the current procedure (the location stored in $ra)\n"
         "frame, f - Show the current stack frame\n"
@@ -42,7 +40,9 @@ const std::string debuggerHelp =
         "print, p <$register> - Print the value of the specified register\n"
         "print, p <ref> - Print the string value of the specified location reference\n"
         "run, r - Run the program from the beginning until the next breakpoint or end of program\n"
-        "step, s - Execute the next instruction\n";
+        "step, s - Execute the next instruction\n"
+        "\nNote: a \"location reference\" means one of a line number, a label, or a filename:line "
+        "or filename:label pair\n";
 
 
 /**
