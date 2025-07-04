@@ -119,7 +119,13 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
 
     ## Python Bindings ##
 
-    find_package(pybind11 REQUIRED)
+    FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11
+            GIT_TAG v2.13.6
+    )
+    FetchContent_MakeAvailable(pybind11)
+
     pybind11_add_module(pymasm_core
             src/pybind/python_bindings.cpp
     )
@@ -139,7 +145,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     FetchContent_Declare(
             Catch2
             GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-            GIT_TAG        v3.8.1 # or a later release
+            GIT_TAG v3.8.1
     )
     FetchContent_MakeAvailable(Catch2)
 
