@@ -71,7 +71,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                     parsePaddedAllocDirective(memLoc, firstToken, args, useLittleEndian);
             memBytes.insert(memBytes.end(), std::get<0>(alloc).begin(), std::get<0>(alloc).end());
             const size_t paddedMemLoc = memLoc + std::get<1>(alloc);
-            debugInfo.source = {tokenLine.filename, tokenLine.lineno};
+            debugInfo.source = {tokenLine.filename, tokenLine.lineno, ""};
             try {
                 debugInfo.label = labelMap.lookupLabel(paddedMemLoc);
             } catch (const std::runtime_error&) {
@@ -82,7 +82,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
         case TokenCategory::INSTRUCTION: {
             const std::vector<std::byte> instrBytes = parseInstruction(memLoc, firstToken, args);
             memBytes.insert(memBytes.end(), instrBytes.begin(), instrBytes.end());
-            debugInfo.source = {tokenLine.filename, tokenLine.lineno};
+            debugInfo.source = {tokenLine.filename, tokenLine.lineno, ""};
             try {
                 debugInfo.label = labelMap.lookupLabel(memLoc);
             } catch (const std::runtime_error&) {
