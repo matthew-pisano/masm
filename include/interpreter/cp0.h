@@ -17,14 +17,17 @@ enum class Coproc0Register {
      * Memory address at which bad virtual address exception occurred
      */
     VADDR = 8,
+
     /**
      * Status register, contains the interrupt mask and enable bits
      */
     STATUS = 12,
+
     /**
      * Cause register, contains the cause of the last exception
      */
     CAUSE = 13,
+
     /**
      * Exception Program Counter, contains the address last executed before the exception
      */

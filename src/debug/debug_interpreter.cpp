@@ -401,10 +401,9 @@ size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::
     const auto it = std::ranges::find_if(state.debugInfo, [label, filename](const auto& pair) {
         return unmangleLabel(pair.second.label) == label && pair.second.source.filename == filename;
     });
-    if (it == state.debugInfo.end()) {
+    if (it == state.debugInfo.end())
         throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename +
                                     "\n");
-    }
     // Get the line for the label
     return it->second.source.lineno;
 }
