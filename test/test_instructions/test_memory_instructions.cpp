@@ -37,11 +37,11 @@ TEST_CASE("Test lb Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.byteTo(0x10010004, 0x82348687);
+    interpreter.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr int32_t expectedResult = 0xffffff87;
+        constexpr int32_t expectedResult = static_cast<int32_t>(0xffffff87);
         const int32_t actualResult = interpreter.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
@@ -53,12 +53,13 @@ TEST_CASE("Test lbu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lbu"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "lbu"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -72,7 +73,7 @@ TEST_CASE("Test lbu Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.byteTo(0x10010004, 0x82348687);
+    interpreter.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -107,11 +108,11 @@ TEST_CASE("Test lh Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.halfTo(0x10010004, 0x82348687);
+    interpreter.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr int32_t expectedResult = 0xffff8687;
+        constexpr int32_t expectedResult = static_cast<int32_t>(0xffff8687);
         const int32_t actualResult = interpreter.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
@@ -123,12 +124,13 @@ TEST_CASE("Test lhu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lhu"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "lhu"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -142,7 +144,7 @@ TEST_CASE("Test lhu Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.halfTo(0x10010004, 0x82348687);
+    interpreter.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
     interpreter.getState().registers[Register::T1] = 0x10010000;
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -193,10 +195,11 @@ TEST_CASE("Test lui Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lui"},
-                                                                 {TokenCategory::REGISTER, "t0"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::IMMEDIATE, "100"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "lui"},
+                 {TokenCategory::REGISTER, "t0"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::IMMEDIATE, "100"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
