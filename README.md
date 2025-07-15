@@ -61,6 +61,26 @@ Exceptions are handled similarly from interrupts. When a runtime exception is tr
 
 By default, *masm* stores words in a *big endian* format to keep in line with the original *MIPS* standard. However, *little endian* compatibility can be enabled with the `--little-endian` option. This changes how words are stored, so certain programs, such as those working with MMIO, may not work without modification.
 
+## Interactive Debugger
+
+in addition to the main interpreter executable, this project also contains a *GDB*-like debugger, *mdb*. This program allows the user to step through a running assembly program interactively. At any interactive step, the user can view the state of the program and continue when desired. The commands used for the debugger are very similar to those used with *GDB*. These include:
+
+* `help` - for more detailed information on the commands
+* `step` - to advance the program by one instruction
+* `break` - to set a breakpoint
+* `continue` - to allow the program t run freely until the next breakpoint
+* `print` - to display information about the state of the program
+
+There are many other comments in addition to these, designed to make debugging complex assembly programs more manageable.
+
+### Usage
+
+*mdb* is called similarly to *masm*, it takes in assembly program files and options. However, instead of immediately running the program, it is assembled, loaded into memory, and the user is dropped into an interactive shell.
+
+```bash
+masm [options...] module1.asm module2.asm ...
+```
+
 ## Python Bindings
 
 In addition to the main executable, this project also builds a set of *Python* bindings accessible through the `pymasm` package. This allows for *Python* code to directly interact with *masm* to assemble and execute strings of assembly programs.
