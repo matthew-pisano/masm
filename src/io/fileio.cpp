@@ -48,3 +48,36 @@ std::vector<std::byte> readFileBytes(const std::string& fileName) {
 
     return result;
 }
+
+
+void writeFile(const std::string& fileName, const std::string& contents) {
+    std::ofstream outputFile;
+
+    outputFile.open(fileName, std::ios::out | std::ios::trunc);
+
+    if (!outputFile.is_open())
+        throw std::runtime_error("Could not open file " + fileName);
+
+    // Write the contents to the file
+    outputFile << contents;
+
+    // Close the file
+    outputFile.close();
+}
+
+
+void writeFileBytes(const std::string& fileName, const std::vector<std::byte>& contents) {
+    std::ofstream outputFile;
+
+    outputFile.open(fileName, std::ios::out | std::ios::binary | std::ios::trunc);
+
+    if (!outputFile.is_open())
+        throw std::runtime_error("Could not open file " + fileName);
+
+    // Write the contents to the file byte by byte
+    for (const auto& byte : contents)
+        outputFile.write(reinterpret_cast<const char*>(&byte), sizeof(byte));
+
+    // Close the file
+    outputFile.close();
+}
