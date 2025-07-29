@@ -67,4 +67,34 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
     return program;
 }
 
-std::vector<std::byte> layoutAsBinary(const MemLayout& layout) { return {}; }
+std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
+    // Offsets for text, data, ktext, kdata
+    std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}};
+
+    if (layout.data.contains(MemSection::TEXT)) {
+        binary[4] = static_cast<std::byte>(binary.size());
+        for (const std::byte& byte : layout.data.at(MemSection::TEXT))
+            binary.push_back(byte);
+    }
+    if (layout.data.contains(MemSection::DATA)) {
+        binary[5] = static_cast<std::byte>(binary.size());
+        for (const std::byte& byte : layout.data.at(MemSection::DATA))
+            binary.push_back(byte);
+        // Ensure length of binary vector is a multiple of 4
+        while (binary.size() % 4 != 0)
+            binary.push_back(std::byte{0});
+    }
+    if (layout.data.contains(MemSection::KTEXT)) {
+        binary[6] = static_cast<std::byte>(binary.size());
+        for (const std::byte& byte : layout.data.at(MemSection::KTEXT))
+            binary.push_back(byte);
+    }
+    if (layout.data.contains(MemSection::KDATA)) {
+        binary[7] = static_cast<std::byte>(binary.size());
+        for (const std::byte& byte : layout.data.at(MemSection::KDATA))
+            binary.push_back(byte);
+    }
+
+    return binary;
+}
