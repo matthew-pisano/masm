@@ -10,16 +10,6 @@
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
 
-class DebugParser : public Parser {
-
-public:
-    /**
-     * Fetches the label map associated with this parser
-     * @return The label map associated with this parser
-     */
-    LabelMap& getLabels();
-};
-
 
 /**
  * Converts a vector of integers to a vector of bytes

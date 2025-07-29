@@ -7,9 +7,6 @@
 #include <catch2/catch_test_macros.hpp>
 
 
-LabelMap& DebugParser::getLabels() { return labelMap; }
-
-
 std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec) {
     std::vector<std::byte> byteVec(intVec.size());
     for (size_t i = 0; i < intVec.size(); ++i)

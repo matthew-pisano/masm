@@ -16,6 +16,9 @@
 #include "utils.h"
 
 
+LabelMap& Parser::getLabels() { return labelMap; }
+
+
 MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
     MemLayout layout;
 

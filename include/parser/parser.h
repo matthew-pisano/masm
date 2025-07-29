@@ -190,6 +190,13 @@ public:
      * @throw MasmSyntaxError When an error is encountered during parsing
      */
     MemLayout parse(const std::vector<LineTokens>& tokenLines);
+
+
+    /**
+     * Fetches the label map associated with this parser
+     * @return The label map associated with this parser
+     */
+    LabelMap& getLabels();
 };
 
 #endif // PARSER_H
