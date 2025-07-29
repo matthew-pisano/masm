@@ -19,6 +19,8 @@ int main(const int argc, char* argv[]) {
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
     bool useLittleEndian = false;
+    bool saveTemps = false;
+    bool assembleOnly = false;
 
     CLI::App app{version + " - MIPS Interpreter", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
@@ -26,6 +28,10 @@ int main(const int argc, char* argv[]) {
                  "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("--save-temps", saveTemps,
+                 "Write intermediate files to the current working directory");
+    app.add_flag("-s,--assemble", assembleOnly,
+                 "Assemble only; do not execute the given program");
     app.set_version_flag("--version", version);
 
     // Set up help message
