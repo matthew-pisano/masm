@@ -4,6 +4,8 @@
 
 #include "debug/intermediates.h"
 
+#include <iomanip>
+
 #include "tokenizer/postprocessor.h"
 
 
@@ -35,20 +37,30 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
 
     for (const auto& [section, data] : layout.data) {
         const uint32_t sectionOffset = memSectionOffset(section);
-        program += "." + memSectionToName(section) + "\n";
+        program += "\n." + memSectionToName(section) + "\n\n";
 
-        for (uint32_t i = 0; i < data.size(); i += 4) {
+        for (uint32_t i = 0; i < data.size(); i++) {
+            if (isSectionExecutable(section) && i % 4 != 0)
+                continue; // Only consider word aligned bytes in executable sections
+
             uint32_t address = sectionOffset + i;
-            DebugInfo debugInfo = layout.debugInfo.at(address);
-
             // Add label if it exists
             try {
-                program += unmangleLabel(labelMap.lookupLabel(address)) + ":\n";
+                program += "\n" + unmangleLabel(labelMap.lookupLabel(address)) + ":\n";
             } catch (const std::runtime_error&) {
             }
 
             // Add instruction or data
-            program += debugInfo.source.text + "\n";
+            if (isSectionExecutable(section)) {
+                DebugInfo debugInfo = layout.debugInfo.at(address);
+                program += debugInfo.source.text + "\n";
+            } else {
+                // Output current word as hex string
+                const int32_t byte = static_cast<int32_t>(data.at(i));
+                std::stringstream ss;
+                ss << std::hex << std::setfill('0') << std::setw(2) << byte;
+                program += ".byte 0x" + ss.str() + "\n";
+            }
         }
     }
 
