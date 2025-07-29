@@ -369,7 +369,7 @@ void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
 
 void DebugInterpreter::listLines(const std::string& arg) {
     const uint32_t pc = state.registers[Register::PC];
-    const uint32_t addr = arg.empty() ? pc : addrFRomStr(arg);
+    const uint32_t addr = arg.empty() ? pc : addrFromStr(arg);
 
     for (uint32_t i = addr - 40; i < addr + 40; i += 4) {
         if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
@@ -408,7 +408,7 @@ size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::
     return it->second.source.lineno;
 }
 
-uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
+uint32_t DebugInterpreter::addrFromStr(const std::string& ref) {
     // Check if the argument is a valid hex address
     if (ref.starts_with("0x")) {
         try {
@@ -454,7 +454,7 @@ uint32_t DebugInterpreter::addrFRomStr(const std::string& ref) {
 }
 
 void DebugInterpreter::setBreakpoint(const std::string& arg) {
-    const uint32_t addr = addrFRomStr(arg);
+    const uint32_t addr = addrFromStr(arg);
     if (!breakpoints.contains(addr)) {
         // Set breakpoint at the found address
         breakpoints[addr] = nextBreakpoint;
@@ -495,7 +495,7 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
 
 
 void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWords) {
-    const uint32_t addr = addrFRomStr(arg);
+    const uint32_t addr = addrFromStr(arg);
 
     for (size_t i = 0; i < numWords; i++) {
         uint32_t value = state.memory._sysWordAt(addr + i * 4);
@@ -603,7 +603,7 @@ void DebugInterpreter::printRegister(const std::string& arg) {
 }
 
 void DebugInterpreter::printRef(const std::string& arg) {
-    const uint32_t addr = addrFRomStr(arg);
+    const uint32_t addr = addrFromStr(arg);
 
     if (state.debugInfo.contains(addr)) {
         const DebugInfo debugInfo = state.debugInfo[addr];

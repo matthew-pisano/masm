@@ -111,7 +111,7 @@ class DebugInterpreter final : public Interpreter {
      * @return The address associated with that string
      * @throw std::invalid_argument if the reference string is invalid or cannot be resolved
      */
-    uint32_t addrFRomStr(const std::string& ref);
+    uint32_t addrFromStr(const std::string& ref);
 
     /**
      * Sets a breakpoint at the given address, source location, or label
