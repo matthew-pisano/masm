@@ -70,15 +70,27 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
 std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
     // Offsets for text, data, ktext, kdata
     std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
                           std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}};
 
+    // Insert an offset value into the four bytes after the given index of the binary vector
+    auto insertOffset = [&binary](const size_t i, const uint32_t offset) {
+        binary[i] = static_cast<std::byte>(offset & 0xFF);
+        binary[i + 1] = static_cast<std::byte>((offset >> 8) & 0xFF);
+        binary[i + 2] = static_cast<std::byte>((offset >> 16) & 0xFF);
+        binary[i + 3] = static_cast<std::byte>((offset >> 24) & 0xFF);
+    };
+
+    // Add section offsets to vector
     if (layout.data.contains(MemSection::TEXT)) {
-        binary[4] = static_cast<std::byte>(binary.size());
+        insertOffset(4, binary.size());
         for (const std::byte& byte : layout.data.at(MemSection::TEXT))
             binary.push_back(byte);
     }
     if (layout.data.contains(MemSection::DATA)) {
-        binary[5] = static_cast<std::byte>(binary.size());
+        insertOffset(8, binary.size());
         for (const std::byte& byte : layout.data.at(MemSection::DATA))
             binary.push_back(byte);
         // Ensure length of binary vector is a multiple of 4
@@ -86,12 +98,12 @@ std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
             binary.push_back(std::byte{0});
     }
     if (layout.data.contains(MemSection::KTEXT)) {
-        binary[6] = static_cast<std::byte>(binary.size());
+        insertOffset(12, binary.size());
         for (const std::byte& byte : layout.data.at(MemSection::KTEXT))
             binary.push_back(byte);
     }
     if (layout.data.contains(MemSection::KDATA)) {
-        binary[7] = static_cast<std::byte>(binary.size());
+        insertOffset(16, binary.size());
         for (const std::byte& byte : layout.data.at(MemSection::KDATA))
             binary.push_back(byte);
     }
