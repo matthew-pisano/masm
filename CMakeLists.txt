@@ -89,6 +89,7 @@ FetchContent_MakeAvailable(cli11)
 
 add_executable(masm-exec src/masm.cpp
         src/io/fileio.cpp
+        src/debug/intermediates.cpp
 )
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
