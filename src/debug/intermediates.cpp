@@ -4,6 +4,8 @@
 
 #include "debug/intermediates.h"
 
+#include "tokenizer/postprocessor.h"
+
 
 std::string memSectionToName(const MemSection& section) {
     switch (section) {
@@ -41,7 +43,7 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
 
             // Add label if it exists
             try {
-                program += labelMap.lookupLabel(address) + ":\n";
+                program += unmangleLabel(labelMap.lookupLabel(address)) + ":\n";
             } catch (const std::runtime_error&) {
             }
 
@@ -53,4 +55,4 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
     return program;
 }
 
-std::vector<std::byte> layoutAsBinary(MemLayout& layout) {}
+std::vector<std::byte> layoutAsBinary(const MemLayout& layout) { return {}; }

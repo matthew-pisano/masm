@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "CLI/CLI.hpp"
+#include "debug/intermediates.h"
 #include "interpreter/interpreter.h"
 #include "io/consoleio.h"
 #include "io/fileio.h"
@@ -30,8 +31,7 @@ int main(const int argc, char* argv[]) {
                  "Use little-endian byte order for memory layout (default is big-endian)");
     app.add_flag("--save-temps", saveTemps,
                  "Write intermediate files to the current working directory");
-    app.add_flag("-s,--assemble", assembleOnly,
-                 "Assemble only; do not execute the given program");
+    app.add_flag("-s,--assemble", assembleOnly, "Assemble only; do not execute the given program");
     app.set_version_flag("--version", version);
 
     // Set up help message
@@ -61,9 +61,21 @@ int main(const int argc, char* argv[]) {
         Parser parser(useLittleEndian);
         const MemLayout layout = parser.parse(program);
 
-        const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        Interpreter interpreter(ioMode, conHandle, useLittleEndian);
-        exitCode = interpreter.interpret(layout);
+        if (saveTemps) {
+            std::string preprocessed = layoutAsString(layout, parser.getLabels());
+            writeFile(inputFileNames[0] + ".i", preprocessed);
+
+            std::vector<std::byte> binary = layoutAsBinary(layout);
+            writeFileBytes(inputFileNames[0] + ".o", binary);
+        }
+
+        // Do not interpret program if only assembling
+        if (!assembleOnly) {
+            const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
+            Interpreter interpreter(ioMode, conHandle, useLittleEndian);
+            exitCode = interpreter.interpret(layout);
+        } else
+            exitCode = 0;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

@@ -16,7 +16,7 @@
  * @param labelMap The label map to use for resolving labels
  * @return A string representation of the memory layout
  */
-std::string layoutAsString(MemLayout& layout, const LabelMap& labelMap);
+std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap);
 
 
 /**
@@ -24,7 +24,7 @@ std::string layoutAsString(MemLayout& layout, const LabelMap& labelMap);
  * @param layout The memory layout to convert
  * @return A vector of bytes representing the memory layout in binary form
  */
-std::vector<std::byte> layoutAsBinary(MemLayout& layout);
+std::vector<std::byte> layoutAsBinary(const MemLayout& layout);
 
 
 #endif // INTERMEDIATES_H

@@ -101,6 +101,9 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                     debugInfo.source.text += " " + token.value;
                 else
                     debugInfo.source.text += " " + unmangleLabel(token.value);
+
+                if (debugInfo.source.text[0] == ' ')
+                    debugInfo.source.text.erase(0, 1); // Remove leading space
             }
 
             // Assign debug info to all allocated instructions (including multi-instruction
