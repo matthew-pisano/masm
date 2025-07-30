@@ -379,9 +379,10 @@ void DebugInterpreter::listLines(const std::string& arg) {
         if (!debugInfo.label.empty())
             streamHandle.putStr("<" + unmangleLabel(debugInfo.label) + ">\n");
         const std::string pointerString = i == pc ? "--->" : "";
-        // An indicator for when a breakpoint is present
-        const std::string bpString =
-                breakpoints.contains(i) ? "[*" + std::to_string(breakpoints[i]) + "]" : "";
+        // An indicator for when a breakpoint is present and now the system breakpoint
+        const std::string bpString = breakpoints.contains(i) && breakpoints[i] != 0
+                                             ? "[*" + std::to_string(breakpoints[i]) + "]"
+                                             : "";
         streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
                                         pointerString, debugInfo.source.lineno, i,
                                         static_cast<uint32_t>(state.memory.wordAt(i)),
