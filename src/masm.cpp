@@ -8,58 +8,9 @@
 #include "io/consoleio.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
+#include "runtime.h"
 #include "utils.h"
 #include "version.h"
-
-
-/**
- * Loads a memory layout from source files, which are MIPS assembly files
- * @param inputFileNames A vector of file names to load the MIPS assembly source code from
- * @param parser The parser to use for parsing the source code
- * @return A memory layout object constructed from the source files
- */
-MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {
-    std::vector<SourceFile> sourceFiles;
-    sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
-    for (const std::string& fileName : inputFileNames)
-        sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
-
-    const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
-    const MemLayout layout = parser.parse(program);
-
-    return layout;
-}
-
-
-/**
- * Loads a memory layout from a binary file, which is a compiled MIPS program
- * @param inputFileNames A vector of file names to load the binary data from
- * @return A memory layout object constructed from the binary data
- */
-MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
-    if (inputFileNames.size() > 1)
-        throw std::runtime_error("Only one binary file may be loaded in at a time");
-
-    const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
-    const MemLayout layout = loadLayout(binary);
-
-    return layout;
-}
-
-
-/**
- * Checks if the first input file is a binary file (compiled MIPS program)
- * @param inputFileNames A vector of file names to check
- * @return True if the first file is a binary file, false otherwise
- */
-bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
-    if (inputFileNames.empty())
-        return false;
-
-    const std::string& firstName = inputFileNames[0];
-    const size_t firstSize = firstName.size();
-    return firstSize > 2 && firstName.substr(firstSize - 2, 2) == ".o";
-}
 
 
 int main(const int argc, char* argv[]) {
@@ -99,7 +50,7 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
-    bool loadingBinary = isLoadingBinary(inputFileNames);
+    const bool loadingBinary = isLoadingBinary(inputFileNames);
     if (loadingBinary && saveTemps)
         std::cerr << "Warning: temp files are not generated when parsing binaries" << std::endl;
     if (loadingBinary && useLittleEndian)
@@ -108,7 +59,6 @@ int main(const int argc, char* argv[]) {
     int exitCode = 1;
     try {
         MemLayout layout;
-
         if (loadingBinary)
             layout = loadLayoutFromBinary(inputFileNames);
         else {

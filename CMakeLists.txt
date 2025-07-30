@@ -67,7 +67,6 @@ add_library(masm STATIC
         src/interpreter/cp1.cpp
         src/interpreter/state.cpp
         src/io/streamio.cpp
-        include/debug/debug_info.h
 )
 
 # -fPIC only needed for native Linux builds (not Windows cross-compilation)
@@ -90,6 +89,7 @@ FetchContent_MakeAvailable(cli11)
 add_executable(masm-exec src/masm.cpp
         src/io/fileio.cpp
         src/debug/intermediates.cpp
+        src/runtime.cpp
 )
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
@@ -104,7 +104,9 @@ endif ()
 
 add_executable(masm-dbg src/mdb.cpp
         src/io/fileio.cpp
+        src/debug/intermediates.cpp
         src/debug/debug_interpreter.cpp
+        src/runtime.cpp
 )
 target_link_libraries(masm-dbg PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-dbg PROPERTIES OUTPUT_NAME "mdb")
