@@ -372,7 +372,7 @@ void DebugInterpreter::listLines(const std::string& arg) {
     const uint32_t addr = arg.empty() ? pc : addrFromStr(arg);
 
     for (uint32_t i = addr - 40; i < addr + 40; i += 4) {
-        if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
+        if (!state.memory.isValid(i))
             continue; // Skip invalid addresses
 
         const DebugInfo debugInfo = state.getDebugInfo(i);
