@@ -520,15 +520,18 @@ void DebugInterpreter::listBreakpoints() {
 }
 
 void DebugInterpreter::listLabels() {
+    bool foundLabel = false;
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
             const SourceLocator src = debugInfo.source;
             streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
                                             unmangleLabel(debugInfo.label), addr, src.filename,
                                             src.lineno));
-        } else if (!debugInfo.label.empty())
-            streamHandle.putStr(
-                    std::format("{} -> 0x{:08x}\n", unmangleLabel(debugInfo.label), addr));
+            foundLabel = true;
+        }
+
+    if (!foundLabel)
+        streamHandle.putStr("No labels found in the program.\n");
 }
 
 void DebugInterpreter::listRegisters() {
