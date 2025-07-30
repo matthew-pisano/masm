@@ -12,6 +12,56 @@
 #include "version.h"
 
 
+/**
+ * Loads a memory layout from source files, which are MIPS assembly files
+ * @param inputFileNames A vector of file names to load the MIPS assembly source code from
+ * @param parser The parser to use for parsing the source code
+ * @return A memory layout object constructed from the source files
+ */
+MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {
+    std::vector<SourceFile> sourceFiles;
+    sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
+    for (const std::string& fileName : inputFileNames)
+        sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
+
+    const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
+    const MemLayout layout = parser.parse(program);
+
+    return layout;
+}
+
+
+/**
+ * Loads a memory layout from a binary file, which is a compiled MIPS program
+ * @param inputFileNames A vector of file names to load the binary data from
+ * @return A memory layout object constructed from the binary data
+ */
+MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
+    if (inputFileNames.size() > 1)
+        throw std::runtime_error("Only one binary file may be loaded in at a time");
+
+    const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
+    const MemLayout layout = loadLayout(binary);
+
+    return layout;
+}
+
+
+/**
+ * Checks if the first input file is a binary file (compiled MIPS program)
+ * @param inputFileNames A vector of file names to check
+ * @return True if the first file is a binary file, false otherwise
+ */
+bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
+    if (inputFileNames.empty())
+        return false;
+
+    const std::string& firstName = inputFileNames[0];
+    const size_t firstSize = firstName.size();
+    return firstSize > 2 && firstName.substr(firstSize - 2, 2) == ".o";
+}
+
+
 int main(const int argc, char* argv[]) {
     std::string name = "masm";
     const std::string _computedVersionString(Version::VERSION);
@@ -49,24 +99,28 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
+    bool loadingBinary = isLoadingBinary(inputFileNames);
+    if (loadingBinary && saveTemps)
+        std::cerr << "Warning: temp files are not generated when parsing binaries" << std::endl;
+    if (loadingBinary && useLittleEndian)
+        std::cerr << "Warning: little-endian mode has no effect on binary files" << std::endl;
+
     int exitCode = 1;
     try {
-        std::vector<SourceFile> sourceFiles;
-        sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
-        for (const std::string& fileName : inputFileNames)
-            sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
+        MemLayout layout;
 
-        const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
+        if (loadingBinary)
+            layout = loadLayoutFromBinary(inputFileNames);
+        else {
+            Parser parser(useLittleEndian);
+            layout = loadLayoutFromSource(inputFileNames, parser);
+            if (saveTemps) {
+                std::string preprocessed = stringifyLayout(layout, parser.getLabels());
+                writeFile(inputFileNames[0] + ".i", preprocessed);
 
-        Parser parser(useLittleEndian);
-        const MemLayout layout = parser.parse(program);
-
-        if (saveTemps) {
-            std::string preprocessed = layoutAsString(layout, parser.getLabels());
-            writeFile(inputFileNames[0] + ".i", preprocessed);
-
-            std::vector<std::byte> binary = layoutAsBinary(layout);
-            writeFileBytes(inputFileNames[0] + ".o", binary);
+                std::vector<std::byte> binary = saveLayout(layout);
+                writeFileBytes(inputFileNames[0] + ".o", binary);
+            }
         }
 
         // Do not interpret program if only assembling

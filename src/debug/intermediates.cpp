@@ -32,7 +32,7 @@ std::string memSectionToName(const MemSection& section) {
 }
 
 
-std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
+std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
     std::string program;
 
     for (const auto& [section, data] : layout.data) {
@@ -67,7 +67,7 @@ std::string layoutAsString(const MemLayout& layout, const LabelMap& labelMap) {
     return program;
 }
 
-std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
+std::vector<std::byte> saveLayout(const MemLayout& layout) {
     // Offsets for text, data, ktext, kdata
     std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'},
                           std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
@@ -78,19 +78,27 @@ std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
     // Insert an offset value into the four bytes after the given index of the binary vector
     auto insertOffset = [&binary](const size_t i, const uint32_t offset) {
         binary[i] = static_cast<std::byte>(offset & 0xFF);
-        binary[i + 1] = static_cast<std::byte>((offset >> 8) & 0xFF);
-        binary[i + 2] = static_cast<std::byte>((offset >> 16) & 0xFF);
-        binary[i + 3] = static_cast<std::byte>((offset >> 24) & 0xFF);
+        binary[i + 1] = static_cast<std::byte>(offset >> 8 & 0xFF);
+        binary[i + 2] = static_cast<std::byte>(offset >> 16 & 0xFF);
+        binary[i + 3] = static_cast<std::byte>(offset >> 24 & 0xFF);
     };
 
     // Add section offsets to vector
     if (layout.data.contains(MemSection::TEXT)) {
         insertOffset(4, binary.size());
+        // Add size byte of section
+        binary.insert(binary.end(), 4, std::byte{0});
+        insertOffset(binary.size() - 4, layout.data.at(MemSection::TEXT).size());
+        // Add text data to binary
         for (const std::byte& byte : layout.data.at(MemSection::TEXT))
             binary.push_back(byte);
     }
     if (layout.data.contains(MemSection::DATA)) {
         insertOffset(8, binary.size());
+        // Add size byte of section
+        binary.insert(binary.end(), 4, std::byte{0});
+        insertOffset(binary.size() - 4, layout.data.at(MemSection::DATA).size());
+        // Add static data to binary
         for (const std::byte& byte : layout.data.at(MemSection::DATA))
             binary.push_back(byte);
         // Ensure length of binary vector is a multiple of 4
@@ -99,14 +107,69 @@ std::vector<std::byte> layoutAsBinary(const MemLayout& layout) {
     }
     if (layout.data.contains(MemSection::KTEXT)) {
         insertOffset(12, binary.size());
+        // Add size byte of section
+        binary.insert(binary.end(), 4, std::byte{0});
+        insertOffset(binary.size() - 4, layout.data.at(MemSection::KTEXT).size());
+        // Add ktext data to binary
         for (const std::byte& byte : layout.data.at(MemSection::KTEXT))
             binary.push_back(byte);
     }
     if (layout.data.contains(MemSection::KDATA)) {
         insertOffset(16, binary.size());
+        // Add size byte of section
+        binary.insert(binary.end(), 4, std::byte{0});
+        insertOffset(binary.size() - 4, layout.data.at(MemSection::KDATA).size());
+        // Add kdata to binary
         for (const std::byte& byte : layout.data.at(MemSection::KDATA))
             binary.push_back(byte);
     }
 
     return binary;
+}
+
+
+MemLayout loadLayout(const std::vector<std::byte>& binary) {
+    // Check if the binary starts with the MASM magic number
+    if (binary[0] != std::byte{'M'} || binary[1] != std::byte{'A'} || binary[2] != std::byte{'S'} ||
+        binary[3] != std::byte{'M'}) {
+        throw std::runtime_error("Invalid MASM binary format");
+    }
+
+    auto extractOffset = [&binary](const size_t index) {
+        return static_cast<uint32_t>(binary[index]) |
+               static_cast<uint32_t>(binary[index + 1]) << 8 |
+               static_cast<uint32_t>(binary[index + 2]) << 16 |
+               static_cast<uint32_t>(binary[index + 3]) << 24;
+    };
+
+    const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12),
+                                            extractOffset(16)};
+    MemLayout layout;
+
+    if (secHeaders[0] > 0) {
+        const size_t textSize = extractOffset(secHeaders[0]);
+        layout.data[MemSection::TEXT] = {};
+        for (size_t i = 0; i < textSize; i++)
+            layout.data[MemSection::TEXT].push_back(binary[secHeaders[0] + 4 + i]);
+    }
+    if (secHeaders[1] > 0) {
+        const size_t dataSize = extractOffset(secHeaders[1]);
+        layout.data[MemSection::DATA] = {};
+        for (size_t i = 0; i < dataSize; i++)
+            layout.data[MemSection::DATA].push_back(binary[secHeaders[1] + 4 + i]);
+    }
+    if (secHeaders[2] > 0) {
+        const size_t ktextSize = extractOffset(secHeaders[2]);
+        layout.data[MemSection::KTEXT] = {};
+        for (size_t i = 0; i < ktextSize; i++)
+            layout.data[MemSection::KTEXT].push_back(binary[secHeaders[2] + 4 + i]);
+    }
+    if (secHeaders[3] > 0) {
+        const size_t kdataSize = extractOffset(secHeaders[3]);
+        layout.data[MemSection::KDATA] = {};
+        for (size_t i = 0; i < kdataSize; i++)
+            layout.data[MemSection::KDATA].push_back(binary[secHeaders[3] + 4 + i]);
+    }
+
+    return layout;
 }
