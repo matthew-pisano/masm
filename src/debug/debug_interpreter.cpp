@@ -39,7 +39,7 @@ const std::string debuggerHelp =
         "next, n - Execute the next instruction, skipping over procedure calls\n"
         "print, p <$register> - Print the value of the specified register\n"
         "print, p <ref> - Print the string value of the specified location reference\n"
-        "run, r - Run the program from the beginning until the next breakpoint or end of program\n"
+        "run, r - Run the program from the beginning, pausing at the first instruction\n"
         "step, s - Execute the next instruction\n"
         "\nNote: a \"location reference\" means one of a line number, a label, or a filename:line "
         "or filename:label pair\n";
