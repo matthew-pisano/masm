@@ -31,9 +31,9 @@ MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
         const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
         const MemLayout layout = loadLayout(binary);
         return layout;
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         throw std::runtime_error("Failed to load binary file '" + inputFileNames[0] +
-                                 "': " + e.what());
+                                 "': check to make sure the file exists and is not malformed");
     }
 }
 
