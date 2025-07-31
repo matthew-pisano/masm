@@ -7,11 +7,19 @@
 #include <catch2/catch_test_macros.hpp>
 
 
-std::vector<std::byte> intVec2ByteVec(const std::vector<uint8_t>& intVec) {
+std::vector<std::byte> iV2bV(const std::vector<uint8_t>& intVec) {
     std::vector<std::byte> byteVec(intVec.size());
     for (size_t i = 0; i < intVec.size(); ++i)
         byteVec[i] = static_cast<std::byte>(intVec[i]);
     return byteVec;
+}
+
+
+std::vector<uint8_t> bV2iV(const std::vector<std::byte>& byteVec) {
+    std::vector<uint8_t> intVec(byteVec.size());
+    for (size_t i = 0; i < byteVec.size(); ++i)
+        intVec[i] = static_cast<uint8_t>(byteVec[i]);
+    return intVec;
 }
 
 

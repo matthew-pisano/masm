@@ -61,7 +61,7 @@ TEST_CASE("Test FP Abs.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x00, 0x08, 0x05});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x00, 0x08, 0x05});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -92,7 +92,7 @@ TEST_CASE("Test FP Abs.d Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x20, 0x10, 0x05});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x20, 0x10, 0x05});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -125,7 +125,7 @@ TEST_CASE("Test FP Add.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x02, 0x08, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x02, 0x08, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -159,7 +159,7 @@ TEST_CASE("Test FP Add.d Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x24, 0x10, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x24, 0x10, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -193,7 +193,7 @@ TEST_CASE("Test FP Div.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x02, 0x08, 0x03});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x02, 0x08, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -226,7 +226,7 @@ TEST_CASE("Test FP Mul.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x02, 0x08, 0x02});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x02, 0x08, 0x02});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -258,7 +258,7 @@ TEST_CASE("Test FP Neg.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x00, 0x08, 0x07});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x00, 0x08, 0x07});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -289,7 +289,7 @@ TEST_CASE("Test FP Sqrt.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x00, 0x08, 0x04});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x00, 0x08, 0x04});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -322,7 +322,7 @@ TEST_CASE("Test FP Sub.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x02, 0x08, 0x01});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x02, 0x08, 0x01});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -354,7 +354,7 @@ TEST_CASE("Test FP c.eq.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x01, 0x00, 0x32});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x01, 0x00, 0x32});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -394,7 +394,7 @@ TEST_CASE("Test FP c.lt.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x01, 0x00, 0x3c});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x01, 0x00, 0x3c});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -434,7 +434,7 @@ TEST_CASE("Test FP c.le.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x01, 0x00, 0x3e});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x01, 0x00, 0x3e});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -479,7 +479,7 @@ TEST_CASE("Test FP bc1f Instruction") {
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x45, 0x00, 0x00, 0x03});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x45, 0x00, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -514,7 +514,7 @@ TEST_CASE("Test FP bc1t Instruction") {
     parser.getLabels().labelMap["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x45, 0x01, 0x00, 0x03});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x45, 0x01, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -551,7 +551,7 @@ TEST_CASE("Test FP cvt.d.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x00, 0x08, 0x21});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x00, 0x08, 0x21});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -582,7 +582,7 @@ TEST_CASE("Test FP cvt.s.d Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x20, 0x10, 0x20});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x20, 0x10, 0x20});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -616,7 +616,7 @@ TEST_CASE("Test FP ldc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xd5, 0x00, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0xd5, 0x00, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -655,7 +655,7 @@ TEST_CASE("Test FP lwc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xc5, 0x00, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0xc5, 0x00, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -693,7 +693,7 @@ TEST_CASE("Test FP sdc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xf5, 0x00, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0xf5, 0x00, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -734,7 +734,7 @@ TEST_CASE("Test FP swc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0xe5, 0x00, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0xe5, 0x00, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -767,7 +767,7 @@ TEST_CASE("Test FP mfc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x44, 0x08, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x44, 0x08, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -797,7 +797,7 @@ TEST_CASE("Test FP mtc1 Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x44, 0x88, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x44, 0x88, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -829,7 +829,7 @@ TEST_CASE("Test FP mov.s Instruction") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x46, 0x00, 0x08, 0x06});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x46, 0x00, 0x08, 0x06});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
