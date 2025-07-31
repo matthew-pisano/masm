@@ -16,7 +16,7 @@
  * @param intVec The vector of integers to convert
  * @return The vector of bytes
  */
-std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec);
+std::vector<std::byte> intVec2ByteVec(const std::vector<uint8_t>& intVec);
 
 
 /**
