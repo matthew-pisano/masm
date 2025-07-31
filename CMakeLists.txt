@@ -155,6 +155,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     add_executable(masm-tests
             src/debug/debug_interpreter.cpp
             src/io/fileio.cpp
+            src/debug/intermediates.cpp
             test/testing_utilities.cpp
             test/test_components/test_tokenizer.cpp
             test/test_components/test_parser.cpp
@@ -168,6 +169,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
             test/test_utils.cpp
             test/test_instructions/test_cp0_instructions.cpp
             test/test_instructions/test_cp1_instructions.cpp
+            test/test_components/test_intermediates.cpp
     )
     target_link_libraries(masm-tests PRIVATE masm)
     target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)

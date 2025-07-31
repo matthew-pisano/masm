@@ -1,0 +1,62 @@
+//
+// Created by matthew on 7/30/25.
+//
+
+
+#include <catch2/catch_test_macros.hpp>
+
+#include "../testing_utilities.h"
+#include "debug/intermediates.h"
+#include "interpreter/memory.h"
+
+
+TEST_CASE("Test Save Layout") {
+    const MemLayout layout = {{{MemSection::TEXT, iV2bV({0x01, 0x02, 0x03})},
+                               {MemSection::DATA, iV2bV({0x04, 0x05})},
+                               {MemSection::KTEXT, iV2bV({0x07, 0x08, 0x09, 0x10, 0x11})},
+                               {MemSection::KDATA, iV2bV({0x06})}},
+                              {}};
+
+    SECTION("All Sections") {
+        std::vector<std::byte> binary = saveLayout(layout);
+        std::vector<std::byte> expected = iV2bV({
+                'M',  'A',  'S',  'M', // Binary identifier
+                0x14, 0x00, 0x00, 0x00, // Text locator
+                0x1B, 0x00, 0x00, 0x00, // Data locator
+                0x24, 0x00, 0x00, 0x00, // KText locator
+                0x2D, 0x00, 0x00, 0x00, // KData locator
+                0x03, 0x00, 0x00, 0x00, // Text size
+                0x01, 0x02, 0x03, // Text section
+                0x02, 0x00, 0x00, 0x00, // Data size
+                0x04, 0x05, 0x00, 0x00, 0x00, // Data section (padded to mul of 4)
+                0x05, 0x00, 0x00, 0x00, // KText size
+                0x07, 0x08, 0x09, 0x10, 0x11, // KText section
+                0x01, 0x00, 0x00, 0x00, // KData size
+                0x06 // KData section
+        });
+        REQUIRE(expected == binary);
+    }
+
+    SECTION("Without Text") {
+        const MemLayout noText = {{{MemSection::DATA, layout.data.at(MemSection::DATA)},
+                                   {MemSection::KTEXT, layout.data.at(MemSection::KTEXT)},
+                                   {MemSection::KDATA, layout.data.at(MemSection::KDATA)}},
+                                  {}};
+        std::vector<std::byte> binary = saveLayout(noText);
+        std::vector<std::byte> expected = iV2bV({
+                'M', 'A', 'S', 'M', // Binary identifier
+                0x00, 0x00, 0x00, 0x00, // Text locator
+                0x14, 0x00, 0x00, 0x00, // Data locator
+                0x1C, 0x00, 0x00, 0x00, // KText locator
+                0x25, 0x00, 0x00, 0x00, // KData locator
+                // Text section missing
+                0x02, 0x00, 0x00, 0x00, // Data size
+                0x04, 0x05, 0x00, 0x00, // Data section (padded to mul of 4)
+                0x05, 0x00, 0x00, 0x00, // KText size
+                0x07, 0x08, 0x09, 0x10, 0x11, // KText section
+                0x01, 0x00, 0x00, 0x00, // KData size
+                0x06 // KData section
+        });
+        REQUIRE(expected == binary);
+    }
+}
