@@ -4,6 +4,8 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "../testing_utilities.h"
 #include "debug/intermediates.h"
@@ -109,5 +111,32 @@ TEST_CASE("Test Load Layout") {
                                      {MemSection::KDATA, iV2bV({0x06})}},
                                     {}};
         REQUIRE(expected.data == layout.data);
+    }
+
+    SECTION("Without Identifier") {
+        std::vector<std::byte> malformed = iV2bV({'M', 'A', 'S'});
+        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::runtime_error,
+                               Catch::Matchers::Message("Invalid MASM binary format"));
+        malformed = iV2bV({'M', 'A', 'S', 'A'});
+        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::runtime_error,
+                               Catch::Matchers::Message("Invalid MASM binary format"));
+    }
+
+    SECTION("Truncated") {
+        std::vector<std::byte> malformed = iV2bV({'M', 'A', 'S', 'M', 0x00, 0x00, 0x00, 0x00});
+        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::out_of_range,
+                               Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring(
+                                       "vector::_M_range_check")));
+        malformed = iV2bV({
+                'M',  'A',  'S',  'M', // Binary identifier
+                0x00, 0x00, 0x00, 0x00, // Text locator
+                0x14, 0x00, 0x00, 0x00, // Data locator
+                0x1C, 0x00, 0x00, 0x00, // KText locator
+                0x28, 0x00, 0x00, 0x00, // KData locator
+                0x02, 0x00, // Data size (truncated)
+        });
+        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::out_of_range,
+                               Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring(
+                                       "vector::_M_range_check")));
     }
 }

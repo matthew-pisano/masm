@@ -137,8 +137,8 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
 
 MemLayout loadLayout(const std::vector<std::byte>& binary) {
     // Check if the binary starts with the MASM magic number
-    if (binary[0] != std::byte{'M'} || binary[1] != std::byte{'A'} || binary[2] != std::byte{'S'} ||
-        binary[3] != std::byte{'M'}) {
+    if (binary.size() < 4 || binary[0] != std::byte{'M'} || binary[1] != std::byte{'A'} ||
+        binary[2] != std::byte{'S'} || binary[3] != std::byte{'M'}) {
         throw std::runtime_error("Invalid MASM binary format");
     }
 
