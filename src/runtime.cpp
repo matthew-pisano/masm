@@ -27,10 +27,14 @@ MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
     if (inputFileNames.size() > 1)
         throw std::runtime_error("Only one binary file may be loaded in at a time");
 
-    const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
-    const MemLayout layout = loadLayout(binary);
-
-    return layout;
+    try {
+        const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
+        const MemLayout layout = loadLayout(binary);
+        return layout;
+    } catch (const std::runtime_error& e) {
+        throw std::runtime_error("Failed to load binary file '" + inputFileNames[0] +
+                                 "': " + e.what());
+    }
 }
 
 

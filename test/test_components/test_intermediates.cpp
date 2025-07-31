@@ -18,8 +18,8 @@ TEST_CASE("Test Save Layout") {
                               {}};
 
     SECTION("All Sections") {
-        std::vector<std::byte> binary = saveLayout(layout);
-        std::vector<std::byte> expected = iV2bV({
+        const std::vector<std::byte> binary = saveLayout(layout);
+        const std::vector<std::byte> expected = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
                 0x14, 0x00, 0x00, 0x00, // Text locator
                 0x1C, 0x00, 0x00, 0x00, // Data locator
@@ -42,8 +42,8 @@ TEST_CASE("Test Save Layout") {
                                    {MemSection::KTEXT, layout.data.at(MemSection::KTEXT)},
                                    {MemSection::KDATA, layout.data.at(MemSection::KDATA)}},
                                   {}};
-        std::vector<std::byte> binary = saveLayout(noText);
-        std::vector<std::byte> expected = iV2bV({
+        const std::vector<std::byte> binary = saveLayout(noText);
+        const std::vector<std::byte> expected = iV2bV({
                 'M', 'A', 'S', 'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
                 0x14, 0x00, 0x00, 0x00, // Data locator
@@ -58,5 +58,56 @@ TEST_CASE("Test Save Layout") {
                 0x06, 0x00, 0x00, 0x00 // KData section
         });
         REQUIRE(expected == binary);
+    }
+}
+
+
+TEST_CASE("Test Load Layout") {
+    const std::vector<std::byte> binary = iV2bV({
+            'M',  'A',  'S',  'M', // Binary identifier
+            0x14, 0x00, 0x00, 0x00, // Text locator
+            0x1C, 0x00, 0x00, 0x00, // Data locator
+            0x24, 0x00, 0x00, 0x00, // KText locator
+            0x30, 0x00, 0x00, 0x00, // KData locator
+            0x03, 0x00, 0x00, 0x00, // Text size
+            0x01, 0x02, 0x03, 0x00, // Text section
+            0x02, 0x00, 0x00, 0x00, // Data size
+            0x04, 0x05, 0x00, 0x00, // Data section
+            0x05, 0x00, 0x00, 0x00, // KText size
+            0x07, 0x08, 0x09, 0x10, 0x11, 0x00, 0x00, 0x00, // KText section
+            0x01, 0x00, 0x00, 0x00, // KData size
+            0x06, 0x00, 0x00, 0x00 // KData section
+    });
+
+    SECTION("All Sections") {
+        const MemLayout layout = loadLayout(binary);
+        const MemLayout expected = {{{MemSection::TEXT, iV2bV({0x01, 0x02, 0x03})},
+                                     {MemSection::DATA, iV2bV({0x04, 0x05})},
+                                     {MemSection::KTEXT, iV2bV({0x07, 0x08, 0x09, 0x10, 0x11})},
+                                     {MemSection::KDATA, iV2bV({0x06})}},
+                                    {}};
+        REQUIRE(expected.data == layout.data);
+    }
+
+    SECTION("Without Text") {
+        const std::vector<std::byte> noText = iV2bV({
+                'M',  'A',  'S',  'M', // Binary identifier
+                0x00, 0x00, 0x00, 0x00, // Text locator
+                0x14, 0x00, 0x00, 0x00, // Data locator
+                0x1C, 0x00, 0x00, 0x00, // KText locator
+                0x28, 0x00, 0x00, 0x00, // KData locator
+                0x02, 0x00, 0x00, 0x00, // Data size
+                0x04, 0x05, 0x00, 0x00, // Data section
+                0x05, 0x00, 0x00, 0x00, // KText size
+                0x07, 0x08, 0x09, 0x10, 0x11, 0x00, 0x00, 0x00, // KText section
+                0x01, 0x00, 0x00, 0x00, // KData size
+                0x06, 0x00, 0x00, 0x00 // KData section
+        });
+        const MemLayout layout = loadLayout(noText);
+        const MemLayout expected = {{{MemSection::DATA, iV2bV({0x04, 0x05})},
+                                     {MemSection::KTEXT, iV2bV({0x07, 0x08, 0x09, 0x10, 0x11})},
+                                     {MemSection::KDATA, iV2bV({0x06})}},
+                                    {}};
+        REQUIRE(expected.data == layout.data);
     }
 }

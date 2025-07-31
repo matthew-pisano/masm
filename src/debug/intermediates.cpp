@@ -143,10 +143,10 @@ MemLayout loadLayout(const std::vector<std::byte>& binary) {
     }
 
     auto extractOffset = [&binary](const size_t index) {
-        return static_cast<uint32_t>(binary[index]) |
-               static_cast<uint32_t>(binary[index + 1]) << 8 |
-               static_cast<uint32_t>(binary[index + 2]) << 16 |
-               static_cast<uint32_t>(binary[index + 3]) << 24;
+        return static_cast<uint32_t>(binary.at(index)) |
+               static_cast<uint32_t>(binary.at(index + 1)) << 8 |
+               static_cast<uint32_t>(binary.at(index + 2)) << 16 |
+               static_cast<uint32_t>(binary.at(index + 3)) << 24;
     };
 
     const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12),
@@ -157,25 +157,25 @@ MemLayout loadLayout(const std::vector<std::byte>& binary) {
         const size_t textSize = extractOffset(secHeaders[0]);
         layout.data[MemSection::TEXT] = {};
         for (size_t i = 0; i < textSize; i++)
-            layout.data[MemSection::TEXT].push_back(binary[secHeaders[0] + 4 + i]);
+            layout.data[MemSection::TEXT].push_back(binary.at(secHeaders[0] + 4 + i));
     }
     if (secHeaders[1] > 0) {
         const size_t dataSize = extractOffset(secHeaders[1]);
         layout.data[MemSection::DATA] = {};
         for (size_t i = 0; i < dataSize; i++)
-            layout.data[MemSection::DATA].push_back(binary[secHeaders[1] + 4 + i]);
+            layout.data[MemSection::DATA].push_back(binary.at(secHeaders[1] + 4 + i));
     }
     if (secHeaders[2] > 0) {
         const size_t ktextSize = extractOffset(secHeaders[2]);
         layout.data[MemSection::KTEXT] = {};
         for (size_t i = 0; i < ktextSize; i++)
-            layout.data[MemSection::KTEXT].push_back(binary[secHeaders[2] + 4 + i]);
+            layout.data[MemSection::KTEXT].push_back(binary.at(secHeaders[2] + 4 + i));
     }
     if (secHeaders[3] > 0) {
         const size_t kdataSize = extractOffset(secHeaders[3]);
         layout.data[MemSection::KDATA] = {};
         for (size_t i = 0; i < kdataSize; i++)
-            layout.data[MemSection::KDATA].push_back(binary[secHeaders[3] + 4 + i]);
+            layout.data[MemSection::KDATA].push_back(binary.at(secHeaders[3] + 4 + i));
     }
 
     return layout;
