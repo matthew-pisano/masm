@@ -83,6 +83,12 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary[i + 3] = static_cast<std::byte>(offset >> 24 & 0xFF);
     };
 
+    // Ensure length of binary vector is a multiple of 4
+    auto padBinary = [&binary]() {
+        while (binary.size() % 4 != 0)
+            binary.push_back(std::byte{0});
+    };
+
     // Add section offsets to vector
     if (layout.data.contains(MemSection::TEXT)) {
         insertOffset(4, binary.size());
@@ -92,6 +98,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         // Add text data to binary
         for (const std::byte& byte : layout.data.at(MemSection::TEXT))
             binary.push_back(byte);
+        padBinary();
     }
     if (layout.data.contains(MemSection::DATA)) {
         insertOffset(8, binary.size());
@@ -101,9 +108,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         // Add static data to binary
         for (const std::byte& byte : layout.data.at(MemSection::DATA))
             binary.push_back(byte);
-        // Ensure length of binary vector is a multiple of 4
-        while (binary.size() % 4 != 0)
-            binary.push_back(std::byte{0});
+        padBinary();
     }
     if (layout.data.contains(MemSection::KTEXT)) {
         insertOffset(12, binary.size());
@@ -113,6 +118,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         // Add ktext data to binary
         for (const std::byte& byte : layout.data.at(MemSection::KTEXT))
             binary.push_back(byte);
+        padBinary();
     }
     if (layout.data.contains(MemSection::KDATA)) {
         insertOffset(16, binary.size());
@@ -122,6 +128,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         // Add kdata to binary
         for (const std::byte& byte : layout.data.at(MemSection::KDATA))
             binary.push_back(byte);
+        padBinary();
     }
 
     return binary;
