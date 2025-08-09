@@ -13,14 +13,14 @@ std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPat
     std::vector<std::string> resolvedPaths;
     for (const auto& path : rawPaths) {
         // Use glob to resolve wildcards
-        glob_t globResult;
-        if (glob(path.c_str(), GLOB_TILDE, nullptr, &globResult) == 0)
+        glob_t globResult{};
+        if (glob(path.c_str(), GLOB_TILDE, nullptr, &globResult) == 0) {
             for (size_t i = 0; i < globResult.gl_pathc; ++i)
                 resolvedPaths.push_back(std::string(globResult.gl_pathv[i]));
-        else
+            globfree(&globResult);
+        } else
             // If glob fails, add the original path
             resolvedPaths.push_back(path);
-        globfree(&globResult);
     }
     return resolvedPaths;
 }
