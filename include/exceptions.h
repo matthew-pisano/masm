@@ -5,6 +5,7 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
+#include <cstdint>
 #include <format>
 #include <stdexcept>
 
