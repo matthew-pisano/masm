@@ -27,14 +27,17 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
 
+    // Insert dummy nop instruction to save space in case a jump main is needed
+    const std::vector<Token> nop = {{TokenCategory::INSTRUCTION, "nop"}};
+    modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
+
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(modifiedTokenLines);
     // Insert jump to main instruction if the label is defined, otherwise start at first text word
     if (labelMap.contains("main")) {
-        const LineTokens firstToken = modifiedTokenLines[0];
         const std::vector<Token> jumpMain = {{TokenCategory::INSTRUCTION, "j"},
                                              {TokenCategory::LABEL_REF, "main"}};
-        modifiedTokenLines.insert(modifiedTokenLines.begin(), {firstToken.filename, 1, jumpMain});
+        modifiedTokenLines[0] = {"<unknown>", 0, jumpMain};
     }
 
     // Resolve pseudo instructions in the token lines

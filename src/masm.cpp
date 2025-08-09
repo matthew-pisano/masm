@@ -50,6 +50,9 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
+    // resolve wildcards in path names to real paths
+    inputFileNames = resolveWildcards(inputFileNames);
+
     const bool loadingBinary = isLoadingBinary(inputFileNames);
     if (loadingBinary && saveTemps)
         std::cerr << "Warning: temp files are not generated when parsing binaries" << std::endl;

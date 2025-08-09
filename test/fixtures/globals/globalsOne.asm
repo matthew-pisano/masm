@@ -3,6 +3,8 @@
 local_string: .asciiz "Hello, World again!"
 
 .text
+
+.globl main
 main:
     li $v0, 4
     la $a0, global_string
