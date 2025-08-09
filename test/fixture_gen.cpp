@@ -80,6 +80,9 @@ int main(const int argc, char* argv[]) {
         return app.exit(e);
     }
 
+    // resolve wildcards in path names to real paths
+    inputFileNames = resolveWildcards(inputFileNames);
+
     std::string projectName = getFileBasename(inputFileNames[0]);
     // Split off extension
     const size_t extPos = projectName.find_last_of('.');

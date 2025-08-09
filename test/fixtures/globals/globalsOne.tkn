@@ -2,7 +2,7 @@
 04local_string@masm_mangle_file_globalsOne.asm
 02asciiz12Hello, World again!
 01text
-04main@masm_mangle_file_globalsOne.asm
+04main
 06li07v009,084
 06la07a009,05global_string
 06syscall

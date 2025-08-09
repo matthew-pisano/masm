@@ -171,6 +171,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
             test/test_instructions/test_cp0_instructions.cpp
             test/test_instructions/test_cp1_instructions.cpp
             test/test_components/test_intermediates.cpp
+            test/test_fileio.cpp
     )
     target_link_libraries(masm-tests PRIVATE masm)
     target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)

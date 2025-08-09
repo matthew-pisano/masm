@@ -21,9 +21,11 @@
  * @param sourceFileNames The name sof the source files to parse
  * @param parsedFileName The name of the parsed file to compare against
  * @param useLittleEndian Whether to use little-endian byte order
+ * @param rawParse Whether to parse the file in raw mode (without adding any new tokens)
  */
 void validateMemLayout(const std::vector<std::string>& sourceFileNames,
-                       const std::string& parsedFileName, const bool useLittleEndian = false) {
+                       const std::string& parsedFileName, const bool useLittleEndian = false,
+                       const bool rawParse = true) {
     const std::vector<std::byte> parsedBytes = readFileBytes(parsedFileName);
 
     std::vector memSecBytes = {
@@ -51,11 +53,11 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
     const std::vector<LineTokens> program = Tokenizer::tokenize(sourceLines);
 
     Parser parser(useLittleEndian);
-    MemLayout actualMem = parser.parse(program);
+    MemLayout actualMem = parser.parse(program, rawParse);
     REQUIRE(expectedMem.data.size() == actualMem.data.size());
-    for (const std::pair<const MemSection, std::vector<std::byte>>& pair : expectedMem.data) {
-        REQUIRE(actualMem.data.contains(pair.first));
-        REQUIRE(pair.second == actualMem.data[pair.first]);
+    for (const auto& [memSec, bytes] : expectedMem.data) {
+        REQUIRE(actualMem.data.contains(memSec));
+        REQUIRE(bytes == actualMem.data[memSec]);
     }
 }
 
@@ -265,9 +267,10 @@ TEST_CASE("Test Parse Loops") {
 
 TEST_CASE("Test Parse Globals") {
     const std::string test_case = "globals";
+    // Parse without raw since it contains a global main
     validateMemLayout({"test/fixtures/" + test_case + "/globalsOne.asm",
                        "test/fixtures/" + test_case + "/globalsTwo.asm"},
-                      "test/fixtures/" + test_case + "/globalsOne.pse");
+                      "test/fixtures/" + test_case + "/globalsOne.pse", false, false);
 }
 
 

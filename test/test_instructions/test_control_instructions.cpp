@@ -23,7 +23,7 @@ TEST_CASE("Test j Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x08, 0x10, 0x00, 0x04});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -51,7 +51,7 @@ TEST_CASE("Test jal Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x0c, 0x10, 0x00, 0x04});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -79,7 +79,7 @@ TEST_CASE("Test jr Instruction") {
     }
 
     Parser parser{};
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x00, 0x00, 0x08});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -107,7 +107,7 @@ TEST_CASE("Test jalr Instruction") {
     }
 
     Parser parser{};
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x00, 0x00, 0x09});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -142,7 +142,7 @@ TEST_CASE("Test beq Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x11, 0x09, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -184,7 +184,7 @@ TEST_CASE("Test bne Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x15, 0x09, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -224,7 +224,7 @@ TEST_CASE("Test bgtz Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
                 iV2bV({0x00, 0x08, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
@@ -270,7 +270,7 @@ TEST_CASE("Test bltz Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
                 iV2bV({0x01, 0x00, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
@@ -316,7 +316,7 @@ TEST_CASE("Test bgez Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
                 iV2bV({0x01, 0x00, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});
@@ -362,7 +362,7 @@ TEST_CASE("Test blez Instruction") {
 
     Parser parser;
     parser.getLabels()["label"] = 0x00400010;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
                 iV2bV({0x00, 0x08, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});

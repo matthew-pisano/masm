@@ -8,6 +8,14 @@
 #include <string>
 #include <vector>
 
+
+/**
+ * Resolves wildcard characters in file paths to actual file names
+ * @param rawPaths A vector of file paths that may contain wildcard characters
+ * @return A vector of file paths with wildcards resolved to actual file names
+ */
+std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPaths);
+
 /**
  * Loads a file and returns its contents as a string
  * @param fileName The name of the file to load
