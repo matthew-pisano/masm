@@ -8,6 +8,7 @@
 #include "io/consoleio.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
+#include "runtime.h"
 #include "utils.h"
 #include "version.h"
 
@@ -44,17 +45,19 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
+    const bool loadingBinary = isLoadingBinary(inputFileNames);
+    if (loadingBinary && useLittleEndian)
+        std::cerr << "Warning: little-endian mode has no effect on binary files" << std::endl;
+
     int exitCode = 1;
     try {
-        std::vector<SourceFile> sourceFiles;
-        sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
-        for (const std::string& fileName : inputFileNames)
-            sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
-
-        const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
-
-        Parser parser(useLittleEndian);
-        const MemLayout layout = parser.parse(program);
+        MemLayout layout;
+        if (loadingBinary)
+            layout = loadLayoutFromBinary(inputFileNames);
+        else {
+            Parser parser(useLittleEndian);
+            layout = loadLayoutFromSource(inputFileNames, parser);
+        }
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
         DebugInterpreter interpreter(ioMode, conHandle, useLittleEndian);

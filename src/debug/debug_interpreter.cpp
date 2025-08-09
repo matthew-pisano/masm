@@ -39,7 +39,7 @@ const std::string debuggerHelp =
         "next, n - Execute the next instruction, skipping over procedure calls\n"
         "print, p <$register> - Print the value of the specified register\n"
         "print, p <ref> - Print the string value of the specified location reference\n"
-        "run, r - Run the program from the beginning until the next breakpoint or end of program\n"
+        "run, r - Run the program from the beginning, pausing at the first instruction\n"
         "step, s - Execute the next instruction\n"
         "\nNote: a \"location reference\" means one of a line number, a label, or a filename:line "
         "or filename:label pair\n";
@@ -372,16 +372,17 @@ void DebugInterpreter::listLines(const std::string& arg) {
     const uint32_t addr = arg.empty() ? pc : addrFromStr(arg);
 
     for (uint32_t i = addr - 40; i < addr + 40; i += 4) {
-        if (!state.memory.isValid(i) || !state.debugInfo.contains(i))
+        if (!state.memory.isValid(i))
             continue; // Skip invalid addresses
 
         const DebugInfo debugInfo = state.getDebugInfo(i);
         if (!debugInfo.label.empty())
             streamHandle.putStr("<" + unmangleLabel(debugInfo.label) + ">\n");
         const std::string pointerString = i == pc ? "--->" : "";
-        // An indicator for when a breakpoint is present
-        const std::string bpString =
-                breakpoints.contains(i) ? "[*" + std::to_string(breakpoints[i]) + "]" : "";
+        // An indicator for when a breakpoint is present and now the system breakpoint
+        const std::string bpString = breakpoints.contains(i) && breakpoints[i] != 0
+                                             ? "[*" + std::to_string(breakpoints[i]) + "]"
+                                             : "";
         streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
                                         pointerString, debugInfo.source.lineno, i,
                                         static_cast<uint32_t>(state.memory.wordAt(i)),
@@ -520,15 +521,18 @@ void DebugInterpreter::listBreakpoints() {
 }
 
 void DebugInterpreter::listLabels() {
+    bool foundLabel = false;
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
             const SourceLocator src = debugInfo.source;
             streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
                                             unmangleLabel(debugInfo.label), addr, src.filename,
                                             src.lineno));
-        } else if (!debugInfo.label.empty())
-            streamHandle.putStr(
-                    std::format("{} -> 0x{:08x}\n", unmangleLabel(debugInfo.label), addr));
+            foundLabel = true;
+        }
+
+    if (!foundLabel)
+        streamHandle.putStr("No labels found in the program.\n");
 }
 
 void DebugInterpreter::listRegisters() {

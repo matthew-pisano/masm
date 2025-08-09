@@ -10,23 +10,21 @@
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
 
-class DebugParser : public Parser {
-
-public:
-    /**
-     * Fetches the label map associated with this parser
-     * @return The label map associated with this parser
-     */
-    LabelMap& getLabels();
-};
-
 
 /**
  * Converts a vector of integers to a vector of bytes
  * @param intVec The vector of integers to convert
  * @return The vector of bytes
  */
-std::vector<std::byte> intVec2ByteVec(const std::vector<int>& intVec);
+std::vector<std::byte> iV2bV(const std::vector<uint8_t>& intVec);
+
+
+/**
+ * Converts a vector of bytes to a vector of integers
+ * @param byteVec The vector of bytes to convert
+ * @return The vector of integers
+ */
+std::vector<uint8_t> bV2iV(const std::vector<std::byte>& byteVec);
 
 
 /**

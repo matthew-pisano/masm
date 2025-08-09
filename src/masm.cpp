@@ -3,10 +3,12 @@
 #include <vector>
 
 #include "CLI/CLI.hpp"
+#include "debug/intermediates.h"
 #include "interpreter/interpreter.h"
 #include "io/consoleio.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
+#include "runtime.h"
 #include "utils.h"
 #include "version.h"
 
@@ -19,6 +21,8 @@ int main(const int argc, char* argv[]) {
     std::vector<std::string> inputFileNames;
     bool useMMIO = false;
     bool useLittleEndian = false;
+    bool saveTemps = false;
+    bool assembleOnly = false;
 
     CLI::App app{version + " - MIPS Interpreter", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
@@ -26,6 +30,9 @@ int main(const int argc, char* argv[]) {
                  "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("--save-temps", saveTemps,
+                 "Write intermediate files to the current working directory");
+    app.add_flag("-s,--assemble", assembleOnly, "Assemble only; do not execute the given program");
     app.set_version_flag("--version", version);
 
     // Set up help message
@@ -43,21 +50,36 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
+    const bool loadingBinary = isLoadingBinary(inputFileNames);
+    if (loadingBinary && saveTemps)
+        std::cerr << "Warning: temp files are not generated when parsing binaries" << std::endl;
+    if (loadingBinary && useLittleEndian)
+        std::cerr << "Warning: little-endian mode has no effect on binary files" << std::endl;
+
     int exitCode = 1;
     try {
-        std::vector<SourceFile> sourceFiles;
-        sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
-        for (const std::string& fileName : inputFileNames)
-            sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
+        MemLayout layout;
+        if (loadingBinary)
+            layout = loadLayoutFromBinary(inputFileNames);
+        else {
+            Parser parser(useLittleEndian);
+            layout = loadLayoutFromSource(inputFileNames, parser);
+            if (saveTemps) {
+                std::string preprocessed = stringifyLayout(layout, parser.getLabels());
+                writeFile(inputFileNames[0] + ".i", preprocessed);
 
-        const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
+                std::vector<std::byte> binary = saveLayout(layout);
+                writeFileBytes(inputFileNames[0] + ".o", binary);
+            }
+        }
 
-        Parser parser(useLittleEndian);
-        const MemLayout layout = parser.parse(program);
-
-        const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        Interpreter interpreter(ioMode, conHandle, useLittleEndian);
-        exitCode = interpreter.interpret(layout);
+        // Do not interpret program if only assembling
+        if (!assembleOnly) {
+            const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
+            Interpreter interpreter(ioMode, conHandle, useLittleEndian);
+            exitCode = interpreter.interpret(layout);
+        } else
+            exitCode = 0;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

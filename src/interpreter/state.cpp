@@ -39,7 +39,11 @@ std::string causeToString(const uint32_t cause) {
 }
 
 
-DebugInfo State::getDebugInfo(const uint32_t addr) const { return debugInfo.at(addr); }
+DebugInfo State::getDebugInfo(const uint32_t addr) const {
+    if (debugInfo.contains(addr))
+        return debugInfo.at(addr);
+    return {{"<unknown>", 0, "<unknown>"}, ""};
+}
 
 
 void State::loadProgram(const MemLayout& layout) {

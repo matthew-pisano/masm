@@ -15,6 +15,9 @@
 #include "utils.h"
 
 
+bool LabelMap::contains(const std::string& label) const { return labelMap.contains(label); }
+
+
 void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
     for (Token& arg : instructionArgs)
         if (arg.category == TokenCategory::LABEL_REF) {

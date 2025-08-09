@@ -16,6 +16,9 @@
 #include "utils.h"
 
 
+LabelMap& Parser::getLabels() { return labelMap; }
+
+
 MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
     MemLayout layout;
 
@@ -98,6 +101,9 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
                     debugInfo.source.text += " " + token.value;
                 else
                     debugInfo.source.text += " " + unmangleLabel(token.value);
+
+                if (debugInfo.source.text[0] == ' ')
+                    debugInfo.source.text.erase(0, 1); // Remove leading space
             }
 
             // Assign debug info to all allocated instructions (including multi-instruction
@@ -376,10 +382,10 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             else if (instructionName == "la") {
                 uint32_t value;
                 if (args[1].category == TokenCategory::LABEL_REF) {
-                    if (!labelMap.labelMap.contains(args[1].value))
+                    if (!labelMap.contains(args[1].value))
                         throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
                                                  "'");
-                    value = labelMap.labelMap[args[1].value];
+                    value = labelMap[args[1].value];
                 } else
                     value = stoui32(args[1].value);
 

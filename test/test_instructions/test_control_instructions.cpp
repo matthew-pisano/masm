@@ -21,11 +21,11 @@ TEST_CASE("Test j Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x08, 0x10, 0x00, 0x04});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x08, 0x10, 0x00, 0x04});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -49,11 +49,11 @@ TEST_CASE("Test jal Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x0c, 0x10, 0x00, 0x04});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x0c, 0x10, 0x00, 0x04});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -81,7 +81,7 @@ TEST_CASE("Test jr Instruction") {
     Parser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x00, 0x00, 0x08});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x00, 0x00, 0x08});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -109,7 +109,7 @@ TEST_CASE("Test jalr Instruction") {
     Parser parser{};
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x01, 0x00, 0x00, 0x09});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x00, 0x00, 0x09});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -140,11 +140,11 @@ TEST_CASE("Test beq Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x11, 0x09, 0x00, 0x03});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x11, 0x09, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -182,11 +182,11 @@ TEST_CASE("Test bne Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes = intVec2ByteVec({0x15, 0x09, 0x00, 0x03});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x15, 0x09, 0x00, 0x03});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -222,12 +222,12 @@ TEST_CASE("Test bgtz Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
-                intVec2ByteVec({0x00, 0x08, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
+                iV2bV({0x00, 0x08, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -268,12 +268,12 @@ TEST_CASE("Test bltz Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
-                intVec2ByteVec({0x01, 0x00, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
+                iV2bV({0x01, 0x00, 0x08, 0x2a, 0x14, 0x20, 0x00, 0x02});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -314,12 +314,12 @@ TEST_CASE("Test bgez Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
-                intVec2ByteVec({0x01, 0x00, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});
+                iV2bV({0x01, 0x00, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -360,12 +360,12 @@ TEST_CASE("Test blez Instruction") {
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
-    DebugParser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    Parser parser;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
-                intVec2ByteVec({0x00, 0x08, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});
+                iV2bV({0x00, 0x08, 0x08, 0x2a, 0x10, 0x20, 0x00, 0x02});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
