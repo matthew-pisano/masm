@@ -28,9 +28,25 @@ Remember to replace the `x.x.x` portion with the release version that you have s
 masm [options...] module1.asm module2.asm ...
 ```
 
+Wildcard arguments are also supported if explicit ordering is not needed.
+
+```bash
+masm [options...] *.asm
+```
+
 Note that program execution will begin at the first instruction in the text section of the first file argument (`module1.asm` in this case).
 
 By default, *masm* will use *syscall I/O*. This means that the console input and output are only accessible through syscalls. Alternately, the `--mmio` option enables *memory-mapped I/O*. With this option, console I/O is routed through the MMIO registers (located at *0xffff0000* - *0xffff000f*). Reading from or writing to these registers passes that information to the program.
+
+### Multi-File Projects
+
+If multiple files are given to *masm* (either explicitly or through a wildcard argument), the program will always choose the first file to place first in text memory. This means that the program may not begin where expected. To make sure the intended first instruction is executed first, label it globally with *main*.
+
+```mips
+.globl main
+main:
+  ...
+```
 
 ### Interrupts
 
