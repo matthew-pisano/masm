@@ -154,7 +154,7 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the Parser Class
     py::class_<Parser>(parser_module, "Parser")
             .def(py::init<>())
-            .def("parse", &Parser::parse, py::arg("program"),
+            .def("parse", &Parser::parse, py::arg("program"), py::arg("raw") = false,
                  "Parses the given program and returns a MemLayout object");
 
     // Interpreter Bindings //
