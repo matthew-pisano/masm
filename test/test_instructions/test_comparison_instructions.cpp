@@ -27,7 +27,7 @@ TEST_CASE("Test slt Instruction") {
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x2a, 0x40, 0x2a});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -62,7 +62,7 @@ TEST_CASE("Test sltu Instruction") {
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x2a, 0x40, 0x29});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -97,7 +97,7 @@ TEST_CASE("Test slti Instruction") {
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x29, 0x28, 0x00, 0x0a});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -131,7 +131,7 @@ TEST_CASE("Test sltiu Instruction") {
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x2d, 0x28, 0x00, 0x0a});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);

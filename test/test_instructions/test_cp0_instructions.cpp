@@ -16,12 +16,13 @@ TEST_CASE("Test Eret Instruction") {
     const SourceFile rawFile = makeRawFile({"eret"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "eret"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "eret"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x42, 0x00, 0x00, 0x18});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -46,15 +47,16 @@ TEST_CASE("Test Mtc0 Instruction") {
     const SourceFile rawFile = makeRawFile({"mtc0 $t1, $8"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "mtc0"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "8"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "mtc0"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "8"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x40, 0x89, 0x40, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
@@ -73,15 +75,16 @@ TEST_CASE("Test Mfc0 Instruction") {
     const SourceFile rawFile = makeRawFile({"mfc0 $t1, $8"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "mfc0"},
-                                                                 {TokenCategory::REGISTER, "t1"},
-                                                                 {TokenCategory::SEPERATOR, ","},
-                                                                 {TokenCategory::REGISTER, "8"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "mfc0"},
+                 {TokenCategory::REGISTER, "t1"},
+                 {TokenCategory::SEPERATOR, ","},
+                 {TokenCategory::REGISTER, "8"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     Parser parser;
-    const MemLayout actualLayout = parser.parse(actualTokens);
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x40, 0x09, 0x40, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);

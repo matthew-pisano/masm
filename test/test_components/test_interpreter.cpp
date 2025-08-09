@@ -73,7 +73,7 @@ TEST_CASE("Test Runtime Error") {
     const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
 
     Parser parser{};
-    const MemLayout layout = parser.parse(program);
+    const MemLayout layout = parser.parse(program, true);
 
     std::istringstream iss;
     std::ostringstream oss;

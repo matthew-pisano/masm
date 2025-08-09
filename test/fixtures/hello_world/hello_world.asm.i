@@ -18,6 +18,7 @@ out_string:
 
 
 .text
+sll $zero, $zero, 0
 
 main:
 addiu $v0, $zero, 4
