@@ -29,6 +29,14 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
 
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(modifiedTokenLines);
+    // Insert jump to main instruction if the label is defined, otherwise start at first text word
+    if (labelMap.contains("main")) {
+        const LineTokens firstToken = modifiedTokenLines[0];
+        const std::vector<Token> jumpMain = {{TokenCategory::INSTRUCTION, "j"},
+                                             {TokenCategory::LABEL_REF, "main"}};
+        modifiedTokenLines.insert(modifiedTokenLines.begin(), {firstToken.filename, 1, jumpMain});
+    }
+
     // Resolve pseudo instructions in the token lines
     resolvePseudoInstructions(modifiedTokenLines);
 
