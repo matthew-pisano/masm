@@ -37,7 +37,9 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
 
     for (const auto& [section, data] : layout.data) {
         const uint32_t sectionOffset = memSectionOffset(section);
-        program += "\n." + memSectionToName(section) + "\n\n";
+        if (!program.empty())
+            program += "\n\n";
+        program += "." + memSectionToName(section) + "\n";
 
         for (uint32_t i = 0; i < data.size(); i++) {
             if (isSectionExecutable(section) && i % 4 != 0)

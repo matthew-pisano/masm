@@ -1,0 +1,28 @@
+.data
+
+out_string:
+.byte 0x48
+.byte 0x65
+.byte 0x6c
+.byte 0x6c
+.byte 0x6f
+.byte 0x2c
+.byte 0x20
+.byte 0x57
+.byte 0x6f
+.byte 0x72
+.byte 0x6c
+.byte 0x64
+.byte 0x21
+.byte 0x00
+
+
+.text
+
+main:
+addiu $v0, $zero, 4
+lui $at, 4097
+ori $a0, $at, 0
+syscall
+addiu $v0, $zero, 10
+syscall

@@ -10,6 +10,19 @@
 #include "../testing_utilities.h"
 #include "debug/intermediates.h"
 #include "interpreter/memory.h"
+#include "io/fileio.h"
+#include "runtime.h"
+
+
+TEST_CASE("Test Stringify Layout") {
+    const std::string fixturePath = "test/fixtures/hello_world/hello_world.asm";
+    Parser parser;
+    const MemLayout layout = loadLayoutFromSource({fixturePath}, parser);
+    const std::string layoutString = stringifyLayout(layout, parser.getLabels());
+    const std::string expectedString = readFile(fixturePath + ".i");
+
+    REQUIRE(layoutString == expectedString);
+}
 
 
 TEST_CASE("Test Save Layout") {

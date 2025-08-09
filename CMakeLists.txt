@@ -153,6 +153,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     FetchContent_MakeAvailable(Catch2)
 
     add_executable(masm-tests
+            src/runtime.cpp
             src/debug/debug_interpreter.cpp
             src/io/fileio.cpp
             src/debug/intermediates.cpp
