@@ -476,7 +476,7 @@ TEST_CASE("Test FP bc1f Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x45, 0x00, 0x00, 0x03});
@@ -511,7 +511,7 @@ TEST_CASE("Test FP bc1t Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x45, 0x01, 0x00, 0x03});

@@ -49,7 +49,7 @@ TEST_CASE("Test la Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =

@@ -17,12 +17,12 @@
  */
 class LabelMap {
 
-public:
     /**
      * A map between the names of labels and their associated memory addresses
      */
     std::map<std::string, uint32_t> labelMap;
 
+public:
     /**
      * Modifies instruction arguments to replace label references with labeled memory locations
      * @param instructionArgs The instruction arguments to modify
@@ -44,6 +44,17 @@ public:
      * @throw MasmSyntaxError When a duplicate label definition is detected
      */
     void populateLabelMap(const std::vector<LineTokens>& tokens);
+
+    /**
+     * Checks if the label map contains a label
+     * @param label The label to check for
+     * @return True if the label exists, false otherwise
+     */
+    bool contains(const std::string& label) const;
+
+    [[nodiscard]] uint32_t operator[](const std::string& label) const { return labelMap.at(label); }
+
+    uint32_t& operator[](const std::string& label) { return labelMap[label]; }
 };
 
 #endif // LABELS_H

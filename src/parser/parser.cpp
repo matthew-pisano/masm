@@ -382,10 +382,10 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             else if (instructionName == "la") {
                 uint32_t value;
                 if (args[1].category == TokenCategory::LABEL_REF) {
-                    if (!labelMap.labelMap.contains(args[1].value))
+                    if (!labelMap.contains(args[1].value))
                         throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
                                                  "'");
-                    value = labelMap.labelMap[args[1].value];
+                    value = labelMap[args[1].value];
                 } else
                     value = stoui32(args[1].value);
 

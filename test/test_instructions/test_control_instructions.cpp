@@ -22,7 +22,7 @@ TEST_CASE("Test j Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x08, 0x10, 0x00, 0x04});
@@ -50,7 +50,7 @@ TEST_CASE("Test jal Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x0c, 0x10, 0x00, 0x04});
@@ -141,7 +141,7 @@ TEST_CASE("Test beq Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x11, 0x09, 0x00, 0x03});
@@ -183,7 +183,7 @@ TEST_CASE("Test bne Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes = iV2bV({0x15, 0x09, 0x00, 0x03});
@@ -223,7 +223,7 @@ TEST_CASE("Test bgtz Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
@@ -269,7 +269,7 @@ TEST_CASE("Test bltz Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
@@ -315,7 +315,7 @@ TEST_CASE("Test bgez Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
@@ -361,7 +361,7 @@ TEST_CASE("Test blez Instruction") {
     }
 
     Parser parser;
-    parser.getLabels().labelMap["label"] = 0x00400010;
+    parser.getLabels()["label"] = 0x00400010;
     const MemLayout actualLayout = parser.parse(actualTokens);
     SECTION("Test Parse") {
         const std::vector<std::byte> expectedBytes =
