@@ -186,10 +186,12 @@ public:
     /**
      * Parses a sequence of tokens into memory allocations ready for execution
      * @param tokenLines The program tokens to parse
+     * @param raw If true, the parser will translate the given tokens verbatim, without adding any
+     * new tokens, useful for debugging or tests
      * @return The memory allocations associated with the program
      * @throw MasmSyntaxError When an error is encountered during parsing
      */
-    MemLayout parse(const std::vector<LineTokens>& tokenLines);
+    MemLayout parse(const std::vector<LineTokens>& tokenLines, bool raw = false);
 
 
     /**

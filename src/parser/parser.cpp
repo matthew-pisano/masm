@@ -19,22 +19,24 @@
 LabelMap& Parser::getLabels() { return labelMap; }
 
 
-MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines) {
+MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool raw) {
     MemLayout layout;
-
     std::vector<LineTokens> modifiedTokenLines = tokenLines;
 
     MemSection currSection = MemSection::TEXT;
     layout.data[MemSection::TEXT] = {};
 
-    // Insert dummy nop instruction to save space in case a jump main is needed
-    const std::vector<Token> nop = {{TokenCategory::INSTRUCTION, "nop"}};
-    modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
+    if (!raw) {
+        // Insert dummy nop instruction to save space in case a jump main is needed
+        const std::vector<Token> nop = {{TokenCategory::INSTRUCTION, "nop"}};
+        modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
+    }
 
     // Resolve all labels before parsing instructions
     labelMap.populateLabelMap(modifiedTokenLines);
+
     // Insert jump to main instruction if the label is defined, otherwise start at first text word
-    if (labelMap.contains("main")) {
+    if (!raw && labelMap.contains("main")) {
         const std::vector<Token> jumpMain = {{TokenCategory::INSTRUCTION, "j"},
                                              {TokenCategory::LABEL_REF, "main"}};
         modifiedTokenLines[0] = {"<unknown>", 0, jumpMain};
