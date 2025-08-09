@@ -52,7 +52,10 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
 
             // Add instruction or data
             if (isSectionExecutable(section)) {
-                DebugInfo debugInfo = layout.debugInfo.at(address);
+                if (!layout.debugInfo.contains(address))
+                    throw std::runtime_error("No debug info at address " + std::to_string(address));
+
+                const DebugInfo debugInfo = layout.debugInfo.at(address);
                 program += debugInfo.source.text + "\n";
             } else {
                 // Output current word as hex string
