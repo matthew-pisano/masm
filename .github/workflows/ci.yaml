@@ -67,7 +67,7 @@ jobs:
       - name: Run CTests
         run: |
           cd build
-          ctest --output-on-failure --verbose --output-junit ../logs/test-results.xml
+          ctest --output-on-failure --verbose --output-junit ../logs/ctest-results.xml
           cd -
 
       - name: Package Python
@@ -79,7 +79,7 @@ jobs:
 
       - name: Run PyTests
         run: |
-          python3 -m pytest test
+          python3 -m pytest --junitxml=logs/pytest-results.xml test
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
