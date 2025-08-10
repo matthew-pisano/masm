@@ -4,12 +4,12 @@
 
 #include "tokenizer/tokenizer.h"
 
+#include <algorithm>
 #include <ostream>
 #include <regex>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <sstream>
 
 #include "exceptions.h"
 #include "parser/directive.h"

@@ -16,7 +16,7 @@ std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPat
         glob_t globResult{};
         if (glob(path.c_str(), GLOB_TILDE, nullptr, &globResult) == 0) {
             for (size_t i = 0; i < globResult.gl_pathc; ++i)
-                resolvedPaths.push_back(std::string(globResult.gl_pathv[i]));
+                resolvedPaths.emplace_back(globResult.gl_pathv[i]);
             globfree(&globResult);
         } else
             // If glob fails, add the original path

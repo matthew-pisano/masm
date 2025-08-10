@@ -1,0 +1,108 @@
+name: Continuous Integration Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CMAKE_PARALLEL: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Clone Run Clang Format
+        uses: actions/checkout@v4
+        with:
+          repository: 'Sarcasm/run-clang-format'
+          path: 'run-clang-format'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format build-essential
+          sudo add-apt-repository -y ppa:deadsnakes/ppa
+          sudo apt update
+          sudo apt-get install -y python3.13 python3.13-venv
+          python3.13 -m ensurepip --upgrade
+          python3.13 -m pip install mypy pytest
+
+      - name: Run Clang Format
+        run: |
+          sed -i '/InsertNewlineAtEOF: true/d' .clang-format
+          ./run-clang-format/run-clang-format.py -r src include test
+
+      - name: Run MyPy
+        run: |
+          export MYPYPATH=$(pwd)/python
+          mypy python
+          mypy test
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+          sudo apt install software-properties-common
+          sudo add-apt-repository -y ppa:deadsnakes/ppa
+          sudo apt update
+          sudo apt-get install -y python3.13 python3.13-venv python3.13-dev
+          python3.13 -m ensurepip --upgrade
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt update
+          sudo apt install -y gcc-13 g++-13
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+          gcc --version
+          sudo rm /usr/bin/python3
+          sudo ln -s /usr/bin/python3.13 /usr/bin/python3
+          python3 -m pip install build pytest wheel setuptools
+          mkdir logs
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build project
+        run: |
+          [[ "${CMAKE_PARALLEL}" == true ]] && \
+          cmake --build build --parallel || \
+          cmake --build build
+
+      - name: Run CTests
+        run: |
+          cd build
+          ctest --output-on-failure --verbose --output-junit ../logs/ctest-results.xml
+          cd -
+
+      - name: Package Python
+        run: |
+          cp build/pymasm_core* python/pymasm/
+          export PYTHONPATH=$(pwd)
+          python3 -m build python --wheel
+          python3 -m pip install python/dist/pymasm-*.whl
+
+      - name: Run PyTests
+        run: |
+          python3 -m pytest --junitxml=logs/pytest-results.xml test
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v2.1.1
+        if: always()
+        with:
+          name: Catch2 Tests
+          path: logs/*.xml
+          reporter: java-junit
+          fail-on-error: true
