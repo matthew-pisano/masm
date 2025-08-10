@@ -52,6 +52,8 @@ jobs:
           sudo apt install -y gcc-13 g++-13
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
           gcc --version
+          pip install build pytest
+          mkdir logs
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
@@ -59,16 +61,29 @@ jobs:
       - name: Build project
         run: cmake --build build --parallel
 
-      - name: Run tests
+      - name: Run ctests
         run: |
           cd build
-          ctest --output-on-failure --verbose --output-junit test-results.xml
+          ctest --output-on-failure --verbose --output-junit ../logs/test-results.xml
+          cd -
+
+      - name: Package Python
+        run: |
+          cp build/pymasm_core* python/pymasm_core
+          cd python
+          python -m build
+          cd -
+          pip install --force-reinstall python/dist/pymasm-*
+
+      - name: Package Python
+        run: |
+          pytest test
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()
         with:
           name: Catch2 Tests
-          path: build/test-results.xml
+          path: logs/*.xml
           reporter: java-junit
           fail-on-error: true
