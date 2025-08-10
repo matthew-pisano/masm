@@ -5,9 +5,9 @@
 #include "utils.h"
 
 #include <algorithm>
-#include <sstream>
 #include <filesystem>
 #include <regex>
+#include <sstream>
 
 
 std::string readSeq(StreamHandle& streamHandle) {

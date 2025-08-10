@@ -9,6 +9,29 @@ on:
       - main
 
 jobs:
+  check-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Clone Run Clang Format
+        uses: actions/checkout@v4
+        with:
+          repository: 'Sarcasm/run-clang-format'
+          path: 'run-clang-format'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format build-essential
+
+      - name: Run Clang Format
+        run: |
+          sed -i '/InsertNewlineAtEOF: true/d' .clang-format
+          ./run-clang-format/run-clang-format.py -r src include test
+
   test:
     runs-on: ubuntu-latest
 
