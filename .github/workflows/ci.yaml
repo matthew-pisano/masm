@@ -46,22 +46,25 @@ jobs:
           sudo apt install software-properties-common
           sudo add-apt-repository -y ppa:deadsnakes/ppa
           sudo apt update
-          sudo apt-get install -y python3.10-dev
+          sudo apt-get install -y python3.13 python3.13-venv python3.13-dev
+          python3.13 -m ensurepip --upgrade
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt update
           sudo apt install -y gcc-13 g++-13
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
           gcc --version
-          pip install build pytest
+          rm /usr/bin/python3
+          ln -s /usr/bin/python3.13 /usr/bin/python3
+          python3 -m pip install build pytest wheel setuptools
           mkdir logs
 
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build project
-        run: cmake --build build --parallel
+        run: cmake --build build
 
-      - name: Run ctests
+      - name: Run CTests
         run: |
           cd build
           ctest --output-on-failure --verbose --output-junit ../logs/test-results.xml
@@ -69,15 +72,14 @@ jobs:
 
       - name: Package Python
         run: |
-          cp build/pymasm_core* python/pymasm_core
-          cd python
-          python -m build
-          cd -
-          pip install --force-reinstall python/dist/pymasm-*
+          cp build/pymasm_core* python/pymasm/
+          export PYTHONPATH=$(pwd)
+          python3 -m build python --wheel
+          python3 -m pip install python/dist/pymasm-*.whl
 
-      - name: Package Python
+      - name: Run PyTests
         run: |
-          pytest test
+          python3 -m pytest test
 
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
