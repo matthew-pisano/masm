@@ -12,7 +12,7 @@ env:
   CMAKE_PARALLEL: true
 
 jobs:
-  check-format:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +29,22 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-format build-essential
+          sudo add-apt-repository -y ppa:deadsnakes/ppa
+          sudo apt update
+          sudo apt-get install -y python3.13 python3.13-venv
+          python3.13 -m ensurepip --upgrade
+          python3.13 -m pip install mypy pytest
 
       - name: Run Clang Format
         run: |
           sed -i '/InsertNewlineAtEOF: true/d' .clang-format
           ./run-clang-format/run-clang-format.py -r src include test
+
+      - name: Run MyPy
+        run: |
+          export MYPYPATH=$(pwd)/python
+          mypy python
+          mypy test
 
   test:
     runs-on: ubuntu-latest
