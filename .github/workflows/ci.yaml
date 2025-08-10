@@ -67,8 +67,8 @@ jobs:
           sudo apt install -y gcc-13 g++-13
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13
           gcc --version
-          rm /usr/bin/python3
-          ln -s /usr/bin/python3.13 /usr/bin/python3
+          sudo rm /usr/bin/python3
+          sudo ln -s /usr/bin/python3.13 /usr/bin/python3
           python3 -m pip install build pytest wheel setuptools
           mkdir logs
 
