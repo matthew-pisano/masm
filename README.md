@@ -38,6 +38,10 @@ Note that program execution will begin at the first instruction in the text sect
 
 By default, *masm* will use *syscall I/O*. This means that the console input and output are only accessible through syscalls. Alternately, the `--mmio` option enables *memory-mapped I/O*. With this option, console I/O is routed through the MMIO registers (located at *0xffff0000* - *0xffff000f*). Reading from or writing to these registers passes that information to the program.
 
+### Examples
+
+This repository contains a variety of example files in `test/fixtures` and `python/examples` that demonstrate how to utilize the majority of *masm*'s capabilities.
+
 ### Multi-File Projects
 
 If multiple files are given to *masm* (either explicitly or through a wildcard argument), the program will always choose the first file to place first in text memory. This means that the program may not begin where expected. To make sure the intended first instruction is executed first, label it globally with *main*.
@@ -113,6 +117,39 @@ from pymasm import interpreter
 ```
 
 For more detailed usage examples, see the [python/examples](python/examples) directory.
+
+## Building from Source
+
+### Prerequisites
+
+- CMake 3.22 or higher
+- C++23 compatible compiler
+    - C++20 should also work with minimal modifications
+- Git (for fetching dependencies)
+
+**For Python bindings (Linux/macOS only):**
+
+> NOTE: Python bindings for macOS have limited support and may not work out-of-the-box
+
+- Python 3.7 or higher
+- pip (for installing the Python package)
+
+### Build Instructions
+
+```bash
+# Clone the repository
+git clone https://github.com/matthew-pisano/masm
+cd masm
+
+# Configure and build
+cmake -S . -B build
+cmake --build build
+
+# Build Python library
+python -m build python
+```
+
+> NOTE: Before building the Python bindings, ensure that a copy (or symlink) of the *pymasm_core* shared object is present in the `python/pymasm` directory.
 
 ## Implementation
 
