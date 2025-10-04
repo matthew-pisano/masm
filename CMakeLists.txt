@@ -118,7 +118,7 @@ endif ()
 
 
 # No tests or Python bindings for cross-compilation on Windows
-if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
+if (NOT (CMAKE_CROSSCOMPILING AND WIN32) AND NOT APPLE)
 
     ## Python Bindings ##
 

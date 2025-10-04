@@ -5,6 +5,7 @@
 #include "debug/intermediates.h"
 
 #include <iomanip>
+#include <sstream>
 
 #include "tokenizer/postprocessor.h"
 

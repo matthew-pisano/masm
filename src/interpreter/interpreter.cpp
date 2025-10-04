@@ -109,7 +109,9 @@ void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
     const int32_t pc = state.registers[Register::PC] - 4;
     if (!state.memory.isValid(handlerAddress)) {
         const SourceLocator pcSrc = state.getDebugInfo(pc).source;
-        const std::string what = std::format("{}: {} (unhandled)", causeToString(cause), excMsg);
+        std::ostringstream oss;
+        oss << causeToString(cause) << ": " << excMsg << " (unhandled)";
+        const std::string what = oss.str();
         throw MasmRuntimeError(what, pc, pcSrc.filename, pcSrc.lineno);
     }
 

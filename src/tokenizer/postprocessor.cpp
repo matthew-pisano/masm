@@ -13,13 +13,15 @@
 
 
 std::string mangleLabel(const std::string& label, const std::string& filename) {
-    return std::format("{}@masm_mangle_file_{}", label, filename);
+    return label + "@masm_mangle_file_" + filename;
 }
 
 
 std::string mangleMacroLabel(const std::string& label, const std::string& filename,
                              const std::string& macroname, size_t pos) {
-    return std::format("{}@masm_mangle_file_{}:{}:{}", label, filename, macroname, pos);
+    std::ostringstream oss;
+    oss << label << "@masm_mangle_file_" << filename << ":" << macroname << ":" << pos;
+    return oss.str();
 }
 
 

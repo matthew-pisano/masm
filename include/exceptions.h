@@ -6,8 +6,8 @@
 #define EXCEPTIONS_H
 
 #include <cstdint>
-#include <format>
 #include <stdexcept>
+#include <sstream>
 
 
 /**
@@ -28,7 +28,9 @@ public:
 class MasmSyntaxError final : public MasmException {
     static std::string constructMessage(const std::string& message, const std::string& filename,
                                         const size_t lineno) {
-        return std::format("Syntax error at {}:{} -> {}", filename, lineno, message);
+        std::ostringstream oss;
+        oss << "Syntax error at " << filename << ":" << lineno << " -> " << message;
+        return oss.str();
     }
 
 public:
@@ -53,8 +55,9 @@ class MasmRuntimeError final : public MasmException {
      */
     static std::string constructMessage(const std::string& message, const uint32_t addr,
                                         const std::string& filename, const size_t lineno) {
-        std::string hexAddr = std::format("0x{:08X}", addr);
-        return std::format("Runtime error at {} ({}:{}) -> {}", hexAddr, filename, lineno, message);
+        std::ostringstream oss;
+        oss << "Runtime error at " << std::hex << "0x" << addr << " (" << filename << ":" << lineno << ") -> " << message;
+        return oss.str();
     }
 
 public:

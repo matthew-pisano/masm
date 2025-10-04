@@ -5,6 +5,7 @@
 #include "debug/debug_interpreter.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <sstream>
 
 #include "exceptions.h"
@@ -134,17 +135,23 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
             } else
                 step();
         } catch (DebuggerExit& e) {
-            streamHandle.putStr(std::format("\n{}", e.what()));
+            std::ostringstream oss;
+            oss << "\n" << e.what();
+            streamHandle.putStr(oss.str());
             return e.code();
         } catch (MasmRuntimeError& e) {
             if (!isInteractive)
                 throw;
-            streamHandle.putStr(std::format("\n{}", e.what()));
+            std::ostringstream oss;
+            oss << "\n" << e.what();
+            streamHandle.putStr(oss.str());
             isRunning = false;
             // Decrement PC to offending instruction
             state.registers[Register::PC] -= 4;
         } catch (ExecExit& e) {
-            streamHandle.putStr(std::format("\n{}", e.what()));
+            std::ostringstream oss;
+            oss << "\n" << e.what();
+            streamHandle.putStr(oss.str());
             isRunning = false;
             if (!isInteractive)
                 return e.code();
@@ -349,7 +356,9 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
     } catch (const DebuggerExit& e) {
         throw;
     } catch (const std::exception& e) {
-        streamHandle.putStr(std::format("\n{}", e.what()));
+    std::ostringstream oss;
+    oss << "\n" << e.what();
+    streamHandle.putStr(oss.str());
         return true; // Continue prompting for commands
     }
     return false;
@@ -383,18 +392,26 @@ void DebugInterpreter::listLines(const std::string& arg) {
         const std::string bpString = breakpoints.contains(i) && breakpoints[i] != 0
                                              ? "[*" + std::to_string(breakpoints[i]) + "]"
                                              : "";
-        streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
-                                        pointerString, debugInfo.source.lineno, i,
-                                        static_cast<uint32_t>(state.memory.wordAt(i)),
-                                        debugInfo.source.text));
+        std::ostringstream oss;
+        oss << std::left << std::setw(6) << bpString << " "
+            << std::setw(4) << pointerString << " "
+            << std::setw(6) << debugInfo.source.lineno << " (0x"
+            << std::setfill('0') << std::setw(8) << std::hex << i << std::dec << "): 0x"
+            << std::setfill('0') << std::setw(8) << std::hex << static_cast<uint32_t>(state.memory.wordAt(i)) << std::dec
+            << "    " << debugInfo.source.text << "\n";
+        streamHandle.putStr(oss.str());
     }
 }
 
 void DebugInterpreter::getFrame() {
     const uint32_t fp = state.registers[Register::FP];
     const uint32_t sp = state.registers[Register::SP];
-    for (uint32_t i = fp; i >= sp; i -= 4)
-        streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
+    for (uint32_t i = fp; i >= sp; i -= 4) {
+        std::ostringstream oss;
+        oss << "0x" << std::setfill('0') << std::setw(8) << std::hex << i << ": 0x"
+            << std::setfill('0') << std::setw(8) << std::hex << state.memory.wordAt(i) << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
 }
 
 size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::string& filename) {
@@ -460,11 +477,16 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
         // Set breakpoint at the found address
         breakpoints[addr] = nextBreakpoint;
         nextBreakpoint++;
-        streamHandle.putStr(
-                std::format("Breakpoint {} set at 0x{:08x}\n", breakpoints[addr], addr));
-    } else
-        streamHandle.putStr(
-                std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
+        std::ostringstream oss;
+        oss << "Breakpoint " << breakpoints[addr] << " set at 0x"
+            << std::setfill('0') << std::setw(8) << std::hex << addr << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    } else {
+        std::ostringstream oss;
+        oss << "Breakpoint " << breakpoints[addr] << " already exists at 0x"
+            << std::setfill('0') << std::setw(8) << std::hex << addr << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
 }
 
 void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
@@ -500,8 +522,11 @@ void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWo
 
     for (size_t i = 0; i < numWords; i++) {
         uint32_t value = state.memory._sysWordAt(addr + i * 4);
-        streamHandle.putStr(
-                std::format("0x{:08x}: 0x{:08x} ({})\n", addr + i * 4, value, wordAsString(value)));
+        std::ostringstream oss;
+        oss << "0x" << std::setfill('0') << std::setw(8) << std::hex << (addr + i * 4)
+            << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec
+            << " (" << wordAsString(value) << ")\n";
+        streamHandle.putStr(oss.str());
     }
 }
 
@@ -515,8 +540,11 @@ void DebugInterpreter::listBreakpoints() {
         if (id == 0)
             continue; // Skip system breakpoint
         SourceLocator src = state.getDebugInfo(addr).source;
-        streamHandle.putStr(
-                std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
+        std::ostringstream oss;
+        oss << std::left << std::setw(3) << id << ": 0x"
+            << std::setfill('0') << std::setw(8) << std::hex << addr << std::dec
+            << " (" << src.filename << ":" << src.lineno << ")\n";
+        streamHandle.putStr(oss.str());
     }
 }
 
@@ -525,9 +553,11 @@ void DebugInterpreter::listLabels() {
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
             const SourceLocator src = debugInfo.source;
-            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
-                                            unmangleLabel(debugInfo.label), addr, src.filename,
-                                            src.lineno));
+            std::ostringstream oss;
+            oss << unmangleLabel(debugInfo.label) << " -> 0x"
+                << std::setfill('0') << std::setw(8) << std::hex << addr << std::dec
+                << " (" << src.filename << ":" << src.lineno << ")\n";
+            streamHandle.putStr(oss.str());
             foundLabel = true;
         }
 
@@ -538,35 +568,55 @@ void DebugInterpreter::listLabels() {
 void DebugInterpreter::listRegisters() {
     for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
         const int32_t value = state.registers[i];
-        streamHandle.putStr(
-                std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
+        std::ostringstream oss;
+        oss << "$" << std::left << std::setw(5) << RegisterFile::nameFromIndex(i)
+            << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec << "\n";
+        streamHandle.putStr(oss.str());
     }
 }
 
 void DebugInterpreter::listCP0Registers() {
     const int32_t vaddrValue = state.cp0[Coproc0Register::VADDR];
-    streamHandle.putStr(std::format("$8  : 0x{:08x}\n", vaddrValue));
+    {
+        std::ostringstream oss;
+        oss << "$8  : 0x" << std::setfill('0') << std::setw(8) << std::hex << vaddrValue << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
     const int32_t statusValue = state.cp0[Coproc0Register::STATUS];
-    streamHandle.putStr(std::format("$12 : 0x{:08x}\n", statusValue));
+    {
+        std::ostringstream oss;
+        oss << "$12 : 0x" << std::setfill('0') << std::setw(8) << std::hex << statusValue << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
     const int32_t causeValue = state.cp0[Coproc0Register::CAUSE];
-    streamHandle.putStr(std::format("$13 : 0x{:08x}\n", causeValue));
+    {
+        std::ostringstream oss;
+        oss << "$13 : 0x" << std::setfill('0') << std::setw(8) << std::hex << causeValue << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
     const int32_t epcValue = state.cp0[Coproc0Register::EPC];
-    streamHandle.putStr(std::format("$14 : 0x{:08x}\n", epcValue));
+    {
+        std::ostringstream oss;
+        oss << "$14 : 0x" << std::setfill('0') << std::setw(8) << std::hex << epcValue << std::dec << "\n";
+        streamHandle.putStr(oss.str());
+    }
 }
 
 void DebugInterpreter::listCP1Registers() {
     for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
         const int32_t value = state.cp1[i];
         const float32_t floatValue = state.cp1.getFloat(i);
+        std::ostringstream oss;
+        oss << "$" << std::left << std::setw(4) << Coproc1RegisterFile::nameFromIndex(i)
+            << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec;
         if (i % 2 == 0) {
             const float64_t doubleValue = state.cp1.getDouble(i);
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value,
-                                            floatValue, doubleValue));
-        } else
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value,
-                                            floatValue));
+            oss << " (" << std::fixed << std::setprecision(6) << floatValue << ", " << doubleValue << ")";
+        } else {
+            oss << " (" << std::fixed << std::setprecision(6) << floatValue << ")";
+        }
+        oss << "\n";
+        streamHandle.putStr(oss.str());
     }
 }
 
@@ -576,7 +626,9 @@ void DebugInterpreter::printRegister(const std::string& arg) {
         try {
             const size_t index = Coproc1RegisterFile::indexFromName(arg);
             int32_t value = state.cp1[index];
-            streamHandle.putStr(std::format("$f{}: 0x{:08x}\n", index, value));
+            std::ostringstream oss;
+            oss << "$f" << index << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec << "\n";
+            streamHandle.putStr(oss.str());
         } catch (const std::exception&) {
             streamHandle.putStr("Invalid Co-Processor 1 register: " + arg + "\n");
         }
@@ -584,7 +636,9 @@ void DebugInterpreter::printRegister(const std::string& arg) {
         // Special Co-Processor 0 registers
         const size_t index = std::stoi(arg);
         int32_t value = state.cp0[index];
-        streamHandle.putStr(std::format("${}: 0x{:08x}\n", index, value));
+    std::ostringstream oss;
+    oss << "$" << index << ": 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec << "\n";
+    streamHandle.putStr(oss.str());
     } else {
         // General-purpose register
         try {
@@ -599,7 +653,9 @@ void DebugInterpreter::printRegister(const std::string& arg) {
                 index = RegisterFile::indexFromName(arg);
 
             int32_t value = state.registers[index];
-            streamHandle.putStr(std::format("${} -> 0x{:08x}\n", arg, value));
+            std::ostringstream oss;
+            oss << "$" << arg << " -> 0x" << std::setfill('0') << std::setw(8) << std::hex << value << std::dec << "\n";
+            streamHandle.putStr(oss.str());
         } catch (const std::exception&) {
             streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)\n");
         }
@@ -611,8 +667,13 @@ void DebugInterpreter::printRef(const std::string& arg) {
 
     if (state.debugInfo.contains(addr)) {
         const DebugInfo debugInfo = state.debugInfo[addr];
-        streamHandle.putStr(std::format("({}:{}) -> \"{}\" \n", debugInfo.source.filename,
-                                        debugInfo.source.lineno, strAt(addr)));
-    } else
-        streamHandle.putStr(std::format("\"{}\" \n", strAt(addr)));
+        std::ostringstream oss;
+        oss << "(" << debugInfo.source.filename << ":" << debugInfo.source.lineno << ") -> \""
+            << strAt(addr) << "\" \n";
+        streamHandle.putStr(oss.str());
+    } else {
+        std::ostringstream oss;
+        oss << "\"" << strAt(addr) << "\" \n";
+        streamHandle.putStr(oss.str());
+    }
 }

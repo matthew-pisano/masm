@@ -59,6 +59,10 @@ struct SourceFile {
  */
 struct Token {
     /**
+     * Default constructor for Token (category UNKNOWN, empty value)
+     */
+    Token() : category(TokenCategory::UNKNOWN), value() {}
+    /**
      * The category of the token, used to determine how to parse it
      */
     TokenCategory category;
@@ -67,6 +71,12 @@ struct Token {
      * The text value of the token, which is the raw string representation
      */
     std::string value;
+
+    /**
+     * Constructs a token with the given category and value
+     */
+    Token(TokenCategory category, const std::string& value)
+        : category(category), value(value) {}
 
     /**
      * Constructs a token with the given category and value (used for mappings with tokens as keys)
