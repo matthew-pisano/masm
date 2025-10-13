@@ -74,12 +74,12 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         {"sw", {InstructionType::I_TYPE_T_S_I, InstructionCode::SW, 4}},
 
         // Remapped Instructions (supported by the ISA, but remapped for convenience of parsing)
-        {"beqz", {InstructionType::PSEUDO, InstructionCode::BEQZ, 4}},
-        {"bnez", {InstructionType::PSEUDO, InstructionCode::BNEZ, 4}},
-        {"bgtz", {InstructionType::PSEUDO, InstructionCode::BGTZ, 8}},
-        {"blez", {InstructionType::PSEUDO, InstructionCode::BLEZ, 8}},
-        {"bltz", {InstructionType::PSEUDO, InstructionCode::BLTZ, 8}},
-        {"bgez", {InstructionType::PSEUDO, InstructionCode::BGEZ, 8}},
+        {"beqz", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
+        {"bnez", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 4}},
+        {"bgtz", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
+        {"blez", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
+        {"bltz", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
+        {"bgez", {InstructionType::PSEUDO, InstructionCode::PSEUDO, 8}},
 
         // Syscall
         {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
