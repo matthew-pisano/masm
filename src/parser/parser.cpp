@@ -365,29 +365,6 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 }
 
 
-std::vector<std::vector<Token>> parseLoadStorePseudoInstructions(const Token& firstToken,
-                                                                 const std::vector<Token>& args) {
-    std::vector<std::vector<Token>> parsedTokens = {{}, {}};
-
-    const uint32_t value = stoui32(args[1].value);
-    const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
-    const unsigned int lowerBytes = value & 0x0000FFFF;
-
-    parsedTokens[0] = {{TokenCategory::INSTRUCTION, "lui"},
-                       {TokenCategory::REGISTER, "at"},
-                       {TokenCategory::SEPERATOR, ","},
-                       {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
-    parsedTokens[1] = {{TokenCategory::INSTRUCTION, firstToken.value},
-                       args[0],
-                       {TokenCategory::SEPERATOR, ","},
-                       {TokenCategory::REGISTER, "at"},
-                       {TokenCategory::SEPERATOR, ","},
-                       {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
-
-    return parsedTokens;
-}
-
-
 void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
     auto it = tokens.begin();
     while (it != tokens.end()) {
@@ -566,6 +543,36 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             throw MasmSyntaxError(e.what(), originalTokenLine.filename, originalTokenLine.lineno);
         }
     }
+}
+
+
+std::vector<std::vector<Token>>
+Parser::parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args) {
+    std::vector<std::vector<Token>> parsedTokens = {{}, {}};
+
+    uint32_t value;
+    if (args[1].category == TokenCategory::LABEL_REF) {
+        if (!labelMap.contains(args[1].value))
+            throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) + "'");
+        value = labelMap[args[1].value];
+    } else
+        value = stoui32(args[1].value);
+
+    const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
+    const unsigned int lowerBytes = value & 0x0000FFFF;
+
+    parsedTokens[0] = {{TokenCategory::INSTRUCTION, "lui"},
+                       {TokenCategory::REGISTER, "at"},
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
+    parsedTokens[1] = {{TokenCategory::INSTRUCTION, firstToken.value},
+                       args[0],
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::REGISTER, "at"},
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
+
+    return parsedTokens;
 }
 
 

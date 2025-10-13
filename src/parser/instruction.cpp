@@ -165,6 +165,16 @@ const std::vector<std::pair<std::string, InstructionOp>> instructionAliasMap = {
         {"sb", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
         {"sh", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
         {"sw", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+
+        {"lb", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"lbu", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"lh", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"lhu", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"lw", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+
+        {"sb", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"sh", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+        {"sw", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
 };
 
 
@@ -220,6 +230,10 @@ void validateInstructionArgs(const InstructionType instructionType,
             break;
         case InstructionType::I_TYPE_T_I:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
+                throw std::runtime_error("Invalid format for I-Type instruction");
+            break;
+        case InstructionType::I_TYPE_T_L:
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args))
                 throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::R_TYPE_S_T:

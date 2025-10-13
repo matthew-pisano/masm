@@ -157,6 +157,7 @@ enum class InstructionType {
     R_TYPE_S, // R-Type with 1 source register
     I_TYPE_T_S_I, // I-Type
     I_TYPE_T_I, // I-Type with 1 register
+    I_TYPE_T_L, // I-Type with 1 register and label
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
     SYSCALL, // Syscall

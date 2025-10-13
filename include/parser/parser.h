@@ -148,6 +148,15 @@ class Parser {
     void resolvePseudoInstructions(std::vector<LineTokens>& tokens);
 
     /**
+     * A helper method to parse the common formats of load/store pseudo instructions
+     * @param firstToken The token containing the load/store pseudo instruction
+     * @param args The argument tokens for the pseudo instruction
+     * @return The lines of tokens that represent the parsed load/store pseudo instruction
+     */
+    std::vector<std::vector<Token>>
+    parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args);
+
+    /**
      * A helper method to parse the common formats of branch pseudo instructions
      * @param reg1 The first register token
      * @param reg2 The second register token
