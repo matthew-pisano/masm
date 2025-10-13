@@ -152,71 +152,88 @@ std::map<std::string, InstructionOp> instructionNameMap = {
 };
 
 
+/**
+ * A mapping between instruction aliases and their associated properties
+ */
+const std::vector<std::pair<std::string, InstructionOp>> instructionAliasMap = {
+        {"lb", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"lbu", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"lh", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"lhu", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"lw", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+
+        {"sb", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"sh", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+        {"sw", {InstructionType::I_TYPE_T_I, InstructionCode::PSEUDO, 8}},
+};
+
+
 bool operator==(const uint32_t lhs, InstructionCode code) {
     return lhs == static_cast<uint32_t>(code);
 }
 
 
-InstructionOp nameToInstructionOp(const std::string& name) {
+InstructionOp nameToInstructionOp(const std::string& name, const std::vector<Token>& args) {
+    for (const auto& [aliasName, aliasOp] : instructionAliasMap) {
+        if (name != aliasName)
+            continue;
+        try {
+            validateInstructionArgs(aliasOp.type, args);
+            return aliasOp;
+        } catch (const std::runtime_error&) {
+        }
+    }
     if (instructionNameMap.contains(name))
         return instructionNameMap[name];
     throw std::runtime_error("Unknown instruction " + name);
 }
 
 
-void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
-
-    switch (nameToInstructionOp(instruction.value).type) {
+void validateInstructionArgs(const InstructionType instructionType,
+                             const std::vector<Token>& args) {
+    switch (instructionType) {
         // Core CPU Instructions
         case InstructionType::R_TYPE_D_T_S:
         case InstructionType::R_TYPE_D_S_T:
             if (!tokenCategoryMatch(
                         {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER},
                         args))
-                throw std::runtime_error("Invalid format for R-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::R_TYPE_D_T_H:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
                                      TokenCategory::IMMEDIATE},
                                     args))
-                throw std::runtime_error("Invalid format for R-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::I_TYPE_S_T_L:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
                                      TokenCategory::LABEL_REF},
                                     args))
-                throw std::runtime_error("Invalid format for I-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::I_TYPE_T_S_I:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
                                      TokenCategory::IMMEDIATE},
                                     args))
-                throw std::runtime_error("Invalid format for I-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::I_TYPE_T_I:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
-                throw std::runtime_error("Invalid format for I-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::R_TYPE_S_T:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
-                throw std::runtime_error("Invalid format for R-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::R_TYPE_D:
         case InstructionType::R_TYPE_S:
             if (!tokenCategoryMatch({TokenCategory::REGISTER}, args))
-                throw std::runtime_error("Invalid format for R-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::J_TYPE_L:
             if (!tokenCategoryMatch({TokenCategory::LABEL_REF}, args))
-                throw std::runtime_error("Invalid format for J-Type instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for J-Type instruction");
             break;
         case InstructionType::SYSCALL:
             if (!tokenCategoryMatch({}, args))
@@ -226,8 +243,7 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         // Co-Processor 0 Instructions
         case InstructionType::CP0_TYPE_T_D:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
-                throw std::runtime_error("Invalid format for Co-Processor 0 instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for Co-Processor 0 instruction");
             break;
         case InstructionType::ERET:
             if (!tokenCategoryMatch({}, args))
@@ -241,32 +257,39 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
         case InstructionType::CP1_TYPE_DP_S_T_C:
         case InstructionType::CP1_TYPE_T_S:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
-                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         case InstructionType::CP1_TYPE_SP_D_S_T:
         case InstructionType::CP1_TYPE_DP_D_S_T:
             if (!tokenCategoryMatch(
                         {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER},
                         args))
-                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         case InstructionType::CP1_TYPE_T_S_I:
             if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
                                      TokenCategory::IMMEDIATE},
                                     args))
-                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         case InstructionType::CP1_TYPE_L:
             if (!tokenCategoryMatch({TokenCategory::LABEL_REF}, args))
-                throw std::runtime_error("Invalid format for Co-Processor 1 instruction " +
-                                         instruction.value);
+                throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         default:
             // Should never be reached
-            throw std::runtime_error("Unknown instruction " + instruction.value);
+            throw std::runtime_error("Unknown instruction");
+    }
+}
+
+
+void validateInstruction(const Token& instruction, const std::vector<Token>& args) {
+    const InstructionType iType = nameToInstructionOp(instruction.value, args).type;
+    try {
+        validateInstructionArgs(iType, args);
+    } catch (const std::runtime_error& e) {
+        // Append instruction name to original error message
+        throw std::runtime_error(e.what() + std::string(" ") + instruction.value);
     }
 }
 

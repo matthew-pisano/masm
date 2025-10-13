@@ -82,7 +82,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                         labelMap[label] = memSectionOffset(currSection) + memSizes[currSection];
                     pendingLabels.clear();
                     // Get size of instruction from map without parsing
-                    memSizes[currSection] += nameToInstructionOp(firstToken.value).size;
+                    memSizes[currSection] += nameToInstructionOp(firstToken.value, args).size;
                     break;
                 case TokenCategory::LABEL_DEF: {
                     if (labelMap.contains(firstToken.value) ||

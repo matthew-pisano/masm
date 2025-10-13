@@ -156,7 +156,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
     // Resolve label references to their computed address values
     labelMap.resolveLabels(args);
 
-    InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
+    InstructionOp instructionOp = nameToInstructionOp(instrToken.value, args);
     std::vector<uint32_t> argCodes = {};
     // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
@@ -364,6 +364,29 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 }
 
 
+std::vector<std::vector<Token>> parseLoadStorePseudoInstructions(const Token& firstToken,
+                                                                 const std::vector<Token>& args) {
+    std::vector<std::vector<Token>> parsedTokens = {{}, {}};
+
+    const uint32_t value = stoui32(args[1].value);
+    const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
+    const unsigned int lowerBytes = value & 0x0000FFFF;
+
+    parsedTokens[0] = {{TokenCategory::INSTRUCTION, "lui"},
+                       {TokenCategory::REGISTER, "at"},
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
+    parsedTokens[1] = {{TokenCategory::INSTRUCTION, firstToken.value},
+                       args[0],
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::REGISTER, "at"},
+                       {TokenCategory::SEPERATOR, ","},
+                       {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
+
+    return parsedTokens;
+}
+
+
 void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
     auto it = tokens.begin();
     while (it != tokens.end()) {
@@ -372,17 +395,33 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
         LineTokens originalTokenLine = tokenLine;
         try {
             const Token& firstToken = tokenLine.tokens[0];
+            const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
+            std::vector<Token> args = filterTokenList(unfilteredArgs);
             if (firstToken.category != TokenCategory::INSTRUCTION ||
-                nameToInstructionOp(firstToken.value).type != InstructionType::PSEUDO) {
+                nameToInstructionOp(firstToken.value, args).opFuncCode != InstructionCode::PSEUDO) {
                 // If the first token is not an instruction, continue to the next line
                 ++it;
                 continue;
             }
-            const std::string instructionName = firstToken.value;
-            const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
-            std::vector<Token> args = filterTokenList(unfilteredArgs);
 
             validatePseudoInstruction(firstToken, args);
+
+            const std::vector<std::string> loadStoreInstrs = {
+                    "lb", "lbu", "lh", "lhu", "lw", "sb", "sh", "sw",
+            };
+
+            const std::string instructionName = firstToken.value;
+            if (std::ranges::find(loadStoreInstrs, instructionName) != loadStoreInstrs.end()) {
+                std::vector<std::vector<Token>> parsedTokens =
+                        parseLoadStorePseudoInstructions(firstToken, args);
+                LineTokens line = originalTokenLine;
+                line.tokens = parsedTokens[0];
+                it = tokens.insert(it + 1, line);
+                line.tokens = parsedTokens[1];
+                it = tokens.insert(it + 1, line);
+                tokens.erase(it - 2); // Remove the pseudo instruction line
+                continue;
+            }
 
             // li $tx, imm -> addiu $tx, $zero, imm
             if (instructionName == "li") {
@@ -393,15 +432,7 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             }
             // la $tx, label -> lui $at, upperAddr; ori $tx, $at, lowerAddr
             else if (instructionName == "la") {
-                uint32_t value;
-                if (args[1].category == TokenCategory::LABEL_REF) {
-                    if (!labelMap.contains(args[1].value))
-                        throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
-                                                 "'");
-                    value = labelMap[args[1].value];
-                } else
-                    value = stoui32(args[1].value);
-
+                const uint32_t value = stoui32(args[1].value);
                 const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
                 const unsigned int lowerBytes = value & 0x0000FFFF;
 
