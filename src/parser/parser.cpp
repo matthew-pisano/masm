@@ -32,7 +32,8 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool ra
         modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
     }
 
-    // Resolve all labels before parsing instructions
+    // Resolve all label locations before parsing instructions
+    // Label references still remain
     labelMap.populateLabelMap(modifiedTokenLines);
 
     // Insert jump to main instruction if the label is defined, otherwise start at first text word
@@ -432,7 +433,15 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             }
             // la $tx, label -> lui $at, upperAddr; ori $tx, $at, lowerAddr
             else if (instructionName == "la") {
-                const uint32_t value = stoui32(args[1].value);
+                uint32_t value;
+                if (args[1].category == TokenCategory::LABEL_REF) {
+                    if (!labelMap.contains(args[1].value))
+                        throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
+                                                 "'");
+                    value = labelMap[args[1].value];
+                } else
+                    value = stoui32(args[1].value);
+
                 const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
                 const unsigned int lowerBytes = value & 0x0000FFFF;
 
