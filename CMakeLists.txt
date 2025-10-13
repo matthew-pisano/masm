@@ -167,6 +167,7 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
             test/test_instructions/test_control_instructions.cpp
             test/test_instructions/test_memory_instructions.cpp
             test/test_instructions/test_pseudo_instructions.cpp
+            test/test_instructions/test_aliased_instructions.cpp
             test/test_utils.cpp
             test/test_instructions/test_cp0_instructions.cpp
             test/test_instructions/test_cp1_instructions.cpp
