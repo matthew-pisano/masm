@@ -18,12 +18,17 @@
 bool LabelMap::contains(const std::string& label) const { return labelMap.contains(label); }
 
 
-void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) {
+uint32_t LabelMap::get(const std::string& label) const {
+    if (!labelMap.contains(label))
+        throw std::runtime_error("Unknown label '" + unmangleLabel(label) + "'");
+    return labelMap.at(label);
+}
+
+
+void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) const {
     for (Token& arg : instructionArgs)
         if (arg.category == TokenCategory::LABEL_REF) {
-            if (!labelMap.contains(arg.value))
-                throw std::runtime_error("Unknown label '" + unmangleLabel(arg.value) + "'");
-            arg = {TokenCategory::IMMEDIATE, std::to_string(labelMap[arg.value])};
+            arg = {TokenCategory::IMMEDIATE, std::to_string(get(arg.value))};
         }
 }
 

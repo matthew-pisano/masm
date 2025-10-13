@@ -28,7 +28,7 @@ public:
      * @param instructionArgs The instruction arguments to modify
      * @throw runtime_error When one of the arguments references an unknown label
      */
-    void resolveLabels(std::vector<Token>& instructionArgs);
+    void resolveLabels(std::vector<Token>& instructionArgs) const;
 
     /**
      * Looks up the first label corresponding to an address
@@ -51,6 +51,13 @@ public:
      * @return True if the label exists, false otherwise
      */
     bool contains(const std::string& label) const;
+
+    /**
+     * Fetches the address associated with a label
+     * @param label The label to fetch the address of
+     * @return The address associated with the label
+     */
+    uint32_t get(const std::string& label) const;
 
     [[nodiscard]] uint32_t operator[](const std::string& label) const { return labelMap.at(label); }
 

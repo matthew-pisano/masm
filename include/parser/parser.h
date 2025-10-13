@@ -154,7 +154,7 @@ class Parser {
      * @return The lines of tokens that represent the parsed load/store pseudo instruction
      */
     std::vector<std::vector<Token>>
-    parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args);
+    parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args) const;
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions
@@ -165,10 +165,10 @@ class Parser {
      * @param checkEq Whether the branch equal instruction is used for this branch type
      * @return The lines of tokens that represent the parsed branch pseudo instruction
      */
-    std::vector<std::vector<Token>> parseBranchPseudoInstruction(const Token& reg1,
-                                                                 const Token& reg2,
-                                                                 const Token& label, bool checkLt,
-                                                                 bool checkEq);
+    static std::vector<std::vector<Token>> parseBranchPseudoInstruction(const Token& reg1,
+                                                                        const Token& reg2,
+                                                                        const Token& label,
+                                                                        bool checkLt, bool checkEq);
 
     /**
      * Parse a single line of tokens into memory allocations

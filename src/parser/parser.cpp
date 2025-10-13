@@ -411,12 +411,9 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             // la $tx, label -> lui $at, upperAddr; ori $tx, $at, lowerAddr
             else if (instructionName == "la") {
                 uint32_t value;
-                if (args[1].category == TokenCategory::LABEL_REF) {
-                    if (!labelMap.contains(args[1].value))
-                        throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
-                                                 "'");
-                    value = labelMap[args[1].value];
-                } else
+                if (args[1].category == TokenCategory::LABEL_REF)
+                    value = labelMap.get(args[1].value);
+                else
                     value = stoui32(args[1].value);
 
                 const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
@@ -547,15 +544,14 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
 
 
 std::vector<std::vector<Token>>
-Parser::parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args) {
+Parser::parseLoadStorePseudoInstructions(const Token& firstToken,
+                                         const std::vector<Token>& args) const {
     std::vector<std::vector<Token>> parsedTokens = {{}, {}};
 
     uint32_t value;
-    if (args[1].category == TokenCategory::LABEL_REF) {
-        if (!labelMap.contains(args[1].value))
-            throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) + "'");
-        value = labelMap[args[1].value];
-    } else
+    if (args[1].category == TokenCategory::LABEL_REF)
+        value = labelMap.get(args[1].value);
+    else
         value = stoui32(args[1].value);
 
     const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
