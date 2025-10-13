@@ -175,6 +175,9 @@ const std::vector<std::pair<std::string, InstructionOp>> instructionAliasMap = {
         {"sb", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
         {"sh", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
         {"sw", {InstructionType::I_TYPE_T_L, InstructionCode::PSEUDO, 8}},
+
+        {"div", {InstructionType::R_TYPE_D_S_T, InstructionCode::PSEUDO, 8}},
+        {"divu", {InstructionType::R_TYPE_D_S_T, InstructionCode::PSEUDO, 8}},
 };
 
 

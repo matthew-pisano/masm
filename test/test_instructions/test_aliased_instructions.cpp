@@ -106,3 +106,55 @@ TEST_CASE("Test sw Instruction Alias Labeled") {
         REQUIRE(expectedBytes == actualBytes);
     }
 }
+
+
+TEST_CASE("Test div Instruction Three Registers") {
+    const SourceFile rawFile = makeRawFile({"div $t0, $t1, $t2"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {{
+                {TokenCategory::INSTRUCTION, "div"},
+                {TokenCategory::REGISTER, "t0"},
+                {TokenCategory::SEPERATOR, ","},
+                {TokenCategory::REGISTER, "t1"},
+                {TokenCategory::SEPERATOR, ","},
+                {TokenCategory::REGISTER, "t2"},
+        }};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    Parser parser;
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
+    SECTION("Test Parse") {
+        const std::vector<std::byte> expectedBytes =
+                iV2bV({0x01, 0x2a, 0x00, 0x1a, 0x00, 0x00, 0x40, 0x12});
+        const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
+        REQUIRE(expectedBytes == actualBytes);
+    }
+}
+
+
+TEST_CASE("Test divu Instruction Three Registers") {
+    const SourceFile rawFile = makeRawFile({"divu $t0, $t1, $t2"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {{
+                {TokenCategory::INSTRUCTION, "divu"},
+                {TokenCategory::REGISTER, "t0"},
+                {TokenCategory::SEPERATOR, ","},
+                {TokenCategory::REGISTER, "t1"},
+                {TokenCategory::SEPERATOR, ","},
+                {TokenCategory::REGISTER, "t2"},
+        }};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    Parser parser;
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
+    SECTION("Test Parse") {
+        const std::vector<std::byte> expectedBytes =
+                iV2bV({0x01, 0x2a, 0x00, 0x1b, 0x00, 0x00, 0x40, 0x12});
+        const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
+        REQUIRE(expectedBytes == actualBytes);
+    }
+}

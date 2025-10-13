@@ -145,7 +145,7 @@ class Parser {
      * @param tokens The lines of tokens to resolve pseudo instructions for
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
-    void resolvePseudoInstructions(std::vector<LineTokens>& tokens);
+    void resolvePseudoInstructions(std::vector<LineTokens>& tokens) const;
 
     /**
      * A helper method to parse the common formats of load/store pseudo instructions
@@ -154,7 +154,7 @@ class Parser {
      * @return The lines of tokens that represent the parsed load/store pseudo instruction
      */
     std::vector<std::vector<Token>>
-    parseLoadStorePseudoInstructions(const Token& firstToken, const std::vector<Token>& args) const;
+    parseInstructionAliases(const Token& firstToken, const std::vector<Token>& args) const;
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions

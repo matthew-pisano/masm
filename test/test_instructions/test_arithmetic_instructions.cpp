@@ -4,11 +4,13 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "../testing_utilities.h"
 #include "debug/debug_interpreter.h"
+#include "exceptions.h"
 #include "interpreter/interpreter.h"
-#include "parser/instruction.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
 
@@ -254,6 +256,15 @@ TEST_CASE("Test div Instruction") {
         REQUIRE(expectedLo == actualLo);
         REQUIRE(expectedHi == actualHi);
     }
+
+    interpreter.getState().registers[Register::T1] = 17;
+    interpreter.getState().registers[Register::T2] = 0;
+    SECTION("Test Execute Div Zero") {
+        REQUIRE_THROWS_MATCHES(
+                interpreter.interpret(actualLayout), MasmRuntimeError,
+                Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> Division by "
+                                         "zero: Division by zero in DIV instruction (unhandled)"));
+    }
 }
 
 
@@ -290,6 +301,15 @@ TEST_CASE("Test divu Instruction") {
         const int32_t actualHi = interpreter.getState().registers[Register::HI];
         REQUIRE(expectedLo == actualLo);
         REQUIRE(expectedHi == actualHi);
+    }
+
+    interpreter.getState().registers[Register::T1] = 17;
+    interpreter.getState().registers[Register::T2] = 0;
+    SECTION("Test Execute DivU Zero") {
+        REQUIRE_THROWS_MATCHES(
+                interpreter.interpret(actualLayout), MasmRuntimeError,
+                Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> Division by "
+                                         "zero: Division by zero in DIVU instruction (unhandled)"));
     }
 }
 
