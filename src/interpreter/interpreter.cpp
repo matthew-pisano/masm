@@ -39,6 +39,7 @@ int Interpreter::interpret(const MemLayout& layout) {
         try {
             step();
         } catch (ExecExit& e) {
+            streamHandle.putStr("\n");
             streamHandle.putStr(e.what());
             streamHandle.putStr("\n");
             return e.code();
