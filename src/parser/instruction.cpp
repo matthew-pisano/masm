@@ -84,6 +84,9 @@ std::map<std::string, InstructionOp> instructionNameMap = {
         // Syscall
         {"syscall", {InstructionType::SYSCALL, InstructionCode::SYSCALL, 4}},
 
+        // Break
+        {"break", {InstructionType::BREAK, InstructionCode::BREAK, 4}},
+
         // Co-Processor 0 Instructions
         {"mfc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MFC0, 4}},
         {"mtc0", {InstructionType::CP0_TYPE_T_D, InstructionCode::MTC0, 4}},
@@ -255,6 +258,11 @@ void validateInstructionArgs(const InstructionType instructionType,
         case InstructionType::SYSCALL:
             if (!tokenCategoryMatch({}, args))
                 throw std::runtime_error("Invalid format for Syscall");
+            break;
+        case InstructionType::BREAK:
+            if (!tokenCategoryMatch({}, args) &&
+                !tokenCategoryMatch({TokenCategory::IMMEDIATE}, args))
+                throw std::runtime_error("Invalid format for Break");
             break;
 
         // Co-Processor 0 Instructions

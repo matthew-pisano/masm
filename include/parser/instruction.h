@@ -83,6 +83,9 @@ enum class InstructionCode {
     // Syscall
     SYSCALL = 0x00,
 
+    // Break
+    BREAK = 0x00,
+
     // Co Processor 0 Instructions
     MFC0 = 0x00,
     MTC0 = 0x04,
@@ -161,6 +164,7 @@ enum class InstructionType {
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
     SYSCALL, // Syscall
+    BREAK, // Syscall
 
     ERET, // Eret instruction
     CP0_TYPE_T_D, // Co-Processor 0 Type (Move from/to CP0)

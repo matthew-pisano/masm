@@ -216,6 +216,8 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
+        case InstructionType::BREAK:
+            return parseBreakInstruction(argCodes.size() > 0 ? argCodes[0] : 0);
 
         // Co-Processor 0 Instructions
         case InstructionType::CP0_TYPE_T_D:
@@ -294,6 +296,13 @@ std::vector<std::byte> Parser::parseJTypeInstruction(const uint32_t opcode,
 
 std::vector<std::byte> Parser::parseSyscallInstruction() const {
     return useLittleEndian ? i32ToLEByte(0x0000000C) : i32ToBEByte(0x0000000C);
+}
+
+
+std::vector<std::byte> Parser::parseBreakInstruction(const uint32_t code) const {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0 & 0x3F) << 26 | (code & 0xFFFFF) << 6 | (0x0D & 0x3F);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
 }
 
 

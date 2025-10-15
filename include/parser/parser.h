@@ -73,6 +73,13 @@ class Parser {
     std::vector<std::byte> parseSyscallInstruction() const;
 
     /**
+     * A specialized function to parse the break instruction
+     * @param code The break code associated with the instruction
+     * @return The memory allocation associated with the break instruction
+     */
+    std::vector<std::byte> parseBreakInstruction(uint32_t code) const;
+
+    /**
      * A specialized function to parse the eret instruction
      * @return The memory allocation associated with the eret instruction
      */
@@ -153,8 +160,8 @@ class Parser {
      * @param args The argument tokens for the pseudo instruction
      * @return The lines of tokens that represent the parsed load/store pseudo instruction
      */
-    std::vector<std::vector<Token>>
-    parseInstructionAliases(const Token& firstToken, const std::vector<Token>& args) const;
+    std::vector<std::vector<Token>> parseInstructionAliases(const Token& firstToken,
+                                                            const std::vector<Token>& args) const;
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions

@@ -1,2 +1,2 @@
 Hello, World!
-Program exited with code 0
+Program exited (code 0)

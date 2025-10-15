@@ -91,7 +91,7 @@ class TestBindings:
 
                 interpreter.step()
             except pymasm.exceptions.ExecExit as e:
-                assert str(e) == "Program exited with code 0"
+                assert str(e) == "Program exited (code 0)"
                 break
 
         assert ostream.getvalue() == b'abcd'

@@ -39,9 +39,8 @@ int Interpreter::interpret(const MemLayout& layout) {
         try {
             step();
         } catch (ExecExit& e) {
-            std::ostringstream oss;
-            oss << "\n" << e.what() << std::endl;
-            streamHandle.putStr(oss.str());
+            streamHandle.putStr(e.what());
+            streamHandle.putStr("\n");
             return e.code();
         }
     }
@@ -177,6 +176,7 @@ void Interpreter::execInstruction(const int32_t instruction) {
     }
 
     const uint32_t opCode = instruction >> 26 & 0x3F;
+    const uint32_t funct = instruction & 0x3F; // Not always applicable to a single section
     if (opCode == 0x10) {
         // Co-Processor 0 instruction
         const uint32_t rs = instruction >> 21 & 0x1F;
@@ -222,9 +222,12 @@ void Interpreter::execInstruction(const int32_t instruction) {
 
         // Execute Co-Processor 1 immediate instruction
         execCP1ImmType(state.cp1, state.registers, state.memory, opCode, base, ft, offset);
+    } else if (opCode == 0x00 && funct == 0x0D) {
+        // Break instruction
+        const int32_t breakCode = instruction >> 6 & 0xFFFFF;
+        throw ExecExit("Break instruction executed", breakCode);
     } else if (opCode == 0x00) {
         // R-Type instruction
-        const uint32_t funct = instruction & 0x3F;
         const uint32_t rs = instruction >> 21 & 0x1F;
         const uint32_t rt = instruction >> 16 & 0x1F;
         const uint32_t rd = instruction >> 11 & 0x1F;
