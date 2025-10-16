@@ -73,6 +73,13 @@ class Parser {
     std::vector<std::byte> parseSyscallInstruction() const;
 
     /**
+     * A specialized function to parse the break instruction
+     * @param code The break code associated with the instruction
+     * @return The memory allocation associated with the break instruction
+     */
+    std::vector<std::byte> parseBreakInstruction(uint32_t code) const;
+
+    /**
      * A specialized function to parse the eret instruction
      * @return The memory allocation associated with the eret instruction
      */
@@ -145,7 +152,16 @@ class Parser {
      * @param tokens The lines of tokens to resolve pseudo instructions for
      * @throw runtime_error When an unknown pseudo instruction is passed
      */
-    void resolvePseudoInstructions(std::vector<LineTokens>& tokens);
+    void resolvePseudoInstructions(std::vector<LineTokens>& tokens) const;
+
+    /**
+     * A helper method to parse the common formats of load/store pseudo instructions
+     * @param firstToken The token containing the load/store pseudo instruction
+     * @param args The argument tokens for the pseudo instruction
+     * @return The lines of tokens that represent the parsed load/store pseudo instruction
+     */
+    std::vector<std::vector<Token>> parseInstructionAliases(const Token& firstToken,
+                                                            const std::vector<Token>& args) const;
 
     /**
      * A helper method to parse the common formats of branch pseudo instructions
@@ -156,10 +172,10 @@ class Parser {
      * @param checkEq Whether the branch equal instruction is used for this branch type
      * @return The lines of tokens that represent the parsed branch pseudo instruction
      */
-    std::vector<std::vector<Token>> parseBranchPseudoInstruction(const Token& reg1,
-                                                                 const Token& reg2,
-                                                                 const Token& label, bool checkLt,
-                                                                 bool checkEq);
+    static std::vector<std::vector<Token>> parseBranchPseudoInstruction(const Token& reg1,
+                                                                        const Token& reg2,
+                                                                        const Token& label,
+                                                                        bool checkLt, bool checkEq);
 
     /**
      * Parse a single line of tokens into memory allocations

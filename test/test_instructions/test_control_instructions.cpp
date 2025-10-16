@@ -4,9 +4,12 @@
 
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include "../testing_utilities.h"
 #include "debug/debug_interpreter.h"
+#include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
@@ -390,5 +393,96 @@ TEST_CASE("Test blez Instruction") {
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") {
         REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400010);
+    }
+}
+
+
+TEST_CASE("Test break Instruction") {
+    const SourceFile rawFile = makeRawFile({"break"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "break"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    Parser parser;
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
+    SECTION("Test Parse") {
+        const std::vector<std::byte> expectedBytes = iV2bV({0x00, 0x00, 0x00, 0x0d});
+        const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
+        REQUIRE(expectedBytes == actualBytes);
+    }
+
+    std::ostringstream oss;
+    StreamHandle streamHandle(std::cin, oss);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+
+    SECTION("Test Execute") {
+        interpreter.interpret(actualLayout);
+        const std::string expectedOutput = "\nBreak instruction executed (code 0)";
+        REQUIRE(expectedOutput == oss.str());
+    }
+
+    std::string inputString = "c\nq\n";
+    std::istringstream iss(inputString);
+    oss.str("");
+    oss.clear();
+
+    StreamHandle interactiveStreamHandle(iss, oss);
+    DebugInterpreter interactiveInterpreter(IOMode::SYSCALL, interactiveStreamHandle);
+    interactiveInterpreter.setInteractive(true);
+    SECTION("Test Debugger") {
+        interactiveInterpreter.interpret(actualLayout);
+
+        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 0)\n"
+                                           "There is no program running.  Use 'run' to "
+                                           "restart\n\n(mdb) \nExiting debugger (code 0)";
+        REQUIRE(expectedOutput == oss.str());
+    }
+}
+
+
+TEST_CASE("Test break Instruction with Code") {
+    const SourceFile rawFile = makeRawFile({"break 42"});
+    const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
+    SECTION("Test Tokenize") {
+        const std::vector<std::vector<Token>> expectedTokens = {
+                {{TokenCategory::INSTRUCTION, "break"}, {TokenCategory::IMMEDIATE, "42"}}};
+        REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
+    }
+
+    Parser parser;
+    const MemLayout actualLayout = parser.parse(actualTokens, true);
+    SECTION("Test Parse") {
+        const std::vector<std::byte> expectedBytes = iV2bV({0x00, 0x00, 0x0a, 0x8d});
+        const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
+        REQUIRE(expectedBytes == actualBytes);
+    }
+
+    std::ostringstream oss;
+    StreamHandle streamHandle(std::cin, oss);
+    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+
+    SECTION("Test Execute") {
+        interpreter.interpret(actualLayout);
+        const std::string expectedOutput = "\nBreak instruction executed (code 42)";
+        REQUIRE(expectedOutput == oss.str());
+    }
+
+    std::string inputString = "c\nq\n";
+    std::istringstream iss(inputString);
+    oss.str("");
+    oss.clear();
+
+    StreamHandle interactiveStreamHandle(iss, oss);
+    DebugInterpreter interactiveInterpreter(IOMode::SYSCALL, interactiveStreamHandle);
+    interactiveInterpreter.setInteractive(true);
+    SECTION("Test Debugger") {
+        interactiveInterpreter.interpret(actualLayout);
+        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 42)\n"
+                                           "There is no program running.  Use 'run' to "
+                                           "restart\n\n(mdb) \nExiting debugger (code 0)";
+        REQUIRE(expectedOutput == oss.str());
     }
 }

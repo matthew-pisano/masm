@@ -69,31 +69,44 @@ public:
  * Execution to indicate that the program has terminated successfully with the given code
  */
 class ExecExit : public std::runtime_error {
-    int errorCode;
+    int32_t errorCode;
+
+    /**
+     * Constructs a message for the execution exit exception
+     * @param message The original error message to display
+     * @param code The exit code of the program
+     * @return The formatted message
+     */
+    static std::string constructMessage(const std::string& message, const int32_t code) {
+        return std::format("{} (code {})", message, code);
+    }
 
 public:
-    explicit ExecExit(const std::string& message, const int code) :
-        std::runtime_error(message), errorCode(code) {}
+    explicit ExecExit(const std::string& message, const int32_t code) :
+        std::runtime_error(constructMessage(message, code)), errorCode(code) {}
 
     /**
      * Get the error code of the exception
      * @return The error code
      */
-    [[nodiscard]] int code() const { return errorCode; }
+    [[nodiscard]] int32_t code() const { return errorCode; }
 };
 
 
 /**
- * Execution exit to indicate that the debugging program has terminated due to a debugger command
+ * Execution exit to indicate that the debugging program has terminated due to a debugger
+ * command
  */
 class DebuggerExit final : public ExecExit {
 public:
-    explicit DebuggerExit(const std::string& message, const int code) : ExecExit(message, code) {}
+    explicit DebuggerExit(const std::string& message, const int32_t code) :
+        ExecExit(message, code) {}
 };
 
 
 /**
- * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause register)
+ * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause
+ * register)
  */
 enum class EXCEPT_CODE {
     ADDRESS_EXCEPTION_LOAD = 0x0010,

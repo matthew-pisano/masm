@@ -32,7 +32,8 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool ra
         modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
     }
 
-    // Resolve all labels before parsing instructions
+    // Resolve all label locations before parsing instructions
+    // Label references still remain
     labelMap.populateLabelMap(modifiedTokenLines);
 
     // Insert jump to main instruction if the label is defined, otherwise start at first text word
@@ -156,7 +157,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
     // Resolve label references to their computed address values
     labelMap.resolveLabels(args);
 
-    InstructionOp instructionOp = nameToInstructionOp(instrToken.value);
+    InstructionOp instructionOp = nameToInstructionOp(instrToken.value, args);
     std::vector<uint32_t> argCodes = {};
     // Parse the instruction argument token values into integers
     for (const Token& arg : args) {
@@ -215,6 +216,8 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
             return parseJTypeInstruction(opFuncCode, argCodes[0]);
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
+        case InstructionType::BREAK:
+            return parseBreakInstruction(!argCodes.empty() ? argCodes[0] : 0);
 
         // Co-Processor 0 Instructions
         case InstructionType::CP0_TYPE_T_D:
@@ -296,6 +299,13 @@ std::vector<std::byte> Parser::parseSyscallInstruction() const {
 }
 
 
+std::vector<std::byte> Parser::parseBreakInstruction(const uint32_t code) const {
+    // Combine fields into 32-bit instruction code
+    const uint32_t instruction = (0 & 0x3F) << 26 | (code & 0xFFFFF) << 6 | (0x0D & 0x3F);
+    return useLittleEndian ? i32ToLEByte(instruction) : i32ToBEByte(instruction);
+}
+
+
 std::vector<std::byte> Parser::parseEretInstruction() const {
     return useLittleEndian ? i32ToLEByte(0x42000018) : i32ToBEByte(0x42000018);
 }
@@ -364,7 +374,7 @@ std::vector<std::byte> Parser::parseCP1CondImmInstruction(const uint32_t loc, co
 }
 
 
-void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
+void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) const {
     auto it = tokens.begin();
     while (it != tokens.end()) {
         LineTokens& tokenLine = *it;
@@ -372,17 +382,39 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
         LineTokens originalTokenLine = tokenLine;
         try {
             const Token& firstToken = tokenLine.tokens[0];
-            if (firstToken.category != TokenCategory::INSTRUCTION ||
-                nameToInstructionOp(firstToken.value).type != InstructionType::PSEUDO) {
+            if (firstToken.category != TokenCategory::INSTRUCTION) {
                 // If the first token is not an instruction, continue to the next line
                 ++it;
                 continue;
             }
-            const std::string instructionName = firstToken.value;
+
             const std::vector unfilteredArgs(tokenLine.tokens.begin() + 1, tokenLine.tokens.end());
             std::vector<Token> args = filterTokenList(unfilteredArgs);
+            InstructionOp instructionOp = nameToInstructionOp(firstToken.value, args);
+            if (instructionOp.opFuncCode != InstructionCode::PSEUDO) {
+                // If the first token is not a pseudo instruction, continue to the next line
+                ++it;
+                continue;
+            }
 
             validatePseudoInstruction(firstToken, args);
+
+            const std::string instructionName = firstToken.value;
+            // Handle instruction aliases
+            if (instructionOp.type != InstructionType::PSEUDO) {
+                std::vector<std::vector<Token>> parsedTokens =
+                        parseInstructionAliases(firstToken, args);
+                LineTokens line = originalTokenLine;
+                // Store the original position before insertions
+                auto erasePos = std::distance(tokens.begin(), it);
+                // Add new lines in the place of the original
+                for (const std::vector<Token>& parsedLine : parsedTokens) {
+                    line.tokens = parsedLine;
+                    it = tokens.insert(it + 1, line);
+                }
+                tokens.erase(tokens.begin() + erasePos); // Remove the pseudo instruction
+                continue;
+            }
 
             // li $tx, imm -> addiu $tx, $zero, imm
             if (instructionName == "li") {
@@ -394,12 +426,9 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             // la $tx, label -> lui $at, upperAddr; ori $tx, $at, lowerAddr
             else if (instructionName == "la") {
                 uint32_t value;
-                if (args[1].category == TokenCategory::LABEL_REF) {
-                    if (!labelMap.contains(args[1].value))
-                        throw std::runtime_error("Unknown label '" + unmangleLabel(args[1].value) +
-                                                 "'");
-                    value = labelMap[args[1].value];
-                } else
+                if (args[1].category == TokenCategory::LABEL_REF)
+                    value = labelMap.get(args[1].value);
+                else
                     value = stoui32(args[1].value);
 
                 const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
@@ -526,6 +555,44 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) {
             throw MasmSyntaxError(e.what(), originalTokenLine.filename, originalTokenLine.lineno);
         }
     }
+}
+
+
+std::vector<std::vector<Token>>
+Parser::parseInstructionAliases(const Token& firstToken, const std::vector<Token>& args) const {
+    std::vector<std::vector<Token>> parsedTokens;
+
+    const std::vector<std::string> loadStoreInstrs = {
+            "lb", "lbu", "lh", "lhu", "lw", "sb", "sh", "sw",
+    };
+    if (std::ranges::find(loadStoreInstrs, firstToken.value) != loadStoreInstrs.end()) {
+        parsedTokens = {{}, {}};
+        uint32_t value;
+        if (args[1].category == TokenCategory::LABEL_REF)
+            value = labelMap.get(args[1].value);
+        else
+            value = stoui32(args[1].value);
+
+        const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
+        const unsigned int lowerBytes = value & 0x0000FFFF;
+
+        parsedTokens[0] = {{TokenCategory::INSTRUCTION, "lui"},
+                           {TokenCategory::REGISTER, "at"},
+                           {TokenCategory::SEPERATOR, ","},
+                           {TokenCategory::IMMEDIATE, std::to_string(upperBytes)}};
+        parsedTokens[1] = {{TokenCategory::INSTRUCTION, firstToken.value},
+                           args[0],
+                           {TokenCategory::SEPERATOR, ","},
+                           {TokenCategory::REGISTER, "at"},
+                           {TokenCategory::SEPERATOR, ","},
+                           {TokenCategory::IMMEDIATE, std::to_string(lowerBytes)}};
+    } else if (firstToken.value == "div" || firstToken.value == "divu") {
+        parsedTokens = {{}, {}};
+        parsedTokens[0] = {firstToken, args[1], {TokenCategory::SEPERATOR, ","}, args[2]};
+        parsedTokens[1] = {{TokenCategory::INSTRUCTION, "mflo"}, args[0]};
+    }
+
+    return parsedTokens;
 }
 
 

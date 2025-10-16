@@ -5,6 +5,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include <climits>
 #include <cstdint>
 #include "tokenizer/tokenizer.h"
 
@@ -82,6 +83,9 @@ enum class InstructionCode {
     // Syscall
     SYSCALL = 0x00,
 
+    // Break
+    BREAK = 0x00,
+
     // Co Processor 0 Instructions
     MFC0 = 0x00,
     MTC0 = 0x04,
@@ -126,7 +130,7 @@ enum class InstructionCode {
     FP_MOV = 0x06,
 
     // Instruction Code for Pseudo Instructions
-    PSEUDO = 0x00,
+    PSEUDO = INT_MAX,
 };
 
 
@@ -156,9 +160,11 @@ enum class InstructionType {
     R_TYPE_S, // R-Type with 1 source register
     I_TYPE_T_S_I, // I-Type
     I_TYPE_T_I, // I-Type with 1 register
+    I_TYPE_T_L, // I-Type with 1 register and label
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
-    SYSCALL, // Syscall
+    SYSCALL, // Syscall instruction
+    BREAK, // Break instruction
 
     ERET, // Eret instruction
     CP0_TYPE_T_D, // Co-Processor 0 Type (Move from/to CP0)
@@ -202,10 +208,20 @@ struct InstructionOp {
 /**
  * Fetches the instruction associated with its name
  * @param name The name of the instruction
+ * @param args A list of arguments following the given instruction
  * @return The instruction representation
  * @throw runtime_error When an unknown instruction is named
  */
-InstructionOp nameToInstructionOp(const std::string& name);
+InstructionOp nameToInstructionOp(const std::string& name, const std::vector<Token>& args);
+
+
+/**
+ * Ensures that the given arguments an expected pattern of token types
+ * @param instructionType The type of instruction to match against
+ * @param args A list of arguments following the given instruction
+ * @throw runtime_error when the arguments for an instruction do not match its accepted values
+ */
+void validateInstructionArgs(InstructionType instructionType, const std::vector<Token>& args);
 
 
 /**

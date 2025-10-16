@@ -249,7 +249,7 @@ TEST_CASE("Test Heap Allocation Syscall") {
 TEST_CASE("Test Exit Syscall") {
     SystemHandle sysHandle;
     REQUIRE_THROWS_MATCHES(sysHandle.exit(), ExecExit,
-                           Catch::Matchers::Message("Program exited with code 0"));
+                           Catch::Matchers::Message("Program exited (code 0)"));
 }
 
 
@@ -285,7 +285,7 @@ TEST_CASE("Test Exit Value Syscall") {
     state.registers[Register::A0] = exitCode;
 
     REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit,
-                           Catch::Matchers::Message("Program exited with code 42"));
+                           Catch::Matchers::Message("Program exited (code 42)"));
     try {
         sysHandle.exitVal(state);
     } catch (const ExecExit& e) {
