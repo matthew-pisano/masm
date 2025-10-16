@@ -163,8 +163,8 @@ enum class InstructionType {
     I_TYPE_T_L, // I-Type with 1 register and label
     I_TYPE_S_T_L, // I-Type with source registers swapped and label
     J_TYPE_L, // J-Type
-    SYSCALL, // Syscall
-    BREAK, // Syscall
+    SYSCALL, // Syscall instruction
+    BREAK, // Break instruction
 
     ERET, // Eret instruction
     CP0_TYPE_T_D, // Co-Processor 0 Type (Move from/to CP0)

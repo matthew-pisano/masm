@@ -217,7 +217,7 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
         case InstructionType::SYSCALL:
             return parseSyscallInstruction();
         case InstructionType::BREAK:
-            return parseBreakInstruction(argCodes.size() > 0 ? argCodes[0] : 0);
+            return parseBreakInstruction(!argCodes.empty() ? argCodes[0] : 0);
 
         // Co-Processor 0 Instructions
         case InstructionType::CP0_TYPE_T_D:
@@ -405,12 +405,14 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) const {
                 std::vector<std::vector<Token>> parsedTokens =
                         parseInstructionAliases(firstToken, args);
                 LineTokens line = originalTokenLine;
+                // Store the original position before insertions
+                auto erasePos = std::distance(tokens.begin(), it);
                 // Add new lines in the place of the original
                 for (const std::vector<Token>& parsedLine : parsedTokens) {
                     line.tokens = parsedLine;
                     it = tokens.insert(it + 1, line);
                 }
-                tokens.erase(it - parsedTokens.size()); // Remove the pseudo instruction line
+                tokens.erase(tokens.begin() + erasePos); // Remove the pseudo instruction
                 continue;
             }
 
