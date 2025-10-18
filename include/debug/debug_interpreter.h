@@ -56,6 +56,10 @@ class DebugInterpreter final : public Interpreter {
      */
     std::map<uint32_t, size_t> breakpoints;
 
+    std::vector<std::string> commandHistory;
+
+    size_t commandPointer = 0;
+
     /**
      * Detects if the debugger must pause execution due to a breakpoint and gather user input
      * @param layout The initial memory layout to use for resetting the debugger
@@ -169,6 +173,10 @@ class DebugInterpreter final : public Interpreter {
      * @param arg The reference to print
      */
     void printRef(const std::string& arg);
+
+    std::string readUserInput();
+
+    void handleKeyboardEscape(std::string& input);
 
 public:
     /**

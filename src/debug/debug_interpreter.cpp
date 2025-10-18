@@ -72,6 +72,47 @@ std::string wordAsString(const uint32_t word) {
 }
 
 
+void DebugInterpreter::handleKeyboardEscape(std::string& input) {
+    // Consume next character
+    const char esc = streamHandle.getCharBlocking();
+    if (esc == 'A' && commandPointer > 0) {
+        commandPointer--;
+        streamHandle.clear();
+        input = commandHistory[commandPointer];
+        streamHandle.putStr(input);
+    }
+    if (esc == 'B' && commandPointer < commandHistory.size() - 1) {
+        commandPointer++;
+        streamHandle.clear();
+        input = commandHistory[commandPointer];
+        streamHandle.putStr(input);
+    } else if (esc == 'B') {
+        streamHandle.clear();
+        input = "";
+        streamHandle.putStr(input);
+    }
+}
+
+
+std::string DebugInterpreter::readUserInput() {
+    std::string input;
+    while (true) {
+        const char c = streamHandle.getCharBlocking();
+        if (c == '\n')
+            break;
+
+        if (c == '\033') {
+            handleKeyboardEscape(input);
+        } else if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
+    }
+    streamHandle.clear();
+    return input;
+}
+
+
 std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
     std::string result;
     while (result.length() < maxLen) {
@@ -110,7 +151,10 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     // Get user commands until none are expected
     while (getCommand) {
         streamHandle.putStr(prompt);
-        const std::string cmdStr = streamHandle.getLine();
+        streamHandle.finish();
+        const std::string cmdStr = readUserInput();
+        commandHistory.push_back(cmdStr);
+        commandPointer = commandHistory.size();
         getCommand = execCommand(cmdStr, layout);
     }
 }

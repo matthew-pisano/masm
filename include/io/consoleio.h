@@ -33,7 +33,7 @@ class ConsoleHandle final : public StreamHandle {
     /**
      * The last character gotten from the input stream
      */
-    char lastChar;
+    char lastChar = 0;
 
 public:
     ConsoleHandle() : StreamHandle(std::cin, std::cout) {}
@@ -70,6 +70,13 @@ public:
      * @param c The character to output
      */
     void putChar(char c) override;
+
+    void finish() override;
+
+    /**
+     * Clears the console input and output stream's content and error flags
+     */
+    void clear() override;
 };
 
 #endif // CONSOLEIO_H

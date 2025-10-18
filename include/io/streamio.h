@@ -58,6 +58,10 @@ public:
      * @param str The string to write to the output stream
      */
     void putStr(const std::string& str);
+
+    virtual void clear() = 0;
+
+    virtual void finish() = 0;
 };
 
 #endif // STREAMIO_H

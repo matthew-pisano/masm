@@ -234,10 +234,10 @@ std::string ConsoleHandle::getLine() {
         if (c == '\n')
             break;
 
-        if (c == '\033') {
+        if (c == '\033')
             // Consume next character
             getCharBlocking();
-        } else if (c != '\b')
+        else if (c != '\b')
             input += c;
         else if (!input.empty())
             input.pop_back(); // Handle backspace
@@ -247,9 +247,24 @@ std::string ConsoleHandle::getLine() {
 
 
 void ConsoleHandle::putChar(const char c) {
-    ostream << c;
-    ostream.flush();
+    ostream << c << std::flush;
+    inputCursor++;
+}
 
-    inputBase++;
-    inputCursor = inputBase;
+void ConsoleHandle::finish() {
+    inputBase = inputCursor;
+    ostream.flush();
+    ostream.clear();
+}
+
+
+void ConsoleHandle::clear() {
+    while (inputCursor > inputBase) {
+        // Remove the previous character on the screen
+        ostream << "\b \b" << std::flush;
+        inputCursor--;
+    }
+
+    ostream.flush();
+    ostream.clear();
 }
