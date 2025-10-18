@@ -19,14 +19,6 @@ using float64_t = double;
 
 
 /**
- * Reads a sequence of characters from the input stream until a newline character is encountered.
- * @param streamHandle The stream handle to read from
- * @return A string containing the characters read from the input stream
- */
-std::string readSeq(StreamHandle& streamHandle);
-
-
-/**
  * Gets the basename of a file path
  * @param path The file path to get the basename of
  * @return The basename of the file path

@@ -110,7 +110,7 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     // Get user commands until none are expected
     while (getCommand) {
         streamHandle.putStr(prompt);
-        const std::string cmdStr = readSeq(streamHandle);
+        const std::string cmdStr = streamHandle.getLine();
         getCommand = execCommand(cmdStr, layout);
     }
 }

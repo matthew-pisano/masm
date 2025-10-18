@@ -43,6 +43,12 @@ public:
     char getCharBlocking();
 
     /**
+     * Reads (blocking) a line from the input stream, omitting control characters
+     * @return The line read from the input stream
+     */
+    virtual std::string getLine();
+
+    /**
      * Sends a character to the output stream
      */
     virtual void putChar(char c);

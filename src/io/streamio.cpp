@@ -27,6 +27,18 @@ char StreamHandle::getCharBlocking() {
     return getChar();
 }
 
+std::string StreamHandle::getLine() {
+    std::string input;
+    while (true) {
+        const char c = getCharBlocking();
+        if (c == '\n')
+            break;
+
+        input += c;
+    }
+    return input;
+}
+
 void StreamHandle::putChar(const char c) {
     ostream.put(c);
     if (ostream.fail())

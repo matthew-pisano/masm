@@ -30,6 +30,11 @@ class ConsoleHandle final : public StreamHandle {
      */
     bool rawModeEnabled = false;
 
+    /**
+     * The last character gotten from the input stream
+     */
+    char lastChar;
+
 public:
     ConsoleHandle() : StreamHandle(std::cin, std::cout) {}
 
@@ -53,6 +58,12 @@ public:
      * @return The character read from the console
      */
     [[nodiscard]] char getChar() override;
+
+    /**
+     * Reads (blocking) a line from the console input, omitting control characters
+     * @return The line read from the console
+     */
+    std::string getLine() override;
 
     /**
      * Outputs a character to the console

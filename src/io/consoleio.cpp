@@ -202,23 +202,48 @@ char ConsoleHandle::getChar() {
             ostream << "\b \b" << std::flush;
             inputCursor--;
         }
+        lastChar = c;
         return '\b'; // Convert DEL to Backspace
     }
 
     // Output the character immediately to stdout as user feedback
     if (c == '\033') {
-        // Escape any escape sequences
-        ostream << "\\033" << std::flush;
-        // Advance the cursor by 3 to account for extra characters
-        inputCursor += 3;
+        // Consume following '['
+        read(STDIN_FILENO, nullptr, 1);
+        inputCursor--;
+    } else if (lastChar == '\033') {
+        // Consume '~' following digit
+        if (c >= '0')
+            read(STDIN_FILENO, nullptr, 1);
+        inputCursor--;
     } else
         ostream << c << std::flush;
 
     inputCursor++;
+    lastChar = c;
     return c;
 }
 
 #endif
+
+
+std::string ConsoleHandle::getLine() {
+    std::string input;
+    while (true) {
+        const char c = getCharBlocking();
+        if (c == '\n')
+            break;
+
+        if (c == '\033') {
+            // Consume next character
+            getCharBlocking();
+        } else if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
+    }
+    return input;
+}
 
 
 void ConsoleHandle::putChar(const char c) {

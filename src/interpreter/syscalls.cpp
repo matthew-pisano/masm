@@ -141,7 +141,7 @@ void SystemHandle::printString(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readInt(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.registers[Register::V0] = std::stoi(input);
     } catch (const std::invalid_argument&) {
@@ -152,7 +152,7 @@ void SystemHandle::readInt(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readFloat(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.cp1.setFloat(Coproc1Register::F0, std::stof(input));
     } catch (const std::invalid_argument&) {
@@ -163,7 +163,7 @@ void SystemHandle::readFloat(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readDouble(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.cp1.setDouble(Coproc1Register::F0, std::stod(input));
     } catch (const std::invalid_argument&) {
