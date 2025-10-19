@@ -72,44 +72,40 @@ std::string wordAsString(const uint32_t word) {
 }
 
 
-void DebugInterpreter::handleKeyboardEscape(std::string& input) {
+void DebugInterpreter::handleKeyboardEscape() {
     // Consume next character
-    const char esc = streamHandle.getCharBlocking();
-    if (esc == 'A' && commandPointer > 0) {
+    const KeyboardEscape esc = static_cast<KeyboardEscape>(streamHandle.getCharBlocking());
+    if (esc == KeyboardEscape::UP && commandPointer > 0) {
         commandPointer--;
         streamHandle.clear();
-        input = commandHistory[commandPointer];
-        streamHandle.putStr(input);
+        for (const char c : commandHistory[commandPointer])
+            streamHandle.putChar(c);
     }
-    if (esc == 'B' && commandPointer < commandHistory.size() - 1) {
+    if (esc == KeyboardEscape::DOWN && commandPointer < commandHistory.size() - 1) {
         commandPointer++;
         streamHandle.clear();
-        input = commandHistory[commandPointer];
-        streamHandle.putStr(input);
-    } else if (esc == 'B') {
+        for (const char c : commandHistory[commandPointer])
+            streamHandle.putChar(c);
+    } else if (esc == KeyboardEscape::DOWN) {
+        commandPointer = commandHistory.size();
         streamHandle.clear();
-        input = "";
-        streamHandle.putStr(input);
+        streamHandle.flush();
     }
 }
 
 
 std::string DebugInterpreter::readUserInput() {
-    std::string input;
     while (true) {
         const char c = streamHandle.getCharBlocking();
         if (c == '\n')
             break;
 
-        if (c == '\033') {
-            handleKeyboardEscape(input);
-        } else if (c != '\b')
-            input += c;
-        else if (!input.empty())
-            input.pop_back(); // Handle backspace
+        if (c == '\033')
+            handleKeyboardEscape();
+        streamHandle.show();
     }
-    streamHandle.clear();
-    return input;
+    const std::string input = streamHandle.getBuffer();
+    return input.substr(0, input.size() - 1); // Remove newline character
 }
 
 
@@ -151,9 +147,13 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     // Get user commands until none are expected
     while (getCommand) {
         streamHandle.putStr(prompt);
-        streamHandle.finish();
         const std::string cmdStr = readUserInput();
-        commandHistory.push_back(cmdStr);
+        streamHandle.flush();
+
+        std::string lastCmd =
+                commandHistory.empty() ? "" : commandHistory[commandHistory.size() - 1];
+        if (!cmdStr.empty() && cmdStr != lastCmd)
+            commandHistory.push_back(cmdStr);
         commandPointer = commandHistory.size();
         getCommand = execCommand(cmdStr, layout);
     }

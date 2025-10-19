@@ -165,6 +165,15 @@ void ConsoleHandle::disableRawConsoleMode() {
 }
 
 
+void ConsoleHandle::delChar() {
+    if (cursor == -1)
+        return;
+
+    buffer.erase(cursor, 1);
+    cursor--;
+}
+
+
 bool ConsoleHandle::hasChar() {
     // Try to read 0 bytes - will return > 0 if data is available
     char buf;
@@ -196,13 +205,9 @@ char ConsoleHandle::getChar() {
         throw std::runtime_error("No character available to read from console");
 
     // Handle DEL
-    if (c == 127) {
-        if (inputCursor > inputBase) {
-            // Remove the previous character on the screen
-            ostream << "\b \b" << std::flush;
-            inputCursor--;
-        }
-        lastChar = c;
+    if (c == 127 || c == '\b') {
+        delChar();
+        lastReadChar = '\b';
         return '\b'; // Convert DEL to Backspace
     }
 
@@ -210,61 +215,37 @@ char ConsoleHandle::getChar() {
     if (c == '\033') {
         // Consume following '['
         read(STDIN_FILENO, nullptr, 1);
-        inputCursor--;
-    } else if (lastChar == '\033') {
+    } else if (lastReadChar == '\033') {
         // Consume '~' following digit
-        if (c >= '0')
+        if (c <= '9')
             read(STDIN_FILENO, nullptr, 1);
-        inputCursor--;
     } else
-        ostream << c << std::flush;
+        putChar(c);
 
-    inputCursor++;
-    lastChar = c;
+    lastReadChar = c;
     return c;
 }
 
 #endif
 
 
-std::string ConsoleHandle::getLine() {
-    std::string input;
-    while (true) {
-        const char c = getCharBlocking();
-        if (c == '\n')
-            break;
-
-        if (c == '\033')
-            // Consume next character
-            getCharBlocking();
-        else if (c != '\b')
-            input += c;
-        else if (!input.empty())
-            input.pop_back(); // Handle backspace
-    }
-    return input;
-}
-
-
-void ConsoleHandle::putChar(const char c) {
-    ostream << c << std::flush;
-    inputCursor++;
-}
-
-void ConsoleHandle::finish() {
-    inputBase = inputCursor;
-    ostream.flush();
-    ostream.clear();
-}
+void ConsoleHandle::putChar(const char c) { StreamHandle::putChar(c); }
 
 
 void ConsoleHandle::clear() {
-    while (inputCursor > inputBase) {
-        // Remove the previous character on the screen
-        ostream << "\b \b" << std::flush;
-        inputCursor--;
-    }
+    StreamHandle::clear();
+    show();
+    writtenBufferSize = 0;
+    lastReadChar = 0;
+}
 
-    ostream.flush();
-    ostream.clear();
+
+void ConsoleHandle::show() {
+    // Clear content from last written buffer
+    for (size_t i = 0; i < writtenBufferSize; i++)
+        ostream << "\b \b" << std::flush;
+
+    writtenBufferSize = buffer.size();
+    // Reprint buffer
+    ostream << buffer << std::flush;
 }

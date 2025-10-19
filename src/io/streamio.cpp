@@ -6,6 +6,10 @@
 
 #include <unistd.h>
 
+
+std::string StreamHandle::getBuffer() { return buffer; }
+
+
 bool StreamHandle::hasChar() {
     const bool hasChar = istream.peek() != std::istream::traits_type::eof();
     // Clear error flags from peeking when stream is empty
@@ -28,24 +32,58 @@ char StreamHandle::getCharBlocking() {
 }
 
 std::string StreamHandle::getLine() {
-    std::string input;
-    while (true) {
-        const char c = getCharBlocking();
-        if (c == '\n')
+    while (true)
+        if (getCharBlocking() == '\n')
             break;
-
-        input += c;
-    }
-    return input;
+    return buffer.substr(0, buffer.size() - 1);
 }
 
 void StreamHandle::putChar(const char c) {
-    ostream.put(c);
-    if (ostream.fail())
-        throw std::runtime_error("Failed to write character to output stream");
+    buffer.insert(cursor + 1, 1, c);
+    cursor++;
 }
 
 void StreamHandle::putStr(const std::string& str) {
     for (const char c : str)
         putChar(c);
+    flush();
 }
+
+void StreamHandle::clear() {
+    buffer.clear();
+    cursor = -1;
+}
+
+void StreamHandle::flush() {
+    const std::string buff = buffer;
+    clear();
+    ostream << buff << std::flush;
+}
+
+void StreamHandle::seek(const int32_t offset, const Whence whence) {
+    // If cursor is uninitialized, do nothing
+    if (cursor == -1)
+        return;
+
+    const int32_t buffSize = static_cast<int32_t>(buffer.size());
+    switch (whence) {
+        case Whence::SET:
+            cursor = offset;
+            break;
+        case Whence::CUR:
+            cursor += offset;
+            break;
+        case Whence::END:
+            cursor = buffSize + offset;
+            break;
+    }
+
+    // Clamp cursor within valid bounds
+    if (cursor > buffSize)
+        cursor = buffSize;
+    else if (cursor < 0)
+        cursor = 0;
+}
+
+
+void StreamHandle::show() {}

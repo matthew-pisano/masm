@@ -176,7 +176,7 @@ class DebugInterpreter final : public Interpreter {
 
     std::string readUserInput();
 
-    void handleKeyboardEscape(std::string& input);
+    void handleKeyboardEscape();
 
 public:
     /**

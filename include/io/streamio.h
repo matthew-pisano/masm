@@ -7,6 +7,16 @@
 #include <iostream>
 
 
+/**
+ * Seek reference points
+ */
+enum class Whence {
+    SET, // Beginning of stream
+    CUR, // Current position in stream
+    END // End of stream
+};
+
+
 class StreamHandle {
 protected:
     /**
@@ -19,10 +29,26 @@ protected:
      */
     std::ostream& ostream;
 
+    /**
+     * Working input buffer before being flushed to the output stream
+     */
+    std::string buffer;
+
+    /**
+     * Cursor position in the input stream
+     */
+    int32_t cursor = -1;
+
 public:
     StreamHandle(std::istream& istream, std::ostream& ostream) :
         istream(istream), ostream(ostream) {}
     virtual ~StreamHandle() = default;
+
+    /**
+     * Gets the current input buffer
+     * @return The current input buffer as a string
+     */
+    virtual std::string getBuffer();
 
     /**
      * Checks if there are characters available to read from the input stream
@@ -59,9 +85,24 @@ public:
      */
     void putStr(const std::string& str);
 
-    virtual void clear() = 0;
+    /**
+     * Clears the output buffer
+     */
+    virtual void clear();
 
-    virtual void finish() = 0;
+    /**
+     * Flushes the output buffer to the output stream
+     */
+    virtual void flush();
+
+    /**
+     * Seeks to a position in the input stream
+     * @param offset The offset to seek to
+     * @param whence The reference point for the seek
+     */
+    virtual void seek(int32_t offset, Whence whence);
+
+    virtual void show();
 };
 
 #endif // STREAMIO_H

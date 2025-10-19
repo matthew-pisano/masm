@@ -4,10 +4,22 @@
 
 #ifndef CONSOLEIO_H
 #define CONSOLEIO_H
-#include <cstdint>
 #include <iostream>
 
 #include "streamio.h"
+
+
+enum class KeyboardEscape {
+    UP = 'A',
+    DOWN = 'B',
+    RIGHT = 'C',
+    LEFT = 'D',
+    HOME = 'H',
+    END = 'F',
+    DELETE = '3',
+    PGUP = '5',
+    PGDN = '6'
+};
 
 
 /**
@@ -16,14 +28,14 @@
 class ConsoleHandle final : public StreamHandle {
 
     /**
-     * The start of the unmodifiable code region
+     * Size of the last written buffer
      */
-    uint32_t inputBase = 0;
+    size_t writtenBufferSize = 0;
 
     /**
-     * The current position of the input cursor
+     * Last character read from the console
      */
-    uint32_t inputCursor = 0;
+    char lastReadChar = 0;
 
     /**
      * Flag indicating whether raw mode is enabled
@@ -31,9 +43,9 @@ class ConsoleHandle final : public StreamHandle {
     bool rawModeEnabled = false;
 
     /**
-     * The last character gotten from the input stream
+     * Deletes a character from the buffer at the current cursor
      */
-    char lastChar = 0;
+    void delChar();
 
 public:
     ConsoleHandle() : StreamHandle(std::cin, std::cout) {}
@@ -59,24 +71,14 @@ public:
      */
     [[nodiscard]] char getChar() override;
 
-    /**
-     * Reads (blocking) a line from the console input, omitting control characters
-     * @return The line read from the console
-     */
-    std::string getLine() override;
-
-    /**
-     * Outputs a character to the console
-     * @param c The character to output
-     */
     void putChar(char c) override;
 
-    void finish() override;
-
     /**
-     * Clears the console input and output stream's content and error flags
+     * Clears the current input line from the console
      */
     void clear() override;
+
+    void show() override;
 };
 
 #endif // CONSOLEIO_H
