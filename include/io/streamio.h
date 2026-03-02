@@ -39,10 +39,27 @@ protected:
      */
     int32_t cursor = -1;
 
+    /**
+     * Whether the stream is in editing mode (disables automatic buffer submission)
+     */
+    bool isEditing = false;
+
 public:
     StreamHandle(std::istream& istream, std::ostream& ostream) :
         istream(istream), ostream(ostream) {}
     virtual ~StreamHandle() = default;
+
+    /**
+     * Sets whether the stream is in editing mode
+     * @param set True to set editing mode, false to disable
+     */
+    void edit(bool set);
+
+    /**
+     * Checks if the stream is in editing mode
+     * @return True if in editing mode, false otherwise
+     */
+    [[nodiscard]] bool editing() const;
 
     /**
      * Gets the current input buffer

@@ -71,14 +71,14 @@ public:
      */
     [[nodiscard]] char getChar() override;
 
-    void putChar(char c) override;
-
     /**
      * Clears the current input line from the console
      */
     void clear() override;
 
     void show() override;
+
+    void seek(int32_t offset, Whence whence) override;
 };
 
 #endif // CONSOLEIO_H

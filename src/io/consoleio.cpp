@@ -211,7 +211,6 @@ char ConsoleHandle::getChar() {
         return '\b'; // Convert DEL to Backspace
     }
 
-    // Output the character immediately to stdout as user feedback
     if (c == '\033') {
         // Consume following '['
         read(STDIN_FILENO, nullptr, 1);
@@ -219,7 +218,7 @@ char ConsoleHandle::getChar() {
         // Consume '~' following digit
         if (c <= '9')
             read(STDIN_FILENO, nullptr, 1);
-    } else
+    } else if (!isEditing)
         putChar(c);
 
     lastReadChar = c;
@@ -229,23 +228,54 @@ char ConsoleHandle::getChar() {
 #endif
 
 
-void ConsoleHandle::putChar(const char c) { StreamHandle::putChar(c); }
-
-
 void ConsoleHandle::clear() {
     StreamHandle::clear();
-    show();
-    writtenBufferSize = 0;
     lastReadChar = 0;
 }
 
 
 void ConsoleHandle::show() {
+    if (!isEditing) {
+        StreamHandle::show();
+        return;
+    }
+
     // Clear content from last written buffer
-    for (size_t i = 0; i < writtenBufferSize; i++)
-        ostream << "\b \b" << std::flush;
+    int32_t tmpCursor = cursor;
+    // Move cursor to the beginning
+    while (tmpCursor > 0) {
+        ostream << "\033[D" << std::flush;
+        tmpCursor--;
+    }
+    // Write current buffer content
+    while (tmpCursor < static_cast<int32_t>(buffer.size())) {
+        ostream << buffer[tmpCursor] << std::flush;
+        tmpCursor++;
+    }
+    // Clear line after buffer if needed
+    while (tmpCursor < static_cast<int32_t>(writtenBufferSize)) {
+        ostream << " " << std::flush;
+        tmpCursor++;
+    }
+    // Move cursor back to current position
+    while (tmpCursor > cursor + static_cast<int32_t>(buffer.size())) {
+        ostream << "\033[D" << std::flush;
+        tmpCursor--;
+    }
 
     writtenBufferSize = buffer.size();
-    // Reprint buffer
-    ostream << buffer << std::flush;
+}
+
+
+void ConsoleHandle::seek(const int32_t offset, const Whence whence) {
+    int32_t initialCursor = cursor;
+    StreamHandle::seek(offset, whence);
+    while (initialCursor < cursor) {
+        ostream << "\033[C" << std::flush; // Move cursor right
+        initialCursor++;
+    }
+    while (initialCursor > cursor) {
+        ostream << "\033[D" << std::flush; // Move cursor left
+        initialCursor--;
+    }
 }

@@ -7,8 +7,11 @@
 #include <unistd.h>
 
 
-std::string StreamHandle::getBuffer() { return buffer; }
+void StreamHandle::edit(const bool set) { isEditing = set; }
 
+bool StreamHandle::editing() const { return isEditing; }
+
+std::string StreamHandle::getBuffer() { return buffer; }
 
 bool StreamHandle::hasChar() {
     const bool hasChar = istream.peek() != std::istream::traits_type::eof();
@@ -41,12 +44,13 @@ std::string StreamHandle::getLine() {
 void StreamHandle::putChar(const char c) {
     buffer.insert(cursor + 1, 1, c);
     cursor++;
+    if (!isEditing)
+        flush();
 }
 
 void StreamHandle::putStr(const std::string& str) {
     for (const char c : str)
         putChar(c);
-    flush();
 }
 
 void StreamHandle::clear() {
@@ -55,9 +59,8 @@ void StreamHandle::clear() {
 }
 
 void StreamHandle::flush() {
-    const std::string buff = buffer;
+    show();
     clear();
-    ostream << buff << std::flush;
 }
 
 void StreamHandle::seek(const int32_t offset, const Whence whence) {
@@ -86,4 +89,4 @@ void StreamHandle::seek(const int32_t offset, const Whence whence) {
 }
 
 
-void StreamHandle::show() {}
+void StreamHandle::show() { ostream << buffer << std::flush; }

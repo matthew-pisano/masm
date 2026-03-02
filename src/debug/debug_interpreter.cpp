@@ -78,33 +78,37 @@ void DebugInterpreter::handleKeyboardEscape() {
     if (esc == KeyboardEscape::UP && commandPointer > 0) {
         commandPointer--;
         streamHandle.clear();
-        for (const char c : commandHistory[commandPointer])
-            streamHandle.putChar(c);
+        streamHandle.putStr(commandHistory[commandPointer]);
     }
     if (esc == KeyboardEscape::DOWN && commandPointer < commandHistory.size() - 1) {
         commandPointer++;
         streamHandle.clear();
-        for (const char c : commandHistory[commandPointer])
-            streamHandle.putChar(c);
+        streamHandle.putStr(commandHistory[commandPointer]);
     } else if (esc == KeyboardEscape::DOWN) {
         commandPointer = commandHistory.size();
         streamHandle.clear();
-        streamHandle.flush();
     }
 }
 
 
 std::string DebugInterpreter::readUserInput() {
+    streamHandle.edit(true);
     while (true) {
         const char c = streamHandle.getCharBlocking();
-        if (c == '\n')
+        if (c == '\n') {
+            streamHandle.putChar(c);
             break;
+        }
 
         if (c == '\033')
             handleKeyboardEscape();
+        else
+            streamHandle.putChar(c); // Echo character
         streamHandle.show();
     }
     const std::string input = streamHandle.getBuffer();
+    streamHandle.flush();
+    streamHandle.edit(false);
     return input.substr(0, input.size() - 1); // Remove newline character
 }
 
@@ -148,7 +152,6 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     while (getCommand) {
         streamHandle.putStr(prompt);
         const std::string cmdStr = readUserInput();
-        streamHandle.flush();
 
         std::string lastCmd =
                 commandHistory.empty() ? "" : commandHistory[commandHistory.size() - 1];
