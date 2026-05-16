@@ -1,6 +1,6 @@
 # Summary
 
-[A short summary of the changes made]
+A short summary of the changes made.
 
 ## Related Issue(s)
 
@@ -13,3 +13,8 @@
 * [ ] Breaking change
 * [ ] Documentation update
 * [ ] Test or fixture update
+* [ ] Reorganization or Refactor
+
+## Additional Context
+
+Add any other context or screenshots about the pull request here.

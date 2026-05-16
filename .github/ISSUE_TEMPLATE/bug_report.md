@@ -2,30 +2,36 @@
 name: Bug report
 about: Detail what has gone wrong
 title: "[BUG] Example Bug Report"
-labels: ''
+labels: [ 'bug' ]
 assignees: ''
 
 ---
 
-**Describe the bug**
+## Bug Description
+
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+## Bug Reproduction
+
 Steps to reproduce the behavior:
+
 1. ...
 2. ...
 3. ...
-...
 
-**Expected behavior**
+## Expected Behavior
+
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+## Screenshots
+
 If applicable, add screenshots to help explain your problem.
 
-**Version information**
- - OS: [Linux, Windows]
- - Version: [e.g. 1.2.0]
+## Version information
 
-**Additional context**
+- OS: [Linux, Windows]
+- Version: [e.g. 1.2.0]
+
+## Additional context
+
 Add any other context about the problem here.
