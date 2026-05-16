@@ -42,7 +42,8 @@ jobs:
           export MYPYPATH=$(pwd)/python
           $VENV_PATH/bin/mypy python
           $VENV_PATH/bin/mypy test
-  test:
+
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,9 +57,7 @@ jobs:
           gcc --version
           python3 -m venv $VENV_PATH
           $VENV_PATH/bin/pip install --upgrade pip
-          $VENV_PATH/bin/pip install build pytest wheel setuptools
-          mkdir logs
-
+          $VENV_PATH/bin/pip install build wheel setuptools
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
@@ -67,28 +66,74 @@ jobs:
           [[ "${CMAKE_PARALLEL}" == true ]] && \
           cmake --build build --parallel "${CMAKE_PARALLELISM}" || \
           cmake --build build
-
-      - name: Run CTests
-        run: |
-          cd build
-          ctest --output-on-failure --verbose --output-junit ../logs/ctest-results.xml
-          cd -
-
       - name: Package Python
         run: |
           cp build/pymasm_core* python/pymasm/
           cd python
           $VENV_PATH/bin/python -m build --wheel
-          cd -
-          $VENV_PATH/bin/pip install python/dist/pymasm-*.whl
-      - name: Run PyTests
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            build/
+            python/dist/
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Install dependencies
         run: |
-          $VENV_PATH/bin/pytest --junitxml=logs/pytest-results.xml test
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+          mkdir -p ${{ github.workspace }}/logs
+      - name: Run CTests
+        run: |
+          chmod +x build/masm-tests
+          ctest --test-dir build --output-on-failure --verbose --output-junit ${{ github.workspace }}/logs/ctest-results.xml
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()
         with:
           name: Catch2 Tests
-          path: logs/*.xml
+          path: ${{ github.workspace }}/logs/ctest-results.xml
+          reporter: java-junit
+          fail-on-error: true
+
+  test-python:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-venv
+          python3 -m venv $VENV_PATH
+          $VENV_PATH/bin/pip install --upgrade pip
+          $VENV_PATH/bin/pip install pytest
+          $VENV_PATH/bin/pip install python/dist/pymasm-*.whl
+          mkdir -p ${{ github.workspace }}/logs
+      - name: Run PyTests
+        run: |
+          $VENV_PATH/bin/pytest --junitxml=${{ github.workspace }}/logs/pytest-results.xml test
+      - name: Publish test results
+        uses: dorny/test-reporter@v2.1.1
+        if: always()
+        with:
+          name: PyTest Tests
+          path: ${{ github.workspace }}/logs/pytest-results.xml
           reporter: java-junit
           fail-on-error: true
