@@ -24,7 +24,7 @@ classifiers = [
 packages = ["pymasm"]
 
 [tool.setuptools.dynamic]
-version = { attr = "python._version.__version__" }
+version = { attr = "_version.__version__" }
 
 [tool.setuptools.package-data]
 pymasm = ["*.so", "*.pyd", "pymasm_core/*.py", "pymasm_core/*.pyi", "py.typed"]
