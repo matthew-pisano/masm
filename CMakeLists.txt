@@ -133,22 +133,22 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
             mdb/debug_interpreter.cpp
             libmasm/src/io/fileio.cpp
             mdb/intermediates.cpp
-            test/testing_utilities.cpp
-            test/test_components/test_tokenizer.cpp
-            test/test_components/test_parser.cpp
-            test/test_components/test_interpreter.cpp
-            test/test_components/test_syscall.cpp
-            test/test_instructions/test_arithmetic_instructions.cpp
-            test/test_instructions/test_comparison_instructions.cpp
-            test/test_instructions/test_control_instructions.cpp
-            test/test_instructions/test_memory_instructions.cpp
-            test/test_instructions/test_pseudo_instructions.cpp
-            test/test_instructions/test_aliased_instructions.cpp
-            test/test_utils.cpp
-            test/test_instructions/test_cp0_instructions.cpp
-            test/test_instructions/test_cp1_instructions.cpp
-            test/test_components/test_intermediates.cpp
-            test/test_fileio.cpp
+            tests/testing_utilities.cpp
+            tests/components/test_tokenizer.cpp
+            tests/components/test_parser.cpp
+            tests/components/test_interpreter.cpp
+            tests/components/test_syscall.cpp
+            tests/instructions/test_arithmetic_instructions.cpp
+            tests/instructions/test_comparison_instructions.cpp
+            tests/instructions/test_control_instructions.cpp
+            tests/instructions/test_memory_instructions.cpp
+            tests/instructions/test_pseudo_instructions.cpp
+            tests/instructions/test_aliased_instructions.cpp
+            tests/utils/test_utils.cpp
+            tests/instructions/test_cp0_instructions.cpp
+            tests/instructions/test_cp1_instructions.cpp
+            tests/components/test_intermediates.cpp
+            tests/utils/test_fileio.cpp
     )
     target_link_libraries(masm-tests PRIVATE masm)
     target_link_libraries(masm-tests PRIVATE Catch2::Catch2WithMain)
