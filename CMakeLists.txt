@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(masm)
+project(libmasm)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -26,23 +26,23 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## MASM Static Library ##
 
 add_library(masm STATIC
-        src/io/consoleio.cpp
-        src/interpreter/memory.cpp
-        src/interpreter/interpreter.cpp
-        src/interpreter/syscalls.cpp
-        src/interpreter/heap.cpp
-        src/parser/parser.cpp
-        src/parser/instruction.cpp
-        src/parser/labels.cpp
-        src/parser/directive.cpp
-        src/tokenizer/tokenizer.cpp
-        src/tokenizer/postprocessor.cpp
-        src/utils.cpp
-        src/interpreter/cpu.cpp
-        src/interpreter/cp0.cpp
-        src/interpreter/cp1.cpp
-        src/interpreter/state.cpp
-        src/io/streamio.cpp
+        libmasm/src/io/consoleio.cpp
+        libmasm/src/interpreter/memory.cpp
+        libmasm/src/interpreter/interpreter.cpp
+        libmasm/src/interpreter/syscalls.cpp
+        libmasm/src/interpreter/heap.cpp
+        libmasm/src/parser/parser.cpp
+        libmasm/src/parser/instruction.cpp
+        libmasm/src/parser/labels.cpp
+        libmasm/src/parser/directive.cpp
+        libmasm/src/tokenizer/tokenizer.cpp
+        libmasm/src/tokenizer/postprocessor.cpp
+        libmasm/src/utils.cpp
+        libmasm/src/interpreter/cpu.cpp
+        libmasm/src/interpreter/cp0.cpp
+        libmasm/src/interpreter/cp1.cpp
+        libmasm/src/interpreter/state.cpp
+        libmasm/src/io/streamio.cpp
 )
 
 # -fPIC only needed for native Linux builds (not Windows cross-compilation)
@@ -62,13 +62,13 @@ FetchContent_MakeAvailable(cli11)
 
 ## MASM Main Executables ##
 
-add_executable(masm-exec src/masm.cpp
-        src/io/fileio.cpp
-        src/debug/intermediates.cpp
-        src/runtime.cpp
+add_executable(masm-exec masm/masm.cpp
+        libmasm/src/io/fileio.cpp
+        mdb/intermediates.cpp
+        libmasm/src/runtime.cpp
 )
 target_link_libraries(masm-exec PRIVATE masm CLI11::CLI11)
-set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "masm")
+set_target_properties(masm-exec PROPERTIES OUTPUT_NAME "libmasm")
 
 # Static linking for Windows cross-compilation (ensures dlls are packaged in)
 if (CMAKE_CROSSCOMPILING AND WIN32)
@@ -78,11 +78,11 @@ endif ()
 
 ## MASM Debugger Executables ##
 
-add_executable(masm-dbg src/mdb.cpp
-        src/io/fileio.cpp
-        src/debug/intermediates.cpp
-        src/debug/debug_interpreter.cpp
-        src/runtime.cpp
+add_executable(masm-dbg mdb/mdb.cpp
+        libmasm/src/io/fileio.cpp
+        mdb/intermediates.cpp
+        mdb/debug_interpreter.cpp
+        libmasm/src/runtime.cpp
 )
 target_link_libraries(masm-dbg PRIVATE masm CLI11::CLI11)
 set_target_properties(masm-dbg PROPERTIES OUTPUT_NAME "mdb")
@@ -106,15 +106,15 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     FetchContent_MakeAvailable(pybind11)
 
     pybind11_add_module(pymasm_core
-            src/pybind/python_bindings.cpp
+            python/src/python_bindings.cpp
     )
-    # Link the Python module with masm
+    # Link the Python module with libmasm
     target_link_libraries(pymasm_core PRIVATE masm)
 
     ## Fixture Generator Executable ##
 
-    add_executable(masm-fg test/fixture_gen.cpp
-            src/io/fileio.cpp
+    add_executable(masm-fg tools/fixture-gen/fixture_gen.cpp
+            libmasm/src/io/fileio.cpp
     )
     target_link_libraries(masm-fg PRIVATE masm CLI11::CLI11)
 
@@ -129,10 +129,10 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     FetchContent_MakeAvailable(Catch2)
 
     add_executable(masm-tests
-            src/runtime.cpp
-            src/debug/debug_interpreter.cpp
-            src/io/fileio.cpp
-            src/debug/intermediates.cpp
+            libmasm/src/runtime.cpp
+            mdb/debug_interpreter.cpp
+            libmasm/src/io/fileio.cpp
+            mdb/intermediates.cpp
             test/testing_utilities.cpp
             test/test_components/test_tokenizer.cpp
             test/test_components/test_parser.cpp

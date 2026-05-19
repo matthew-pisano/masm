@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "exceptions.h"
+#include "../../libmasm/include/masm/exceptions.h"
 #include "interpreter/interpreter.h"
 #include "interpreter/syscalls.h"
 

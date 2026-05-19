@@ -25,13 +25,13 @@ Remember to replace the `x.x.x` portion with the release version that you have s
 *masm* takes in a valid *MIPS* program and executes the instructions within on a virtual CPU that interacts with virtual registers and memory.
 
 ```bash
-masm [options...] module1.asm module2.asm ...
+libmasm [options...] module1.asm module2.asm ...
 ```
 
 Wildcard arguments are also supported if explicit ordering is not needed.
 
 ```bash
-masm [options...] *.asm
+libmasm [options...] *.asm
 ```
 
 Note that program execution will begin at the first instruction in the text section of the first file argument (`module1.asm` in this case).
@@ -98,7 +98,7 @@ There are many other comments in addition to these, designed to make debugging c
 *mdb* is called similarly to *masm*, it takes in assembly program files and options. However, instead of immediately running the program, it is assembled, loaded into memory, and the user is dropped into an interactive shell.
 
 ```bash
-masm [options...] module1.asm module2.asm ...
+libmasm [options...] module1.asm module2.asm ...
 ```
 
 ## Python Bindings
@@ -139,7 +139,7 @@ For more detailed usage examples, see the [python/examples](python/examples) dir
 ```bash
 # Clone the repository
 git clone https://github.com/matthew-pisano/masm
-cd masm
+cd libmasm
 
 # Configure and build
 cmake -S . -B build

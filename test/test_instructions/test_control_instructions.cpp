@@ -7,9 +7,9 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include "../../libmasm/include/masm/exceptions.h"
+#include "../../mdb/debug_interpreter.h"
 #include "../testing_utilities.h"
-#include "debug/debug_interpreter.h"
-#include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"

@@ -9,14 +9,14 @@
 #include <string>
 #include <vector>
 
+#include "../../libmasm/include/masm/exceptions.h"
+#include "../../libmasm/include/masm/utils.h"
+#include "../../mdb/debug_interpreter.h"
 #include "../testing_utilities.h"
-#include "debug/debug_interpreter.h"
-#include "exceptions.h"
 #include "interpreter/interpreter.h"
 #include "io/fileio.h"
 #include "parser/parser.h"
 #include "tokenizer/tokenizer.h"
-#include "utils.h"
 
 
 /**

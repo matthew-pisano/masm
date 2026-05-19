@@ -8,12 +8,12 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include "../../libmasm/include/masm/exceptions.h"
+#include "../../libmasm/include/masm/utils.h"
 #include "../testing_utilities.h"
-#include "exceptions.h"
 #include "io/fileio.h"
 #include "parser/directive.h"
 #include "parser/parser.h"
-#include "utils.h"
 
 
 /**

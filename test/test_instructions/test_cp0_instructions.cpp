@@ -5,8 +5,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "../../mdb/debug_interpreter.h"
 #include "../testing_utilities.h"
-#include "debug/debug_interpreter.h"
 #include "interpreter/interpreter.h"
 #include "interpreter/memory.h"
 #include "tokenizer/tokenizer.h"
