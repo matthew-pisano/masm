@@ -8,9 +8,10 @@
 #include <iostream>
 
 
-#include "../assembler/memory.h"
-#include "state.h"
-#include "syscalls.h"
+#include <masm/assembler/memory.h>
+#include <masm/interpreter/state.h>
+#include <masm/interpreter/syscalls.h>
+#include <masm/io/streamio.h>
 
 
 /**
@@ -72,8 +73,7 @@ protected:
     State state;
 
 public:
-    Interpreter(const IOMode ioMode, StreamHandle& streamHandle) :
-        ioMode(ioMode), streamHandle(streamHandle) {}
+    Interpreter(const IOMode ioMode, StreamHandle& streamHandle) : ioMode(ioMode), streamHandle(streamHandle) {}
 
     Interpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
         ioMode(ioMode), streamHandle(streamHandle), state(useLittleEndian) {}

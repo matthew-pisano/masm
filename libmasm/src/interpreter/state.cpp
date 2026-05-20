@@ -2,9 +2,9 @@
 // Created by matthew on 6/8/25.
 //
 
-#include "interpreter/state.h"
+#include <masm/interpreter/state.h>
 
-#include "../../libmasm/include/masm/exceptions.h"
+#include <masm/exceptions.h>
 
 
 std::string causeToString(const uint32_t cause) {

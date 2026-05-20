@@ -2,7 +2,7 @@
 // Created by matthew on 6/7/25.
 //
 
-#include "interpreter/cp0.h"
+#include <masm/interpreter/cp0.h>
 
 #include <stdexcept>
 
@@ -21,8 +21,8 @@ int32_t& Coproc0RegisterFile::operator[](const Coproc0Register index) {
 }
 
 
-void execCP0Type(Coproc0RegisterFile& cp0, RegisterFile& registers, const uint32_t rs,
-                 const uint32_t rt, const uint32_t rd) {
+void execCP0Type(Coproc0RegisterFile& cp0, RegisterFile& registers, const uint32_t rs, const uint32_t rt,
+                 const uint32_t rd) {
     switch (static_cast<InstructionCode>(rs)) {
         case InstructionCode::MFC0: {
             // Move from CP0

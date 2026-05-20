@@ -7,7 +7,7 @@
 #include <array>
 #include <cstdint>
 
-#include "cpu.h"
+#include <masm/interpreter/cpu.h>
 
 /**
  * Enum representing the valid coprocessor 0 registers
@@ -64,8 +64,7 @@ public:
  * @param rt The second source register
  * @param rd The destination register
  */
-void execCP0Type(Coproc0RegisterFile& cp0, RegisterFile& registers, uint32_t rs, uint32_t rt,
-                 uint32_t rd);
+void execCP0Type(Coproc0RegisterFile& cp0, RegisterFile& registers, uint32_t rs, uint32_t rt, uint32_t rd);
 
 
 /**

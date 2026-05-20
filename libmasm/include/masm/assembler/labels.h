@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/tokenizer.h>
 
 /**
  * Class to manage the mapping of labels to memory locations

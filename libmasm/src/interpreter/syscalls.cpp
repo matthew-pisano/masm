@@ -2,21 +2,21 @@
 // Created by matthew on 4/26/25.
 //
 
-#include "interpreter/syscalls.h"
+#include <masm/interpreter/syscalls.h>
 
 #include <chrono>
 #include <iomanip>
 #include <unistd.h>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "interpreter/cpu.h"
-#include "io/consoleio.h"
+#include <masm/exceptions.h>
+#include <masm/interpreter/cpu.h>
+#include <masm/io/consoleio.h>
+#include <masm/utils.h>
 
 
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
     if (ioMode != IOMode::SYSCALL)
-        throw ExecExcept(syscallName + " syscall not supported in MMIO mode",
-                         EXCEPT_CODE::SYSCALL_EXCEPTION);
+        throw ExecExcept(syscallName + " syscall not supported in MMIO mode", EXCEPT_CODE::SYSCALL_EXCEPTION);
 }
 
 void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamHandle) {
@@ -218,8 +218,7 @@ void SystemHandle::time(State& state) {
     // Get the current time in milliseconds since the epoch
     const auto now = std::chrono::system_clock::now();
     const auto duration = now.time_since_epoch();
-    const int64_t milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    const int64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
     // Store high bits in $a1 and low bits in $a0
     state.registers[Register::A0] = static_cast<int32_t>(milliseconds & 0xFFFFFFFF);
@@ -229,8 +228,7 @@ void SystemHandle::time(State& state) {
 void SystemHandle::sleep(State& state) {
     const int32_t milliseconds = state.registers[Register::A0];
     if (milliseconds < 0)
-        throw ExecExcept("Negative sleep time: " + std::to_string(milliseconds),
-                         EXCEPT_CODE::SYSCALL_EXCEPTION);
+        throw ExecExcept("Negative sleep time: " + std::to_string(milliseconds), EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     usleep(milliseconds * 1000);
 }

@@ -7,8 +7,8 @@
 #include <array>
 #include <cstdint>
 
-#include "../../libmasm/include/masm/utils.h"
-#include "cpu.h"
+#include <masm/interpreter/cpu.h>
+#include <masm/utils.h>
 
 /**
  * Enum representing the valid coprocessor 1 (floating point) registers
@@ -169,8 +169,7 @@ public:
  * @param fd The destination register
  * @param func The function code of the instruction
  */
-void execCP1RegType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd,
-                    uint32_t func);
+void execCP1RegType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t fd, uint32_t func);
 
 
 /**
@@ -181,8 +180,7 @@ void execCP1RegType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32_
  * @param rt The CPU source register
  * @param fs The CP1 source register
  */
-void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t sub, uint32_t rt,
-                       uint32_t fs);
+void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t sub, uint32_t rt, uint32_t fs);
 
 
 /**
@@ -195,8 +193,8 @@ void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, uint32
  * @param ft The first source register
  * @param offset The offset from the base register
  */
-void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory, uint32_t op,
-                    uint32_t base, uint32_t ft, uint32_t offset);
+void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory, uint32_t op, uint32_t base,
+                    uint32_t ft, uint32_t offset);
 
 
 /**
@@ -207,8 +205,7 @@ void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& m
  * @param fs The second source register
  * @param cond The condition type
  */
-void execCP1CondType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32_t fs,
-                     uint32_t cond);
+void execCP1CondType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32_t fs, uint32_t cond);
 
 
 /**
@@ -218,7 +215,6 @@ void execCP1CondType(Coproc1RegisterFile& cp1, uint32_t fmt, uint32_t ft, uint32
  * @param tf The source register
  * @param offset The offset from the instruction location
  */
-void execCP1CondImmType(const Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t tf,
-                        int32_t offset);
+void execCP1CondImmType(const Coproc1RegisterFile& cp1, RegisterFile& registers, uint32_t tf, int32_t offset);
 
 #endif // CP1_H

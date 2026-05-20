@@ -2,7 +2,7 @@
 // Created by matthew on 5/21/25.
 //
 
-#include "io/consoleio.h"
+#include <masm/io/consoleio.h>
 
 #ifdef _WIN32
 #include <conio.h>

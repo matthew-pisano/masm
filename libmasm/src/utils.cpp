@@ -2,12 +2,14 @@
 // Created by matthew on 4/15/25.
 //
 
-#include "../include/masm/utils.h"
+#include <masm/utils.h>
 
 #include <algorithm>
 #include <filesystem>
 #include <regex>
 #include <sstream>
+
+#include <masm/io/streamio.h>
 
 
 std::string readSeq(StreamHandle& streamHandle) {

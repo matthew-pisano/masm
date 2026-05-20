@@ -3,11 +3,11 @@
 //
 
 
-#include "../include/masm/runtime.h"
+#include <masm/runtime.h>
 
-#include "../include/masm/assembler/serialization.h"
-#include "io/fileio.h"
-#include "utils.h"
+#include <masm/assembler/serialization.h>
+#include <masm/io/fileio.h>
+#include <masm/utils.h>
 
 
 MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {

@@ -2,15 +2,12 @@
 // Created by matthew on 4/24/25.
 //
 
-#include "interpreter/interpreter.h"
+#include <masm/interpreter/interpreter.h>
 
-#include <sstream>
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "assembler/instruction.h"
-#include "interpreter/syscalls.h"
-#include "io/consoleio.h"
+#include <masm/exceptions.h>
+#include <masm/interpreter/syscalls.h>
 
 
 void Interpreter::initProgram(const MemLayout& layout) {
@@ -27,8 +24,8 @@ void Interpreter::initProgram(const MemLayout& layout) {
     state.memory._sysWordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
     // Enable interrupts
     // Enable MMIO interrupt bits for keyboard and display
-    state.cp0[Coproc0Register::STATUS] |= static_cast<int32_t>(INTERP_CODE::DISPLAY_INTERP) |
-                                          static_cast<int32_t>(INTERP_CODE::KEYBOARD_INTERP);
+    state.cp0[Coproc0Register::STATUS] |=
+            static_cast<int32_t>(INTERP_CODE::DISPLAY_INTERP) | static_cast<int32_t>(INTERP_CODE::KEYBOARD_INTERP);
 }
 
 
@@ -127,10 +124,10 @@ void Interpreter::step() {
     if (ioMode == IOMode::MMIO && static_cast<uint32_t>(pc) < memSectionOffset(MemSection::KTEXT)) {
         // Bit 0 is the interrupt enable bit
         const uint32_t interpEnabled = state.cp0[Coproc0Register::STATUS] & 0x1;
-        const uint32_t keyboardEnabled = state.cp0[Coproc0Register::STATUS] &
-                                         static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
-        const uint32_t displayEnabled = state.cp0[Coproc0Register::STATUS] &
-                                        static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
+        const uint32_t keyboardEnabled =
+                state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
+        const uint32_t displayEnabled =
+                state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
         if (readMMIO() && interpEnabled && keyboardEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         if (writeMMIO() && interpEnabled && displayEnabled)

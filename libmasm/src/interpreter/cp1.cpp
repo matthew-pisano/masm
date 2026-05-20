@@ -2,14 +2,15 @@
 // Created by matthew on 6/7/25.
 //
 
-#include "interpreter/cp1.h"
+#include <masm/interpreter/cp1.h>
 
 #include <cmath>
 #include <stdexcept>
 
+#include <masm/assembler/memory.h>
+#include <masm/interpreter/cpu.h>
+
 #include "assembler/instruction.h"
-#include "interpreter/cpu.h"
-#include "interpreter/memory.h"
 
 
 // Coprocessor 1 (floating point) register access
@@ -57,8 +58,7 @@ void Coproc1RegisterFile::setDouble(const Coproc1Register index, const float64_t
 }
 
 int Coproc1RegisterFile::indexFromName(const std::string& name) {
-    if (name.starts_with("f") && isSignedInteger(name.substr(1)) &&
-        std::stoi(name.substr(1)) >= 0) {
+    if (name.starts_with("f") && isSignedInteger(name.substr(1)) && std::stoi(name.substr(1)) >= 0) {
         // Handle floating point registers ($f0-$f31)
         return std::stoi(name.substr(1));
     }
@@ -84,13 +84,11 @@ int32_t& Coproc1RegisterFile::operator[](const Coproc1Register index) {
 
 // Coprocessor 1 flags access
 bool Coproc1RegisterFile::getFlag(const uint32_t index) const { return flags.at(index); }
-void Coproc1RegisterFile::setFlag(const uint32_t index, const bool value) {
-    flags.at(index) = value;
-}
+void Coproc1RegisterFile::setFlag(const uint32_t index, const bool value) { flags.at(index) = value; }
 
 
-void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft,
-                    const uint32_t fs, const uint32_t fd, const uint32_t func) {
+void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft, const uint32_t fs,
+                    const uint32_t fd, const uint32_t func) {
     const bool singlePrecision = fmt == 0x10; // Single precision format
     switch (static_cast<InstructionCode>(func)) {
         case InstructionCode::FP_ABS: {
@@ -179,14 +177,13 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
         }
         // Should never be reached
         default:
-            throw std::runtime_error("Unknown Co-Processor 1 reg type instruction " +
-                                     std::to_string(func));
+            throw std::runtime_error("Unknown Co-Processor 1 reg type instruction " + std::to_string(func));
     }
 }
 
 
-void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, const uint32_t sub,
-                       const uint32_t rt, const uint32_t fs) {
+void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, const uint32_t sub, const uint32_t rt,
+                       const uint32_t fs) {
     switch (static_cast<InstructionCode>(sub)) {
         case InstructionCode::FP_MFC1: {
             // Move from CP1 to CPU register
@@ -200,21 +197,18 @@ void execCP1RegImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, const 
         }
         // Should never be reached
         default:
-            throw std::runtime_error("Unknown Co-Processor 1 reg immediate type instruction " +
-                                     std::to_string(sub));
+            throw std::runtime_error("Unknown Co-Processor 1 reg immediate type instruction " + std::to_string(sub));
     }
 }
 
 
-void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory,
-                    const uint32_t op, const uint32_t base, const uint32_t ft,
-                    const uint32_t offset) {
+void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& memory, const uint32_t op,
+                    const uint32_t base, const uint32_t ft, const uint32_t offset) {
     const uint32_t address = registers[base] + offset;
     switch (static_cast<InstructionCode>(op)) {
         case InstructionCode::FP_LDC1: {
             if (ft % 2 != 0)
-                throw std::runtime_error("Invalid double precision register: f" +
-                                         std::to_string(ft));
+                throw std::runtime_error("Invalid double precision register: f" + std::to_string(ft));
 
             cp1[ft] = memory.wordAt(address); // Lower 32 bits
             cp1[ft + 1] = memory.wordAt(address + 4); // Upper 32 bits
@@ -225,8 +219,7 @@ void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& m
             break;
         case InstructionCode::FP_SDC1: {
             if (ft % 2 != 0)
-                throw std::runtime_error("Invalid double precision register: f" +
-                                         std::to_string(ft));
+                throw std::runtime_error("Invalid double precision register: f" + std::to_string(ft));
 
             memory.wordTo(address, cp1[ft]); // Lower 32 bits
             memory.wordTo(address + 4, cp1[ft + 1]); // Upper 32 bits
@@ -238,14 +231,13 @@ void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& m
         }
         // Should never be reached
         default:
-            throw std::runtime_error("Unknown Co-Processor 1 immediate type instruction " +
-                                     std::to_string(op));
+            throw std::runtime_error("Unknown Co-Processor 1 immediate type instruction " + std::to_string(op));
     }
 }
 
 
-void execCP1CondType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft,
-                     const uint32_t fs, const uint32_t cond) {
+void execCP1CondType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft, const uint32_t fs,
+                     const uint32_t cond) {
     const bool singlePrecision = fmt == 0x10; // Single precision format
     float64_t fsVal;
     float64_t ftVal;
@@ -270,8 +262,7 @@ void execCP1CondType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_
             break;
         // Should never be reached
         default:
-            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " +
-                                     std::to_string(cond));
+            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " + std::to_string(cond));
     }
 }
 
@@ -289,7 +280,6 @@ void execCP1CondImmType(const Coproc1RegisterFile& cp1, RegisterFile& registers,
             break;
         // Should never be reached
         default:
-            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " +
-                                     std::to_string(tf));
+            throw std::runtime_error("Unknown Co-Processor 1 conditional instruction " + std::to_string(tf));
     }
 }

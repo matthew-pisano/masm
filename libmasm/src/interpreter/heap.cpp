@@ -2,9 +2,9 @@
 // Created by matthew on 5/19/25.
 //
 
-#include "interpreter/heap.h"
+#include <masm/interpreter/heap.h>
 
-#include "../../libmasm/include/masm/exceptions.h"
+#include <masm/exceptions.h>
 
 
 uint32_t HeapAllocator::nextFree(const uint32_t size) const {

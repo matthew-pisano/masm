@@ -2,12 +2,13 @@
 // Created by matthew on 6/7/25.
 //
 
-#include "interpreter/cpu.h"
+#include <masm/interpreter/cpu.h>
 
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/exceptions.h>
+#include <masm/utils.h>
+
 #include "assembler/instruction.h"
 
 
@@ -53,23 +54,17 @@ std::string RegisterFile::nameFromIndex(const uint32_t index) {
 int32_t RegisterFile::operator[](const uint32_t index) const { return registers.at(index); }
 int32_t& RegisterFile::operator[](const uint32_t index) { return registers.at(index); }
 
-int32_t RegisterFile::operator[](const Register index) const {
-    return registers.at(static_cast<uint32_t>(index));
-}
-int32_t& RegisterFile::operator[](const Register index) {
-    return registers.at(static_cast<uint32_t>(index));
-}
+int32_t RegisterFile::operator[](const Register index) const { return registers.at(static_cast<uint32_t>(index)); }
+int32_t& RegisterFile::operator[](const Register index) { return registers.at(static_cast<uint32_t>(index)); }
 
 
-void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs, const uint32_t rt,
-               const uint32_t rd, const uint32_t shamt) {
+void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs, const uint32_t rt, const uint32_t rd,
+               const uint32_t shamt) {
     switch (static_cast<InstructionCode>(funct)) {
         case InstructionCode::ADD: {
-            const int64_t extResult =
-                    static_cast<int64_t>(registers[rs]) + static_cast<int64_t>(registers[rt]);
+            const int64_t extResult = static_cast<int64_t>(registers[rs]) + static_cast<int64_t>(registers[rt]);
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw ExecExcept("Integer overflow in ADD instruction",
-                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
+                throw ExecExcept("Integer overflow in ADD instruction", EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             registers[rd] = registers[rs] + registers[rt];
             break;
         }
@@ -81,16 +76,14 @@ void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs,
             break;
         case InstructionCode::DIV: {
             if (registers[rt] == 0)
-                throw ExecExcept("Division by zero in DIV instruction",
-                                 EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
+                throw ExecExcept("Division by zero in DIV instruction", EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
             registers[Register::LO] = registers[rs] / registers[rt];
             registers[Register::HI] = registers[rs] % registers[rt];
             break;
         }
         case InstructionCode::DIVU: {
             if (registers[rt] == 0)
-                throw ExecExcept("Division by zero in DIVU instruction",
-                                 EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
+                throw ExecExcept("Division by zero in DIVU instruction", EXCEPT_CODE::DIVIDE_BY_ZERO_EXCEPTION);
             const uint32_t rsVal = registers[rs];
             const uint32_t rtVal = registers[rt];
             registers[Register::LO] = static_cast<int32_t>(rsVal / rtVal);
@@ -166,11 +159,9 @@ void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs,
             registers[rd] = registers[rt] >> (registers[rs] & 0x1F);
             break;
         case InstructionCode::SUB: {
-            const int64_t extResult =
-                    static_cast<int64_t>(registers[rs]) - static_cast<int64_t>(registers[rt]);
+            const int64_t extResult = static_cast<int64_t>(registers[rs]) - static_cast<int64_t>(registers[rt]);
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw ExecExcept("Integer overflow in SUB instruction",
-                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
+                throw ExecExcept("Integer overflow in SUB instruction", EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             registers[rd] = registers[rs] - registers[rt];
             break;
         }
@@ -207,8 +198,8 @@ void execRType(RegisterFile& registers, const uint32_t funct, const uint32_t rs,
 }
 
 
-void execIType(RegisterFile& registers, Memory& memory, const uint32_t opCode, const uint32_t rs,
-               const uint32_t rt, const int32_t immediate) {
+void execIType(RegisterFile& registers, Memory& memory, const uint32_t opCode, const uint32_t rs, const uint32_t rt,
+               const int32_t immediate) {
     int32_t signExtImm = immediate;
     // Sign-extend immediate value
     if (signExtImm & 0x8000)
@@ -218,8 +209,7 @@ void execIType(RegisterFile& registers, Memory& memory, const uint32_t opCode, c
         case InstructionCode::ADDI: {
             const int64_t extResult = static_cast<int64_t>(registers[rs]) + signExtImm;
             if (extResult > INT32_MAX || extResult < INT32_MIN)
-                throw ExecExcept("Integer overflow in ADDI instruction",
-                                 EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
+                throw ExecExcept("Integer overflow in ADDI instruction", EXCEPT_CODE::ARITHMETIC_OVERFLOW_EXCEPTION);
             registers[rt] = registers[rs] + signExtImm;
             break;
         }
@@ -300,5 +290,5 @@ void execJType(RegisterFile& registers, const uint32_t opCode, const uint32_t ad
     }
 
     // Jump to the target address
-    registers[Register::PC] = (registers[Register::PC] & 0xF0000000) | address << 2;
+    registers[Register::PC] = registers[Register::PC] & 0xF0000000 | address << 2;
 }

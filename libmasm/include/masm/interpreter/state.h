@@ -7,11 +7,11 @@
 #include <cstdint>
 #include <string>
 
-#include "../assembler/debug_info.h"
-#include "cp0.h"
-#include "cp1.h"
-#include "cpu.h"
-#include "heap.h"
+#include <masm/assembler/debug_info.h>
+#include <masm/interpreter/cp0.h>
+#include <masm/interpreter/cp1.h>
+#include <masm/interpreter/cpu.h>
+#include <masm/interpreter/heap.h>
 
 
 /**

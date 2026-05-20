@@ -4,8 +4,9 @@
 
 #ifndef RUNTIME_H
 #define RUNTIME_H
-#include "../../../include/interpreter/memory.h"
-#include "../../../include/parser/parser.h"
+
+#include <masm/assembler/memory.h>
+#include <masm/assembler/parser.h>
 
 /**
  * Loads a memory layout from source files, which are MIPS assembly files

@@ -9,8 +9,8 @@
 #include <map>
 #include <random>
 
-#include "io/consoleio.h"
-#include "state.h"
+#include <masm/io/consoleio.h>
+#include <masm/interpreter/state.h>
 
 
 /**

@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-#include "../assembler/memory.h"
+#include <masm/assembler/memory.h>
 
 /**
  * Enum representing the valid register numbers
@@ -133,8 +133,7 @@ public:
  * @param rd The destination register
  * @param shamt The shift amount
  */
-void execRType(RegisterFile& registers, uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd,
-               uint32_t shamt);
+void execRType(RegisterFile& registers, uint32_t funct, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t shamt);
 
 
 /**
@@ -146,8 +145,7 @@ void execRType(RegisterFile& registers, uint32_t funct, uint32_t rs, uint32_t rt
  * @param rt The second source register
  * @param immediate The immediate value
  */
-void execIType(RegisterFile& registers, Memory& memory, uint32_t opCode, uint32_t rs, uint32_t rt,
-               int32_t immediate);
+void execIType(RegisterFile& registers, Memory& memory, uint32_t opCode, uint32_t rs, uint32_t rt, int32_t immediate);
 
 
 /**

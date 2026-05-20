@@ -7,16 +7,14 @@
 
 #include <cstdint>
 #include <string>
-#include <tokenizer/tokenizer.h>
 #include <vector>
 
-#include "../../../include/io/streamio.h"
-
+#include <masm/assembler/tokenizer.h>
+#include <masm/io/streamio.h>
 
 // Stand-in for fixed-width floating point types
 using float32_t = float;
 using float64_t = double;
-
 
 /**
  * Reads a sequence of characters from the input stream until a newline character is encountered.
@@ -84,8 +82,7 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
  * @param tokens The tokens to check
  * @return True if the tokens match the pattern, false otherwise
  */
-bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern,
-                        const std::vector<Token>& tokens);
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens);
 
 
 /**

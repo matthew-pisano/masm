@@ -8,7 +8,7 @@
 #include <map>
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/utils.h>
 
 
 /**
@@ -184,9 +184,7 @@ const std::vector<std::pair<std::string, InstructionOp>> instructionAliasMap = {
 };
 
 
-bool operator==(const uint32_t lhs, InstructionCode code) {
-    return lhs == static_cast<uint32_t>(code);
-}
+bool operator==(const uint32_t lhs, InstructionCode code) { return lhs == static_cast<uint32_t>(code); }
 
 
 InstructionOp nameToInstructionOp(const std::string& name, const std::vector<Token>& args) {
@@ -205,33 +203,24 @@ InstructionOp nameToInstructionOp(const std::string& name, const std::vector<Tok
 }
 
 
-void validateInstructionArgs(const InstructionType instructionType,
-                             const std::vector<Token>& args) {
+void validateInstructionArgs(const InstructionType instructionType, const std::vector<Token>& args) {
     switch (instructionType) {
         // Core CPU Instructions
         case InstructionType::R_TYPE_D_T_S:
         case InstructionType::R_TYPE_D_S_T:
-            if (!tokenCategoryMatch(
-                        {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER},
-                        args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::R_TYPE_D_T_H:
-            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
-                                     TokenCategory::IMMEDIATE},
-                                    args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for R-Type instruction");
             break;
         case InstructionType::I_TYPE_S_T_L:
-            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
-                                     TokenCategory::LABEL_REF},
-                                    args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args))
                 throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::I_TYPE_T_S_I:
-            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
-                                     TokenCategory::IMMEDIATE},
-                                    args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for I-Type instruction");
             break;
         case InstructionType::I_TYPE_T_I:
@@ -260,8 +249,7 @@ void validateInstructionArgs(const InstructionType instructionType,
                 throw std::runtime_error("Invalid format for Syscall");
             break;
         case InstructionType::BREAK:
-            if (!tokenCategoryMatch({}, args) &&
-                !tokenCategoryMatch({TokenCategory::IMMEDIATE}, args))
+            if (!tokenCategoryMatch({}, args) && !tokenCategoryMatch({TokenCategory::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for Break");
             break;
 
@@ -286,15 +274,11 @@ void validateInstructionArgs(const InstructionType instructionType,
             break;
         case InstructionType::CP1_TYPE_SP_D_S_T:
         case InstructionType::CP1_TYPE_DP_D_S_T:
-            if (!tokenCategoryMatch(
-                        {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER},
-                        args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         case InstructionType::CP1_TYPE_T_S_I:
-            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER,
-                                     TokenCategory::IMMEDIATE},
-                                    args))
+            if (!tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
                 throw std::runtime_error("Invalid format for Co-Processor 1 instruction");
             break;
         case InstructionType::CP1_TYPE_L:
@@ -321,39 +305,30 @@ void validateInstruction(const Token& instruction, const std::vector<Token>& arg
 
 void validatePseudoInstruction(const Token& instruction, const std::vector<Token>& args) {
     std::vector<std::string> branchPseudoInstrs = {"blt", "bgt", "ble", "bge"};
-    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez",
-                                                       "bgez", "beqz", "bnez"};
+    std::vector<std::string> branchZeroPseudoInstrs = {"bltz", "bgtz", "blez", "bgez", "beqz", "bnez"};
     const std::string instructionName = instruction.value;
 
-    if (instructionName == "li" &&
+    if (instructionName == "li" && !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
+        throw std::runtime_error("Invalid format for instruction " + instruction.value);
+    if (instructionName == "la" && !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args) &&
         !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
-    if (instructionName == "la" &&
-        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args) &&
-        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
+    if (instructionName == "lui" && !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
-    if (instructionName == "lui" &&
-        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
-        throw std::runtime_error("Invalid format for instruction " + instruction.value);
-    if (instructionName == "move" &&
-        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
+    if (instructionName == "move" && !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "mul" &&
-        !tokenCategoryMatch(
-                {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
+        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::REGISTER}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "nop" && !tokenCategoryMatch({}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (instructionName == "subi" &&
-        !tokenCategoryMatch(
-                {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
+        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::IMMEDIATE}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
     if (std::ranges::find(branchPseudoInstrs, instructionName) != branchPseudoInstrs.end() &&
-        !tokenCategoryMatch(
-                {TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args))
+        !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
-    if (std::ranges::find(branchZeroPseudoInstrs, instructionName) !=
-                branchZeroPseudoInstrs.end() &&
+    if (std::ranges::find(branchZeroPseudoInstrs, instructionName) != branchZeroPseudoInstrs.end() &&
         !tokenCategoryMatch({TokenCategory::REGISTER, TokenCategory::LABEL_REF}, args))
         throw std::runtime_error("Invalid format for instruction " + instruction.value);
 }

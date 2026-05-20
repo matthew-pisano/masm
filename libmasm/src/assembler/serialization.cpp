@@ -2,11 +2,11 @@
 // Created by matthew on 7/28/25.
 //
 
-#include "../../include/masm/assembler/serialization.h"
+#include <masm/assembler/serialization.h>
 
 #include <iomanip>
 
-#include "tokenizer/postprocessor.h"
+#include <assembler/postprocessor.h>
 
 
 std::string memSectionToName(const MemSection& section) {
@@ -89,7 +89,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
     };
 
     // Ensure length of binary vector is a multiple of 4
-    auto padBinary = [&binary]() {
+    auto padBinary = [&binary] {
         while (binary.size() % 4 != 0)
             binary.push_back(std::byte{0});
     };

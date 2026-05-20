@@ -2,12 +2,12 @@
 // Created by matthew on 7/28/25.
 //
 
-#ifndef INTERMEDIATES_H
-#define INTERMEDIATES_H
+#ifndef SERIALIZATION_H
+#define SERIALIZATION_H
 #include <string>
 
-#include "interpreter/memory.h"
-#include "parser/labels.h"
+#include <masm/assembler/labels.h>
+#include <masm/assembler/memory.h>
 
 
 /**
@@ -35,4 +35,4 @@ std::vector<std::byte> saveLayout(const MemLayout& layout);
 MemLayout loadLayout(const std::vector<std::byte>& binary);
 
 
-#endif // INTERMEDIATES_H
+#endif // SERIALIZATION_H

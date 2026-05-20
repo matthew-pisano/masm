@@ -4,7 +4,6 @@
 
 #ifndef DEBUG_INFO_H
 #define DEBUG_INFO_H
-#include <memory>
 #include <string>
 
 

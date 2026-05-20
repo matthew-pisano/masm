@@ -2,12 +2,10 @@
 // Created by matthew on 4/16/25.
 //
 
-#include "interpreter/memory.h"
+#include <masm/assembler/memory.h>
 
-#include <stdexcept>
-
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/exceptions.h>
+#include <masm/utils.h>
 
 
 std::byte Memory::_sysByteAt(const uint32_t index) const {

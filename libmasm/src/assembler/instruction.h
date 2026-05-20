@@ -7,7 +7,8 @@
 
 #include <climits>
 #include <cstdint>
-#include "tokenizer/tokenizer.h"
+
+#include <masm/assembler/tokenizer.h>
 
 
 /**

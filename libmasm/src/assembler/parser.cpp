@@ -2,18 +2,19 @@
 // Created by matthew on 4/14/25.
 //
 
-#include "assembler/parser.h"
+#include <masm/assembler/parser.h>
 
 #include <algorithm>
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/exceptions.h>
+#include <masm/utils.h>
+#include <masm/interpreter/cp1.h>
+#include <masm/interpreter/cpu.h>
+
 #include "assembler/directive.h"
 #include "assembler/instruction.h"
-#include "interpreter/cp1.h"
-#include "interpreter/cpu.h"
-#include "tokenizer/postprocessor.h"
+#include "assembler/postprocessor.h"
 
 
 LabelMap& Parser::getLabels() { return labelMap; }
@@ -149,7 +150,7 @@ void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTok
 
 
 std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token& instrToken,
-                                                std::vector<Token>& args) {
+                                                std::vector<Token>& args) const {
 
     // Throw error if pattern for instruction is invalid
     validateInstruction(instrToken, args);

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/utils.h>
 
 
 void validateAllocDirective(const Token& dirToken, const std::vector<Token>& args) {
@@ -157,7 +157,7 @@ std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSiz
     if (blockAlign == 0)
         throw std::runtime_error("Block alignment cannot be zero");
 
-    uint32_t padding = blockAlign - (loc % blockAlign); // Pad to nearest multiple
+    uint32_t padding = blockAlign - loc % blockAlign; // Pad to nearest multiple
     if (padding == blockAlign)
         padding = 0;
     std::vector bytes(padding + blockSize, std::byte{0});

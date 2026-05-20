@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/tokenizer.h>
 
 
 const std::array<std::string, 4> MEM_SEC_DIRECTIVES = {"data", "text", "kdata", "ktext"};

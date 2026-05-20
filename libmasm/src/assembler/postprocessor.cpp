@@ -2,14 +2,14 @@
 // Created by matthew on 5/9/25.
 //
 
-#include "tokenizer/postprocessor.h"
+#include "assembler/postprocessor.h"
 
 #include <algorithm>
 #include <stdexcept>
 #include <unordered_map>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/exceptions.h>
+#include <masm/utils.h>
 
 
 std::string mangleLabel(const std::string& label, const std::string& filename) {

@@ -2,17 +2,18 @@
 // Created by matthew on 4/26/25.
 //
 
-#include "assembler/labels.h"
+#include <masm/assembler/labels.h>
 
 #include <algorithm>
 #include <stdexcept>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/assembler/memory.h>
+#include <masm/exceptions.h>
+#include <masm/utils.h>
+
 #include "assembler/directive.h"
 #include "assembler/instruction.h"
-#include "interpreter/memory.h"
-#include "tokenizer/postprocessor.h"
+#include "assembler/postprocessor.h"
 
 
 bool LabelMap::contains(const std::string& label) const { return labelMap.contains(label); }
@@ -75,8 +76,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                             parsePaddedAllocDirective(memSizes[currSection], firstToken, args);
                     // Assign labels to the following byte allocation plus the section offset
                     for (const std::string& label : pendingLabels)
-                        labelMap[label] = memSectionOffset(currSection) + memSizes[currSection] +
-                                          std::get<1>(alloc);
+                        labelMap[label] = memSectionOffset(currSection) + memSizes[currSection] + std::get<1>(alloc);
                     pendingLabels.clear();
                     memSizes[currSection] += std::get<0>(alloc).size();
                     break;
@@ -92,8 +92,7 @@ void LabelMap::populateLabelMap(const std::vector<LineTokens>& tokens) {
                 case TokenCategory::LABEL_DEF: {
                     if (labelMap.contains(firstToken.value) ||
                         std::ranges::find(pendingLabels, firstToken.value) != pendingLabels.end())
-                        throw std::runtime_error("Duplicate label '" +
-                                                 unmangleLabel(firstToken.value) + "'");
+                        throw std::runtime_error("Duplicate label '" + unmangleLabel(firstToken.value) + "'");
                     // Add to pending labels (address resolved to next instruction/directive)
                     pendingLabels.push_back(firstToken.value);
                     break;
