@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 
+#include "../libmasm/include/masm/assembler/serialization.h"
 #include "../libmasm/include/masm/runtime.h"
-#include "../mdb/intermediates.h"
 #include "CLI/CLI.hpp"
 #include "interpreter/interpreter.h"
 #include "io/consoleio.h"

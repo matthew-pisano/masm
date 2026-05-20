@@ -7,8 +7,8 @@
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include "../../libmasm/include/masm/assembler/serialization.h"
 #include "../../libmasm/include/masm/runtime.h"
-#include "../../mdb/intermediates.h"
 #include "../testing_utilities.h"
 #include "interpreter/memory.h"
 #include "io/fileio.h"

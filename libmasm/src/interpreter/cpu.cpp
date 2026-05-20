@@ -8,7 +8,7 @@
 
 #include "../../libmasm/include/masm/exceptions.h"
 #include "../../libmasm/include/masm/utils.h"
-#include "parser/instruction.h"
+#include "assembler/instruction.h"
 
 
 std::map<std::string, Register> RegisterFile::nameToIndex = {

@@ -2,16 +2,16 @@
 // Created by matthew on 4/26/25.
 //
 
-#include "parser/labels.h"
+#include "assembler/labels.h"
 
 #include <algorithm>
 #include <stdexcept>
 
 #include "../../libmasm/include/masm/exceptions.h"
 #include "../../libmasm/include/masm/utils.h"
+#include "assembler/directive.h"
+#include "assembler/instruction.h"
 #include "interpreter/memory.h"
-#include "parser/directive.h"
-#include "parser/instruction.h"
 #include "tokenizer/postprocessor.h"
 
 

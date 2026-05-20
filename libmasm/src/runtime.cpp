@@ -5,7 +5,7 @@
 
 #include "../include/masm/runtime.h"
 
-#include "../../mdb/intermediates.h"
+#include "../include/masm/assembler/serialization.h"
 #include "io/fileio.h"
 #include "utils.h"
 

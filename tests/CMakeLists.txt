@@ -8,7 +8,6 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(masm-tests
         testing_utilities.cpp
         ${CMAKE_SOURCE_DIR}/mdb/debug_interpreter.cpp
-        ${CMAKE_SOURCE_DIR}/mdb/intermediates.cpp
         components/test_tokenizer.cpp
         components/test_parser.cpp
         components/test_interpreter.cpp

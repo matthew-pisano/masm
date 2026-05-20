@@ -13,8 +13,8 @@
 
 #include "../../libmasm/include/masm/exceptions.h"
 #include "../../libmasm/include/masm/utils.h"
-#include "parser/directive.h"
-#include "parser/instruction.h"
+#include "assembler/directive.h"
+#include "assembler/instruction.h"
 #include "tokenizer/postprocessor.h"
 
 

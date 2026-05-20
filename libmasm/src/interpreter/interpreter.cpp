@@ -8,9 +8,9 @@
 #include <stdexcept>
 
 #include "../../libmasm/include/masm/exceptions.h"
+#include "assembler/instruction.h"
 #include "interpreter/syscalls.h"
 #include "io/consoleio.h"
-#include "parser/instruction.h"
 
 
 void Interpreter::initProgram(const MemLayout& layout) {

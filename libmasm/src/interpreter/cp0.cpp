@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-#include "parser/instruction.h"
+#include "assembler/instruction.h"
 
 
 // Coprocessor 0 register access

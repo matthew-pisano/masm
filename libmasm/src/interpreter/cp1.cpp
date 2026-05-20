@@ -7,9 +7,9 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "assembler/instruction.h"
 #include "interpreter/cpu.h"
 #include "interpreter/memory.h"
-#include "parser/instruction.h"
 
 
 // Coprocessor 1 (floating point) register access

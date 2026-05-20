@@ -4,7 +4,7 @@ set(LIBMASM_INTERPRETER_SOURCES
         cpu.cpp
         heap.cpp
         interpreter.cpp
-        memory.cpp
+        ../assembler/memory.cpp
         state.cpp
         syscalls.cpp
 )

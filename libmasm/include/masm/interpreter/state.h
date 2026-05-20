@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string>
 
-#include "../../mdb/debug_info.h"
+#include "../assembler/debug_info.h"
 #include "cp0.h"
 #include "cp1.h"
 #include "cpu.h"

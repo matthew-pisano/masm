@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../../mdb/debug_info.h"
+#include "debug_info.h"
 
 
 /**

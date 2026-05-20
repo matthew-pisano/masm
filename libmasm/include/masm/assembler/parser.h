@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "interpreter/memory.h"
+#include "tokenizer/memory.h"
 #include "labels.h"
 #include "tokenizer/tokenizer.h"
 

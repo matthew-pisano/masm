@@ -2,7 +2,7 @@
 // Created by matthew on 7/28/25.
 //
 
-#include "intermediates.h"
+#include "../../include/masm/assembler/serialization.h"
 
 #include <iomanip>
 

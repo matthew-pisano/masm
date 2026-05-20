@@ -2,17 +2,17 @@
 // Created by matthew on 4/14/25.
 //
 
-#include "parser/parser.h"
+#include "assembler/parser.h"
 
 #include <algorithm>
 #include <stdexcept>
 
 #include "../../libmasm/include/masm/exceptions.h"
 #include "../../libmasm/include/masm/utils.h"
+#include "assembler/directive.h"
+#include "assembler/instruction.h"
 #include "interpreter/cp1.h"
 #include "interpreter/cpu.h"
-#include "parser/directive.h"
-#include "parser/instruction.h"
 #include "tokenizer/postprocessor.h"
 
 

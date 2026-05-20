@@ -8,7 +8,7 @@
 #include <iostream>
 
 
-#include "memory.h"
+#include "../assembler/memory.h"
 #include "state.h"
 #include "syscalls.h"
 

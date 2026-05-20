@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-#include "memory.h"
+#include "../assembler/memory.h"
 
 /**
  * Enum representing the valid register numbers

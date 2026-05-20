@@ -2,7 +2,7 @@
 // Created by matthew on 4/15/25.
 //
 
-#include "parser/instruction.h"
+#include "assembler/instruction.h"
 
 #include <algorithm>
 #include <map>

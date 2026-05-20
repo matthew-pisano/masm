@@ -6,7 +6,7 @@
 #define HEAP_H
 #include <cstdint>
 
-#include "memory.h"
+#include "../assembler/memory.h"
 
 const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
 constexpr uint32_t HEAP_SIZE = 0xfd00000; // 253 MiB

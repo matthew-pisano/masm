@@ -1,13 +1,11 @@
+add_subdirectory(src/assembler)
 add_subdirectory(src/interpreter)
 add_subdirectory(src/io)
-add_subdirectory(src/parser)
-add_subdirectory(src/tokenizer)
 
 add_library(libmasm STATIC
+        ${LIBMASM_ASSEMBLER_SOURCES}
         ${LIBMASM_INTERPRETER_SOURCES}
         ${LIBMASM_IO_SOURCES}
-        ${LIBMASM_PARSER_SOURCES}
-        ${LIBMASM_TOKENIZER_SOURCES}
         src/utils.cpp
         src/runtime.cpp
 )
