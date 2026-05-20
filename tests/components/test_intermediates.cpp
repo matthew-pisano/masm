@@ -7,11 +7,12 @@
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "../../libmasm/include/masm/assembler/serialization.h"
-#include "../../libmasm/include/masm/runtime.h"
-#include "../testing_utilities.h"
-#include "interpreter/memory.h"
-#include "io/fileio.h"
+#include <masm/assembler/memory.h>
+#include <masm/assembler/serialization.h>
+#include <masm/io/fileio.h>
+#include <masm/runtime.h>
+
+#include "tests/testing_utilities.h"
 
 
 TEST_CASE("Test Stringify Layout") {
@@ -137,9 +138,9 @@ TEST_CASE("Test Load Layout") {
 
     SECTION("Truncated") {
         std::vector<std::byte> malformed = iV2bV({'M', 'A', 'S', 'M', 0x00, 0x00, 0x00, 0x00});
-        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::out_of_range,
-                               Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring(
-                                       "vector::_M_range_check")));
+        REQUIRE_THROWS_MATCHES(
+                loadLayout(malformed), std::out_of_range,
+                Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring("vector::_M_range_check")));
         malformed = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
@@ -148,8 +149,8 @@ TEST_CASE("Test Load Layout") {
                 0x28, 0x00, 0x00, 0x00, // KData locator
                 0x02, 0x00, // Data size (truncated)
         });
-        REQUIRE_THROWS_MATCHES(loadLayout(malformed), std::out_of_range,
-                               Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring(
-                                       "vector::_M_range_check")));
+        REQUIRE_THROWS_MATCHES(
+                loadLayout(malformed), std::out_of_range,
+                Catch::Matchers::MessageMatches(Catch::Matchers::ContainsSubstring("vector::_M_range_check")));
     }
 }

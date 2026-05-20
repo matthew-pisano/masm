@@ -9,14 +9,14 @@
 #include <string>
 #include <vector>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
-#include "../../mdb/debug_interpreter.h"
-#include "../testing_utilities.h"
-#include "interpreter/interpreter.h"
-#include "io/fileio.h"
-#include "parser/parser.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/parser.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/exceptions.h>
+#include <masm/interpreter/interpreter.h>
+#include <masm/io/fileio.h>
+#include <masm/utils.h>
+
+#include "mdb/debug_interpreter.h"
 
 
 /**
@@ -81,10 +81,9 @@ TEST_CASE("Test Runtime Error") {
     StreamHandle streamHandle(iss, oss);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
-    REQUIRE_THROWS_MATCHES(
-            interpreter.interpret(layout), MasmRuntimeError,
-            Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "
-                                     "zero: Division by zero in DIV instruction (unhandled)"));
+    REQUIRE_THROWS_MATCHES(interpreter.interpret(layout), MasmRuntimeError,
+                           Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "
+                                                    "zero: Division by zero in DIV instruction (unhandled)"));
 }
 
 
@@ -125,8 +124,7 @@ TEST_CASE("Test Execute Syscall") {
 TEST_CASE("Test Execute Globals") {
     const std::string test_case = "globals";
     validateOutput(IOMode::SYSCALL,
-                   {"test/fixtures/" + test_case + "/globalsOne.asm",
-                    "test/fixtures/" + test_case + "/globalsTwo.asm"},
+                   {"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
                    "test/fixtures/" + test_case + "/globalsOne.txt");
 }
 

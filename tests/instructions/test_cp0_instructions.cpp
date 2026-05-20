@@ -5,19 +5,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../../mdb/debug_interpreter.h"
-#include "../testing_utilities.h"
-#include "interpreter/interpreter.h"
-#include "interpreter/memory.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/memory.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/interpreter/interpreter.h>
+
+#include "mdb/debug_interpreter.h"
+#include "tests/testing_utilities.h"
 
 
 TEST_CASE("Test Eret Instruction") {
     const SourceFile rawFile = makeRawFile({"eret"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "eret"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "eret"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -47,11 +47,10 @@ TEST_CASE("Test Mtc0 Instruction") {
     const SourceFile rawFile = makeRawFile({"mtc0 $t1, $8"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "mtc0"},
-                 {TokenCategory::REGISTER, "t1"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "8"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "mtc0"},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "8"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -75,11 +74,10 @@ TEST_CASE("Test Mfc0 Instruction") {
     const SourceFile rawFile = makeRawFile({"mfc0 $t1, $8"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "mfc0"},
-                 {TokenCategory::REGISTER, "t1"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "8"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "mfc0"},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "8"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 

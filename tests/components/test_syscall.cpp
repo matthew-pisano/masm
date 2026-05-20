@@ -6,9 +6,9 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "interpreter/interpreter.h"
-#include "interpreter/syscalls.h"
+#include <masm/exceptions.h>
+#include <masm/interpreter/interpreter.h>
+#include <masm/interpreter/syscalls.h>
 
 
 uint32_t writeStringToMem(State& state, const std::string& string) {
@@ -100,9 +100,8 @@ TEST_CASE("Test Read Int Syscall") {
         std::istringstream istream(input);
         StreamHandle streamHandle{istream, std::cout};
 
-        REQUIRE_THROWS_MATCHES(
-                sysHandle.readInt(state, streamHandle), ExecExcept,
-                Catch::Matchers::Message("Input out of range: 99999999999999999999"));
+        REQUIRE_THROWS_MATCHES(sysHandle.readInt(state, streamHandle), ExecExcept,
+                               Catch::Matchers::Message("Input out of range: 99999999999999999999"));
     }
 
     SECTION("Edited Input") {
@@ -248,8 +247,7 @@ TEST_CASE("Test Heap Allocation Syscall") {
 
 TEST_CASE("Test Exit Syscall") {
     SystemHandle sysHandle;
-    REQUIRE_THROWS_MATCHES(sysHandle.exit(), ExecExit,
-                           Catch::Matchers::Message("Program exited (code 0)"));
+    REQUIRE_THROWS_MATCHES(sysHandle.exit(), ExecExit, Catch::Matchers::Message("Program exited (code 0)"));
 }
 
 
@@ -284,8 +282,7 @@ TEST_CASE("Test Exit Value Syscall") {
     State state;
     state.registers[Register::A0] = exitCode;
 
-    REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit,
-                           Catch::Matchers::Message("Program exited (code 42)"));
+    REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit, Catch::Matchers::Message("Program exited (code 42)"));
     try {
         sysHandle.exitVal(state);
     } catch (const ExecExit& e) {
@@ -300,8 +297,7 @@ TEST_CASE("Test Time Syscall") {
     sysHandle.time(state);
 
     const auto duration = std::chrono::system_clock::now().time_since_epoch();
-    const int64_t milliseconds =
-            std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    const int64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 
     REQUIRE(state.registers[Register::A0] == static_cast<int32_t>(milliseconds & 0xFFFFFFFF));
     REQUIRE(state.registers[Register::A1] == static_cast<int32_t>(milliseconds >> 32 & 0xFFFFFFFF));
@@ -316,14 +312,12 @@ TEST_CASE("Test Sleep Syscall") {
         state.registers[Register::A0] = 500;
 
         const auto startDuration = std::chrono::system_clock::now().time_since_epoch();
-        const long startMillis =
-                std::chrono::duration_cast<std::chrono::milliseconds>(startDuration).count();
+        const long startMillis = std::chrono::duration_cast<std::chrono::milliseconds>(startDuration).count();
 
         sysHandle.sleep(state);
 
         const auto endDuration = std::chrono::system_clock::now().time_since_epoch();
-        const long endMillis =
-                std::chrono::duration_cast<std::chrono::milliseconds>(endDuration).count();
+        const long endMillis = std::chrono::duration_cast<std::chrono::milliseconds>(endDuration).count();
 
         // Check that the program continues after the sleep syscall
         // Use a small tolerance to avoid errors

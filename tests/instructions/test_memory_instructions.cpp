@@ -5,12 +5,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../../mdb/debug_interpreter.h"
-#include "../testing_utilities.h"
-#include "interpreter/interpreter.h"
-#include "parser/parser.h"
-#include "tokenizer/postprocessor.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/parser.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/interpreter/interpreter.h>
+
+#include "libmasm/src/assembler/postprocessor.h"
+#include "mdb/debug_interpreter.h"
+#include "tests/testing_utilities.h"
 
 
 TEST_CASE("Test lb Instruction") {
@@ -53,13 +54,12 @@ TEST_CASE("Test lbu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "lbu"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "t1"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lbu"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -124,13 +124,12 @@ TEST_CASE("Test lhu Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "lhu"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::REGISTER, "t1"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "4"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lhu"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::REGISTER, "t1"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -195,11 +194,10 @@ TEST_CASE("Test lui Instruction") {
     std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     Postprocessor::processBaseAddressing(actualTokens);
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "lui"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "100"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lui"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "100"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 

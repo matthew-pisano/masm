@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "../../libmasm/include/masm/utils.h"
+#include <masm/utils.h>
 
 
 TEST_CASE("Test Is Signed Integer") {
@@ -79,12 +79,10 @@ TEST_CASE("Test Filter Token List") {
 
     SECTION("Test Invalid Token Lists") {
         std::vector tokens = {sep};
-        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
-                               Catch::Matchers::Message("Unexpected ','"));
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error, Catch::Matchers::Message("Unexpected ','"));
 
         tokens = {sep, reg};
-        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
-                               Catch::Matchers::Message("Unexpected ','"));
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error, Catch::Matchers::Message("Unexpected ','"));
 
         tokens = {reg, sep};
         REQUIRE_THROWS_MATCHES(filterTokenList(tokens), std::runtime_error,
@@ -100,19 +98,16 @@ TEST_CASE("Test Filter Token List") {
         REQUIRE_NOTHROW(filterTokenList(tokens, {TokenCategory::REGISTER}));
 
         tokens = {reg, sep, label};
-        REQUIRE_NOTHROW(
-                filterTokenList(tokens, {TokenCategory::REGISTER, TokenCategory::LABEL_REF}));
+        REQUIRE_NOTHROW(filterTokenList(tokens, {TokenCategory::REGISTER, TokenCategory::LABEL_REF}));
 
         tokens = {reg, sep, label};
-        REQUIRE_THROWS_MATCHES(
-                filterTokenList(tokens, {TokenCategory::REGISTER}), std::runtime_error,
-                Catch::Matchers::Message("Invalid token 'label' of type 'LABEL_REF'"));
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens, {TokenCategory::REGISTER}), std::runtime_error,
+                               Catch::Matchers::Message("Invalid token 'label' of type 'LABEL_REF'"));
 
         tokens = {reg, sep, label, sep, param};
-        REQUIRE_THROWS_MATCHES(
-                filterTokenList(tokens, {TokenCategory::REGISTER, TokenCategory::LABEL_REF}),
-                std::runtime_error,
-                Catch::Matchers::Message("Invalid token 'param' of type 'MACRO_PARAM'"));
+        REQUIRE_THROWS_MATCHES(filterTokenList(tokens, {TokenCategory::REGISTER, TokenCategory::LABEL_REF}),
+                               std::runtime_error,
+                               Catch::Matchers::Message("Invalid token 'param' of type 'MACRO_PARAM'"));
     }
 }
 
@@ -159,8 +154,7 @@ TEST_CASE("Test Token Type Match") {
 
 
 TEST_CASE("Test i32 to Bytes") {
-    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
-                                 std::byte{0x00}};
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
     std::vector<std::byte> actualBytes = i32ToBEByte(0);
     REQUIRE(expectedBytes == actualBytes);
 
@@ -179,8 +173,7 @@ TEST_CASE("Test i32 to Bytes") {
 
 
 TEST_CASE("Test f32 to Bytes") {
-    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
-                                 std::byte{0x00}};
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
     std::vector<std::byte> actualBytes = f32ToBEByte(0.0f);
     REQUIRE(expectedBytes == actualBytes);
 
@@ -199,9 +192,8 @@ TEST_CASE("Test f32 to Bytes") {
 
 
 TEST_CASE("Test f64 to Bytes") {
-    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
-                                 std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
-                                 std::byte{0x00}, std::byte{0x00}};
+    std::vector expectedBytes = {std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00},
+                                 std::byte{0x00}, std::byte{0x00}, std::byte{0x00}, std::byte{0x00}};
     std::vector<std::byte> actualBytes = f64ToBEByte(0.0);
     REQUIRE(expectedBytes == actualBytes);
 

@@ -5,10 +5,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../testing_utilities.h"
-#include "interpreter/interpreter.h"
-#include "parser/parser.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/parser.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/interpreter/interpreter.h>
+
+#include "tests/testing_utilities.h"
 
 
 // No execution tests are needed as the aliased instructions are made of other, tested instructions
@@ -18,19 +19,17 @@ TEST_CASE("Test lw Instruction Alias") {
     const SourceFile rawFile = makeRawFile({"lw $t0, 0xffff0000"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "lw"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "4294901760"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4294901760"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x3c, 0x01, 0xff, 0xff, 0x8c, 0x28, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x3c, 0x01, 0xff, 0xff, 0x8c, 0x28, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -41,11 +40,10 @@ TEST_CASE("Test lw Instruction Alias Labeled") {
     const SourceFile rawFile = makeRawFile({"lw $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "lw"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "lw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -53,8 +51,7 @@ TEST_CASE("Test lw Instruction Alias Labeled") {
     parser.getLabels()["label"] = 0xffff0000;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x3c, 0x01, 0xff, 0xff, 0x8c, 0x28, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x3c, 0x01, 0xff, 0xff, 0x8c, 0x28, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -65,19 +62,17 @@ TEST_CASE("Test sw Instruction Alias") {
     const SourceFile rawFile = makeRawFile({"sw $t0, 0xffff0000"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "sw"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "4294901760"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "4294901760"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x3c, 0x01, 0xff, 0xff, 0xac, 0x28, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x3c, 0x01, 0xff, 0xff, 0xac, 0x28, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -88,11 +83,10 @@ TEST_CASE("Test sw Instruction Alias Labeled") {
     const SourceFile rawFile = makeRawFile({"sw $t0, label"});
     const std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
     SECTION("Test Tokenize") {
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "sw"},
-                 {TokenCategory::REGISTER, "t0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::LABEL_REF, "label"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "sw"},
+                                                                 {TokenCategory::REGISTER, "t0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::LABEL_REF, "label"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -100,8 +94,7 @@ TEST_CASE("Test sw Instruction Alias Labeled") {
     parser.getLabels()["label"] = 0xffff0000;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x3c, 0x01, 0xff, 0xff, 0xac, 0x28, 0x00, 0x00});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x3c, 0x01, 0xff, 0xff, 0xac, 0x28, 0x00, 0x00});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -126,8 +119,7 @@ TEST_CASE("Test div Instruction Three Registers") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x01, 0x2a, 0x00, 0x1a, 0x00, 0x00, 0x40, 0x12});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x2a, 0x00, 0x1a, 0x00, 0x00, 0x40, 0x12});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }
@@ -152,8 +144,7 @@ TEST_CASE("Test divu Instruction Three Registers") {
     Parser parser;
     const MemLayout actualLayout = parser.parse(actualTokens, true);
     SECTION("Test Parse") {
-        const std::vector<std::byte> expectedBytes =
-                iV2bV({0x01, 0x2a, 0x00, 0x1b, 0x00, 0x00, 0x40, 0x12});
+        const std::vector<std::byte> expectedBytes = iV2bV({0x01, 0x2a, 0x00, 0x1b, 0x00, 0x00, 0x40, 0x12});
         const std::vector<std::byte> actualBytes = actualLayout.data.at(MemSection::TEXT);
         REQUIRE(expectedBytes == actualBytes);
     }

@@ -8,12 +8,13 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
-#include "../testing_utilities.h"
-#include "io/fileio.h"
-#include "parser/directive.h"
-#include "parser/parser.h"
+#include <masm/assembler/parser.h>
+#include <masm/exceptions.h>
+#include <masm/io/fileio.h>
+#include <masm/utils.h>
+
+#include "libmasm/src/assembler/directive.h"
+#include "tests/testing_utilities.h"
 
 
 /**
@@ -23,14 +24,12 @@
  * @param useLittleEndian Whether to use little-endian byte order
  * @param rawParse Whether to parse the file in raw mode (without adding any new tokens)
  */
-void validateMemLayout(const std::vector<std::string>& sourceFileNames,
-                       const std::string& parsedFileName, const bool useLittleEndian = false,
-                       const bool rawParse = true) {
+void validateMemLayout(const std::vector<std::string>& sourceFileNames, const std::string& parsedFileName,
+                       const bool useLittleEndian = false, const bool rawParse = true) {
     const std::vector<std::byte> parsedBytes = readFileBytes(parsedFileName);
 
-    std::vector memSecBytes = {
-            static_cast<std::byte>(MemSection::DATA), static_cast<std::byte>(MemSection::TEXT),
-            static_cast<std::byte>(MemSection::KDATA), static_cast<std::byte>(MemSection::KTEXT)};
+    std::vector memSecBytes = {static_cast<std::byte>(MemSection::DATA), static_cast<std::byte>(MemSection::TEXT),
+                               static_cast<std::byte>(MemSection::KDATA), static_cast<std::byte>(MemSection::KTEXT)};
 
     MemLayout expectedMem;
     MemSection currSection;
@@ -65,9 +64,8 @@ void validateMemLayout(const std::vector<std::string>& sourceFileNames,
 TEST_CASE("Test Directive Allocation") {
     SECTION("Test Align") {
         std::vector<std::byte> expected = {};
-        std::vector<std::byte> actual =
-                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "align"},
-                                    {Token{TokenCategory::IMMEDIATE, "0"}});
+        std::vector<std::byte> actual = parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "align"},
+                                                            {Token{TokenCategory::IMMEDIATE, "0"}});
         REQUIRE(expected == actual);
 
         expected = iV2bV({0});
@@ -93,9 +91,8 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Ascii") {
         std::vector<std::byte> expected = {};
-        std::vector<std::byte> actual =
-                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "ascii"},
-                                    {Token{TokenCategory::STRING, ""}});
+        std::vector<std::byte> actual = parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "ascii"},
+                                                            {Token{TokenCategory::STRING, ""}});
         REQUIRE(expected == actual);
 
         expected = iV2bV({'h', 'e', 'l', 'l', 'o'});
@@ -106,9 +103,8 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Asciiz") {
         std::vector<std::byte> expected = iV2bV({0});
-        std::vector<std::byte> actual =
-                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "asciiz"},
-                                    {Token{TokenCategory::STRING, ""}});
+        std::vector<std::byte> actual = parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "asciiz"},
+                                                            {Token{TokenCategory::STRING, ""}});
         REQUIRE(expected == actual);
 
         expected = iV2bV({'h', 'e', 'l', 'l', 'o', 0});
@@ -119,50 +115,43 @@ TEST_CASE("Test Directive Allocation") {
 
     SECTION("Test Byte") {
         std::vector<std::byte> expected = iV2bV({69});
-        std::vector<std::byte> actual =
-                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "byte"},
-                                    {Token{TokenCategory::IMMEDIATE, "69"}});
+        std::vector<std::byte> actual = parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "byte"},
+                                                            {Token{TokenCategory::IMMEDIATE, "69"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Double") {
-        std::vector<std::byte> expected =
-                iV2bV({0x00, 0x00, 0x00, 0xbf, 0xf8, 0xa3, 0xd7, 0x0a, 0x3d, 0x70, 0xa4});
-        std::vector<std::byte> actual =
-                parseAllocDirective(5, Token{TokenCategory::ALLOC_DIRECTIVE, "double"},
-                                    {Token{TokenCategory::IMMEDIATE, "-1.54"}});
+        std::vector<std::byte> expected = iV2bV({0x00, 0x00, 0x00, 0xbf, 0xf8, 0xa3, 0xd7, 0x0a, 0x3d, 0x70, 0xa4});
+        std::vector<std::byte> actual = parseAllocDirective(5, Token{TokenCategory::ALLOC_DIRECTIVE, "double"},
+                                                            {Token{TokenCategory::IMMEDIATE, "-1.54"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Float") {
         std::vector<std::byte> expected = iV2bV({0x00, 0x00, 0x00, 0xbf, 0xc5, 0x1e, 0xb8});
-        std::vector<std::byte> actual =
-                parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "float"},
-                                    {Token{TokenCategory::IMMEDIATE, "-1.54"}});
+        std::vector<std::byte> actual = parseAllocDirective(1, Token{TokenCategory::ALLOC_DIRECTIVE, "float"},
+                                                            {Token{TokenCategory::IMMEDIATE, "-1.54"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Half") {
         std::vector<std::byte> expected = iV2bV({0x00, 0x01, 0xa4});
-        std::vector<std::byte> actual =
-                parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "half"},
-                                    {Token{TokenCategory::IMMEDIATE, "420"}});
+        std::vector<std::byte> actual = parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "half"},
+                                                            {Token{TokenCategory::IMMEDIATE, "420"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Space") {
         std::vector<std::byte> expected = iV2bV({0, 0, 0, 0, 0, 0, 0, 0, 0});
-        std::vector<std::byte> actual =
-                parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "space"},
-                                    {Token{TokenCategory::IMMEDIATE, "9"}});
+        std::vector<std::byte> actual = parseAllocDirective(3, Token{TokenCategory::ALLOC_DIRECTIVE, "space"},
+                                                            {Token{TokenCategory::IMMEDIATE, "9"}});
         REQUIRE(expected == actual);
     }
 
     SECTION("Test Word") {
         std::vector<std::byte> expected = iV2bV({0x00, 0x00, 0x00, 0x00, 0xbc, 0x61, 0x4e});
-        std::vector<std::byte> actual =
-                parseAllocDirective(5, Token{TokenCategory::ALLOC_DIRECTIVE, "word"},
-                                    {Token{TokenCategory::IMMEDIATE, "12345678"}});
+        std::vector<std::byte> actual = parseAllocDirective(5, Token{TokenCategory::ALLOC_DIRECTIVE, "word"},
+                                                            {Token{TokenCategory::IMMEDIATE, "12345678"}});
         REQUIRE(expected == actual);
     }
 }
@@ -172,28 +161,22 @@ TEST_CASE("Test Parser Syntax Errors") {
     SECTION("Test Unknown Label Reference") {
         Parser parser{};
         const std::vector<LineTokens> program = {
-                {"test.asm",
-                 1,
-                 {{TokenCategory::INSTRUCTION, "j"}, {TokenCategory::LABEL_REF, "ref"}}}};
-        REQUIRE_THROWS_MATCHES(
-                parser.parse(program), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at test.asm:1 -> Unknown label 'ref'"));
+                {"test.asm", 1, {{TokenCategory::INSTRUCTION, "j"}, {TokenCategory::LABEL_REF, "ref"}}}};
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at test.asm:1 -> Unknown label 'ref'"));
     }
 
     SECTION("Test Unknown Duplicate Label") {
         Parser parser{};
-        const std::vector<LineTokens> program = {
-                {"test.asm", 1, {{TokenCategory::LABEL_DEF, "label"}}},
-                {"test.asm", 1, {{TokenCategory::LABEL_DEF, "label"}}}};
-        REQUIRE_THROWS_MATCHES(
-                parser.parse(program), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at test.asm:1 -> Duplicate label 'label'"));
+        const std::vector<LineTokens> program = {{"test.asm", 1, {{TokenCategory::LABEL_DEF, "label"}}},
+                                                 {"test.asm", 1, {{TokenCategory::LABEL_DEF, "label"}}}};
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at test.asm:1 -> Duplicate label 'label'"));
     }
 
     SECTION("Test Empty Allocation Directive") {
         Parser parser{};
-        const std::vector<LineTokens> program = {
-                {"test.asm", 1, {{TokenCategory::ALLOC_DIRECTIVE, "word"}}}};
+        const std::vector<LineTokens> program = {{"test.asm", 1, {{TokenCategory::ALLOC_DIRECTIVE, "word"}}}};
         REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
                                Catch::Matchers::Message("Syntax error at test.asm:1 -> Directive "
                                                         "'word' expects at least one argument"));
@@ -202,13 +185,9 @@ TEST_CASE("Test Parser Syntax Errors") {
     SECTION("Test Unsupported Directive") {
         Parser parser{};
         const std::vector<LineTokens> program = {
-                {"test.asm",
-                 1,
-                 {{TokenCategory::ALLOC_DIRECTIVE, "eeby"}, {TokenCategory::IMMEDIATE, "1"}}}};
-        REQUIRE_THROWS_MATCHES(
-                parser.parse(program), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at test.asm:1 -> Unsupported directive 'eeby'"));
+                {"test.asm", 1, {{TokenCategory::ALLOC_DIRECTIVE, "eeby"}, {TokenCategory::IMMEDIATE, "1"}}}};
+        REQUIRE_THROWS_MATCHES(parser.parse(program), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at test.asm:1 -> Unsupported directive 'eeby'"));
     }
 }
 
@@ -218,12 +197,8 @@ TEST_CASE("Test Word Allocation from Label") {
     const std::vector<LineTokens> program = {
             {"test.asm", 1, {{TokenCategory::SEC_DIRECTIVE, "data"}}},
             {"test.asm", 2, {{TokenCategory::LABEL_DEF, "label"}}},
-            {"test.asm",
-             2,
-             {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::IMMEDIATE, "0"}}},
-            {"test.asm",
-             3,
-             {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::LABEL_REF, "label"}}}};
+            {"test.asm", 2, {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::IMMEDIATE, "0"}}},
+            {"test.asm", 3, {{TokenCategory::ALLOC_DIRECTIVE, "word"}, {TokenCategory::LABEL_REF, "label"}}}};
 
     MemLayout layout = parser.parse(program);
     REQUIRE(layout.data[MemSection::DATA].size() == 8);
@@ -268,9 +243,9 @@ TEST_CASE("Test Parse Loops") {
 TEST_CASE("Test Parse Globals") {
     const std::string test_case = "globals";
     // Parse without raw since it contains a global main
-    validateMemLayout({"test/fixtures/" + test_case + "/globalsOne.asm",
-                       "test/fixtures/" + test_case + "/globalsTwo.asm"},
-                      "test/fixtures/" + test_case + "/globalsOne.pse", false, false);
+    validateMemLayout(
+            {"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
+            "test/fixtures/" + test_case + "/globalsOne.pse", false, false);
 }
 
 

@@ -6,9 +6,9 @@
 #define TESTING_UTILITIES_H
 #include <vector>
 
-#include "interpreter/interpreter.h"
-#include "parser/parser.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/parser.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/interpreter/interpreter.h>
 
 
 /**

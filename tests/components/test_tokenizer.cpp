@@ -7,11 +7,12 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "../../libmasm/include/masm/exceptions.h"
-#include "../../libmasm/include/masm/utils.h"
-#include "../testing_utilities.h"
-#include "io/fileio.h"
-#include "tokenizer/tokenizer.h"
+#include <masm/assembler/tokenizer.h>
+#include <masm/exceptions.h>
+#include <masm/io/fileio.h>
+#include <masm/utils.h>
+
+#include "tests/testing_utilities.h"
 
 
 /**
@@ -19,14 +20,13 @@
  * @param sourceFileNames The names of the source files to tokenize
  * @param tokensFileName The name of the tokenized file to compare against
  */
-void validateTokens(const std::vector<std::string>& sourceFileNames,
-                    const std::string& tokensFileName) {
+void validateTokens(const std::vector<std::string>& sourceFileNames, const std::string& tokensFileName) {
     std::string tokensSource = readFile(tokensFileName);
     std::vector<std::string> tokenizedLines;
     std::stringstream ss(tokensSource);
-    std::string line;
-    while (std::getline(ss, line))
-        tokenizedLines.push_back(line);
+    std::string srcLine;
+    while (std::getline(ss, srcLine))
+        tokenizedLines.push_back(srcLine);
 
     constexpr char groupSep = 0x1d;
     std::vector<std::vector<Token>> expectedTokens = {};
@@ -44,8 +44,7 @@ void validateTokens(const std::vector<std::string>& sourceFileNames,
             if (line[i] == groupSep) {
                 lastToken = i;
                 lastLine.push_back({});
-                lastLine[lastLine.size() - 1].category =
-                        static_cast<TokenCategory>(std::stoi(tokenCategory));
+                lastLine[lastLine.size() - 1].category = static_cast<TokenCategory>(std::stoi(tokenCategory));
                 lastLine[lastLine.size() - 1].value = tokenValue;
                 tokenCategory.clear();
                 tokenValue.clear();
@@ -74,8 +73,7 @@ TEST_CASE("Test Tokenize Single Lines") {
     SECTION("Test Directive") {
         const SourceFile rawFile = makeRawFile({".asciiz"});
         std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile(rawFile);
-        std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::ALLOC_DIRECTIVE, "asciiz"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::ALLOC_DIRECTIVE, "asciiz"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
     SECTION("Test Memory Directive") {
@@ -140,8 +138,7 @@ TEST_CASE("Test Tokenize Single Lines") {
     SECTION("Test String") {
         const SourceFile rawFile = makeRawFile({R"("'ello \n\"There\"")"});
         std::vector<LineTokens> actualTokens = Tokenizer::tokenizeFile({rawFile});
-        std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::STRING, R"('ello \n\"There\")"}}};
+        std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::STRING, R"('ello \n\"There\")"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
@@ -217,33 +214,29 @@ TEST_CASE("Test Tokenize Eqv") {
 
 TEST_CASE("Test Tokenize Macro") {
     SECTION("Test Macro without Parameters") {
-        const SourceFile rawFile =
-                makeRawFile({".macro done", "li $v0, 10", "syscall", ".end_macro", "done"});
+        const SourceFile rawFile = makeRawFile({".macro done", "li $v0, 10", "syscall", ".end_macro", "done"});
         const std::vector<LineTokens> actualTokens = Tokenizer::tokenize({rawFile});
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "li"},
-                 {TokenCategory::REGISTER, "v0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "10"}},
-                {{TokenCategory::INSTRUCTION, "syscall"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "li"},
+                                                                 {TokenCategory::REGISTER, "v0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "10"}},
+                                                                {{TokenCategory::INSTRUCTION, "syscall"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 
     SECTION("Test Macro with Parameters") {
-        const SourceFile rawFile =
-                makeRawFile({".macro terminate(%termination_value)", "li $a0, %termination_value",
-                             "li $v0, 17", "syscall", ".end_macro", "terminate(1)"});
+        const SourceFile rawFile = makeRawFile({".macro terminate(%termination_value)", "li $a0, %termination_value",
+                                                "li $v0, 17", "syscall", ".end_macro", "terminate(1)"});
         const std::vector<LineTokens> actualTokens = Tokenizer::tokenize({rawFile});
-        const std::vector<std::vector<Token>> expectedTokens = {
-                {{TokenCategory::INSTRUCTION, "li"},
-                 {TokenCategory::REGISTER, "a0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "1"}},
-                {{TokenCategory::INSTRUCTION, "li"},
-                 {TokenCategory::REGISTER, "v0"},
-                 {TokenCategory::SEPERATOR, ","},
-                 {TokenCategory::IMMEDIATE, "17"}},
-                {{TokenCategory::INSTRUCTION, "syscall"}}};
+        const std::vector<std::vector<Token>> expectedTokens = {{{TokenCategory::INSTRUCTION, "li"},
+                                                                 {TokenCategory::REGISTER, "a0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "1"}},
+                                                                {{TokenCategory::INSTRUCTION, "li"},
+                                                                 {TokenCategory::REGISTER, "v0"},
+                                                                 {TokenCategory::SEPERATOR, ","},
+                                                                 {TokenCategory::IMMEDIATE, "17"}},
+                                                                {{TokenCategory::INSTRUCTION, "syscall"}}};
         REQUIRE_NOTHROW(validateTokenLines(expectedTokens, actualTokens));
     }
 }
@@ -268,156 +261,125 @@ TEST_CASE("Test Tokenize Include") {
 TEST_CASE("Test Tokenizer Syntax Errors") {
     SECTION("Test Misplaced Quote") {
         const SourceFile rawFile = makeRawFile({R"(g"hello")"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token 'g'"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token 'g'"));
     }
 
     SECTION("Test Unclosed Quote") {
         const SourceFile rawFile = makeRawFile({R"("hello)"});
         REQUIRE_THROWS_MATCHES(
                 Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Unexpected EOL while parsing token 'hello '"));
+                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected EOL while parsing token 'hello '"));
     }
 
     SECTION("Test Unexpected First Token") {
         SourceFile rawFile = makeRawFile({","});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ','"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ','"));
 
         rawFile = makeRawFile({"("});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token '('"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token '('"));
 
         rawFile = makeRawFile({")"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ')'"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ')'"));
 
         rawFile = makeRawFile({":"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ':'"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token ':'"));
     }
 
     SECTION("Test Undeclared Global Label") {
         const SourceFile rawFile = makeRawFile({".globl invalid"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Global label 'invalid' "
-                                         "referenced without declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Global label 'invalid' "
+                                                        "referenced without declaration"));
     }
 
     SECTION("Test Invalid Global Label") {
         SourceFile rawFile = makeRawFile({".globl"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Invalid global label declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid global label declaration"));
 
         rawFile = makeRawFile({".globl 1"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Invalid global label declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid global label declaration"));
     }
 
     SECTION("Test Invalid Eqv") {
         SourceFile rawFile = makeRawFile({".eqv"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
 
         rawFile = makeRawFile({".eqv hello"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
 
         rawFile = makeRawFile({".eqv 1 1"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid eqv declaration"));
     }
 
     SECTION("Test Base Addressing") {
         SourceFile rawFile = makeRawFile({"($t0)"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token '('"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unexpected token '('"));
 
         rawFile = makeRawFile({"lw $s1 2($t0"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Malformed parenthesis expression"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Malformed parenthesis expression"));
 
         rawFile = makeRawFile({"lw $s1 2()"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Malformed parenthesis expression"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Malformed parenthesis expression"));
     }
 
     SECTION("Test Malformed Macro Params") {
         SourceFile rawFile = makeRawFile({".macro macro %arg"});
         REQUIRE_THROWS_MATCHES(
                 Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Malformed macro parameter declaration"));
+                Catch::Matchers::Message("Syntax error at a.asm:1 -> Malformed macro parameter declaration"));
 
         rawFile = makeRawFile({".macro macro (%arg"});
         REQUIRE_THROWS_MATCHES(
                 Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:1 -> Malformed macro parameter declaration"));
+                Catch::Matchers::Message("Syntax error at a.asm:1 -> Malformed macro parameter declaration"));
     }
 
     SECTION("Test Malformed Macro Call") {
-        SourceFile rawFile = makeRawFile(
-                {".macro macro(%arg)", "addi $t0, $zero, %arg", ".end_macro", "macro(0, 1)"});
+        SourceFile rawFile = makeRawFile({".macro macro(%arg)", "addi $t0, $zero, %arg", ".end_macro", "macro(0, 1)"});
         REQUIRE_THROWS_MATCHES(
                 Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:4 -> Invalid number of macro arguments"));
+                Catch::Matchers::Message("Syntax error at a.asm:4 -> Invalid number of macro arguments"));
 
-        rawFile = makeRawFile(
-                {".macro macro(%arg)", "addi $t0, $zero, %bargg", ".end_macro", "macro(0)"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message(
-                        "Syntax error at a.asm:2 -> Invalid macro parameter 'bargg'"));
+        rawFile = makeRawFile({".macro macro(%arg)", "addi $t0, $zero, %bargg", ".end_macro", "macro(0)"});
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:2 -> Invalid macro parameter 'bargg'"));
     }
 
     SECTION("Test Malformed Macro Declaration") {
         SourceFile rawFile = makeRawFile({".macro"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid macro declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid macro declaration"));
 
         rawFile = makeRawFile({".macro 1"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid macro declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid macro declaration"));
 
         rawFile = makeRawFile({".macro macro(%arg)", "addi $t0, $zero, %bargg"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Unmatched macro declaration"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Unmatched macro declaration"));
     }
 
     SECTION("Test Invalid Include") {
         SourceFile rawFile = makeRawFile({".include"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid include directive"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid include directive"));
 
         rawFile = makeRawFile({".include 1"});
-        REQUIRE_THROWS_MATCHES(
-                Tokenizer::tokenize({rawFile}), MasmSyntaxError,
-                Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid include directive"));
+        REQUIRE_THROWS_MATCHES(Tokenizer::tokenize({rawFile}), MasmSyntaxError,
+                               Catch::Matchers::Message("Syntax error at a.asm:1 -> Invalid include directive"));
     }
 }
 
@@ -458,8 +420,7 @@ TEST_CASE("Test Tokenize Loops") {
 
 TEST_CASE("Test Tokenize Globals") {
     const std::string test_case = "globals";
-    validateTokens({"test/fixtures/" + test_case + "/globalsOne.asm",
-                    "test/fixtures/" + test_case + "/globalsTwo.asm"},
+    validateTokens({"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
                    "test/fixtures/" + test_case + "/globalsOne.tkn");
 }
 

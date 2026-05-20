@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "io/fileio.h"
+#include <masm/io/fileio.h>
 
 
 TEST_CASE("Test Wild Card Resolution") {
@@ -23,10 +23,8 @@ TEST_CASE("Test Wild Card Resolution") {
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
 
         inputPaths = {"test/fixtures/arithmetic/*"};
-        expectedPaths = {"test/fixtures/arithmetic/arithmetic.asm",
-                         "test/fixtures/arithmetic/arithmetic.pse",
-                         "test/fixtures/arithmetic/arithmetic.tkn",
-                         "test/fixtures/arithmetic/arithmetic.txt"};
+        expectedPaths = {"test/fixtures/arithmetic/arithmetic.asm", "test/fixtures/arithmetic/arithmetic.pse",
+                         "test/fixtures/arithmetic/arithmetic.tkn", "test/fixtures/arithmetic/arithmetic.txt"};
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
     }
     SECTION("Test Multiple Wildcard") {
