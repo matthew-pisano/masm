@@ -1,4 +1,4 @@
-add_executable(masm-fg masm.cpp)
+add_executable(masm-fg fixture_gen.cpp)
 target_link_libraries(masm-fg PRIVATE libmasm CLI11::CLI11)
 set_target_properties(masm-fg PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

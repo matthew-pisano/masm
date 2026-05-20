@@ -18,7 +18,7 @@ target_include_directories(libmasm
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-set_target_properties(pystd PROPERTIES
+set_target_properties(libmasm PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         OUTPUT_NAME "masm"
         POSITION_INDEPENDENT_CODE ON
