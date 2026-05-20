@@ -4,7 +4,8 @@
 
 #ifndef DEBUG_INTERPRETER_H
 #define DEBUG_INTERPRETER_H
-#include "interpreter/interpreter.h"
+
+#include <masm/interpreter/interpreter.h>
 
 
 /**
@@ -67,8 +68,7 @@ class DebugInterpreter final : public Interpreter {
      * @param cmdStr The command string to parse, e.g. "break 0x1234"
      * @return A tuple containing the DebugCommand enum value and a vector of arguments
      */
-    static std::tuple<DebugCommand, std::vector<std::string>>
-    parseCommand(const std::string& cmdStr);
+    static std::tuple<DebugCommand, std::vector<std::string>> parseCommand(const std::string& cmdStr);
 
     /**
      * Executes a debug command from the user
@@ -176,8 +176,7 @@ public:
      * @param ioMode The I/O mode to use for the interpreter
      * @param streamHandle The stream handle to use for I/O operations
      */
-    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) :
-        Interpreter(ioMode, streamHandle) {}
+    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) : Interpreter(ioMode, streamHandle) {}
 
     /**
      * Constructor for the DebugInterpreter class

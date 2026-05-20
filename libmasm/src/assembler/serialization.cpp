@@ -6,7 +6,9 @@
 
 #include <iomanip>
 
-#include <assembler/postprocessor.h>
+#include <masm/utils.h>
+
+#include "assembler/postprocessor.h"
 
 
 std::string memSectionToName(const MemSection& section) {
@@ -74,11 +76,10 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
 
 std::vector<std::byte> saveLayout(const MemLayout& layout) {
     // Offsets for text, data, ktext, kdata
-    std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}};
+    std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'}, std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}};
 
     // Insert an offset value into the four bytes after the given index of the binary vector
     auto insertOffset = [&binary](const size_t i, const uint32_t offset) {
@@ -148,14 +149,11 @@ MemLayout loadLayout(const std::vector<std::byte>& binary) {
     }
 
     auto extractOffset = [&binary](const size_t index) {
-        return static_cast<uint32_t>(binary.at(index)) |
-               static_cast<uint32_t>(binary.at(index + 1)) << 8 |
-               static_cast<uint32_t>(binary.at(index + 2)) << 16 |
-               static_cast<uint32_t>(binary.at(index + 3)) << 24;
+        return static_cast<uint32_t>(binary.at(index)) | static_cast<uint32_t>(binary.at(index + 1)) << 8 |
+               static_cast<uint32_t>(binary.at(index + 2)) << 16 | static_cast<uint32_t>(binary.at(index + 3)) << 24;
     };
 
-    const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12),
-                                            extractOffset(16)};
+    const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12), extractOffset(16)};
     MemLayout layout;
 
     if (secHeaders[0] > 0) {

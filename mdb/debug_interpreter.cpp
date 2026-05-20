@@ -7,8 +7,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../libmasm/include/masm/exceptions.h"
-#include "tokenizer/postprocessor.h"
+#include <masm/exceptions.h>
 
 /**
  * The prompt string for the debugger, displayed before each command input
@@ -83,9 +82,7 @@ std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
     return result;
 }
 
-std::string DebugInterpreter::strAt(const uint32_t addr) {
-    return strAt(addr, std::numeric_limits<size_t>::max());
-}
+std::string DebugInterpreter::strAt(const uint32_t addr) { return strAt(addr, std::numeric_limits<size_t>::max()); }
 
 
 State& DebugInterpreter::getState() { return state; }
@@ -97,13 +94,12 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     // Always get command if system breakpoint is zero
     bool getCommand = breakpoints.contains(pc) || (breakpoints.contains(0) && breakpoints[0] == 0);
     // If execution has reached the system breakpoint
-    const bool atSystemBreakpoint = (breakpoints.contains(pc) && breakpoints[pc] == 0) ||
-                                    (breakpoints.contains(0) && breakpoints[0] == 0);
+    const bool atSystemBreakpoint =
+            (breakpoints.contains(pc) && breakpoints[pc] == 0) || (breakpoints.contains(0) && breakpoints[0] == 0);
 
     if (atSystemBreakpoint) {
         // Clear system breakpoint
-        const auto it = std::ranges::find_if(breakpoints,
-                                             [](const auto& pair) { return pair.second == 0; });
+        const auto it = std::ranges::find_if(breakpoints, [](const auto& pair) { return pair.second == 0; });
         if (it != breakpoints.end())
             breakpoints.erase(it);
     }
@@ -155,8 +151,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     }
 }
 
-std::tuple<DebugCommand, std::vector<std::string>>
-DebugInterpreter::parseCommand(const std::string& cmdStr) {
+std::tuple<DebugCommand, std::vector<std::string>> DebugInterpreter::parseCommand(const std::string& cmdStr) {
     if (cmdStr.empty())
         throw std::invalid_argument("Command cannot be empty");
 
@@ -380,12 +375,10 @@ void DebugInterpreter::listLines(const std::string& arg) {
             streamHandle.putStr("<" + unmangleLabel(debugInfo.label) + ">\n");
         const std::string pointerString = i == pc ? "--->" : "";
         // An indicator for when a breakpoint is present and now the system breakpoint
-        const std::string bpString = breakpoints.contains(i) && breakpoints[i] != 0
-                                             ? "[*" + std::to_string(breakpoints[i]) + "]"
-                                             : "";
-        streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString,
-                                        pointerString, debugInfo.source.lineno, i,
-                                        static_cast<uint32_t>(state.memory.wordAt(i)),
+        const std::string bpString =
+                breakpoints.contains(i) && breakpoints[i] != 0 ? "[*" + std::to_string(breakpoints[i]) + "]" : "";
+        streamHandle.putStr(std::format("{:<6} {:<4} {:<6} (0x{:08x}): 0x{:08x}    {}\n", bpString, pointerString,
+                                        debugInfo.source.lineno, i, static_cast<uint32_t>(state.memory.wordAt(i)),
                                         debugInfo.source.text));
     }
 }
@@ -403,8 +396,7 @@ size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::
         return unmangleLabel(pair.second.label) == label && pair.second.source.filename == filename;
     });
     if (it == state.debugInfo.end())
-        throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename +
-                                    "\n");
+        throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename + "\n");
     // Get the line for the label
     return it->second.source.lineno;
 }
@@ -449,8 +441,7 @@ uint32_t DebugInterpreter::addrFromStr(const std::string& ref) {
         return src.filename == refFile && src.lineno == refLine;
     });
     if (it == state.debugInfo.end())
-        throw std::invalid_argument("Cannot find memory at " + refFile + ":" +
-                                    std::to_string(refLine) + "\n");
+        throw std::invalid_argument("Cannot find memory at " + refFile + ":" + std::to_string(refLine) + "\n");
     return it->first;
 }
 
@@ -460,11 +451,9 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
         // Set breakpoint at the found address
         breakpoints[addr] = nextBreakpoint;
         nextBreakpoint++;
-        streamHandle.putStr(
-                std::format("Breakpoint {} set at 0x{:08x}\n", breakpoints[addr], addr));
+        streamHandle.putStr(std::format("Breakpoint {} set at 0x{:08x}\n", breakpoints[addr], addr));
     } else
-        streamHandle.putStr(
-                std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
+        streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
 }
 
 void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
@@ -486,8 +475,8 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
         return;
     }
     // Find and delete the breakpoint with the specified ID
-    const auto it = std::ranges::find_if(
-            breakpoints, [breakpointId](const auto& pair) { return pair.second == breakpointId; });
+    const auto it =
+            std::ranges::find_if(breakpoints, [breakpointId](const auto& pair) { return pair.second == breakpointId; });
     if (it != breakpoints.end())
         breakpoints.erase(it);
     else
@@ -500,8 +489,7 @@ void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWo
 
     for (size_t i = 0; i < numWords; i++) {
         uint32_t value = state.memory._sysWordAt(addr + i * 4);
-        streamHandle.putStr(
-                std::format("0x{:08x}: 0x{:08x} ({})\n", addr + i * 4, value, wordAsString(value)));
+        streamHandle.putStr(std::format("0x{:08x}: 0x{:08x} ({})\n", addr + i * 4, value, wordAsString(value)));
     }
 }
 
@@ -515,8 +503,7 @@ void DebugInterpreter::listBreakpoints() {
         if (id == 0)
             continue; // Skip system breakpoint
         SourceLocator src = state.getDebugInfo(addr).source;
-        streamHandle.putStr(
-                std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
+        streamHandle.putStr(std::format("{:<3}: 0x{:08x} ({}:{})\n", id, addr, src.filename, src.lineno));
     }
 }
 
@@ -525,9 +512,8 @@ void DebugInterpreter::listLabels() {
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
             const SourceLocator src = debugInfo.source;
-            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n",
-                                            unmangleLabel(debugInfo.label), addr, src.filename,
-                                            src.lineno));
+            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", unmangleLabel(debugInfo.label), addr,
+                                            src.filename, src.lineno));
             foundLabel = true;
         }
 
@@ -538,8 +524,7 @@ void DebugInterpreter::listLabels() {
 void DebugInterpreter::listRegisters() {
     for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
         const int32_t value = state.registers[i];
-        streamHandle.putStr(
-                std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
+        streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
     }
 }
 
@@ -561,11 +546,9 @@ void DebugInterpreter::listCP1Registers() {
         if (i % 2 == 0) {
             const float64_t doubleValue = state.cp1.getDouble(i);
             streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value,
-                                            floatValue, doubleValue));
+                                            Coproc1RegisterFile::nameFromIndex(i), value, floatValue, doubleValue));
         } else
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value,
+            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n", Coproc1RegisterFile::nameFromIndex(i), value,
                                             floatValue));
     }
 }
@@ -611,8 +594,8 @@ void DebugInterpreter::printRef(const std::string& arg) {
 
     if (state.debugInfo.contains(addr)) {
         const DebugInfo debugInfo = state.debugInfo[addr];
-        streamHandle.putStr(std::format("({}:{}) -> \"{}\" \n", debugInfo.source.filename,
-                                        debugInfo.source.lineno, strAt(addr)));
+        streamHandle.putStr(
+                std::format("({}:{}) -> \"{}\" \n", debugInfo.source.filename, debugInfo.source.lineno, strAt(addr)));
     } else
         streamHandle.putStr(std::format("\"{}\" \n", strAt(addr)));
 }

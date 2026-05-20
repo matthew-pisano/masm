@@ -2,7 +2,7 @@
 // Created by matthew on 5/9/25.
 //
 
-#include "assembler/postprocessor.h"
+#include "postprocessor.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -20,17 +20,6 @@ std::string mangleLabel(const std::string& label, const std::string& filename) {
 std::string mangleMacroLabel(const std::string& label, const std::string& filename,
                              const std::string& macroname, size_t pos) {
     return std::format("{}@masm_mangle_file_{}:{}:{}", label, filename, macroname, pos);
-}
-
-
-std::string unmangleLabel(const std::string& mangledLabel) {
-    // Find the last '@' in the mangled label
-    const size_t atPos = mangledLabel.find_last_of('@');
-    if (atPos == std::string::npos)
-        return mangledLabel; // No mangling found, return original label
-
-    // Return the label part before the '@'
-    return mangledLabel.substr(0, atPos);
 }
 
 

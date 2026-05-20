@@ -33,14 +33,6 @@ std::string mangleMacroLabel(const std::string& label, const std::string& filena
 
 
 /**
- * Unmangles a label by removing the file ID from it, restoring the original label name.
- * @param mangledLabel The mangled label to unmangle
- * @return The unmangled label
- */
-std::string unmangleLabel(const std::string& mangledLabel);
-
-
-/**
  * A class that post-processes a tokenized file to perform various transformations like managing
  * global definitions and defining/expanding macros
  */

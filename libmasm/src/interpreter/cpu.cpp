@@ -290,5 +290,5 @@ void execJType(RegisterFile& registers, const uint32_t opCode, const uint32_t ad
     }
 
     // Jump to the target address
-    registers[Register::PC] = registers[Register::PC] & 0xF0000000 | address << 2;
+    registers[Register::PC] = (registers[Register::PC] & 0xF0000000) | address << 2;
 }

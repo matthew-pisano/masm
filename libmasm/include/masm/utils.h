@@ -17,6 +17,13 @@ using float32_t = float;
 using float64_t = double;
 
 /**
+ * Unmangles a label by removing the file ID from it, restoring the original label name.
+ * @param mangledLabel The mangled label to unmangle
+ * @return The unmangled label
+ */
+std::string unmangleLabel(const std::string& mangledLabel);
+
+/**
  * Reads a sequence of characters from the input stream until a newline character is encountered.
  * @param streamHandle The stream handle to read from
  * @return A string containing the characters read from the input stream
