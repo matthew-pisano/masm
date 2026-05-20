@@ -1,0 +1,7 @@
+set(LIBMASM_IO_SOURCES
+        consoleio.cpp
+        fileio.cpp
+        streamio.cpp
+)
+list(TRANSFORM LIBMASM_IO_SOURCES PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+set(LIBMASM_IO_SOURCES "${LIBMASM_IO_SOURCES}" PARENT_SCOPE)

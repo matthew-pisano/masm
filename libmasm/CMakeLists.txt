@@ -1,0 +1,25 @@
+add_subdirectory(src/interpreter)
+add_subdirectory(src/io)
+add_subdirectory(src/parser)
+add_subdirectory(src/tokenizer)
+
+add_library(libmasm STATIC
+        ${LIBMASM_INTERPRETER_SOURCES}
+        ${LIBMASM_IO_SOURCES}
+        ${LIBMASM_PARSER_SOURCES}
+        ${LIBMASM_TOKENIZER_SOURCES}
+        src/utils.cpp
+        src/runtime.cpp
+)
+target_include_directories(libmasm
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+set_target_properties(pystd PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        OUTPUT_NAME "masm"
+        POSITION_INDEPENDENT_CODE ON
+)
