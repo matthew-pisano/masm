@@ -3,19 +3,19 @@
 //
 
 
-#include <../../libmasm/include/masm/exceptions.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
-#include "pybind/pybind_convert.h"
-#include "pybind_buffer.h"
+#include <masm/assembler/memory.h>
+#include <masm/assembler/parser.h>
+#include <masm/assembler/tokenizer.h>
+#include <masm/exceptions.h>
+#include <masm/interpreter/interpreter.h>
 
-#include "interpreter/interpreter.h"
-#include "interpreter/memory.h"
-#include "parser/parser.h"
-#include "tokenizer/tokenizer.h"
+#include "pybind_buffer.h"
+#include "pybind_convert.h"
 
 namespace py = pybind11;
 
@@ -33,10 +33,8 @@ class InterpreterWrapper {
 
 public:
     InterpreterWrapper(const IOMode ioMode, const py::object& istream, const py::object& ostream) :
-        ibuf_(std::make_unique<PyBytesIOBuf>(istream)),
-        obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
-        istream_(std::make_shared<std::istream>(ibuf_.get())),
-        ostream_(std::make_unique<std::ostream>(obuf_.get())),
+        ibuf_(std::make_unique<PyBytesIOBuf>(istream)), obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
+        istream_(std::make_shared<std::istream>(ibuf_.get())), ostream_(std::make_unique<std::ostream>(obuf_.get())),
         streamHandle_(std::make_unique<StreamHandle>(*istream_, *ostream_)),
         obj_(std::make_unique<Interpreter>(ioMode, *streamHandle_)) {}
 
@@ -76,25 +74,21 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the SourceFile struct
     py::class_<SourceFile>(tokenizer_module, "SourceFile")
             .def(py::init<>())
-            .def(py::init<const std::string&, const std::string&>(), py::arg("name"),
-                 py::arg("source"))
+            .def(py::init<const std::string&, const std::string&>(), py::arg("name"), py::arg("source"))
             .def_readwrite("name", &SourceFile::name)
             .def_readwrite("source", &SourceFile::source)
-            .def("__repr__", [](const SourceFile& sf) {
-                return "<SourceFile(name='" + sf.name + "', source=" + sf.source + ")>";
-            });
+            .def("__repr__",
+                 [](const SourceFile& sf) { return "<SourceFile(name='" + sf.name + "', source=" + sf.source + ")>"; });
 
     // Binding for the Token struct
     py::class_<Token>(tokenizer_module, "Token")
             .def(py::init<>())
-            .def(py::init<TokenCategory, const std::string&>(), py::arg("category"),
-                 py::arg("value"))
+            .def(py::init<TokenCategory, const std::string&>(), py::arg("category"), py::arg("value"))
             .def_readwrite("category", &Token::category)
             .def_readwrite("value", &Token::value)
             .def("__repr__",
                  [](const Token& t) {
-                     return "<Token(category=" + tokenCategoryToString(t.category) + ", value='" +
-                            t.value + "')>";
+                     return "<Token(category=" + tokenCategoryToString(t.category) + ", value='" + t.value + "')>";
                  })
             .def("__str__", [](const Token& t) { return t.value; })
             .def(py::self == py::self) // Bind the equality operator
@@ -103,8 +97,8 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Binding for the LineTokens struct
     py::class_<LineTokens>(tokenizer_module, "LineTokens")
             .def(py::init<>())
-            .def(py::init<const std::string&, size_t, const std::vector<Token>&>(),
-                 py::arg("filename"), py::arg("lineno"), py::arg("tokens"))
+            .def(py::init<const std::string&, size_t, const std::vector<Token>&>(), py::arg("filename"),
+                 py::arg("lineno"), py::arg("tokens"))
             .def_readwrite("filename", &LineTokens::filename)
             .def_readwrite("lineno", &LineTokens::lineno)
             .def_readwrite("tokens", &LineTokens::tokens)
@@ -117,8 +111,8 @@ PYBIND11_MODULE(pymasm_core, m) {
                 if (!concatLine.empty())
                     concatLine.pop_back();
 
-                return "<LineTokens(filename='" + lt.filename +
-                       "', lineno=" + std::to_string(lt.lineno) + ", tokens=[" + concatLine + "]>";
+                return "<LineTokens(filename='" + lt.filename + "', lineno=" + std::to_string(lt.lineno) +
+                       ", tokens=[" + concatLine + "]>";
             });
 
     // Binding for the Tokenizer class
@@ -147,9 +141,8 @@ PYBIND11_MODULE(pymasm_core, m) {
     py::class_<MemLayout>(tokenizer_module, "MemLayout")
             .def(py::init<>())
             .def_readwrite("data", &MemLayout::data)
-            .def("__repr__", [](const MemLayout& ml) {
-                return "<MemLayout(data size=" + std::to_string(ml.data.size()) + ")>";
-            });
+            .def("__repr__",
+                 [](const MemLayout& ml) { return "<MemLayout(data size=" + std::to_string(ml.data.size()) + ")>"; });
 
     // Binding for the Parser Class
     py::class_<Parser>(parser_module, "Parser")
@@ -160,9 +153,7 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Interpreter Bindings //
 
     // Binding for the IO Mode enum
-    py::enum_<IOMode>(interpreter_module, "IOMode")
-            .value("SYSCALL", IOMode::SYSCALL)
-            .value("MMIO", IOMode::MMIO);
+    py::enum_<IOMode>(interpreter_module, "IOMode").value("SYSCALL", IOMode::SYSCALL).value("MMIO", IOMode::MMIO);
 
     // Bindings for the Interpreter class
     py::class_<InterpreterWrapper>(interpreter_module, "Interpreter")

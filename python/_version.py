@@ -13,7 +13,7 @@ def _get_version():
     # Look for version.json in the project root
     current_dir = Path(__file__).parent.parent
 
-    version_file = current_dir / "version.json"
+    version_file = current_dir / "version/version.json"
     if version_file.exists():
         try:
             with open(version_file, 'r') as f:
