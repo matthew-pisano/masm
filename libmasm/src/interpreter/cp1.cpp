@@ -11,36 +11,37 @@
 #include <masm/interpreter/cpu.h>
 
 #include "assembler/instruction.h"
+#include "conversion.h"
 
 
 // Coprocessor 1 (floating point) register access
-float32_t Coproc1RegisterFile::getFloat(const uint32_t index) const {
-    return *reinterpret_cast<const float32_t*>(&registers.at(index));
+float Coproc1RegisterFile::getFloat(const uint32_t index) const {
+    return *reinterpret_cast<const float*>(&registers.at(index));
 }
 
-void Coproc1RegisterFile::setFloat(const uint32_t index, const float32_t value) {
+void Coproc1RegisterFile::setFloat(const uint32_t index, const float value) {
     registers.at(index) = *reinterpret_cast<const int32_t*>(&value);
 }
 
-float32_t Coproc1RegisterFile::getFloat(const Coproc1Register index) const {
+float Coproc1RegisterFile::getFloat(const Coproc1Register index) const {
     return getFloat(static_cast<uint32_t>(index));
 }
 
-void Coproc1RegisterFile::setFloat(const Coproc1Register index, const float32_t value) {
+void Coproc1RegisterFile::setFloat(const Coproc1Register index, const float value) {
     setFloat(static_cast<uint32_t>(index), value);
 }
 
-float64_t Coproc1RegisterFile::getDouble(const uint32_t index) const {
+double Coproc1RegisterFile::getDouble(const uint32_t index) const {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid double precision register: f" + std::to_string(index));
 
     const int32_t lower = registers.at(index); // Lower 32 bits
     const int32_t upper = registers.at(index + 1); // Upper 32 bits
     const int64_t valueInt = static_cast<int64_t>(upper) << 32 | static_cast<uint32_t>(lower);
-    return *reinterpret_cast<const float64_t*>(&valueInt);
+    return *reinterpret_cast<const double*>(&valueInt);
 }
 
-void Coproc1RegisterFile::setDouble(const uint32_t index, const float64_t value) {
+void Coproc1RegisterFile::setDouble(const uint32_t index, const double value) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid double precision register: f" + std::to_string(index));
 
@@ -49,11 +50,11 @@ void Coproc1RegisterFile::setDouble(const uint32_t index, const float64_t value)
     registers.at(index + 1) = static_cast<int32_t>(valueInt >> 32 & 0xFFFFFFFF); // Upper 32 bits
 }
 
-float64_t Coproc1RegisterFile::getDouble(const Coproc1Register index) const {
+double Coproc1RegisterFile::getDouble(const Coproc1Register index) const {
     return getDouble(static_cast<uint32_t>(index));
 }
 
-void Coproc1RegisterFile::setDouble(const Coproc1Register index, const float64_t value) {
+void Coproc1RegisterFile::setDouble(const Coproc1Register index, const double value) {
     setDouble(static_cast<uint32_t>(index), value);
 }
 
@@ -100,32 +101,32 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
         }
         case InstructionCode::FP_ADD: {
             if (singlePrecision) {
-                const float32_t result = cp1.getFloat(fs) + cp1.getFloat(ft);
+                const float result = cp1.getFloat(fs) + cp1.getFloat(ft);
                 cp1.setFloat(fd, result);
             } else {
-                const float64_t result = cp1.getDouble(fs) + cp1.getDouble(ft);
+                const double result = cp1.getDouble(fs) + cp1.getDouble(ft);
                 cp1.setDouble(fd, result);
             }
             break;
         }
         case InstructionCode::FP_CVT_D: {
             // Must be single to double conversion
-            const float64_t result = cp1.getFloat(fs);
+            const double result = cp1.getFloat(fs);
             cp1.setDouble(fd, result);
             break;
         }
         case InstructionCode::FP_CVT_S: {
             // Must be double to single conversion
-            const float32_t result = static_cast<float32_t>(cp1.getDouble(fs));
+            const float result = static_cast<float>(cp1.getDouble(fs));
             cp1.setFloat(fd, result);
             break;
         }
         case InstructionCode::FP_DIV: {
             if (singlePrecision) {
-                const float32_t result = cp1.getFloat(fs) / cp1.getFloat(ft);
+                const float result = cp1.getFloat(fs) / cp1.getFloat(ft);
                 cp1.setFloat(fd, result);
             } else {
-                const float64_t result = cp1.getDouble(fs) / cp1.getDouble(ft);
+                const double result = cp1.getDouble(fs) / cp1.getDouble(ft);
                 cp1.setDouble(fd, result);
             }
             break;
@@ -140,10 +141,10 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
         }
         case InstructionCode::FP_MUL: {
             if (singlePrecision) {
-                const float32_t result = cp1.getFloat(fs) * cp1.getFloat(ft);
+                const float result = cp1.getFloat(fs) * cp1.getFloat(ft);
                 cp1.setFloat(fd, result);
             } else {
-                const float64_t result = cp1.getDouble(fs) * cp1.getDouble(ft);
+                const double result = cp1.getDouble(fs) * cp1.getDouble(ft);
                 cp1.setDouble(fd, result);
             }
             break;
@@ -157,20 +158,20 @@ void execCP1RegType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t
         }
         case InstructionCode::FP_SQRT: {
             if (singlePrecision) {
-                const float32_t result = std::sqrt(cp1.getFloat(fs));
+                const float result = std::sqrt(cp1.getFloat(fs));
                 cp1.setFloat(fd, result);
             } else {
-                const float64_t result = std::sqrt(cp1.getDouble(fs));
+                const double result = std::sqrt(cp1.getDouble(fs));
                 cp1.setDouble(fd, result);
             }
             break;
         }
         case InstructionCode::FP_SUB: {
             if (singlePrecision) {
-                const float32_t result = cp1.getFloat(fs) - cp1.getFloat(ft);
+                const float result = cp1.getFloat(fs) - cp1.getFloat(ft);
                 cp1.setFloat(fd, result);
             } else {
-                const float64_t result = cp1.getDouble(fs) - cp1.getDouble(ft);
+                const double result = cp1.getDouble(fs) - cp1.getDouble(ft);
                 cp1.setDouble(fd, result);
             }
             break;
@@ -239,8 +240,8 @@ void execCP1ImmType(Coproc1RegisterFile& cp1, RegisterFile& registers, Memory& m
 void execCP1CondType(Coproc1RegisterFile& cp1, const uint32_t fmt, const uint32_t ft, const uint32_t fs,
                      const uint32_t cond) {
     const bool singlePrecision = fmt == 0x10; // Single precision format
-    float64_t fsVal;
-    float64_t ftVal;
+    double fsVal;
+    double ftVal;
 
     if (singlePrecision) {
         fsVal = cp1.getFloat(fs);

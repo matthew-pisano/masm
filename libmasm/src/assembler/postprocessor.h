@@ -12,6 +12,26 @@
 
 
 /**
+ * Validates a comma separated list of tokens, returning the list with commas stripped out
+ * @param listTokens The list of tokens to filter
+ * @param validElems The only valid token types to include in the filtered list
+ * @return The filtered list of tokens
+ * @throw runtime_error When the list is malformed or contains invalid tokens
+ */
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
+                                   const std::vector<TokenCategory>& validElems = {});
+
+
+/**
+ * Checks to see if a given vector of tokens matches a token category pattern
+ * @param pattern The pattern to match against
+ * @param tokens The tokens to check
+ * @return True if the tokens match the pattern, false otherwise
+ */
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens);
+
+
+/**
  * Mangles a label by adding the file ID to it, ensuring that labels are unique across files.
  * @param label The label to mangle
  * @param filename The name of the file the label is in, used to create a unique identifier

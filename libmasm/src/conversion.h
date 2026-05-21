@@ -1,35 +1,12 @@
 //
-// Created by matthew on 4/15/25.
+// Created by matthew on 5/20/26.
 //
 
-#ifndef UTILS_H
-#define UTILS_H
-
+#ifndef MASM_CONVERSIONS_H
+#define MASM_CONVERSIONS_H
 #include <cstdint>
 #include <string>
 #include <vector>
-
-#include <masm/assembler/tokenizer.h>
-#include <masm/io/streamio.h>
-
-// Stand-in for fixed-width floating point types
-using float32_t = float;
-using float64_t = double;
-
-/**
- * Reads a sequence of characters from the input stream until a newline character is encountered.
- * @param streamHandle The stream handle to read from
- * @return A string containing the characters read from the input stream
- */
-std::string readSeq(StreamHandle& streamHandle);
-
-
-/**
- * Gets the basename of a file path
- * @param path The file path to get the basename of
- * @return The basename of the file path
- */
-std::string getFileBasename(const std::string& path);
 
 
 /**
@@ -46,43 +23,6 @@ bool isSignedInteger(const std::string& str);
  * @return True if the string is a signed float, false otherwise
  */
 bool isSignedFloat(const std::string& str);
-
-
-/**
- * Escapes a string by replacing escape sequences with their corresponding characters
- * @param string The string to escape
- * @return The escaped string
- */
-std::string escapeString(const std::string& string);
-
-
-/**
- * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
- * @param string The string to convert
- * @param nullTerminate Whether to null terminate the string
- * @return The vector of bytes representing the string
- */
-std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
-
-
-/**
- * Validates a comma seperated list of tokens, returning the list with commas stripped out
- * @param listTokens The list of tokens to filter
- * @param validElems The only valid token types to include in the filtered list
- * @return The filtered list of tokens
- * @throw runtime_error When the list is malformed or contains invalid tokens
- */
-std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
-                                   const std::vector<TokenCategory>& validElems = {});
-
-
-/**
- * Checks to see if a given vector of tokens matches a token category pattern
- * @param pattern The pattern to match against
- * @param tokens The tokens to check
- * @return True if the tokens match the pattern, false otherwise
- */
-bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens);
 
 
 /**
@@ -148,6 +88,15 @@ std::vector<std::byte> f64ToLEByte(double f64);
 
 
 /**
+ * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
+ * @param string The string to convert
+ * @param nullTerminate Whether to null terminate the string
+ * @return The vector of bytes representing the string
+ */
+std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
+
+
+/**
  * Converts a hexadecimal string to an integer string
  * @param hex The hexadecimal string to convert
  * @return The integer string value of the hexadecimal string
@@ -170,4 +119,4 @@ std::string hexToString(uint32_t value);
  */
 uint32_t stoui32(const std::string& str);
 
-#endif // UTILS_H
+#endif // MASM_CONVERSIONS_H

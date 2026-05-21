@@ -12,20 +12,19 @@
 #include <vector>
 
 #include <masm/exceptions.h>
-#include <masm/utils.h>
 
 #include "assembler/directive.h"
 #include "assembler/instruction.h"
 #include "assembler/postprocessor.h"
+#include "conversion.h"
 
 
 /**
  * An array storing the names of memory directives
  */
 constexpr std::array<const char*, 14> tokenCategoryNames = {
-        "UNKNOWN",    "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",
-        "LABEL_REF",  "INSTRUCTION",   "REGISTER",        "IMMEDIATE",      "SEPERATOR",
-        "OPEN_PAREN", "CLOSE_PAREN",   "STRING",          "MACRO_PARAM"};
+        "UNKNOWN",  "SEC_DIRECTIVE", "ALLOC_DIRECTIVE", "META_DIRECTIVE", "LABEL_DEF",   "LABEL_REF", "INSTRUCTION",
+        "REGISTER", "IMMEDIATE",     "SEPERATOR",       "OPEN_PAREN",     "CLOSE_PAREN", "STRING",    "MACRO_PARAM"};
 
 
 bool operator==(const LineTokens& lhs, const LineTokens& rhs) {
@@ -34,13 +33,9 @@ bool operator==(const LineTokens& lhs, const LineTokens& rhs) {
 bool operator!=(const LineTokens& lhs, const LineTokens& rhs) { return !(lhs == rhs); }
 
 
-std::string tokenCategoryToString(TokenCategory category) {
-    return tokenCategoryNames.at(static_cast<int>(category));
-}
+std::string tokenCategoryToString(TokenCategory category) { return tokenCategoryNames.at(static_cast<int>(category)); }
 
-bool operator==(const Token& lhs, const Token& rhs) {
-    return lhs.category == rhs.category && lhs.value == rhs.value;
-}
+bool operator==(const Token& lhs, const Token& rhs) { return lhs.category == rhs.category && lhs.value == rhs.value; }
 
 bool operator!=(const Token& lhs, const Token& rhs) { return !(lhs == rhs); }
 
@@ -96,8 +91,7 @@ std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
         sourceLines.push_back(line);
 
     for (size_t i = 0; i < sourceLines.size(); ++i) {
-        std::vector<LineTokens> tokenizedLines =
-                tokenizeLine(sourceLines[i], sourceFile.name, i + 1);
+        std::vector<LineTokens> tokenizedLines = tokenizeLine(sourceLines[i], sourceFile.name, i + 1);
 
         for (LineTokens& tokenLine : tokenizedLines)
             // Skip empty or comment lines
@@ -109,8 +103,8 @@ std::vector<LineTokens> Tokenizer::tokenizeFile(const SourceFile& sourceFile) {
 }
 
 
-std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
-                                                const std::string& filename, const size_t lineno) {
+std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine, const std::string& filename,
+                                                const size_t lineno) {
     const Token eqvToken = {TokenCategory::META_DIRECTIVE, "eqv"};
 
     std::vector<LineTokens> tokens = {{filename, lineno, {}}};
@@ -167,15 +161,13 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
             currentType = TokenCategory::MACRO_PARAM;
         }
         // Handle Immediates, Instructions, and Label references
-        else if (isdigit(c) || c == '-' ||
-                 (c == 'x' && currentToken.size() == 1 && currentToken[0] == '0')) {
+        else if (isdigit(c) || c == '-' || (c == 'x' && currentToken.size() == 1 && currentToken[0] == '0')) {
             currentType = TokenCategory::IMMEDIATE;
             currentToken += c;
         } else {
             // Set first token in line as an instruction, otherwise as a label reference
             // If the third token in an eqv directive line, also set as instruction
-            if (tokenLine.tokens.empty() ||
-                (tokenLine.tokens.size() == 2 && tokenLine.tokens[0] == eqvToken))
+            if (tokenLine.tokens.empty() || (tokenLine.tokens.size() == 2 && tokenLine.tokens[0] == eqvToken))
                 currentType = TokenCategory::INSTRUCTION;
             else
                 currentType = TokenCategory::LABEL_REF;
@@ -185,8 +177,7 @@ std::vector<LineTokens> Tokenizer::tokenizeLine(const std::string& sourceLine,
 
     // If the current token is not terminated before the end of the file (usually with strings)
     if (!currentToken.empty())
-        throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", filename,
-                              lineno);
+        throw MasmSyntaxError("Unexpected EOL while parsing token '" + currentToken + "'", filename, lineno);
 
     return tokens;
 }
@@ -197,8 +188,7 @@ void Tokenizer::terminateToken(const char c, TokenCategory& currentType, std::st
     LineTokens& tokenLine = tokens[tokens.size() - 1];
 
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
-        throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename,
-                              tokenLine.lineno);
+        throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename, tokenLine.lineno);
 
     if (currentType == TokenCategory::IMMEDIATE && currentToken.starts_with("0x"))
         currentToken = hexToInt(currentToken);

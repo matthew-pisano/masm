@@ -8,7 +8,6 @@
 #include <cstdint>
 
 #include <masm/interpreter/cpu.h>
-#include <masm/utils.h>
 
 /**
  * Enum representing the valid coprocessor 1 (floating point) registers
@@ -86,56 +85,56 @@ public:
      * @param index The index of the register
      * @return The float value stored in the register
      */
-    [[nodiscard]] float32_t getFloat(uint32_t index) const;
+    [[nodiscard]] float getFloat(uint32_t index) const;
 
     /**
      * Sets the float value within one of the CP1 registers
      * @param index The index of the register to modify
      * @param value The new value of the register
      */
-    void setFloat(uint32_t index, float32_t value);
+    void setFloat(uint32_t index, float value);
 
     /**
      * Gets the float value stored in one of the CP1 registers
      * @param index The index of the register
      * @return The float value stored in the register
      */
-    [[nodiscard]] float32_t getFloat(Coproc1Register index) const;
+    [[nodiscard]] float getFloat(Coproc1Register index) const;
 
     /**
      * Sets the float value within one of the CP1 registers
      * @param index The index of the register to modify
      * @param value The new value of the register
      */
-    void setFloat(Coproc1Register index, float32_t value);
+    void setFloat(Coproc1Register index, float value);
 
     /**
      * Gets the double value stored in two of the CP1 registers
      * @param index The even index of the first FP register
      * @return The double value stored in the registers
      */
-    [[nodiscard]] float64_t getDouble(uint32_t index) const;
+    [[nodiscard]] double getDouble(uint32_t index) const;
 
     /**
      * Sets the double value within two of the CP1 registers
      * @param index The even index of the first FP register to modify
      * @param value The new value of the registers
      */
-    void setDouble(uint32_t index, float64_t value);
+    void setDouble(uint32_t index, double value);
 
     /**
      * Gets the double value stored in two of the CP1 registers
      * @param index The even index of the first FP register
      * @return The double value stored in the registers
      */
-    [[nodiscard]] float64_t getDouble(Coproc1Register index) const;
+    [[nodiscard]] double getDouble(Coproc1Register index) const;
 
     /**
      * Sets the double value within two of the CP1 registers
      * @param index The even index of the first FP register to modify
      * @param value The new value of the registers
      */
-    void setDouble(Coproc1Register index, float64_t value);
+    void setDouble(Coproc1Register index, double value);
 
     /**
      * Returns the register number associated with a name

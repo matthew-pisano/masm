@@ -11,6 +11,7 @@ add_executable(masm-tests
         components/test_intermediates.cpp
         components/test_interpreter.cpp
         components/test_parser.cpp
+        components/test_postprocessor.cpp
         components/test_syscall.cpp
         components/test_tokenizer.cpp
         instructions/test_aliased_instructions.cpp
@@ -21,8 +22,8 @@ add_executable(masm-tests
         instructions/test_cp1_instructions.cpp
         instructions/test_memory_instructions.cpp
         instructions/test_pseudo_instructions.cpp
+        utils/test_conversion.cpp
         utils/test_fileio.cpp
-        utils/test_utils.cpp
 )
 target_link_libraries(masm-tests PRIVATE libmasm Catch2::Catch2WithMain)
 target_include_directories(masm-tests SYSTEM PRIVATE

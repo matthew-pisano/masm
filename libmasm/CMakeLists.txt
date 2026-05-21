@@ -6,7 +6,7 @@ add_library(libmasm STATIC
         ${LIBMASM_ASSEMBLER_SOURCES}
         ${LIBMASM_INTERPRETER_SOURCES}
         ${LIBMASM_IO_SOURCES}
-        src/utils.cpp
+        src/conversion.cpp
 )
 target_include_directories(libmasm
         PUBLIC

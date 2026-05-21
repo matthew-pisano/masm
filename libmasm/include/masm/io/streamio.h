@@ -20,8 +20,7 @@ protected:
     std::ostream& ostream;
 
 public:
-    StreamHandle(std::istream& istream, std::ostream& ostream) :
-        istream(istream), ostream(ostream) {}
+    StreamHandle(std::istream& istream, std::ostream& ostream) : istream(istream), ostream(ostream) {}
     virtual ~StreamHandle() = default;
 
     /**
@@ -41,6 +40,15 @@ public:
      * @return The character read from the input stream
      */
     char getCharBlocking();
+
+    /**
+     * Reads a sequence of characters from the input stream until a newline character is encountered.
+     *
+     * This method also handles backspace characters by removing the last streamed character.
+     *
+     * @return A string containing the characters read from the input stream
+     */
+    std::string getLine();
 
     /**
      * Sends a character to the output stream

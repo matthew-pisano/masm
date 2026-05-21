@@ -14,9 +14,9 @@
 #include <masm/exceptions.h>
 #include <masm/interpreter/interpreter.h>
 #include <masm/io/fileio.h>
-#include <masm/utils.h>
 
 #include "mdb/debug_interpreter.h"
+#include "shared/load_layout.h"
 
 
 /**

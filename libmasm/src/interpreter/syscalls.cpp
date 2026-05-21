@@ -11,7 +11,8 @@
 #include <masm/exceptions.h>
 #include <masm/interpreter/cpu.h>
 #include <masm/io/consoleio.h>
-#include <masm/utils.h>
+
+#include "conversion.h"
 
 
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
@@ -116,14 +117,14 @@ void SystemHandle::printInt(const State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::printFloat(const State& state, StreamHandle& streamHandle) {
-    const float32_t value = state.cp1.getFloat(Coproc1Register::F12);
+    const float value = state.cp1.getFloat(Coproc1Register::F12);
     std::ostringstream oss;
     oss << std::setprecision(6) << value; // Set precision for float output
     streamHandle.putStr(oss.str());
 }
 
 void SystemHandle::printDouble(const State& state, StreamHandle& streamHandle) {
-    const float64_t value = state.cp1.getDouble(Coproc1Register::F12);
+    const double value = state.cp1.getDouble(Coproc1Register::F12);
     std::ostringstream oss;
     oss << std::setprecision(6) << value; // Set precision for double output
     streamHandle.putStr(oss.str());
@@ -141,7 +142,7 @@ void SystemHandle::printString(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readInt(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.registers[Register::V0] = std::stoi(input);
     } catch (const std::invalid_argument&) {
@@ -152,7 +153,7 @@ void SystemHandle::readInt(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readFloat(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.cp1.setFloat(Coproc1Register::F0, std::stof(input));
     } catch (const std::invalid_argument&) {
@@ -163,7 +164,7 @@ void SystemHandle::readFloat(State& state, StreamHandle& streamHandle) {
 }
 
 void SystemHandle::readDouble(State& state, StreamHandle& streamHandle) {
-    const std::string input = readSeq(streamHandle);
+    const std::string input = streamHandle.getLine();
     try {
         state.cp1.setDouble(Coproc1Register::F0, std::stod(input));
     } catch (const std::invalid_argument&) {

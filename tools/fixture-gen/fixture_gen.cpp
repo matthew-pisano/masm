@@ -11,7 +11,8 @@
 #include <masm/assembler/parser.h>
 #include <masm/assembler/tokenizer.h>
 #include <masm/io/fileio.h>
-#include <masm/utils.h>
+
+#include "load_layout.h"
 
 
 /**

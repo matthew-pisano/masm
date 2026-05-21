@@ -21,6 +21,21 @@ char StreamHandle::getChar() {
     return c;
 }
 
+std::string StreamHandle::getLine() {
+    std::string input;
+    while (true) {
+        const char c = getCharBlocking();
+        if (c == '\n')
+            break;
+
+        if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
+    }
+    return input;
+}
+
 char StreamHandle::getCharBlocking() {
     while (!hasChar())
         usleep(1000); // Sleep for 1 ms

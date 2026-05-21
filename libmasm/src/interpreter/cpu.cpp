@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 #include <masm/exceptions.h>
-#include <masm/utils.h>
 
 #include "assembler/instruction.h"
 

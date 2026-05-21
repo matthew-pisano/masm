@@ -5,7 +5,8 @@
 #include <masm/assembler/memory.h>
 
 #include <masm/exceptions.h>
-#include <masm/utils.h>
+
+#include "conversion.h"
 
 
 std::byte Memory::_sysByteAt(const uint32_t index) const {
@@ -19,16 +20,12 @@ std::byte Memory::_sysByteAt(const uint32_t index) const {
 int32_t Memory::_sysWordAt(const uint32_t index) const {
     if (useLittleEndian)
         // If little-endian, read bytes in little endian order
-        return static_cast<int32_t>(_sysByteAt(index + 3)) << 24 |
-               static_cast<int32_t>(_sysByteAt(index + 2)) << 16 |
-               static_cast<int32_t>(_sysByteAt(index + 1)) << 8 |
-               static_cast<int32_t>(_sysByteAt(index));
+        return static_cast<int32_t>(_sysByteAt(index + 3)) << 24 | static_cast<int32_t>(_sysByteAt(index + 2)) << 16 |
+               static_cast<int32_t>(_sysByteAt(index + 1)) << 8 | static_cast<int32_t>(_sysByteAt(index));
 
     // If big-endian, read bytes in big endian order
-    return static_cast<int32_t>(_sysByteAt(index)) << 24 |
-           static_cast<int32_t>(_sysByteAt(index + 1)) << 16 |
-           static_cast<int32_t>(_sysByteAt(index + 2)) << 8 |
-           static_cast<int32_t>(_sysByteAt(index + 3));
+    return static_cast<int32_t>(_sysByteAt(index)) << 24 | static_cast<int32_t>(_sysByteAt(index + 1)) << 16 |
+           static_cast<int32_t>(_sysByteAt(index + 2)) << 8 | static_cast<int32_t>(_sysByteAt(index + 3));
 }
 
 
@@ -66,8 +63,7 @@ void Memory::writeSideEffect(const uint32_t index) {
     const uint32_t output_data = output_ready + 4;
 
     // Check if writing to input or output ready bits or input data word
-    if ((index >= output_ready && index < output_ready + 4) ||
-        (index >= input_ready && index < input_ready + 4) ||
+    if ((index >= output_ready && index < output_ready + 4) || (index >= input_ready && index < input_ready + 4) ||
         (index >= input_data && index < input_data + 4))
         throw std::runtime_error("Invalid write into read-only memory at " + hexToString(index));
 
@@ -80,8 +76,7 @@ void Memory::writeSideEffect(const uint32_t index) {
 
 int32_t Memory::wordAt(const uint32_t index) {
     if (index % 4 != 0)
-        throw ExecExcept("Invalid word access at " + hexToString(index),
-                         EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
+        throw ExecExcept("Invalid word access at " + hexToString(index), EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
     return _sysWordAt(index);
@@ -90,17 +85,14 @@ int32_t Memory::wordAt(const uint32_t index) {
 
 uint16_t Memory::halfAt(const uint32_t index) {
     if (index % 2 != 0)
-        throw ExecExcept("Invalid half-word access at " + hexToString(index),
-                         EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
+        throw ExecExcept("Invalid half-word access at " + hexToString(index), EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
     if (useLittleEndian)
         // If little-endian, read bytes in little endian order
-        return static_cast<uint16_t>(_sysByteAt(index + 1)) << 8 |
-               static_cast<uint16_t>(_sysByteAt(index));
+        return static_cast<uint16_t>(_sysByteAt(index + 1)) << 8 | static_cast<uint16_t>(_sysByteAt(index));
 
-    return static_cast<uint16_t>(_sysByteAt(index)) << 8 |
-           static_cast<uint16_t>(_sysByteAt(index + 1));
+    return static_cast<uint16_t>(_sysByteAt(index)) << 8 | static_cast<uint16_t>(_sysByteAt(index + 1));
 }
 
 
@@ -112,8 +104,7 @@ uint8_t Memory::byteAt(const uint32_t index) {
 
 void Memory::wordTo(const uint32_t index, const int32_t value) {
     if (index % 4 != 0)
-        throw ExecExcept("Invalid word access at " + hexToString(index),
-                         EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
+        throw ExecExcept("Invalid word access at " + hexToString(index), EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
     _sysWordTo(index, value);
@@ -122,8 +113,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
 
 void Memory::halfTo(const uint32_t index, const int16_t value) {
     if (index % 2 != 0)
-        throw ExecExcept("Invalid half-word access at " + hexToString(index),
-                         EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
+        throw ExecExcept("Invalid half-word access at " + hexToString(index), EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
     if (useLittleEndian) {

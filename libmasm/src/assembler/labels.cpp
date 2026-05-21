@@ -9,7 +9,6 @@
 
 #include <masm/assembler/memory.h>
 #include <masm/exceptions.h>
-#include <masm/utils.h>
 
 #include "assembler/directive.h"
 #include "assembler/instruction.h"

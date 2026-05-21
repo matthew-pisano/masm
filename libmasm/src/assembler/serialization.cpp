@@ -6,8 +6,6 @@
 
 #include <iomanip>
 
-#include <masm/utils.h>
-
 #include "assembler/postprocessor.h"
 
 

@@ -13,8 +13,15 @@
 
 
 const std::array<std::string, 4> MEM_SEC_DIRECTIVES = {"data", "text", "kdata", "ktext"};
-const std::array<std::string, 5> META_DIRECTIVES = {"globl", "eqv", "macro", "end_macro",
-                                                    "include"};
+const std::array<std::string, 5> META_DIRECTIVES = {"globl", "eqv", "macro", "end_macro", "include"};
+
+
+/**
+ * Escapes a string by replacing escape sequences with their corresponding characters
+ * @param string The string to escape
+ * @return The escaped string
+ */
+std::string escapeString(const std::string& string);
 
 
 /**
@@ -36,8 +43,7 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
  * @return A tuple containing the memory allocation associated with the directive and any padding
  * @throw runtime_error When the arguments for a directive are malformed
  */
-std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(uint32_t loc,
-                                                                     const Token& dirToken,
+std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(uint32_t loc, const Token& dirToken,
                                                                      const std::vector<Token>& args,
                                                                      bool useLittleEndian = false);
 
@@ -51,8 +57,7 @@ std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(uint32_t lo
  * @return The memory allocation associated with the directive
  * @throw runtime_error When the arguments for a directive are malformed
  */
-std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken,
-                                           const std::vector<Token>& args,
+std::vector<std::byte> parseAllocDirective(uint32_t loc, const Token& dirToken, const std::vector<Token>& args,
                                            bool useLittleEndian = false);
 
 

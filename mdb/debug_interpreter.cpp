@@ -122,7 +122,7 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     // Get user commands until none are expected
     while (getCommand) {
         streamHandle.putStr(prompt);
-        const std::string cmdStr = readSeq(streamHandle);
+        const std::string cmdStr = streamHandle.getLine();
         getCommand = execCommand(cmdStr, layout);
     }
 }
@@ -338,7 +338,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
                 // Examine memory at the specified address
                 size_t numWords = 1;
                 if (args.size() > 1)
-                    numWords = stoui32(args[1]);
+                    numWords = std::stoul(args[1]);
 
                 examineAddress(args[0], numWords);
                 return true;
@@ -485,7 +485,7 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
         return;
     }
 
-    size_t breakpointId = stoui32(arg);
+    size_t breakpointId = std::stoul(arg);
     if (breakpointId == 0) {
         streamHandle.putStr("No breakpoint found with ID 0\n");
         return;
@@ -558,9 +558,9 @@ void DebugInterpreter::listCP0Registers() {
 void DebugInterpreter::listCP1Registers() {
     for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
         const int32_t value = state.cp1[i];
-        const float32_t floatValue = state.cp1.getFloat(i);
+        const float floatValue = state.cp1.getFloat(i);
         if (i % 2 == 0) {
-            const float64_t doubleValue = state.cp1.getDouble(i);
+            const double doubleValue = state.cp1.getDouble(i);
             streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
                                             Coproc1RegisterFile::nameFromIndex(i), value, floatValue, doubleValue));
         } else

@@ -10,11 +10,11 @@
 #include <masm/exceptions.h>
 #include <masm/interpreter/cp1.h>
 #include <masm/interpreter/cpu.h>
-#include <masm/utils.h>
 
 #include "assembler/directive.h"
 #include "assembler/instruction.h"
 #include "assembler/postprocessor.h"
+#include "conversion.h"
 
 
 LabelMap& Parser::getLabels() { return labelMap; }

@@ -8,7 +8,7 @@
 #include <map>
 #include <stdexcept>
 
-#include <masm/utils.h>
+#include "assembler/postprocessor.h"
 
 
 /**

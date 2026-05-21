@@ -66,7 +66,7 @@ TEST_CASE("Test FP Abs.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float32_t expected = 42.69;
+    constexpr float expected = 42.69;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected * -1);
@@ -94,7 +94,7 @@ TEST_CASE("Test FP Abs.d Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float64_t expected = 42e69;
+    constexpr double expected = 42e69;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setDouble(Coproc1Register::F2, expected * -1);
@@ -130,7 +130,7 @@ TEST_CASE("Test FP Add.s Instruction") {
     interpreter.getState().cp1.setFloat(Coproc1Register::F2, 20);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 30;
+        constexpr float expected = 30;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -163,7 +163,7 @@ TEST_CASE("Test FP Add.d Instruction") {
     interpreter.getState().cp1.setDouble(Coproc1Register::F4, 20);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 30;
+        constexpr float expected = 30;
         REQUIRE(expected == interpreter.getState().cp1.getDouble(Coproc1Register::F0));
     }
 }
@@ -196,7 +196,7 @@ TEST_CASE("Test FP Div.s Instruction") {
     interpreter.getState().cp1.setFloat(Coproc1Register::F2, 5);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 2;
+        constexpr float expected = 2;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -228,7 +228,7 @@ TEST_CASE("Test FP Mul.s Instruction") {
     interpreter.getState().cp1.setFloat(Coproc1Register::F2, 5);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 50;
+        constexpr float expected = 50;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -253,7 +253,7 @@ TEST_CASE("Test FP Neg.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float32_t expected = -10;
+    constexpr float expected = -10;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, -expected);
@@ -281,7 +281,7 @@ TEST_CASE("Test FP Sqrt.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float32_t expected = 5;
+    constexpr float expected = 5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected * expected);
@@ -317,7 +317,7 @@ TEST_CASE("Test FP Sub.s Instruction") {
     interpreter.getState().cp1.setFloat(Coproc1Register::F2, 10);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") {
-        constexpr float32_t expected = 10;
+        constexpr float expected = 10;
         REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0));
     }
 }
@@ -345,7 +345,7 @@ TEST_CASE("Test FP c.eq.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
-    constexpr float32_t testValue = 42.69;
+    constexpr float testValue = 42.69;
     SECTION("Test Execute Equal") {
         interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue);
@@ -384,7 +384,7 @@ TEST_CASE("Test FP c.lt.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
-    constexpr float32_t testValue = 42.69;
+    constexpr float testValue = 42.69;
     SECTION("Test Execute Less Than") {
         interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
@@ -423,7 +423,7 @@ TEST_CASE("Test FP c.le.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
-    constexpr float32_t testValue = 42.69;
+    constexpr float testValue = 42.69;
     SECTION("Test Execute Less Than or Equal") {
         interpreter.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         interpreter.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
@@ -528,7 +528,7 @@ TEST_CASE("Test FP cvt.d.s Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float32_t expected = 55.5;
+    constexpr float expected = 55.5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected);
@@ -556,7 +556,7 @@ TEST_CASE("Test FP cvt.s.d Instruction") {
         REQUIRE(expectedBytes == actualBytes);
     }
 
-    constexpr float64_t expected = 55.5;
+    constexpr double expected = 55.5;
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     interpreter.getState().cp1.setDouble(Coproc1Register::F2, expected);
@@ -591,7 +591,7 @@ TEST_CASE("Test FP ldc1 Instruction") {
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
 
-    constexpr float64_t expected = 75.5;
+    constexpr double expected = 75.5;
     const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
     interpreter.getState().memory.wordTo(address, static_cast<int32_t>(intRepr & 0xFFFFFFFF));
     interpreter.getState().memory.wordTo(address + 4, static_cast<int32_t>(intRepr >> 32));
@@ -627,7 +627,7 @@ TEST_CASE("Test FP lwc1 Instruction") {
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
 
-    constexpr float32_t expected = 75.5;
+    constexpr float expected = 75.5;
     const int32_t intRepr = *reinterpret_cast<const int32_t*>(&expected);
     interpreter.getState().memory.wordTo(address, intRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
@@ -662,7 +662,7 @@ TEST_CASE("Test FP sdc1 Instruction") {
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
 
-    constexpr float64_t expected = 75.5;
+    constexpr double expected = 75.5;
     const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
     const int32_t lower = static_cast<int32_t>(intRepr & 0xFFFFFFFF);
     const int32_t upper = static_cast<int32_t>(intRepr >> 32);
@@ -702,7 +702,7 @@ TEST_CASE("Test FP swc1 Instruction") {
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
     uint32_t address = memSectionOffset(MemSection::DATA);
 
-    constexpr float32_t floatRepr = 75.5;
+    constexpr float floatRepr = 75.5;
     const int32_t expected = *reinterpret_cast<const int32_t*>(&floatRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.getState().cp1.setFloat(Coproc1Register::F0, 75.5);
@@ -791,7 +791,7 @@ TEST_CASE("Test FP mov.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
 
-    constexpr float32_t expected = 42.69;
+    constexpr float expected = 42.69;
     interpreter.getState().cp1.setFloat(Coproc1Register::F1, expected);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == interpreter.getState().cp1.getFloat(Coproc1Register::F0)); }

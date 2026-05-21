@@ -10,8 +10,8 @@
 #include <masm/assembler/tokenizer.h>
 #include <masm/exceptions.h>
 #include <masm/io/fileio.h>
-#include <masm/utils.h>
 
+#include "shared/load_layout.h"
 #include "tests/testing_utilities.h"
 
 

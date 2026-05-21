@@ -5,11 +5,26 @@
 #ifndef LOAD_LAYOUT_H
 #define LOAD_LAYOUT_H
 
+#include <filesystem>
+
 #include <masm/assembler/memory.h>
 #include <masm/assembler/parser.h>
 #include <masm/assembler/serialization.h>
 #include <masm/io/fileio.h>
-#include <masm/utils.h>
+
+
+/**
+ * Gets the basename of a file path
+ * @param path The file path to get the basename of
+ * @return The basename of the file path
+ */
+inline std::string getFileBasename(const std::string& path) {
+    // Find the last occurrence of the directory separator (slash or backslash)
+    const size_t sepPos = path.find_last_of(std::filesystem::path::preferred_separator);
+    const std::string fileName = sepPos == std::string::npos ? path : path.substr(sepPos + 1);
+    return fileName;
+}
+
 
 /**
  * Loads a memory layout from source files, which are MIPS assembly files

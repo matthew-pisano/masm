@@ -9,8 +9,8 @@
 #include <map>
 #include <random>
 
-#include <masm/io/consoleio.h>
 #include <masm/interpreter/state.h>
+#include <masm/io/consoleio.h>
 
 
 /**
@@ -43,7 +43,7 @@ public:
      * Generates a random floating-point number in the range [0.0, 1.0]
      * @return A random floating-point number in the range [0.0, 1.0]
      */
-    float32_t getRandomFloat() {
+    float getRandomFloat() {
         std::uniform_real_distribution dist(0.0f, 1.0f);
         return dist(rng);
     }
@@ -52,7 +52,7 @@ public:
      * Generates a random double-precision floating-point number in the range [0.0, 1.0]
      * @return A random double-precision floating-point number in the range [0.0, 1.0]
      */
-    float64_t getRandomDouble() {
+    double getRandomDouble() {
         std::uniform_real_distribution dist(0.0, 1.0);
         return dist(rng);
     }

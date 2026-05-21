@@ -7,7 +7,45 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include <masm/utils.h>
+#include "conversion.h"
+
+
+std::string escapeString(const std::string& string) {
+    std::string escapedString;
+    bool toEscape = false;
+    for (const char c : string) {
+        if (!toEscape && c == '\\') {
+            toEscape = true;
+            continue;
+        }
+
+        if (toEscape) {
+            if (c == 'n')
+                escapedString += '\n';
+            else if (c == 'r')
+                escapedString += '\r';
+            else if (c == 'b')
+                escapedString += '\b';
+            else if (c == 'f')
+                escapedString += '\f';
+            else if (c == 'a')
+                escapedString += '\a';
+            else if (c == 'v')
+                escapedString += '\v';
+            else if (c == 't')
+                escapedString += '\t';
+            else if (c == '\\' || c == '"')
+                escapedString += c;
+            else
+                throw std::runtime_error("Invalid escape sequence \\" + std::string(1, c));
+            toEscape = false;
+            continue;
+        }
+
+        escapedString += c;
+    }
+    return escapedString;
+}
 
 
 void validateAllocDirective(const Token& dirToken, const std::vector<Token>& args) {
@@ -16,17 +54,15 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
         throw std::runtime_error("Directive '" + dirName + "' expects at least one argument");
 
     const std::vector<std::string> singleArgDirectives = {"asciiz", "ascii", "space", "align"};
-    if (std::ranges::find(singleArgDirectives, dirName) != singleArgDirectives.end() &&
-        args.size() != 1)
+    if (std::ranges::find(singleArgDirectives, dirName) != singleArgDirectives.end() && args.size() != 1)
         throw std::runtime_error("Directive '" + dirName + "' expects exactly one argument");
 
     // Align
     if (dirName == "align") {
         const std::string val = args[0].value;
-        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) ||
-            std::stoi(val) < 0 || std::stoi(val) > 3)
-            throw std::runtime_error("Directive '" + dirName +
-                                     "' expects an integer argument between 0 and 3");
+        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) < 0 ||
+            std::stoi(val) > 3)
+            throw std::runtime_error("Directive '" + dirName + "' expects an integer argument between 0 and 3");
     }
     // Asciiz or Ascii
     else if (dirName == "asciiz" || dirName == "ascii") {
@@ -39,8 +75,7 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
             if (arg.category != TokenCategory::IMMEDIATE || !isSignedInteger(arg.value)) {
                 if (dirName == "word" && arg.category == TokenCategory::LABEL_REF)
                     continue;
-                throw std::runtime_error("Directive '" + dirName +
-                                         "' expects integers as arguments");
+                throw std::runtime_error("Directive '" + dirName + "' expects integers as arguments");
             }
     }
     // Double or Float
@@ -52,17 +87,14 @@ void validateAllocDirective(const Token& dirToken, const std::vector<Token>& arg
     // Space
     else if (dirName == "space") {
         const std::string val = args[0].value;
-        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) ||
-            std::stoi(val) <= 0)
-            throw std::runtime_error("Directive '" + dirName +
-                                     "' expects a positive integer argument");
+        if (args[0].category != TokenCategory::IMMEDIATE || !isSignedInteger(val) || std::stoi(val) <= 0)
+            throw std::runtime_error("Directive '" + dirName + "' expects a positive integer argument");
     } else
         throw std::runtime_error("Unsupported directive '" + dirName + "'");
 }
 
 
-std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(const uint32_t loc,
-                                                                     const Token& dirToken,
+std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(const uint32_t loc, const Token& dirToken,
                                                                      const std::vector<Token>& args,
                                                                      const bool useLittleEndian) {
 
@@ -117,8 +149,7 @@ std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(const uint3
         for (const Token& arg : args) {
             std::vector<std::byte> halfBytes = parseAllocBlock(loc, 2, 2);
             padding = halfBytes.size() - 2;
-            populateMemBlock(halfBytes, static_cast<uint16_t>(std::stoi(arg.value)),
-                             useLittleEndian);
+            populateMemBlock(halfBytes, static_cast<uint16_t>(std::stoi(arg.value)), useLittleEndian);
             bytes.insert(bytes.end(), halfBytes.begin(), halfBytes.end());
         }
     }
@@ -131,8 +162,7 @@ std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(const uint3
         for (const Token& arg : args) {
             std::vector<std::byte> wordBytes = parseAllocBlock(loc, 4, 4);
             padding = wordBytes.size() - 4;
-            populateMemBlock(wordBytes, static_cast<uint32_t>(std::stoi(arg.value)),
-                             useLittleEndian);
+            populateMemBlock(wordBytes, static_cast<uint32_t>(std::stoi(arg.value)), useLittleEndian);
             bytes.insert(bytes.end(), wordBytes.begin(), wordBytes.end());
         }
     }
@@ -144,16 +174,14 @@ std::tuple<std::vector<std::byte>, size_t> parsePaddedAllocDirective(const uint3
 }
 
 
-std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken,
-                                           const std::vector<Token>& args,
+std::vector<std::byte> parseAllocDirective(const uint32_t loc, const Token& dirToken, const std::vector<Token>& args,
                                            const bool useLittleEndian) {
     // Simply return the allocation portion of parsePaddedAllocDirective()
     return std::get<0>(parsePaddedAllocDirective(loc, dirToken, args, useLittleEndian));
 }
 
 
-std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSize,
-                                       const uint32_t blockAlign) {
+std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSize, const uint32_t blockAlign) {
     if (blockAlign == 0)
         throw std::runtime_error("Block alignment cannot be zero");
 
@@ -165,50 +193,39 @@ std::vector<std::byte> parseAllocBlock(const uint32_t loc, const size_t blockSiz
 }
 
 
-void populateMemBlock(std::vector<std::byte>& block, const std::string& string,
-                      const bool nullTerminate) {
+void populateMemBlock(std::vector<std::byte>& block, const std::string& string, const bool nullTerminate) {
     const std::vector<std::byte> bytes = stringToBytes(string, nullTerminate);
     const long offset = static_cast<long>(block.size() - bytes.size());
     std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
-void populateMemBlock(std::byte& block, const uint8_t integer) {
-    block = static_cast<std::byte>(integer);
-}
+void populateMemBlock(std::byte& block, const uint8_t integer) { block = static_cast<std::byte>(integer); }
 
 
-void populateMemBlock(std::vector<std::byte>& block, const uint16_t integer,
-                      const bool useLittleEndian) {
-    const std::vector<std::byte> bytes =
-            useLittleEndian ? i16ToLEByte(integer) : i16ToBEByte(integer);
+void populateMemBlock(std::vector<std::byte>& block, const uint16_t integer, const bool useLittleEndian) {
+    const std::vector<std::byte> bytes = useLittleEndian ? i16ToLEByte(integer) : i16ToBEByte(integer);
     const long offset = static_cast<long>(block.size() - bytes.size());
     std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
-void populateMemBlock(std::vector<std::byte>& block, const uint32_t integer,
-                      const bool useLittleEndian) {
-    const std::vector<std::byte> bytes =
-            useLittleEndian ? i32ToLEByte(integer) : i32ToBEByte(integer);
+void populateMemBlock(std::vector<std::byte>& block, const uint32_t integer, const bool useLittleEndian) {
+    const std::vector<std::byte> bytes = useLittleEndian ? i32ToLEByte(integer) : i32ToBEByte(integer);
     const long offset = static_cast<long>(block.size() - bytes.size());
     std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
-void populateMemBlock(std::vector<std::byte>& block, const float decimal,
-                      const bool useLittleEndian) {
-    const std::vector<std::byte> bytes =
-            useLittleEndian ? f32ToLEByte(decimal) : f32ToBEByte(decimal);
+void populateMemBlock(std::vector<std::byte>& block, const float decimal, const bool useLittleEndian) {
+    const std::vector<std::byte> bytes = useLittleEndian ? f32ToLEByte(decimal) : f32ToBEByte(decimal);
     const long offset = static_cast<long>(block.size() - bytes.size());
     std::ranges::copy(bytes, block.begin() + offset);
 }
 
 
-void populateMemBlock(std::vector<std::byte>& block, const double decimal,
-                      const bool useLittleEndian) {
-    const std::vector<std::byte> bytes =
-            useLittleEndian ? f64ToLEByte(decimal) : f64ToBEByte(decimal);
+void populateMemBlock(std::vector<std::byte>& block, const double decimal, const bool useLittleEndian) {
+    const std::vector<std::byte> bytes = useLittleEndian ? f64ToLEByte(decimal) : f64ToBEByte(decimal);
     const long offset = static_cast<long>(block.size() - bytes.size());
     std::ranges::copy(bytes, block.begin() + offset);
 }

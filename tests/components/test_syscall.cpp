@@ -412,7 +412,7 @@ TEST_CASE("Test Random Float Syscall") {
     state.registers[Register::A1] = 1444;
 
     RandomGenerator rng(state.registers[Register::A1]);
-    const float32_t expected = rng.getRandomFloat();
+    const float expected = rng.getRandomFloat();
 
     sysHandle.setRandSeed(state);
     sysHandle.randFloat(state);
@@ -428,7 +428,7 @@ TEST_CASE("Test Random Double Syscall") {
     state.registers[Register::A1] = 1444;
 
     RandomGenerator rng(state.registers[Register::A1]);
-    const float64_t expected = rng.getRandomDouble();
+    const double expected = rng.getRandomDouble();
 
     sysHandle.setRandSeed(state);
     sysHandle.randDouble(state);
