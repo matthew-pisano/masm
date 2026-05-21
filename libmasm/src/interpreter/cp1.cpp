@@ -20,7 +20,7 @@ float Coproc1RegisterFile::getFloat(const uint32_t index) const {
 }
 
 void Coproc1RegisterFile::setFloat(const uint32_t index, const float value) {
-    registers.at(index) = *reinterpret_cast<const int32_t*>(&value);
+    registers.at(index) = std::bit_cast<int32_t>(value);
 }
 
 float Coproc1RegisterFile::getFloat(const Coproc1Register index) const {
@@ -38,14 +38,14 @@ double Coproc1RegisterFile::getDouble(const uint32_t index) const {
     const int32_t lower = registers.at(index); // Lower 32 bits
     const int32_t upper = registers.at(index + 1); // Upper 32 bits
     const int64_t valueInt = static_cast<int64_t>(upper) << 32 | static_cast<uint32_t>(lower);
-    return *reinterpret_cast<const double*>(&valueInt);
+    return std::bit_cast<double>(valueInt);
 }
 
 void Coproc1RegisterFile::setDouble(const uint32_t index, const double value) {
     if (index % 2 != 0)
         throw std::runtime_error("Invalid double precision register: f" + std::to_string(index));
 
-    const int64_t valueInt = *reinterpret_cast<const int64_t*>(&value);
+    const int64_t valueInt = std::bit_cast<int64_t>(value);
     registers.at(index) = static_cast<int32_t>(valueInt & 0xFFFFFFFF); // Lower 32 bits
     registers.at(index + 1) = static_cast<int32_t>(valueInt >> 32 & 0xFFFFFFFF); // Upper 32 bits
 }

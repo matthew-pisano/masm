@@ -11,8 +11,6 @@
 #include <masm/assembler/parser.h>
 #include <masm/assembler/serialization.h>
 
-#include "fileio.h"
-
 
 /**
  * Gets the basename of a file path

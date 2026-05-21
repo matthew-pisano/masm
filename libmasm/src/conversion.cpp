@@ -41,14 +41,14 @@ std::vector<std::byte> i16ToBEByte(const uint16_t i16) {
 }
 
 
-std::vector<std::byte> f32ToBEByte(float f32) {
-    const uint32_t i32 = *reinterpret_cast<uint32_t*>(&f32);
+std::vector<std::byte> f32ToBEByte(const float f32) {
+    const uint32_t i32 = std::bit_cast<uint32_t>(f32);
     return i32ToBEByte(i32);
 }
 
 
-std::vector<std::byte> f64ToBEByte(double f64) {
-    const uint64_t i64 = *reinterpret_cast<uint64_t*>(&f64);
+std::vector<std::byte> f64ToBEByte(const double f64) {
+    const uint64_t i64 = std::bit_cast<uint64_t>(f64);
     std::vector<std::byte> upperBytes = i32ToBEByte(i64 >> 32 & 0xFFFFFFFF);
     std::vector<std::byte> lowerBytes = i32ToBEByte(i64 & 0xFFFFFFFF);
     upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
@@ -76,14 +76,14 @@ std::vector<std::byte> i16ToLEByte(const uint16_t i16) {
 }
 
 
-std::vector<std::byte> f32ToLEByte(float f32) {
-    const uint32_t i32 = *reinterpret_cast<uint32_t*>(&f32);
+std::vector<std::byte> f32ToLEByte(const float f32) {
+    const uint32_t i32 = std::bit_cast<uint32_t>(f32);
     return i32ToLEByte(i32);
 }
 
 
-std::vector<std::byte> f64ToLEByte(double f64) {
-    const uint64_t i64 = *reinterpret_cast<uint64_t*>(&f64);
+std::vector<std::byte> f64ToLEByte(const double f64) {
+    const uint64_t i64 = std::bit_cast<uint64_t>(f64);
     std::vector<std::byte> upperBytes = i32ToLEByte(i64 >> 32 & 0xFFFFFFFF);
     std::vector<std::byte> lowerBytes = i32ToLEByte(i64 & 0xFFFFFFFF);
     upperBytes.insert(upperBytes.end(), lowerBytes.begin(), lowerBytes.end());
