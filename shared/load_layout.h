@@ -2,15 +2,22 @@
 // Created by matthew on 7/29/25.
 //
 
+#ifndef LOAD_LAYOUT_H
+#define LOAD_LAYOUT_H
 
-#include <masm/runtime.h>
-
+#include <masm/assembler/memory.h>
+#include <masm/assembler/parser.h>
 #include <masm/assembler/serialization.h>
 #include <masm/io/fileio.h>
 #include <masm/utils.h>
 
-
-MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {
+/**
+ * Loads a memory layout from source files, which are MIPS assembly files
+ * @param inputFileNames A vector of file names to load the MIPS assembly source code from
+ * @param parser The parser to use for parsing the source code
+ * @return A memory layout object constructed from the source files
+ */
+inline MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {
     std::vector<SourceFile> sourceFiles;
     sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
     for (const std::string& fileName : inputFileNames)
@@ -23,7 +30,12 @@ MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, P
 }
 
 
-MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
+/**
+ * Loads a memory layout from a binary file, which is a compiled MIPS program
+ * @param inputFileNames A vector of file names to load the binary data from
+ * @return A memory layout object constructed from the binary data
+ */
+inline MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
     if (inputFileNames.size() > 1)
         throw std::runtime_error("Only one binary file may be loaded in at a time");
 
@@ -31,14 +43,19 @@ MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileNames) {
         const std::vector<std::byte> binary = readFileBytes(inputFileNames[0]);
         const MemLayout layout = loadLayout(binary);
         return layout;
-    } catch (const std::exception& e) {
+    } catch ([[maybe_unused]] const std::exception& e) {
         throw std::runtime_error("Failed to load binary file '" + inputFileNames[0] +
                                  "': check to make sure the file exists and is not malformed");
     }
 }
 
 
-bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
+/**
+ * Checks if the first input file is a binary file (compiled MIPS program)
+ * @param inputFileNames A vector of file names to check
+ * @return True if the first file is a binary file, false otherwise
+ */
+inline bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
     if (inputFileNames.empty())
         return false;
 
@@ -46,3 +63,5 @@ bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
     const size_t firstSize = firstName.size();
     return firstSize > 2 && firstName.substr(firstSize - 2, 2) == ".o";
 }
+
+#endif // LOAD_LAYOUT_H

@@ -7,7 +7,6 @@ add_library(libmasm STATIC
         ${LIBMASM_INTERPRETER_SOURCES}
         ${LIBMASM_IO_SOURCES}
         src/utils.cpp
-        src/runtime.cpp
 )
 target_include_directories(libmasm
         PUBLIC

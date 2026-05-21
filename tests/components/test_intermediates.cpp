@@ -7,10 +7,10 @@
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
+#include <../../shared/load_layout.h>
 #include <masm/assembler/memory.h>
 #include <masm/assembler/serialization.h>
 #include <masm/io/fileio.h>
-#include <masm/runtime.h>
 
 #include "tests/testing_utilities.h"
 

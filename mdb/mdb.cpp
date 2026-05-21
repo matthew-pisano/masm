@@ -8,9 +8,9 @@
 #include <masm/interpreter/interpreter.h>
 #include <masm/io/consoleio.h>
 #include <masm/io/fileio.h>
-#include <masm/runtime.h>
 
 #include "debug_interpreter.h"
+#include "load_layout.h"
 #include "version.h"
 
 
