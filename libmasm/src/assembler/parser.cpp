@@ -161,12 +161,12 @@ std::vector<std::byte> Parser::parseInstruction(const uint32_t loc, const Token&
     for (const Token& arg : args) {
         switch (arg.category) {
             case TokenCategory::IMMEDIATE:
-                argCodes.push_back(stoui32(arg.value));
+                argCodes.push_back(stringToi32(arg.value));
                 break;
             case TokenCategory::REGISTER: {
                 if (isSignedInteger(arg.value))
                     // If the register is an integer, use it as the register index
-                    argCodes.push_back(stoui32(arg.value));
+                    argCodes.push_back(stringToi32(arg.value));
                 else {
                     // Otherwise, use the register name to get the index
                     if (arg.value.starts_with("f"))
@@ -410,7 +410,7 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) const {
                 if (args[1].category == TokenCategory::LABEL_REF)
                     value = labelMap.get(args[1].value);
                 else
-                    value = stoui32(args[1].value);
+                    value = stringToi32(args[1].value);
 
                 const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
                 const unsigned int lowerBytes = value & 0x0000FFFF;
@@ -448,7 +448,7 @@ void Parser::resolvePseudoInstructions(std::vector<LineTokens>& tokens) const {
             }
             // subi $tx, $ty, imm  -> addi $tx, $ty, -imm
             else if (instructionName == "subi") {
-                uint32_t immediate = -stoui32(args[2].value);
+                uint32_t immediate = -stringToi32(args[2].value);
                 tokenLine.tokens = {
                         {TokenCategory::INSTRUCTION, "addi"}, args[0],
                         {TokenCategory::SEPERATOR, ","},      args[1],
@@ -531,7 +531,7 @@ std::vector<std::vector<Token>> Parser::parseInstructionAliases(const Token& fir
         if (args[1].category == TokenCategory::LABEL_REF)
             value = labelMap.get(args[1].value);
         else
-            value = stoui32(args[1].value);
+            value = stringToi32(args[1].value);
 
         const unsigned int upperBytes = (value & 0xFFFF0000) >> 16;
         const unsigned int lowerBytes = value & 0x0000FFFF;

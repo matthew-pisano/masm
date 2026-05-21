@@ -88,28 +88,11 @@ std::vector<std::byte> f64ToLEByte(double f64);
 
 
 /**
- * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
- * @param string The string to convert
- * @param nullTerminate Whether to null terminate the string
- * @return The vector of bytes representing the string
- */
-std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
-
-
-/**
- * Converts a hexadecimal string to an integer string
- * @param hex The hexadecimal string to convert
- * @return The integer string value of the hexadecimal string
- */
-std::string hexToInt(std::string hex);
-
-
-/**
  * Converts an integer to a hexadecimal string
  * @param value The integer value to convert
  * @return The hexadecimal string representation of the integer value
  */
-std::string hexToString(uint32_t value);
+std::string i32ToHexString(uint32_t value);
 
 
 /**
@@ -117,6 +100,15 @@ std::string hexToString(uint32_t value);
  * @param str The string to convert
  * @return The unsigned 32-bit integer value of the string
  */
-uint32_t stoui32(const std::string& str);
+uint32_t stringToi32(const std::string& str);
+
+
+/**
+ * Converts a string to a vector of bytes, where each byte is the ASCII value of the character
+ * @param string The string to convert
+ * @param nullTerminate Whether to null terminate the string
+ * @return The vector of bytes representing the string
+ */
+std::vector<std::byte> stringToBytes(const std::string& string, bool nullTerminate);
 
 #endif // MASM_CONVERSIONS_H

@@ -190,8 +190,13 @@ void Tokenizer::terminateToken(const char c, TokenCategory& currentType, std::st
     if (!isspace(c) && currentToken.empty() && tokenLine.tokens.empty())
         throw MasmSyntaxError("Unexpected token '" + std::string(1, c) + "'", tokenLine.filename, tokenLine.lineno);
 
-    if (currentType == TokenCategory::IMMEDIATE && currentToken.starts_with("0x"))
-        currentToken = hexToInt(currentToken);
+    if (currentType == TokenCategory::IMMEDIATE && currentToken.starts_with("0x")) {
+        std::stringstream ss;
+        ss << std::hex << currentToken.substr(2);
+        uint32_t tokenValue;
+        ss >> tokenValue;
+        currentToken = std::to_string(tokenValue);
+    }
 
     // Assign the current token as a label definition if a colon follows
     if (c == ':')

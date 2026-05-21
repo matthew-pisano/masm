@@ -91,42 +91,14 @@ std::vector<std::byte> f64ToLEByte(double f64) {
 }
 
 
-std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate) {
-    std::vector<std::byte> bytes = {};
-    for (const char c : string)
-        bytes.push_back(static_cast<std::byte>(c));
-    if (nullTerminate)
-        bytes.push_back(static_cast<std::byte>(0));
-    return bytes;
-}
-
-
-std::string hexToInt(std::string hex) {
-    const std::regex pattern("^[-]?0x[0-9a-fA-F]+$");
-    if (!std::regex_match(hex, pattern))
-        throw std::runtime_error("Invalid hex integer " + hex);
-
-    hex = hex.substr(2);
-    uint32_t hexInt;
-    try {
-        hexInt = std::stoull(hex, nullptr, 16);
-    } catch ([[maybe_unused]] const std::out_of_range& e) {
-        throw std::runtime_error("Hex integer out of range: " + hex);
-    } catch ([[maybe_unused]] const std::invalid_argument& e) {
-        throw std::runtime_error("Invalid hex integer: " + hex);
-    }
-    return std::to_string(hexInt);
-}
-
-
-std::string hexToString(const uint32_t value) {
+std::string i32ToHexString(const uint32_t value) {
     std::stringstream ss;
     ss << "0x" << std::hex << value;
     return ss.str();
 }
 
 
-uint32_t stoui32(const std::string& str) {
+uint32_t stringToi32(const std::string& str) {
     if (!isSignedInteger(str))
         throw std::runtime_error("Invalid integer " + str);
 
@@ -141,4 +113,14 @@ uint32_t stoui32(const std::string& str) {
     } catch ([[maybe_unused]] const std::invalid_argument& e) {
         throw std::runtime_error("Invalid unsigned integer: " + str);
     }
+}
+
+
+std::vector<std::byte> stringToBytes(const std::string& string, const bool nullTerminate) {
+    std::vector<std::byte> bytes = {};
+    for (const char c : string)
+        bytes.push_back(static_cast<std::byte>(c));
+    if (nullTerminate)
+        bytes.push_back(static_cast<std::byte>(0));
+    return bytes;
 }
