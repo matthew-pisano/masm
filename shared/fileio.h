@@ -2,14 +2,21 @@
 // Created by matthew on 4/13/25.
 //
 
-#include <masm/io/fileio.h>
+#ifndef FILEIO_H
+#define FILEIO_H
 
 #include <fstream>
 #include <glob.h>
-#include <stdexcept>
+#include <string>
+#include <vector>
 
 
-std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPaths) {
+/**
+ * Resolves wildcard characters in file paths to actual file names
+ * @param rawPaths A vector of file paths that may contain wildcard characters
+ * @return A vector of file paths with wildcards resolved to actual file names
+ */
+inline std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPaths) {
     std::vector<std::string> resolvedPaths;
     for (const auto& path : rawPaths) {
         // Use glob to resolve wildcards
@@ -25,8 +32,13 @@ std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPat
     return resolvedPaths;
 }
 
-
-std::string readFile(const std::string& fileName) {
+/**
+ * Loads a file and returns its contents as a string
+ * @param fileName The name of the file to load
+ * @return A string containing the contents of the file
+ * @throw runtime_error When a file fails to open
+ */
+inline std::string readFile(const std::string& fileName) {
     std::ifstream inputFile;
     std::string result;
 
@@ -47,7 +59,12 @@ std::string readFile(const std::string& fileName) {
 }
 
 
-std::vector<std::byte> readFileBytes(const std::string& fileName) {
+/**
+ * Loads a file and returns its contents as a vector of bytes (characters)
+ * @param fileName The name of the file to load
+ * @return A vector of the bytes within the given file
+ */
+inline std::vector<std::byte> readFileBytes(const std::string& fileName) {
     std::ifstream inputFile;
     std::vector<std::byte> result;
 
@@ -68,7 +85,12 @@ std::vector<std::byte> readFileBytes(const std::string& fileName) {
 }
 
 
-void writeFile(const std::string& fileName, const std::string& contents) {
+/**
+ * Writes a string to a file, overwriting any existing contents
+ * @param fileName The name of the file to write to
+ * @param contents The contents to write to the file
+ */
+inline void writeFile(const std::string& fileName, const std::string& contents) {
     std::ofstream outputFile;
 
     outputFile.open(fileName, std::ios::out | std::ios::trunc);
@@ -84,7 +106,12 @@ void writeFile(const std::string& fileName, const std::string& contents) {
 }
 
 
-void writeFileBytes(const std::string& fileName, const std::vector<std::byte>& contents) {
+/**
+ * Writes a vector of bytes to a binary file, overwriting any existing contents
+ * @param fileName The name of the file to write to
+ * @param contents The contents to write to the file as a vector of bytes
+ */
+inline void writeFileBytes(const std::string& fileName, const std::vector<std::byte>& contents) {
     std::ofstream outputFile;
 
     outputFile.open(fileName, std::ios::out | std::ios::binary | std::ios::trunc);
@@ -99,3 +126,5 @@ void writeFileBytes(const std::string& fileName, const std::vector<std::byte>& c
     // Close the file
     outputFile.close();
 }
+
+#endif // FILEIO_H

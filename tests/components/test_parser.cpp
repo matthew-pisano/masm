@@ -10,9 +10,9 @@
 
 #include <masm/assembler/parser.h>
 #include <masm/exceptions.h>
-#include <masm/io/fileio.h>
 
 #include "libmasm/src/assembler/directive.h"
+#include "shared/fileio.h"
 #include "shared/load_layout.h"
 #include "tests/testing_utilities.h"
 

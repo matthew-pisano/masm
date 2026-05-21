@@ -8,8 +8,8 @@
 #include <masm/assembler/serialization.h>
 #include <masm/interpreter/interpreter.h>
 #include <masm/io/consoleio.h>
-#include <masm/io/fileio.h>
 
+#include "fileio.h"
 #include "load_layout.h"
 #include "version.h"
 

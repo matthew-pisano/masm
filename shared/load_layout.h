@@ -10,7 +10,8 @@
 #include <masm/assembler/memory.h>
 #include <masm/assembler/parser.h>
 #include <masm/assembler/serialization.h>
-#include <masm/io/fileio.h>
+
+#include "fileio.h"
 
 
 /**
