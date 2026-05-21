@@ -8,19 +8,19 @@ FetchContent_MakeAvailable(Catch2)
 add_executable(masm-tests
         testing_utilities.cpp
         ${CMAKE_SOURCE_DIR}/mdb/debug_interpreter.cpp
-        components/test_tokenizer.cpp
-        components/test_parser.cpp
-        components/test_interpreter.cpp
-        components/test_syscall.cpp
         components/test_intermediates.cpp
+        components/test_interpreter.cpp
+        components/test_parser.cpp
+        components/test_syscall.cpp
+        components/test_tokenizer.cpp
+        instructions/test_aliased_instructions.cpp
         instructions/test_arithmetic_instructions.cpp
         instructions/test_comparison_instructions.cpp
         instructions/test_control_instructions.cpp
-        instructions/test_memory_instructions.cpp
-        instructions/test_pseudo_instructions.cpp
-        instructions/test_aliased_instructions.cpp
         instructions/test_cp0_instructions.cpp
         instructions/test_cp1_instructions.cpp
+        instructions/test_memory_instructions.cpp
+        instructions/test_pseudo_instructions.cpp
         utils/test_fileio.cpp
         utils/test_utils.cpp
 )

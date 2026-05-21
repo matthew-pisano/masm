@@ -386,61 +386,62 @@ TEST_CASE("Test Tokenizer Syntax Errors") {
 
 TEST_CASE("Test Tokenize Hello World") {
     const std::string test_case = "hello_world";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Load Address") {
     const std::string test_case = "load_address";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Syscall") {
     const std::string test_case = "syscall";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 TEST_CASE("Test Tokenize Loops") {
     const std::string test_case = "loops";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Globals") {
     const std::string test_case = "globals";
-    validateTokens({"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
-                   "test/fixtures/" + test_case + "/globalsOne.tkn");
+    validateTokens(
+            {"tests/fixtures/" + test_case + "/globalsOne.asm", "tests/fixtures/" + test_case + "/globalsTwo.asm"},
+            "tests/fixtures/" + test_case + "/globalsOne.tkn");
 }
 
 
 TEST_CASE("Test Tokenize Syscall Input Output") {
     const std::string test_case = "input_output";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize MMIO Input Output") {
     const std::string test_case = "mmio";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }
 
 
 TEST_CASE("Test Tokenize Echo Interrupt") {
     const std::string test_case = "echointer";
-    validateTokens({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".tkn");
+    validateTokens({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".tkn");
 }

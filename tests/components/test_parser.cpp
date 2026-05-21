@@ -209,69 +209,69 @@ TEST_CASE("Test Word Allocation from Label") {
 
 TEST_CASE("Test Parse Hello World") {
     const std::string test_case = "hello_world";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
 TEST_CASE("Test Parse Load Address") {
     const std::string test_case = "load_address";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
 TEST_CASE("Test Parse Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
 TEST_CASE("Test Parse Syscall") {
     const std::string test_case = "syscall";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 TEST_CASE("Test Parse Loops") {
     const std::string test_case = "loops";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 TEST_CASE("Test Parse Globals") {
     const std::string test_case = "globals";
     // Parse without raw since it contains a global main
     validateMemLayout(
-            {"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
-            "test/fixtures/" + test_case + "/globalsOne.pse", false, false);
+            {"tests/fixtures/" + test_case + "/globalsOne.asm", "tests/fixtures/" + test_case + "/globalsTwo.asm"},
+            "tests/fixtures/" + test_case + "/globalsOne.pse", false, false);
 }
 
 
 TEST_CASE("Test Parse Syscall Input Output") {
     const std::string test_case = "input_output";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
 TEST_CASE("Test Parse MMIO Input Output") {
     const std::string test_case = "mmio";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }
 
 
 TEST_CASE("Test Parse MMIO Input Output Little Endian") {
     const std::string test_case = "mmio_le";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse", true);
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse", true);
 }
 
 
 TEST_CASE("Test Parse Echo Interrupt") {
     const std::string test_case = "echointer";
-    validateMemLayout({"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                      "test/fixtures/" + test_case + "/" + test_case + ".pse");
+    validateMemLayout({"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                      "tests/fixtures/" + test_case + "/" + test_case + ".pse");
 }

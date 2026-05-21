@@ -18,19 +18,19 @@ TEST_CASE("Test Wild Card Resolution") {
         REQUIRE(test == resolveWildcards({test})[0]);
     }
     SECTION("Test Single Wildcard") {
-        std::vector<std::string> inputPaths = {"test/fixtures/arithmetic/*.asm"};
-        std::vector<std::string> expectedPaths = {"test/fixtures/arithmetic/arithmetic.asm"};
+        std::vector<std::string> inputPaths = {"tests/fixtures/arithmetic/*.asm"};
+        std::vector<std::string> expectedPaths = {"tests/fixtures/arithmetic/arithmetic.asm"};
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
 
-        inputPaths = {"test/fixtures/arithmetic/*"};
-        expectedPaths = {"test/fixtures/arithmetic/arithmetic.asm", "test/fixtures/arithmetic/arithmetic.pse",
-                         "test/fixtures/arithmetic/arithmetic.tkn", "test/fixtures/arithmetic/arithmetic.txt"};
+        inputPaths = {"tests/fixtures/arithmetic/*"};
+        expectedPaths = {"tests/fixtures/arithmetic/arithmetic.asm", "tests/fixtures/arithmetic/arithmetic.pse",
+                         "tests/fixtures/arithmetic/arithmetic.tkn", "tests/fixtures/arithmetic/arithmetic.txt"};
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
     }
     SECTION("Test Multiple Wildcard") {
-        std::vector<std::string> inputPaths = {"test/fixtures/arithmetic/*.t*"};
-        std::vector<std::string> expectedPaths = {"test/fixtures/arithmetic/arithmetic.tkn",
-                                                  "test/fixtures/arithmetic/arithmetic.txt"};
+        std::vector<std::string> inputPaths = {"tests/fixtures/arithmetic/*.t*"};
+        std::vector<std::string> expectedPaths = {"tests/fixtures/arithmetic/arithmetic.tkn",
+                                                  "tests/fixtures/arithmetic/arithmetic.txt"};
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
     }
 }

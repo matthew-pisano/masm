@@ -7,13 +7,13 @@ import pytest
 
 @pytest.fixture(scope="module")
 def syscall_io_asm():
-    with open("test/fixtures/input_output/input_output.asm") as f:
+    with open("tests/fixtures/input_output/input_output.asm") as f:
         return f.read()
 
 
 @pytest.fixture(scope="module")
 def mem_mapped_io_asm():
-    with open("test/fixtures/mmio/mmio.asm") as f:
+    with open("tests/fixtures/mmio/mmio.asm") as f:
         return f.read()
 
 
@@ -33,7 +33,7 @@ class TestBindings:
         interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
         exitCode = interpreter.interpret(layout)
 
-        with open("test/fixtures/input_output/input_output.txt", "rb") as f:
+        with open("tests/fixtures/input_output/input_output.txt", "rb") as f:
             expected_output = f.read()
 
         assert exitCode == 0
@@ -53,7 +53,7 @@ class TestBindings:
         interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
         exitCode = interpreter.interpret(layout)
 
-        with open("test/fixtures/mmio/mmio.txt", "rb") as f:
+        with open("tests/fixtures/mmio/mmio.txt", "rb") as f:
             expected_output = f.read()
 
         assert exitCode == 0

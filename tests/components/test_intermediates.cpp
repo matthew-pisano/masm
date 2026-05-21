@@ -16,7 +16,7 @@
 
 
 TEST_CASE("Test Stringify Layout") {
-    const std::string fixturePath = "test/fixtures/hello_world/hello_world.asm";
+    const std::string fixturePath = "tests/fixtures/hello_world/hello_world.asm";
     Parser parser;
     const MemLayout layout = loadLayoutFromSource({fixturePath}, parser);
     const std::string layoutString = stringifyLayout(layout, parser.getLabels());

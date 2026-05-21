@@ -89,67 +89,68 @@ TEST_CASE("Test Runtime Error") {
 
 TEST_CASE("Test Execute Hello World") {
     const std::string test_case = "hello_world";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Arithmetic") {
     const std::string test_case = "arithmetic";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Load Address") {
     const std::string test_case = "load_address";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Loops") {
     const std::string test_case = "loops";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 
 TEST_CASE("Test Execute Syscall") {
     const std::string test_case = "syscall";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt");
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
 }
 
 TEST_CASE("Test Execute Globals") {
     const std::string test_case = "globals";
-    validateOutput(IOMode::SYSCALL,
-                   {"test/fixtures/" + test_case + "/globalsOne.asm", "test/fixtures/" + test_case + "/globalsTwo.asm"},
-                   "test/fixtures/" + test_case + "/globalsOne.txt");
+    validateOutput(
+            IOMode::SYSCALL,
+            {"tests/fixtures/" + test_case + "/globalsOne.asm", "tests/fixtures/" + test_case + "/globalsTwo.asm"},
+            "tests/fixtures/" + test_case + "/globalsOne.txt");
 }
 
 
 TEST_CASE("Test Execute Syscall Input Output") {
     const std::string test_case = "input_output";
     const std::string inputString = "5\n";
-    validateOutput(IOMode::SYSCALL, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }
 
 
 TEST_CASE("Test Execute MMIO Input Output") {
     const std::string test_case = "mmio";
     const std::string inputString = "1234";
-    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+    validateOutput(IOMode::MMIO, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }
 
 
 TEST_CASE("Test Execute MMIO Input Output Little Endian") {
     const std::string test_case = "mmio_le";
     const std::string inputString = "1234";
-    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString, true);
+    validateOutput(IOMode::MMIO, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt", inputString, true);
 }
 
 
@@ -157,6 +158,6 @@ TEST_CASE("Test Execute Echo Interrupt") {
     const std::string test_case = "echointer";
     const std::string padding(50, '\0');
     const std::string inputString = padding + "Hello there!q";
-    validateOutput(IOMode::MMIO, {"test/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "test/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
+    validateOutput(IOMode::MMIO, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt", inputString);
 }
