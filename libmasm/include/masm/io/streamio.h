@@ -4,6 +4,7 @@
 
 #ifndef STREAMIO_H
 #define STREAMIO_H
+
 #include <iostream>
 
 

@@ -4,7 +4,7 @@
 
 #ifndef CONSOLEIO_H
 #define CONSOLEIO_H
-#include <cstdint>
+
 #include <iostream>
 
 #include <masm/io/streamio.h>

@@ -5,9 +5,6 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <iostream>
-
-
 #include <masm/assembler/memory.h>
 #include <masm/interpreter/state.h>
 #include <masm/interpreter/syscalls.h>
