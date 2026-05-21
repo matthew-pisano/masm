@@ -112,8 +112,7 @@ protected:
      * @return the new position in the stream, or -1 on error
      */
     pos_type seekoff(off_type off, const std::ios_base::seekdir way,
-                     const std::ios_base::openmode which = std::ios_base::in |
-                                                           std::ios_base::out) override {
+                     const std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override {
         if (which & std::ios_base::out) {
             // For output, delegate to BytesIO's seek
             try {
@@ -139,8 +138,7 @@ protected:
                     // Account for buffered data
                     const off_type current_pos = bytesio_.attr("tell")().cast<off_type>();
                     const off_type buffered_offset = gptr() - eback();
-                    bytesio_.attr("seek")(current_pos - (egptr() - eback()) + buffered_offset +
-                                          off);
+                    bytesio_.attr("seek")(current_pos - (egptr() - eback()) + buffered_offset + off);
                 } else if (way == std::ios_base::end) {
                     bytesio_.attr("seek")(off, 2);
                 }
@@ -161,8 +159,7 @@ protected:
      * @return the new position in the stream, or -1 on error
      */
     pos_type seekpos(const pos_type sp,
-                     const std::ios_base::openmode which = std::ios_base::in |
-                                                           std::ios_base::out) override {
+                     const std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override {
         return seekoff(sp, std::ios_base::beg, which);
     }
 

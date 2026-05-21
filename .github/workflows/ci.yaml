@@ -35,13 +35,12 @@ jobs:
       - name: Run Clang Format
         run: |
           sed -i '/InsertNewlineAtEOF: true/d' .clang-format
-          ./run-clang-format/run-clang-format.py -r src include test
+          ./run-clang-format/run-clang-format.py -r libmasm masm mdb python shared tests tools
 
       - name: Run MyPy
         run: |
           export MYPYPATH=$(pwd)/python
           $VENV_PATH/bin/mypy python
-          $VENV_PATH/bin/mypy test
 
   build:
     runs-on: ubuntu-latest

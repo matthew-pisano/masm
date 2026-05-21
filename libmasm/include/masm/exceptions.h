@@ -26,14 +26,12 @@ public:
  * A class for syntax errors in MASM
  */
 class MasmSyntaxError final : public MasmException {
-    static std::string constructMessage(const std::string& message, const std::string& filename,
-                                        const size_t lineno) {
+    static std::string constructMessage(const std::string& message, const std::string& filename, const size_t lineno) {
         return std::format("Syntax error at {}:{} -> {}", filename, lineno, message);
     }
 
 public:
-    explicit MasmSyntaxError(const std::string& message, const std::string& filename,
-                             const size_t lineno) :
+    explicit MasmSyntaxError(const std::string& message, const std::string& filename, const size_t lineno) :
         MasmException(constructMessage(message, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
@@ -51,16 +49,15 @@ class MasmRuntimeError final : public MasmException {
      * @param filename The name of the source file that produced the error
      * @return The formatted message
      */
-    static std::string constructMessage(const std::string& message, const uint32_t addr,
-                                        const std::string& filename, const size_t lineno) {
+    static std::string constructMessage(const std::string& message, const uint32_t addr, const std::string& filename,
+                                        const size_t lineno) {
         std::string hexAddr = std::format("0x{:08X}", addr);
         return std::format("Runtime error at {} ({}:{}) -> {}", hexAddr, filename, lineno, message);
     }
 
 public:
-    explicit MasmRuntimeError(const std::string& message, const uint32_t addr,
-                              const std::string& filename, const size_t lineno) :
-        MasmException(constructMessage(message, addr, filename, lineno)) {}
+    explicit MasmRuntimeError(const std::string& message, const uint32_t addr, const std::string& filename,
+                              const size_t lineno) : MasmException(constructMessage(message, addr, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 
@@ -99,8 +96,7 @@ public:
  */
 class DebuggerExit final : public ExecExit {
 public:
-    explicit DebuggerExit(const std::string& message, const int32_t code) :
-        ExecExit(message, code) {}
+    explicit DebuggerExit(const std::string& message, const int32_t code) : ExecExit(message, code) {}
 };
 
 

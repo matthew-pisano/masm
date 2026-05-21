@@ -68,8 +68,7 @@ public:
      * @param src the source vector to convert
      * @return a Python bytes object containing the data from the vector
      */
-    static handle cast(const std::vector<std::byte>& src, return_value_policy /* policy */,
-                       handle /* parent */) {
+    static handle cast(const std::vector<std::byte>& src, return_value_policy /* policy */, handle /* parent */) {
         return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(src.data()),
                                          static_cast<Py_ssize_t>(src.size()));
     }

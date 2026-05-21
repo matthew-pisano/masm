@@ -8,9 +8,9 @@
 
 #include <CLI/CLI.hpp>
 
-#include "fileio.h"
 #include <masm/assembler/parser.h>
 #include <masm/assembler/tokenizer.h>
+#include "fileio.h"
 
 #include "load_layout.h"
 

@@ -132,8 +132,8 @@ class Tokenizer {
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating line
      */
-    static std::vector<LineTokens> tokenizeLine(const std::string& sourceLine,
-                                                const std::string& filename, size_t lineno);
+    static std::vector<LineTokens> tokenizeLine(const std::string& sourceLine, const std::string& filename,
+                                                size_t lineno);
 
 public:
     /**
@@ -150,8 +150,7 @@ public:
      * @return A vector of source code lines
      * @throw MasmSyntaxError When encountering a malformed or early terminating file
      */
-    [[nodiscard]] static std::vector<LineTokens>
-    tokenize(const std::vector<SourceFile>& sourceFiles);
+    [[nodiscard]] static std::vector<LineTokens> tokenize(const std::vector<SourceFile>& sourceFiles);
 };
 
 #endif // TOKENIZER_H
