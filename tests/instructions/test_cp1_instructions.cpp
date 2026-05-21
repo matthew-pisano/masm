@@ -592,9 +592,9 @@ TEST_CASE("Test FP ldc1 Instruction") {
     uint32_t address = memSectionOffset(MemSection::DATA);
 
     constexpr double expected = 75.5;
-    const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
-    interpreter.getState().memory.wordTo(address, static_cast<int32_t>(intRepr & 0xFFFFFFFF));
-    interpreter.getState().memory.wordTo(address + 4, static_cast<int32_t>(intRepr >> 32));
+    constexpr int64_t intRepr = std::bit_cast<int64_t>(expected);
+    interpreter.getState().memory.wordTo(address, intRepr & 0xFFFFFFFF);
+    interpreter.getState().memory.wordTo(address + 4, intRepr >> 32);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == interpreter.getState().cp1.getDouble(Coproc1Register::F0)); }
@@ -628,7 +628,7 @@ TEST_CASE("Test FP lwc1 Instruction") {
     uint32_t address = memSectionOffset(MemSection::DATA);
 
     constexpr float expected = 75.5;
-    const int32_t intRepr = *reinterpret_cast<const int32_t*>(&expected);
+    constexpr int32_t intRepr = std::bit_cast<int32_t>(expected);
     interpreter.getState().memory.wordTo(address, intRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.interpret(actualLayout);
@@ -663,9 +663,9 @@ TEST_CASE("Test FP sdc1 Instruction") {
     uint32_t address = memSectionOffset(MemSection::DATA);
 
     constexpr double expected = 75.5;
-    const int64_t intRepr = *reinterpret_cast<const int64_t*>(&expected);
-    const int32_t lower = static_cast<int32_t>(intRepr & 0xFFFFFFFF);
-    const int32_t upper = static_cast<int32_t>(intRepr >> 32);
+    constexpr int64_t intRepr = std::bit_cast<int64_t>(expected);
+    constexpr int32_t lower = intRepr & 0xFFFFFFFF;
+    constexpr int32_t upper = intRepr >> 32;
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.getState().cp1.setDouble(Coproc1Register::F0, expected);
     interpreter.interpret(actualLayout);
@@ -703,7 +703,7 @@ TEST_CASE("Test FP swc1 Instruction") {
     uint32_t address = memSectionOffset(MemSection::DATA);
 
     constexpr float floatRepr = 75.5;
-    const int32_t expected = *reinterpret_cast<const int32_t*>(&floatRepr);
+    constexpr int32_t expected = std::bit_cast<int32_t>(floatRepr);
     interpreter.getState().registers[Register::T0] = static_cast<int32_t>(address);
     interpreter.getState().cp1.setFloat(Coproc1Register::F0, 75.5);
     interpreter.interpret(actualLayout);
