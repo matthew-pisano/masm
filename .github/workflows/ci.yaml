@@ -67,7 +67,7 @@ jobs:
           cmake --build build
       - name: Package Python
         run: |
-          cp build/pymasm_core* python/pymasm/
+          cp build/python/pymasm_core* python/pymasm/
           cd python
           $VENV_PATH/bin/python -m build --wheel
       - name: Upload build artifacts
@@ -95,8 +95,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/logs
       - name: Run CTests
         run: |
-          chmod +x build/masm-tests
-          ctest --test-dir build --output-on-failure --verbose --output-junit ${{ github.workspace }}/logs/ctest-results.xml
+          chmod +x build/tests/masm-tests
+          ctest --test-dir build/tests --output-on-failure --verbose --output-junit ${{ github.workspace }}/logs/ctest-results.xml
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()
