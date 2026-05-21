@@ -2,14 +2,15 @@
 #include <string>
 #include <vector>
 
-#include "../libmasm/include/masm/runtime.h"
-#include "CLI/CLI.hpp"
+#include <CLI/CLI.hpp>
+
+#include <masm/assembler/parser.h>
+#include <masm/interpreter/interpreter.h>
+#include <masm/io/consoleio.h>
+#include <masm/io/fileio.h>
+#include <masm/runtime.h>
+
 #include "debug_interpreter.h"
-#include "interpreter/interpreter.h"
-#include "io/consoleio.h"
-#include "io/fileio.h"
-#include "parser/parser.h"
-#include "utils.h"
 #include "version.h"
 
 
@@ -24,8 +25,7 @@ int main(const int argc, char* argv[]) {
 
     CLI::App app{version + " - Masm Debugger", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
-    app.add_flag("-m,--mmio", useMMIO,
-                 "Use memory-mapped I/O instead of system calls for input/output operations");
+    app.add_flag("-m,--mmio", useMMIO, "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
     app.set_version_flag("--version", version);
