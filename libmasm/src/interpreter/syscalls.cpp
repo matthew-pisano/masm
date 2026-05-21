@@ -12,8 +12,6 @@
 #include <masm/interpreter/cpu.h>
 #include <masm/io/consoleio.h>
 
-#include "conversion.h"
-
 
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {
     if (ioMode != IOMode::SYSCALL)

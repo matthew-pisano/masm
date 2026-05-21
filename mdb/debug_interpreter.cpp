@@ -357,7 +357,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
                 throw DebuggerExit("Exiting debugger", 0);
             }
         }
-    } catch (const DebuggerExit& e) {
+    } catch ([[maybe_unused]] const DebuggerExit& e) {
         throw;
     } catch (const std::exception& e) {
         streamHandle.putStr(std::format("\n{}", e.what()));

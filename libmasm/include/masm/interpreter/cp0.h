@@ -5,7 +5,6 @@
 #ifndef CP0_H
 #define CP0_H
 #include <array>
-#include <cstdint>
 
 #include <masm/interpreter/cpu.h>
 

@@ -178,7 +178,7 @@ class Parser {
      * @param tokenLine The line of tokens to parse
      * @throw runtime_error When an error is encountered during parsing
      */
-    void parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine);
+    void parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine) const;
 
 protected:
     /**

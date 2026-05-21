@@ -16,7 +16,6 @@
 #include "assembler/directive.h"
 #include "assembler/instruction.h"
 #include "assembler/postprocessor.h"
-#include "conversion.h"
 
 
 /**
@@ -60,10 +59,10 @@ std::vector<LineTokens> Tokenizer::tokenize(const std::vector<SourceFile>& sourc
     std::map<std::string, std::vector<LineTokens>> programMap;
 
     // Process macros and eqv directives in each file
-    for (std::pair<const std::string, std::vector<LineTokens>>& fileTokens : rawProgramMap) {
-        Postprocessor::replaceEqv(fileTokens.second);
-        Postprocessor::processMacros(fileTokens.second);
-        programMap[fileTokens.first] = fileTokens.second;
+    for (auto& [programName, program] : rawProgramMap) {
+        Postprocessor::replaceEqv(program);
+        Postprocessor::processMacros(program);
+        programMap[programName] = program;
     }
 
     // Mangle labels in files

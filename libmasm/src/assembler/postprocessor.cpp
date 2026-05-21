@@ -5,6 +5,7 @@
 #include "postprocessor.h"
 
 #include <algorithm>
+#include <ranges>
 #include <stdexcept>
 #include <unordered_map>
 
@@ -73,21 +74,21 @@ std::string unmangleLabel(const std::string& mangledLabel) {
 void Postprocessor::mangleLabels(std::map<std::string, std::vector<LineTokens>>& programMap) {
     // Stores globals that have not yet been matched to declarations
     std::vector<std::pair<std::string, LineTokens>> globals;
-    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap)
-        collectGlobals(globals, programFile.second);
+    for (auto& program : programMap | std::views::values)
+        collectGlobals(globals, program);
 
     // Create vector of just names for globals
     std::vector<std::string> globalNames = {};
     globalNames.reserve(globals.size());
-    for (const std::pair<std::string, LineTokens>& global : globals)
-        globalNames.push_back(global.first);
+    for (const auto& globalName : globals | std::views::keys)
+        globalNames.push_back(globalName);
 
     std::vector undeclaredGlobals(globals);
     // Mangle labels and resolve globals
-    for (std::pair<const std::string, std::vector<LineTokens>>& programFile : programMap) {
-        for (LineTokens& line : programFile.second) {
+    for (auto& [programName, program] : programMap) {
+        for (LineTokens& line : program) {
             // Mangle the labels in the line
-            std::string lineDeclaration = mangleLabelsInLine(globalNames, line, programFile.first);
+            std::string lineDeclaration = mangleLabelsInLine(globalNames, line, programName);
             // If a label was declared, add it to the list of found declarations
             if (!lineDeclaration.empty())
                 for (size_t i = 0; i < undeclaredGlobals.size(); i++) {
@@ -344,7 +345,7 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
 void Postprocessor::processIncludes(std::map<std::string, std::vector<LineTokens>>& rawProgramMap) {
     const Token includeToken = {TokenCategory::META_DIRECTIVE, "include"};
 
-    for (auto& [fileName, tokenizedFile] : rawProgramMap) {
+    for (auto& tokenizedFile : rawProgramMap | std::views::values) {
         for (size_t i = 0; i < tokenizedFile.size(); i++) {
             LineTokens& line = tokenizedFile[i];
             if (line.tokens[0] != includeToken)

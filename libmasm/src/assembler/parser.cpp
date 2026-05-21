@@ -62,7 +62,7 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool ra
 }
 
 
-void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine) {
+void Parser::parseLine(MemLayout& layout, MemSection& currSection, const LineTokens& tokenLine) const {
     // Get next open location in memory
     const uint32_t memLoc = memSectionOffset(currSection) + layout.data[currSection].size();
 

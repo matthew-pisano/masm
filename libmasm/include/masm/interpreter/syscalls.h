@@ -125,14 +125,14 @@ public:
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printInt(const State& state, StreamHandle& streamHandle);
+    static void printInt(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the floating-point number stored in the register $f12 to the console
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printFloat(const State& state, StreamHandle& streamHandle);
+    static void printFloat(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the double-precision floating-point number stored in the registers $f12 and $f13 to
@@ -140,28 +140,28 @@ public:
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printDouble(const State& state, StreamHandle& streamHandle);
+    static void printDouble(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the null-terminated string stored in the memory at the address in $a0 to the console
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printString(State& state, StreamHandle& streamHandle);
+    static void printString(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads an integer from the console and stores it in the register $v0
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for reading
      */
-    void readInt(State& state, StreamHandle& streamHandle);
+    static void readInt(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a floating-point number from the console and stores it in the register $f0
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for reading
      */
-    void readFloat(State& state, StreamHandle& streamHandle);
+    static void readFloat(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a double-precision floating-point number from the console and stores it in the
@@ -169,7 +169,7 @@ public:
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for reading
      */
-    void readDouble(State& state, StreamHandle& streamHandle);
+    static void readDouble(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a string from the console and stores it in the memory at the address in $a0 up to the
@@ -177,71 +177,71 @@ public:
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for reading
      */
-    void readString(State& state, StreamHandle& streamHandle);
+    static void readString(State& state, StreamHandle& streamHandle);
 
     /**
      * Allocates a block of memory of the size in $a0 and stores the address in $v0
      * @param state The current state of the interpreter
      */
-    void heapAlloc(State& state);
+    static void heapAlloc(State& state);
 
     /**
      * Exits the program with the exit code 0
      */
-    void exit();
+    static void exit();
 
     /**
      * Prints the character stored in the register $a0 to the console
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printChar(const State& state, StreamHandle& streamHandle);
+    static void printChar(const State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a character from the console and stores it in the register $v0
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for reading
      */
-    void readChar(State& state, StreamHandle& streamHandle);
+    static void readChar(State& state, StreamHandle& streamHandle);
 
     /**
      * Exits the program with the exit code stored in $a0
      * @param state The current state of the interpreter
      */
-    void exitVal(const State& state);
+    static void exitVal(const State& state);
 
     /**
      * Gets the current system time as a 64-bit integer with low bits in $a0 and high bits in $a1
      * @param state The current state of the interpreter
      */
-    void time(State& state);
+    static void time(State& state);
 
     /**
      * Sleeps for the given number of milliseconds specified in $a0
      * @param state The current state of the interpreter
      */
-    void sleep(State& state);
+    static void sleep(State& state);
 
     /**
      * Prints the integer stored in the register $a0 as a hexadecimal value
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printIntHex(const State& state, StreamHandle& streamHandle);
+    static void printIntHex(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the integer stored in the register $a0 as a binary value
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printIntBin(const State& state, StreamHandle& streamHandle);
+    static void printIntBin(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the unsigned integer stored in the register $a0
      * @param state The current state of the interpreter
      * @param streamHandle The stream handle for printing
      */
-    void printUInt(const State& state, StreamHandle& streamHandle);
+    static void printUInt(const State& state, StreamHandle& streamHandle);
 
     /**
      * Sets the random seed for the random number generator with the ID of the RNG in $a0 and the

@@ -34,9 +34,9 @@ void LabelMap::resolveLabels(std::vector<Token>& instructionArgs) const {
 
 
 std::string LabelMap::lookupLabel(const uint32_t address) const {
-    for (const std::pair<const std::string, uint32_t>& pair : labelMap) {
-        if (pair.second == address)
-            return pair.first;
+    for (const auto& [label, labelAddr] : labelMap) {
+        if (labelAddr == address)
+            return label;
     }
     throw std::runtime_error("No label found for address " + std::to_string(address));
 }

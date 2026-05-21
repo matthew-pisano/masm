@@ -34,9 +34,9 @@ std::string RegisterFile::nameFromIndex(const uint32_t index) {
     if (index >= NUM_CPU_REGISTERS)
         throw std::runtime_error("Invalid register index: " + std::to_string(index));
 
-    for (const auto& pair : nameToIndex)
-        if (static_cast<uint32_t>(pair.second) == index)
-            return pair.first;
+    for (const auto& [regName, reg] : nameToIndex)
+        if (static_cast<uint32_t>(reg) == index)
+            return regName;
 
     if (index == static_cast<uint32_t>(Register::PC))
         return "pc";
