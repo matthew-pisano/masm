@@ -27,6 +27,7 @@ add_executable(masm-tests
 target_link_libraries(masm-tests PRIVATE libmasm Catch2::Catch2WithMain)
 target_include_directories(masm-tests SYSTEM PRIVATE
         ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 set_target_properties(masm-tests PROPERTIES
         COMPILE_WARNING_AS_ERROR ON
