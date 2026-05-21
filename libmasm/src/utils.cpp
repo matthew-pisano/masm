@@ -96,8 +96,7 @@ std::vector<std::byte> stringToBytes(const std::string& string, const bool nullT
 }
 
 
-std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
-                                   const std::vector<TokenCategory>& validElems) {
+std::vector<Token> filterTokenList(const std::vector<Token>& listTokens, const std::vector<TokenCategory>& validElems) {
     std::vector<Token> elements = {};
 
     for (size_t i = 0; i < listTokens.size(); i++) {
@@ -106,14 +105,12 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
         if (i % 2 == 0 && listTokens[i].category == TokenCategory::SEPERATOR)
             throw std::runtime_error("Unexpected ','");
         if (i == listTokens.size() - 1 && listTokens[i].category == TokenCategory::SEPERATOR)
-            throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value +
-                                     "'");
+            throw std::runtime_error("Unexpected ',' after token '" + listTokens[i - 1].value + "'");
 
         if (listTokens[i].category == TokenCategory::SEPERATOR)
             continue;
 
-        if (!validElems.empty() &&
-            std::ranges::find(validElems, listTokens[i].category) == validElems.end())
+        if (!validElems.empty() && std::ranges::find(validElems, listTokens[i].category) == validElems.end())
             throw std::runtime_error("Invalid token '" + listTokens[i].value + "' of type '" +
                                      tokenCategoryToString(listTokens[i].category) + "'");
         // Only push non seperator elements
@@ -124,8 +121,7 @@ std::vector<Token> filterTokenList(const std::vector<Token>& listTokens,
 }
 
 
-bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern,
-                        const std::vector<Token>& tokens) {
+bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens) {
     if (pattern.size() != tokens.size())
         return false;
 
@@ -207,7 +203,7 @@ std::vector<std::byte> f64ToLEByte(double f64) {
 }
 
 
-std::string hex_to_string(const uint32_t value) {
+std::string hexToString(const uint32_t value) {
     std::stringstream ss;
     ss << "0x" << std::hex << value;
     return ss.str();

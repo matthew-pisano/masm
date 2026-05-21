@@ -160,7 +160,7 @@ std::string hexToInt(std::string hex);
  * @param value The integer value to convert
  * @return The hexadecimal string representation of the integer value
  */
-std::string hex_to_string(uint32_t value);
+std::string hexToString(uint32_t value);
 
 
 /**

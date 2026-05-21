@@ -69,7 +69,7 @@ void Memory::writeSideEffect(const uint32_t index) {
     if ((index >= output_ready && index < output_ready + 4) ||
         (index >= input_ready && index < input_ready + 4) ||
         (index >= input_data && index < input_data + 4))
-        throw std::runtime_error("Invalid write into read-only memory at " + hex_to_string(index));
+        throw std::runtime_error("Invalid write into read-only memory at " + hexToString(index));
 
     // Check if writing to output data word
     if (index >= output_data && index < output_data + 4)
@@ -80,7 +80,7 @@ void Memory::writeSideEffect(const uint32_t index) {
 
 int32_t Memory::wordAt(const uint32_t index) {
     if (index % 4 != 0)
-        throw ExecExcept("Invalid word access at " + hex_to_string(index),
+        throw ExecExcept("Invalid word access at " + hexToString(index),
                          EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
@@ -90,7 +90,7 @@ int32_t Memory::wordAt(const uint32_t index) {
 
 uint16_t Memory::halfAt(const uint32_t index) {
     if (index % 2 != 0)
-        throw ExecExcept("Invalid half-word access at " + hex_to_string(index),
+        throw ExecExcept("Invalid half-word access at " + hexToString(index),
                          EXCEPT_CODE::ADDRESS_EXCEPTION_LOAD);
 
     readSideEffect(index);
@@ -112,7 +112,7 @@ uint8_t Memory::byteAt(const uint32_t index) {
 
 void Memory::wordTo(const uint32_t index, const int32_t value) {
     if (index % 4 != 0)
-        throw ExecExcept("Invalid word access at " + hex_to_string(index),
+        throw ExecExcept("Invalid word access at " + hexToString(index),
                          EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
@@ -122,7 +122,7 @@ void Memory::wordTo(const uint32_t index, const int32_t value) {
 
 void Memory::halfTo(const uint32_t index, const int16_t value) {
     if (index % 2 != 0)
-        throw ExecExcept("Invalid half-word access at " + hex_to_string(index),
+        throw ExecExcept("Invalid half-word access at " + hexToString(index),
                          EXCEPT_CODE::ADDRESS_EXCEPTION_STORE);
 
     writeSideEffect(index);
