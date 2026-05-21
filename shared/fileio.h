@@ -5,30 +5,121 @@
 #ifndef FILEIO_H
 #define FILEIO_H
 
+#include <algorithm>
+#include <filesystem>
 #include <fstream>
-#include <glob.h>
 #include <string>
 #include <vector>
 
 
 /**
- * Resolves wildcard characters in file paths to actual file names
+ * Expands leading '~' to the user's home directory
+ * @param path A raw file path
+ * @return The filepath with the leading tilde replaced with the home directory
+ */
+inline std::string expandTilde(const std::string& path) {
+    if (path.empty() || path[0] != '~')
+        return path;
+#ifdef _WIN32
+    const char* home = getenv("USERPROFILE");
+#else
+    const char* home = getenv("HOME");
+#endif
+    return home ? std::string(home) + path.substr(1) : path;
+}
+
+/**
+ * Matches a filename against a wildcard pattern supporting '*' and '?'
+ * Case-insensitive on Windows, case-sensitive elsewhere
+ *
+ * @param pattern The wildcard pattern to match against
+ * @param path The path to match
+ * @return Whether the given path matches the pattern
+ */
+inline bool wildcardMatch(const std::string& pattern, const std::string& path) {
+    // Normalize strings to lower case on Windows
+    auto normalizeCase = [](std::string s) {
+#ifdef _WIN32
+        std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+#endif
+        return s;
+    };
+
+    const std::string normPattern = normalizeCase(pattern);
+    const std::string normPath = normalizeCase(path);
+
+    size_t patternIdx = 0;
+    size_t pathIdx = 0;
+    size_t lastStar = std::string::npos;
+    size_t lastMatch = 0;
+
+    while (pathIdx < normPath.size()) {
+        // Match a single character
+        const bool characterMatch = normPattern[patternIdx] == '?' || normPattern[patternIdx] == normPath[pathIdx];
+        if (patternIdx < normPattern.size() && characterMatch) {
+            ++patternIdx;
+            ++pathIdx;
+        }
+        // Match a group of characters
+        else if (patternIdx < normPattern.size() && normPattern[patternIdx] == '*') {
+            lastStar = patternIdx++;
+            lastMatch = pathIdx;
+        } else if (lastStar != std::string::npos) {
+            patternIdx = lastStar + 1;
+            pathIdx = ++lastMatch;
+        } else
+            return false;
+    }
+
+    // Skip over any remaining wildcards
+    while (patternIdx < normPattern.size() && normPattern[patternIdx] == '*')
+        ++patternIdx;
+
+    return patternIdx == normPattern.size();
+}
+
+/**
+ * Resolves wildcard characters in file paths to actual file names, supports '*' and '?' wildcards, and '~' home
+ * directory expansion
+ *
  * @param rawPaths A vector of file paths that may contain wildcard characters
- * @return A vector of file paths with wildcards resolved to actual file names
+ * @return A vector of resolved file paths, sorted alphabetically
  */
 inline std::vector<std::string> resolveWildcards(const std::vector<std::string>& rawPaths) {
     std::vector<std::string> resolvedPaths;
-    for (const auto& path : rawPaths) {
-        // Use glob to resolve wildcards
-        glob_t globResult{};
-        if (glob(path.c_str(), GLOB_TILDE, nullptr, &globResult) == 0) {
-            for (size_t i = 0; i < globResult.gl_pathc; ++i)
-                resolvedPaths.emplace_back(globResult.gl_pathv[i]);
-            globfree(&globResult);
-        } else
-            // If glob fails, add the original path
-            resolvedPaths.push_back(path);
+
+    for (const auto& rawPath : rawPaths) {
+        const std::string pathStr = expandTilde(rawPath);
+        const std::filesystem::path path(pathStr);
+        const std::filesystem::path dir = path.parent_path();
+        const std::string pattern = path.filename().string();
+
+        // No wildcard is in the string
+        if (pattern.find_first_of("*?") == std::string::npos) {
+            resolvedPaths.push_back(pathStr);
+            continue;
+        }
+
+        const std::filesystem::path searchDir = dir.empty() ? std::filesystem::path(".") : dir;
+
+        std::error_code ec;
+        std::vector<std::string> matches;
+
+        for (const auto& entry : std::filesystem::directory_iterator(searchDir, ec)) {
+            const std::string filename = entry.path().filename().string();
+            if (wildcardMatch(pattern, filename))
+                matches.push_back(entry.path().string());
+        }
+
+        if (ec || matches.empty()) {
+            resolvedPaths.push_back(rawPath);
+        } else {
+            // Sort results if matched
+            std::ranges::sort(matches);
+            resolvedPaths.insert(resolvedPaths.end(), matches.begin(), matches.end());
+        }
     }
+
     return resolvedPaths;
 }
 
