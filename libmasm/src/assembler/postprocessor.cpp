@@ -17,9 +17,20 @@ std::string mangleLabel(const std::string& label, const std::string& filename) {
 }
 
 
-std::string mangleMacroLabel(const std::string& label, const std::string& filename,
-                             const std::string& macroname, size_t pos) {
+std::string mangleMacroLabel(const std::string& label, const std::string& filename, const std::string& macroname,
+                             size_t pos) {
     return std::format("{}@masm_mangle_file_{}:{}:{}", label, filename, macroname, pos);
+}
+
+
+std::string unmangleLabel(const std::string& mangledLabel) {
+    // Find the last '@' in the mangled label
+    const size_t atPos = mangledLabel.find_last_of('@');
+    if (atPos == std::string::npos)
+        return mangledLabel; // No mangling found, return original label
+
+    // Return the label part before the '@'
+    return mangledLabel.substr(0, atPos);
 }
 
 
@@ -57,18 +68,16 @@ void Postprocessor::mangleLabels(std::map<std::string, std::vector<LineTokens>>&
         const std::string labelName = std::get<0>(undeclaredGlobals[0]);
         const std::string filename = std::get<1>(undeclaredGlobals[0]).filename;
         const size_t lineno = std::get<1>(undeclaredGlobals[0]).lineno;
-        throw MasmSyntaxError("Global label '" + labelName + "' referenced without declaration",
-                              filename, lineno);
+        throw MasmSyntaxError("Global label '" + labelName + "' referenced without declaration", filename, lineno);
     }
 }
 
 
-std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals,
-                                              LineTokens& lineTokens, const std::string& fileId) {
+std::string Postprocessor::mangleLabelsInLine(std::vector<std::string>& globals, LineTokens& lineTokens,
+                                              const std::string& fileId) {
     std::string lineDeclaration;
     for (Token& lineToken : lineTokens.tokens) {
-        if (lineToken.category != TokenCategory::LABEL_DEF &&
-            lineToken.category != TokenCategory::LABEL_REF)
+        if (lineToken.category != TokenCategory::LABEL_DEF && lineToken.category != TokenCategory::LABEL_REF)
             continue;
 
         // If declaring a label, remove it from the remaining available declarations
@@ -129,8 +138,7 @@ void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
             if (it != eqvMapping.end()) {
                 // Replace the label reference with the eqv value
                 line.tokens.erase(line.tokens.begin() + j);
-                line.tokens.insert(line.tokens.begin() + j, it->second.tokens.begin(),
-                                   it->second.tokens.end());
+                line.tokens.insert(line.tokens.begin() + j, it->second.tokens.begin(), it->second.tokens.end());
                 j += it->second.tokens.size() - 1;
             }
         }
@@ -140,18 +148,15 @@ void Postprocessor::replaceEqv(std::vector<LineTokens>& tokenizedFile) {
 
 void Postprocessor::processBaseAddressing(std::vector<LineTokens>& tokenizedFile) {
     for (LineTokens& tokenLine : tokenizedFile) {
-        const auto openParen =
-                std::ranges::find(tokenLine.tokens, Token{TokenCategory::OPEN_PAREN, "("});
+        const auto openParen = std::ranges::find(tokenLine.tokens, Token{TokenCategory::OPEN_PAREN, "("});
 
         // Skip instances or parens outside of instructions
-        if (tokenLine.tokens[0].category != TokenCategory::INSTRUCTION ||
-            openParen == tokenLine.tokens.end())
+        if (tokenLine.tokens[0].category != TokenCategory::INSTRUCTION || openParen == tokenLine.tokens.end())
             continue;
 
         // Ensure there is space before and after the open paren
         if (openParen == tokenLine.tokens.begin() || tokenLine.tokens.size() < 4)
-            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename,
-                                  tokenLine.lineno);
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename, tokenLine.lineno);
         // A vector containing the last three elements of tokenLine
         std::vector<Token> lastFour = {};
         while (lastFour.size() < 4) {
@@ -165,11 +170,10 @@ void Postprocessor::processBaseAddressing(std::vector<LineTokens>& tokenizedFile
             lastFour[0] = {TokenCategory::IMMEDIATE, "0"};
         }
 
-        const std::vector pattern = {TokenCategory::IMMEDIATE, TokenCategory::OPEN_PAREN,
-                                     TokenCategory::REGISTER, TokenCategory::CLOSE_PAREN};
+        const std::vector pattern = {TokenCategory::IMMEDIATE, TokenCategory::OPEN_PAREN, TokenCategory::REGISTER,
+                                     TokenCategory::CLOSE_PAREN};
         if (!tokenCategoryMatch(pattern, lastFour))
-            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename,
-                                  tokenLine.lineno);
+            throw MasmSyntaxError("Malformed parenthesis expression", tokenLine.filename, tokenLine.lineno);
         // Replace with target pattern
         tokenLine.tokens.push_back(lastFour[2]);
         tokenLine.tokens.push_back({TokenCategory::SEPERATOR, ","});
@@ -202,8 +206,7 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
         for (Token& bodyToken : bodyLine.tokens)
             if (bodyToken.category == TokenCategory::LABEL_DEF) {
                 macroLabelDefs.emplace_back(TokenCategory::LABEL_REF, bodyToken.value);
-                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename,
-                                                   mangledMacro.name, pos);
+                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename, mangledMacro.name, pos);
             }
 
     // Next mangle label references
@@ -215,20 +218,18 @@ Postprocessor::Macro Postprocessor::mangleMacroLabels(const Macro& macro, const 
                 if (it == macroLabelDefs.end())
                     continue;
 
-                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename,
-                                                   mangledMacro.name, pos);
+                bodyToken.value = mangleMacroLabel(bodyToken.value, mangledMacro.filename, mangledMacro.name, pos);
             }
 
     return mangledMacro;
 }
 
 
-void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
-                                std::vector<LineTokens>& tokenizedFile) {
+void Postprocessor::expandMacro(const Macro& macro, size_t& pos, std::vector<LineTokens>& tokenizedFile) {
     std::vector<Token> macroArgs;
     if (tokenizedFile[pos].tokens.size() > 1)
-        macroArgs = filterTokenList(std::vector(tokenizedFile[pos].tokens.begin() + 2,
-                                                tokenizedFile[pos].tokens.end() - 1));
+        macroArgs = filterTokenList(
+                std::vector(tokenizedFile[pos].tokens.begin() + 2, tokenizedFile[pos].tokens.end() - 1));
 
     if (macroArgs.size() != macro.params.size())
         throw MasmSyntaxError("Invalid number of macro arguments", tokenizedFile[pos].filename,
@@ -238,8 +239,7 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
 
     Macro mangledMacro = mangleMacroLabels(macro, pos);
     // Insert the mangled macro body into the tokenized file
-    tokenizedFile.insert(tokenizedFile.begin() + pos, mangledMacro.body.begin(),
-                         mangledMacro.body.end());
+    tokenizedFile.insert(tokenizedFile.begin() + pos, mangledMacro.body.begin(), mangledMacro.body.end());
     // Remove the macro call line
     tokenizedFile.erase(tokenizedFile.begin() + pos + mangledMacro.body.size());
 
@@ -250,8 +250,8 @@ void Postprocessor::expandMacro(const Macro& macro, size_t& pos,
                 continue;
             const auto it = std::ranges::find(macro.params, token);
             if (it == macro.params.end())
-                throw MasmSyntaxError("Invalid macro parameter '" + token.value + "'",
-                                      tokenizedFile.at(pos).filename, tokenizedFile.at(pos).lineno);
+                throw MasmSyntaxError("Invalid macro parameter '" + token.value + "'", tokenizedFile.at(pos).filename,
+                                      tokenizedFile.at(pos).lineno);
             const size_t paramIdx = std::distance(macro.params.begin(), it);
             // Replace token with argument
             token = macroArgs[paramIdx];
@@ -267,8 +267,7 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
     for (size_t i = 0; i < tokenizedFile.size(); i++) {
         LineTokens& line = tokenizedFile[i];
         // If the line is a macro declaration
-        if (line.tokens[0].category == TokenCategory::META_DIRECTIVE &&
-            line.tokens[0].value == "macro") {
+        if (line.tokens[0].category == TokenCategory::META_DIRECTIVE && line.tokens[0].value == "macro") {
             const size_t macroStart = i;
             if (line.tokens.size() < 2 || line.tokens[1].category != TokenCategory::LABEL_REF)
                 throw MasmSyntaxError("Invalid macro declaration", line.filename, line.lineno);
@@ -281,8 +280,7 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
                 i++;
                 // If we reach the end of the file without finding an end_macro directive
                 if (i >= tokenizedFile.size())
-                    throw MasmSyntaxError("Unmatched macro declaration", line.filename,
-                                          line.lineno);
+                    throw MasmSyntaxError("Unmatched macro declaration", line.filename, line.lineno);
 
                 // If we find an end_macro directive, break out of the loop
                 if (tokenizedFile[i].tokens[0].category == TokenCategory::META_DIRECTIVE &&
@@ -295,15 +293,13 @@ void Postprocessor::processMacros(std::vector<LineTokens>& tokenizedFile) {
                     expandMacro(macroMap[tokenizedFile[i].tokens[0].value], i, tokenizedFile);
             }
             // Store the macro in the map and remove the macro declaration from the file
-            macro.body =
-                    std::vector(tokenizedFile.begin() + macroStart + 1, tokenizedFile.begin() + i);
+            macro.body = std::vector(tokenizedFile.begin() + macroStart + 1, tokenizedFile.begin() + i);
             macroMap[macro.name] = macro;
             tokenizedFile.erase(tokenizedFile.begin() + macroStart, tokenizedFile.begin() + i + 1);
             i = macroStart - 1;
         }
         // If the line is a label reference that matches a macro, expand it
-        else if (line.tokens[0].category == TokenCategory::LABEL_REF &&
-                 macroMap.contains(line.tokens[0].value))
+        else if (line.tokens[0].category == TokenCategory::LABEL_REF && macroMap.contains(line.tokens[0].value))
             expandMacro(macroMap[line.tokens[0].value], i, tokenizedFile);
     }
 }

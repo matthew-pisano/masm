@@ -28,8 +28,16 @@ std::string mangleLabel(const std::string& label, const std::string& filename);
  * @param pos The position of the macro in the file
  * @return The mangled label
  */
-std::string mangleMacroLabel(const std::string& label, const std::string& filename,
-                             const std::string& macroname, size_t pos);
+std::string mangleMacroLabel(const std::string& label, const std::string& filename, const std::string& macroname,
+                             size_t pos);
+
+
+/**
+ * Unmangles a label by removing the file ID from it, restoring the original label name.
+ * @param mangledLabel The mangled label to unmangle
+ * @return The unmangled label
+ */
+std::string unmangleLabel(const std::string& mangledLabel);
 
 
 /**
@@ -94,8 +102,7 @@ class Postprocessor {
      * @param pos The position in the tokenized file to expand the macro at
      * @param tokenizedFile The tokenized file to expand the macro in
      */
-    static void expandMacro(const Macro& macro, size_t& pos,
-                            std::vector<LineTokens>& tokenizedFile);
+    static void expandMacro(const Macro& macro, size_t& pos, std::vector<LineTokens>& tokenizedFile);
 
     /**
      * A helper function that mangles the labels in a macro

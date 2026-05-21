@@ -12,17 +12,6 @@
 #include <masm/io/streamio.h>
 
 
-std::string unmangleLabel(const std::string& mangledLabel) {
-    // Find the last '@' in the mangled label
-    const size_t atPos = mangledLabel.find_last_of('@');
-    if (atPos == std::string::npos)
-        return mangledLabel; // No mangling found, return original label
-
-    // Return the label part before the '@'
-    return mangledLabel.substr(0, atPos);
-}
-
-
 std::string readSeq(StreamHandle& streamHandle) {
     std::string input;
     while (true) {

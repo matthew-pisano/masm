@@ -71,6 +71,22 @@ std::string wordAsString(const uint32_t word) {
 }
 
 
+/**
+ * Unmangles a label by removing the file ID from it, restoring the original label name.
+ * @param mangledLabel The mangled label to unmangle
+ * @return The unmangled label
+ */
+std::string unmangleDebugLabel(const std::string& mangledLabel) {
+    // Find the last '@' in the mangled label
+    const size_t atPos = mangledLabel.find_last_of('@');
+    if (atPos == std::string::npos)
+        return mangledLabel; // No mangling found, return original label
+
+    // Return the label part before the '@'
+    return mangledLabel.substr(0, atPos);
+}
+
+
 std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
     std::string result;
     while (result.length() < maxLen) {
@@ -372,7 +388,7 @@ void DebugInterpreter::listLines(const std::string& arg) {
 
         const DebugInfo debugInfo = state.getDebugInfo(i);
         if (!debugInfo.label.empty())
-            streamHandle.putStr("<" + unmangleLabel(debugInfo.label) + ">\n");
+            streamHandle.putStr("<" + unmangleDebugLabel(debugInfo.label) + ">\n");
         const std::string pointerString = i == pc ? "--->" : "";
         // An indicator for when a breakpoint is present and now the system breakpoint
         const std::string bpString =
@@ -393,7 +409,7 @@ void DebugInterpreter::getFrame() {
 size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::string& filename) {
     // Find debug info that matches the given label in the current file
     const auto it = std::ranges::find_if(state.debugInfo, [label, filename](const auto& pair) {
-        return unmangleLabel(pair.second.label) == label && pair.second.source.filename == filename;
+        return unmangleDebugLabel(pair.second.label) == label && pair.second.source.filename == filename;
     });
     if (it == state.debugInfo.end())
         throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename + "\n");
@@ -512,7 +528,7 @@ void DebugInterpreter::listLabels() {
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
             const SourceLocator src = debugInfo.source;
-            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", unmangleLabel(debugInfo.label), addr,
+            streamHandle.putStr(std::format("{} -> 0x{:08x} ({}:{})\n", unmangleDebugLabel(debugInfo.label), addr,
                                             src.filename, src.lineno));
             foundLabel = true;
         }
