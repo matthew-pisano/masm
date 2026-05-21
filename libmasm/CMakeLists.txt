@@ -19,4 +19,5 @@ set_target_properties(libmasm PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
         OUTPUT_NAME "masm"
         POSITION_INDEPENDENT_CODE ON
+        COMPILE_WARNING_AS_ERROR ON
 )
