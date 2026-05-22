@@ -2,8 +2,8 @@
 // Created by matthew on 6/15/25.
 //
 
-#ifndef DEBUG_INTERPRETER_H
-#define DEBUG_INTERPRETER_H
+#ifndef DEBUG_SIMULATOR_H
+#define DEBUG_SIMULATOR_H
 
 #include <masm/simulator/simulator.hpp>
 
@@ -223,4 +223,4 @@ public:
     int interpret(const MemLayout& layout) override;
 };
 
-#endif // DEBUG_INTERPRETER_H
+#endif // DEBUG_SIMULATOR_H

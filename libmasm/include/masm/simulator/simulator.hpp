@@ -2,8 +2,8 @@
 // Created by matthew on 4/24/25.
 //
 
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef SIMULATOR_H
+#define SIMULATOR_H
 
 #include <masm/assembler/memory.hpp>
 #include <masm/io/streamio.hpp>
@@ -98,4 +98,4 @@ public:
     virtual int interpret(const MemLayout& layout);
 };
 
-#endif // INTERPRETER_H
+#endif // SIMULATOR_H
