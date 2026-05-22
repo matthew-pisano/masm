@@ -10,7 +10,7 @@
 #include <masm/assembler/tokenizer.hpp>
 #include <masm/simulator/simulator.hpp>
 
-#include "mdb/debug_interpreter.hpp"
+#include "mdb/debug_simulator.hpp"
 #include "tests/testing_utilities.hpp"
 
 
@@ -147,17 +147,17 @@ TEST_CASE("Test beq Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 37;
-    interpreterEq.getState().registers[Register::T1] = 37;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 37;
+    simulatorEq.getState().registers[Register::T1] = 37;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
-    interpreterNe.getState().registers[Register::T0] = 37;
-    interpreterNe.getState().registers[Register::T1] = 42;
-    interpreterNe.simulate(actualLayout);
-    SECTION("Test Execute Not Equal") { REQUIRE(interpreterNe.getState().registers[Register::PC] == 0x00400004); }
+    DebugSimulator simulatorNe(IOMode::SYSCALL, streamHandle);
+    simulatorNe.getState().registers[Register::T0] = 37;
+    simulatorNe.getState().registers[Register::T1] = 42;
+    simulatorNe.simulate(actualLayout);
+    SECTION("Test Execute Not Equal") { REQUIRE(simulatorNe.getState().registers[Register::PC] == 0x00400004); }
 }
 
 
@@ -184,17 +184,17 @@ TEST_CASE("Test bne Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 37;
-    interpreterEq.getState().registers[Register::T1] = 37;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 37;
+    simulatorEq.getState().registers[Register::T1] = 37;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400004); }
 
-    DebugSimulator interpreter2Ne(IOMode::SYSCALL, streamHandle);
-    interpreter2Ne.getState().registers[Register::T0] = 37;
-    interpreter2Ne.getState().registers[Register::T1] = 42;
-    interpreter2Ne.simulate(actualLayout);
-    SECTION("Test Execute Not Equal") { REQUIRE(interpreter2Ne.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulator2Ne(IOMode::SYSCALL, streamHandle);
+    simulator2Ne.getState().registers[Register::T0] = 37;
+    simulator2Ne.getState().registers[Register::T1] = 42;
+    simulator2Ne.simulate(actualLayout);
+    SECTION("Test Execute Not Equal") { REQUIRE(simulator2Ne.getState().registers[Register::PC] == 0x00400010); }
 }
 
 
@@ -219,20 +219,20 @@ TEST_CASE("Test bgtz Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 0;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 0;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
-    interpreterGt.getState().registers[Register::T0] = 69;
-    interpreterGt.simulate(actualLayout);
-    SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorGt(IOMode::SYSCALL, streamHandle);
+    simulatorGt.getState().registers[Register::T0] = 69;
+    simulatorGt.simulate(actualLayout);
+    SECTION("Test Execute Greater Than") { REQUIRE(simulatorGt.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
-    interpreterLt.getState().registers[Register::T0] = -420;
-    interpreterLt.simulate(actualLayout);
-    SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorLt(IOMode::SYSCALL, streamHandle);
+    simulatorLt.getState().registers[Register::T0] = -420;
+    simulatorLt.simulate(actualLayout);
+    SECTION("Test Execute Less Than") { REQUIRE(simulatorLt.getState().registers[Register::PC] == 0x00400008); }
 }
 
 
@@ -257,20 +257,20 @@ TEST_CASE("Test bltz Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 0;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 0;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
-    interpreterGt.getState().registers[Register::T0] = 69;
-    interpreterGt.simulate(actualLayout);
-    SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorGt(IOMode::SYSCALL, streamHandle);
+    simulatorGt.getState().registers[Register::T0] = 69;
+    simulatorGt.simulate(actualLayout);
+    SECTION("Test Execute Greater Than") { REQUIRE(simulatorGt.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
-    interpreterLt.getState().registers[Register::T0] = -420;
-    interpreterLt.simulate(actualLayout);
-    SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorLt(IOMode::SYSCALL, streamHandle);
+    simulatorLt.getState().registers[Register::T0] = -420;
+    simulatorLt.simulate(actualLayout);
+    SECTION("Test Execute Less Than") { REQUIRE(simulatorLt.getState().registers[Register::PC] == 0x00400010); }
 }
 
 
@@ -295,20 +295,20 @@ TEST_CASE("Test bgez Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 0;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 0;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
-    interpreterGt.getState().registers[Register::T0] = 69;
-    interpreterGt.simulate(actualLayout);
-    SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorGt(IOMode::SYSCALL, streamHandle);
+    simulatorGt.getState().registers[Register::T0] = 69;
+    simulatorGt.simulate(actualLayout);
+    SECTION("Test Execute Greater Than") { REQUIRE(simulatorGt.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
-    interpreterLt.getState().registers[Register::T0] = -420;
-    interpreterLt.simulate(actualLayout);
-    SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorLt(IOMode::SYSCALL, streamHandle);
+    simulatorLt.getState().registers[Register::T0] = -420;
+    simulatorLt.simulate(actualLayout);
+    SECTION("Test Execute Less Than") { REQUIRE(simulatorLt.getState().registers[Register::PC] == 0x00400008); }
 }
 
 
@@ -333,20 +333,20 @@ TEST_CASE("Test blez Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().registers[Register::T0] = 0;
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().registers[Register::T0] = 0;
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Equal") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
-    interpreterGt.getState().registers[Register::T0] = 69;
-    interpreterGt.simulate(actualLayout);
-    SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008); }
+    DebugSimulator simulatorGt(IOMode::SYSCALL, streamHandle);
+    simulatorGt.getState().registers[Register::T0] = 69;
+    simulatorGt.simulate(actualLayout);
+    SECTION("Test Execute Greater Than") { REQUIRE(simulatorGt.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
-    interpreterLt.getState().registers[Register::T0] = -420;
-    interpreterLt.simulate(actualLayout);
-    SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorLt(IOMode::SYSCALL, streamHandle);
+    simulatorLt.getState().registers[Register::T0] = -420;
+    simulatorLt.simulate(actualLayout);
+    SECTION("Test Execute Less Than") { REQUIRE(simulatorLt.getState().registers[Register::PC] == 0x00400010); }
 }
 
 

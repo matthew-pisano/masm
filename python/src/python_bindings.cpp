@@ -49,7 +49,7 @@ PYBIND11_MODULE(pymasm_core, m) {
 
     const py::module_ tokenizer_module = m.def_submodule("tokenizer", "Masm Tokenizer");
     const py::module_ parser_module = m.def_submodule("parser", "Masm Parser");
-    const py::module_ interpreter_module = m.def_submodule("simulator", "Masm Simulator");
+    const py::module_ simulator_module = m.def_submodule("simulator", "Masm Simulator");
     const py::module_ exceptions_module = m.def_submodule("exceptions", "Masm Exceptions");
 
     // Tokenizer Bindings //
@@ -153,17 +153,17 @@ PYBIND11_MODULE(pymasm_core, m) {
     // Simulator Bindings //
 
     // Binding for the IO Mode enum
-    py::enum_<IOMode>(interpreter_module, "IOMode").value("SYSCALL", IOMode::SYSCALL).value("MMIO", IOMode::MMIO);
+    py::enum_<IOMode>(simulator_module, "IOMode").value("SYSCALL", IOMode::SYSCALL).value("MMIO", IOMode::MMIO);
 
     // Bindings for the Simulator class
-    py::class_<SimulatorWrapper>(interpreter_module, "Simulator")
+    py::class_<SimulatorWrapper>(simulator_module, "Simulator")
             // Constructor that accepts Python file-like objects
             .def(py::init<IOMode, py::object, py::object>())
             .def("step", &SimulatorWrapper::step, "Executes a single instruction")
             .def("init_program", &SimulatorWrapper::initProgram, py::arg("layout"),
                  "Initializes the simulator with the given memory layout")
-            .def("interpret", &SimulatorWrapper::interpret, py::arg("layout"),
-                 "Interprets the given memory layout and returns an exit code");
+            .def("simulate", &SimulatorWrapper::simulate, py::arg("layout"),
+                 "Simulates the given memory layout and returns an exit code");
 
     // Exceptions Bindings //
 

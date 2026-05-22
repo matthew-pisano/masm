@@ -45,8 +45,8 @@ def main():
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = simulator.Simulator(io_mode, istream, ostream)
-    masm_interpreter.init_program(mem_layout)
+    masm_simulator = simulator.Simulator(io_mode, istream, ostream)
+    masm_simulator.init_program(mem_layout)
 
     # The current position to read the output buffer at
     opos = 0
@@ -64,7 +64,7 @@ def main():
                 istream.seek(ipos)
 
             # Step the simulator
-            masm_interpreter.step()
+            masm_simulator.step()
 
             ostream.seek(opos)
             if output := ostream.read().decode():

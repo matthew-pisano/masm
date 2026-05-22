@@ -30,8 +30,8 @@ def main():
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = simulator.Simulator(io_mode, istream, ostream)
-    exit_code = masm_interpreter.simulate(mem_layout)
+    masm_simulator = simulator.Simulator(io_mode, istream, ostream)
+    exit_code = masm_simulator.simulate(mem_layout)
 
     # Print out the result and exit
     print(ostream.getvalue().decode())

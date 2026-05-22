@@ -13,7 +13,7 @@
 #include <masm/simulator/simulator.hpp>
 
 #include "libmasm/src/assembler/postprocessor.hpp"
-#include "mdb/debug_interpreter.hpp"
+#include "mdb/debug_simulator.hpp"
 #include "tests/testing_utilities.hpp"
 
 
@@ -466,15 +466,15 @@ TEST_CASE("Test FP bc1f Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().cp1.setFlag(0, true);
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Flag True") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().cp1.setFlag(0, true);
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Flag True") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400004); }
 
-    DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().cp1.setFlag(0, false);
-    interpreterNe.simulate(actualLayout);
-    SECTION("Test Execute Flag False") { REQUIRE(interpreterNe.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorNe(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().cp1.setFlag(0, false);
+    simulatorNe.simulate(actualLayout);
+    SECTION("Test Execute Flag False") { REQUIRE(simulatorNe.getState().registers[Register::PC] == 0x00400010); }
 }
 
 
@@ -497,15 +497,15 @@ TEST_CASE("Test FP bc1t Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().cp1.setFlag(0, true);
-    interpreterEq.simulate(actualLayout);
-    SECTION("Test Execute Flag True") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
+    DebugSimulator simulatorEq(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().cp1.setFlag(0, true);
+    simulatorEq.simulate(actualLayout);
+    SECTION("Test Execute Flag True") { REQUIRE(simulatorEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
-    interpreterEq.getState().cp1.setFlag(0, false);
-    interpreterNe.simulate(actualLayout);
-    SECTION("Test Execute Flag False") { REQUIRE(interpreterNe.getState().registers[Register::PC] == 0x00400004); }
+    DebugSimulator simulatorNe(IOMode::SYSCALL, streamHandle);
+    simulatorEq.getState().cp1.setFlag(0, false);
+    simulatorNe.simulate(actualLayout);
+    SECTION("Test Execute Flag False") { REQUIRE(simulatorNe.getState().registers[Register::PC] == 0x00400004); }
 }
 
 

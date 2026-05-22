@@ -14,7 +14,7 @@
 #include <masm/exceptions.hpp>
 #include <masm/simulator/simulator.hpp>
 
-#include "mdb/debug_interpreter.hpp"
+#include "mdb/debug_simulator.hpp"
 #include "shared/fileio.hpp"
 #include "shared/load_layout.hpp"
 

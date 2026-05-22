@@ -4,11 +4,10 @@
 
 #include <CLI/CLI.hpp>
 
-#include <masm/assembler/parser.hpp>
 #include <masm/io/consoleio.hpp>
 #include <masm/simulator/simulator.hpp>
 
-#include "debug_interpreter.hpp"
+#include "debug_simulator.hpp"
 #include "fileio.hpp"
 #include "load_layout.hpp"
 #include "version.h"

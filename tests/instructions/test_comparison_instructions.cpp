@@ -9,7 +9,7 @@
 #include <masm/assembler/tokenizer.hpp>
 #include <masm/simulator/simulator.hpp>
 
-#include "mdb/debug_interpreter.hpp"
+#include "mdb/debug_simulator.hpp"
 #include "tests/testing_utilities.hpp"
 
 

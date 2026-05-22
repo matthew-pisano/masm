@@ -29,13 +29,13 @@ def main():
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = simulator.Simulator(io_mode, istream, ostream)
-    masm_interpreter.init_program(mem_layout)
+    masm_simulator = simulator.Simulator(io_mode, istream, ostream)
+    masm_simulator.init_program(mem_layout)
 
     pos = 0
     while True:
         try:
-            masm_interpreter.step()
+            masm_simulator.step()
             ostream.seek(pos)
             output = ostream.read().decode()
             pos = ostream.tell()

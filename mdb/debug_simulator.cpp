@@ -2,7 +2,7 @@
 // Created by matthew on 6/15/25.
 //
 
-#include "debug_interpreter.hpp"
+#include "debug_simulator.hpp"
 
 #include <algorithm>
 #include <sstream>
