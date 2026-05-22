@@ -23,7 +23,11 @@ for dir in tests/fixtures/*; do
     fi
 
     # Run fixture gen command with fixture files
-    ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}"
+    if [[ "${dir_name}" == *_le ]]; then
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" -l
+    else
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}"
+    fi
 
     cd - > /dev/null || exit 1
   fi
