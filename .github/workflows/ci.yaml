@@ -35,13 +35,12 @@ jobs:
       - name: Run Clang Format
         run: |
           sed -i '/InsertNewlineAtEOF: true/d' .clang-format
-          ./run-clang-format/run-clang-format.py -r src include test
+          ./run-clang-format/run-clang-format.py -r libmasm masm mdb python shared tests tools
 
       - name: Run MyPy
         run: |
           export MYPYPATH=$(pwd)/python
           $VENV_PATH/bin/mypy python
-          $VENV_PATH/bin/mypy test
 
   build:
     runs-on: ubuntu-latest
@@ -68,9 +67,8 @@ jobs:
           cmake --build build
       - name: Package Python
         run: |
-          cp build/pymasm_core* python/pymasm/
-          cd python
-          $VENV_PATH/bin/python -m build --wheel
+          cp build/python/pymasm_core* python/pymasm/
+          $VENV_PATH/bin/python -m build python --wheel
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -96,8 +94,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/logs
       - name: Run CTests
         run: |
-          chmod +x build/masm-tests
-          ctest --test-dir build --output-on-failure --verbose --output-junit ${{ github.workspace }}/logs/ctest-results.xml
+          chmod +x build/tests/masm-tests
+          ctest --test-dir build/tests --output-on-failure --verbose --output-junit ${{ github.workspace }}/logs/ctest-results.xml
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()
@@ -128,7 +126,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/logs
       - name: Run PyTests
         run: |
-          $VENV_PATH/bin/pytest --junitxml=${{ github.workspace }}/logs/pytest-results.xml test
+          $VENV_PATH/bin/pytest --junitxml=${{ github.workspace }}/logs/pytest-results.xml python/tests
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()

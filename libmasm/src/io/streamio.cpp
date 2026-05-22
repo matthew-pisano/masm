@@ -1,0 +1,54 @@
+//
+// Created by matthew on 6/8/25.
+//
+
+#include <masm/io/streamio.hpp>
+
+#include <unistd.h>
+
+bool StreamHandle::hasChar() {
+    const bool hasChar = istream.peek() != std::istream::traits_type::eof();
+    // Clear error flags from peeking when stream is empty
+    istream.clear();
+    return hasChar;
+}
+
+char StreamHandle::getChar() {
+    char c;
+    istream.get(c);
+    if (istream.eof())
+        throw std::runtime_error("End of input stream reached");
+    return c;
+}
+
+std::string StreamHandle::getLine() {
+    std::string input;
+    while (true) {
+        const char c = getCharBlocking();
+        if (c == '\n')
+            break;
+
+        if (c != '\b')
+            input += c;
+        else if (!input.empty())
+            input.pop_back(); // Handle backspace
+    }
+    return input;
+}
+
+char StreamHandle::getCharBlocking() {
+    while (!hasChar())
+        usleep(1000); // Sleep for 1 ms
+    return getChar();
+}
+
+void StreamHandle::putChar(const char c) {
+    ostream.put(c);
+    if (ostream.fail())
+        throw std::runtime_error("Failed to write character to output stream");
+}
+
+void StreamHandle::putStr(const std::string& str) {
+    for (const char c : str)
+        putChar(c);
+}
