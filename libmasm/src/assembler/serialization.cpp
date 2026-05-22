@@ -7,6 +7,7 @@
 #include <iomanip>
 
 #include "assembler/postprocessor.hpp"
+#include "util/conversion.hpp"
 
 
 std::string memSectionToName(const MemSection& section) {
@@ -31,6 +32,68 @@ std::string memSectionToName(const MemSection& section) {
     throw std::runtime_error("Unknown memory section");
 }
 
+uint32_t BEByteToi32(const std::span<const std::byte>& bytes) {
+    uint32_t i32 = 0;
+    i32 |= static_cast<uint32_t>(bytes[0] << 24);
+    i32 |= static_cast<uint32_t>(bytes[1] << 16);
+    i32 |= static_cast<uint32_t>(bytes[2] << 8);
+    i32 |= static_cast<uint32_t>(bytes[3]);
+    return i32;
+}
+
+std::string bytesToString(const std::span<const std::byte>& bytes) {
+    std::string string;
+
+    for (const std::byte byte : bytes) {
+        const char c = static_cast<char>(byte);
+        if (c == 0)
+            break; // Break on null-terminator
+        string += c;
+    }
+    return string;
+}
+
+std::vector<std::byte> serializeDebugInfo(const std::map<uint32_t, DebugInfo>& debugInfo) {
+    std::vector<std::byte> binaryDebugInfo;
+
+    for (auto [lineAddr, lineDebugInfo] : debugInfo) {
+        // Line address (4 bytes)
+        binaryDebugInfo.append_range(i32ToBEByte(lineAddr));
+        // Filename (n bytes)
+        binaryDebugInfo.append_range(stringToBytes(lineDebugInfo.source.filename, true));
+        // Line number (4 bytes)
+        binaryDebugInfo.append_range(i32ToBEByte(lineDebugInfo.source.lineno));
+        // Line text (n bytes)
+        binaryDebugInfo.append_range(stringToBytes(lineDebugInfo.source.text, true));
+        // Line label (n bytes)
+        binaryDebugInfo.append_range(stringToBytes(lineDebugInfo.label, true));
+    }
+
+    return binaryDebugInfo;
+}
+
+std::map<uint32_t, DebugInfo> deSerializeDebugInfo(const std::vector<std::byte>& binaryDebugInfo) {
+    std::map<uint32_t, DebugInfo> debugInfo;
+
+    const std::span binarySpan(binaryDebugInfo);
+
+    size_t byteIdx = 0;
+    while (byteIdx < binaryDebugInfo.size()) {
+        uint32_t lineAddr = BEByteToi32(binarySpan.subspan(byteIdx, 4));
+        byteIdx += 4;
+        std::string filename = bytesToString(binarySpan.subspan(byteIdx, binaryDebugInfo.size() - byteIdx));
+        byteIdx += filename.length() + 1;
+        uint32_t lineno = BEByteToi32(binarySpan.subspan(byteIdx, 4));
+        byteIdx += 4;
+        std::string text = bytesToString(binarySpan.subspan(byteIdx, binaryDebugInfo.size() - byteIdx));
+        byteIdx += text.length() + 1;
+        std::string label = bytesToString(binarySpan.subspan(byteIdx, binaryDebugInfo.size() - byteIdx));
+        byteIdx += label.length() + 1;
+        debugInfo[lineAddr] = {{filename, lineno, text}, label};
+    }
+
+    return debugInfo;
+}
 
 std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
     std::string program;
@@ -74,10 +137,10 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
 
 std::vector<std::byte> saveLayout(const MemLayout& layout) {
     // Offsets for text, data, ktext, kdata
-    std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'}, std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},
-                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}};
+    std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'}, std::byte{0}, std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}, std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}, std::byte{0},
+                          std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}, std::byte{0}};
 
     // Insert an offset value into the four bytes after the given index of the binary vector
     auto insertOffset = [&binary](const size_t i, const uint32_t offset) {
@@ -100,8 +163,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary.insert(binary.end(), 4, std::byte{0});
         insertOffset(binary.size() - 4, layout.data.at(MemSection::TEXT).size());
         // Add text data to binary
-        for (const std::byte& byte : layout.data.at(MemSection::TEXT))
-            binary.push_back(byte);
+        binary.append_range(layout.data.at(MemSection::TEXT));
         padBinary();
     }
     if (layout.data.contains(MemSection::DATA)) {
@@ -110,8 +172,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary.insert(binary.end(), 4, std::byte{0});
         insertOffset(binary.size() - 4, layout.data.at(MemSection::DATA).size());
         // Add static data to binary
-        for (const std::byte& byte : layout.data.at(MemSection::DATA))
-            binary.push_back(byte);
+        binary.append_range(layout.data.at(MemSection::DATA));
         padBinary();
     }
     if (layout.data.contains(MemSection::KTEXT)) {
@@ -120,8 +181,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary.insert(binary.end(), 4, std::byte{0});
         insertOffset(binary.size() - 4, layout.data.at(MemSection::KTEXT).size());
         // Add ktext data to binary
-        for (const std::byte& byte : layout.data.at(MemSection::KTEXT))
-            binary.push_back(byte);
+        binary.append_range(layout.data.at(MemSection::KTEXT));
         padBinary();
     }
     if (layout.data.contains(MemSection::KDATA)) {
@@ -130,8 +190,16 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary.insert(binary.end(), 4, std::byte{0});
         insertOffset(binary.size() - 4, layout.data.at(MemSection::KDATA).size());
         // Add kdata to binary
-        for (const std::byte& byte : layout.data.at(MemSection::KDATA))
-            binary.push_back(byte);
+        binary.append_range(layout.data.at(MemSection::KDATA));
+        padBinary();
+    }
+    if (!layout.debugInfo.empty()) {
+        const std::vector<std::byte> binaryDebugInfo = serializeDebugInfo(layout.debugInfo);
+        insertOffset(20, binary.size());
+        binary.insert(binary.end(), 4, std::byte{0});
+        insertOffset(binary.size() - 4, binaryDebugInfo.size());
+        // Add debug info to binary
+        binary.append_range(binaryDebugInfo);
         padBinary();
     }
 
@@ -151,7 +219,8 @@ MemLayout loadLayout(const std::vector<std::byte>& binary) {
                static_cast<uint32_t>(binary.at(index + 2)) << 16 | static_cast<uint32_t>(binary.at(index + 3)) << 24;
     };
 
-    const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12), extractOffset(16)};
+    const std::vector<size_t> secHeaders = {extractOffset(4), extractOffset(8), extractOffset(12), extractOffset(16),
+                                            extractOffset(20)};
     MemLayout layout;
 
     if (secHeaders[0] > 0) {
@@ -177,6 +246,13 @@ MemLayout loadLayout(const std::vector<std::byte>& binary) {
         layout.data[MemSection::KDATA] = {};
         for (size_t i = 0; i < kdataSize; i++)
             layout.data[MemSection::KDATA].push_back(binary.at(secHeaders[3] + 4 + i));
+    }
+    if (secHeaders[4] > 0) {
+        const size_t debugInfoSize = extractOffset(secHeaders[4]);
+        std::vector<std::byte> binaryDebugInfo;
+        for (size_t i = 0; i < debugInfoSize; i++)
+            binaryDebugInfo.push_back(binary.at(secHeaders[4] + 4 + i));
+        layout.debugInfo = deSerializeDebugInfo(binaryDebugInfo);
     }
 
     return layout;
