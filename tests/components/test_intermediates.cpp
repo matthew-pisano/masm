@@ -34,7 +34,7 @@ TEST_CASE("Test Save Layout") {
                               {}};
 
     SECTION("All Sections") {
-        const std::vector<std::byte> binary = saveLayout(layout);
+        const std::vector<std::byte> binary = saveLayout(layout, false);
         const std::vector<std::byte> expected = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
                 0x14, 0x00, 0x00, 0x00, // Text locator
@@ -58,7 +58,7 @@ TEST_CASE("Test Save Layout") {
                                    {MemSection::KTEXT, layout.data.at(MemSection::KTEXT)},
                                    {MemSection::KDATA, layout.data.at(MemSection::KDATA)}},
                                   {}};
-        const std::vector<std::byte> binary = saveLayout(noText);
+        const std::vector<std::byte> binary = saveLayout(noText, false);
         const std::vector<std::byte> expected = iV2bV({
                 'M', 'A', 'S', 'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator

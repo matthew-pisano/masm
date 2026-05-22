@@ -31,7 +31,7 @@ TEST_CASE("Test Eret Instruction") {
 
     constexpr int32_t expectedPC = 0x00400004;
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp0[Coproc0Register::EPC] = expectedPC;
     simulator.getState().cp0[Coproc0Register::CAUSE] = 1;
     simulator.interpret(actualLayout);
@@ -63,7 +63,7 @@ TEST_CASE("Test Mtc0 Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 1444;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(1444 == simulator.getState().cp0[Coproc0Register::VADDR]); }
@@ -90,7 +90,7 @@ TEST_CASE("Test Mfc0 Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp0[Coproc0Register::VADDR] = 1444;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(1444 == simulator.getState().registers[Register::T1]); }

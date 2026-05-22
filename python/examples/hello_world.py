@@ -30,7 +30,7 @@ def main():
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = simulator.Interpreter(io_mode, istream, ostream)
+    masm_interpreter = simulator.Simulator(io_mode, istream, ostream)
     exit_code = masm_interpreter.interpret(mem_layout)
 
     # Print out the result and exit

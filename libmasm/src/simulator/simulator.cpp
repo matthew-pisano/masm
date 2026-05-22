@@ -10,7 +10,7 @@
 #include <masm/simulator/syscalls.hpp>
 
 
-void Interpreter::initProgram(const MemLayout& layout) {
+void Simulator::initProgram(const MemLayout& layout) {
     // Load the program into memory
     state.loadProgram(layout);
     // Initialize PC to the start of the text section
@@ -29,7 +29,7 @@ void Interpreter::initProgram(const MemLayout& layout) {
 }
 
 
-int Interpreter::interpret(const MemLayout& layout) {
+int Simulator::interpret(const MemLayout& layout) {
     initProgram(layout);
 
     while (true) {
@@ -45,7 +45,7 @@ int Interpreter::interpret(const MemLayout& layout) {
 }
 
 
-bool Interpreter::readMMIO() {
+bool Simulator::readMMIO() {
     if (ioMode != IOMode::MMIO)
         throw std::runtime_error("MMIO mode not enabled for reading input");
 
@@ -73,7 +73,7 @@ bool Interpreter::readMMIO() {
 }
 
 
-bool Interpreter::writeMMIO() {
+bool Simulator::writeMMIO() {
     if (ioMode != IOMode::MMIO)
         throw std::runtime_error("MMIO mode not enabled for writing output");
 
@@ -97,10 +97,10 @@ bool Interpreter::writeMMIO() {
 }
 
 
-void Interpreter::interrupt(const uint32_t cause) { except(cause, ""); }
+void Simulator::interrupt(const uint32_t cause) { except(cause, ""); }
 
 
-void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
+void Simulator::except(const uint32_t cause, const std::string& excMsg) {
     // Check if exception handler is a valid address
     const uint32_t handlerAddress = memSectionOffset(MemSection::KTEXT);
     const int32_t pc = state.registers[Register::PC] - 4;
@@ -117,7 +117,7 @@ void Interpreter::except(const uint32_t cause, const std::string& excMsg) {
 }
 
 
-void Interpreter::step() {
+void Simulator::step() {
     uint32_t cause = 0;
     int32_t& pc = state.registers[Register::PC];
     // Update MMIO registers if in MMIO mode and the PC is not in the KTEXT section
@@ -161,7 +161,7 @@ void Interpreter::step() {
 }
 
 
-void Interpreter::execInstruction(const int32_t instruction) {
+void Simulator::execInstruction(const int32_t instruction) {
     if (instruction == 0x0000000C) {
         // Syscall instruction
         sysHandle.exec(ioMode, state, streamHandle);

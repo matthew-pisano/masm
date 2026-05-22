@@ -1,4 +1,4 @@
-"""Masm Interpreter"""
+"""Masm Simulator"""
 
 from enum import Enum
 from typing import Any, IO
@@ -13,8 +13,8 @@ class IOMode(Enum):
     MMIO = ...  # Memory-mapped I/O mode for reading/writing MMIO registers
 
 
-class Interpreter:
-    """Interpreter for MIPS assembly programs"""
+class Simulator:
+    """Simulator for MIPS assembly programs"""
 
     def __init__(self, ioMode: IOMode, istream: IO[Any], ostream: IO[Any]) -> None: ...
 

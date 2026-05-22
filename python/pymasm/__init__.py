@@ -1,4 +1,4 @@
-"""MIPS Assembly Interpreter Library"""
+"""MIPS Assembly Simulator Library"""
 
 from pymasm.pymasm_core import exceptions
 from pymasm.pymasm_core import simulator

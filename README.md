@@ -1,4 +1,4 @@
-# masm - A C++ MIPS Assembler and Interpreter
+# masm - A C++ MIPS Assembler and Simulator
 
 *masm* takes in one or more assembly source code files as input and outputs the standard output stream of the program. Programs are processed in three steps:
 

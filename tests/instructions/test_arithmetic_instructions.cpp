@@ -38,7 +38,7 @@ TEST_CASE("Test add Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.getState().registers[Register::T2] = 2;
     simulator.interpret(actualLayout);
@@ -72,7 +72,7 @@ TEST_CASE("Test addu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.getState().registers[Register::T2] = 2;
     simulator.interpret(actualLayout);
@@ -106,7 +106,7 @@ TEST_CASE("Test addi Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -139,7 +139,7 @@ TEST_CASE("Test addiu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -172,7 +172,7 @@ TEST_CASE("Test and Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
     simulator.interpret(actualLayout);
@@ -206,7 +206,7 @@ TEST_CASE("Test andi Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -237,7 +237,7 @@ TEST_CASE("Test div Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 17;
     simulator.getState().registers[Register::T2] = 5;
     simulator.interpret(actualLayout);
@@ -281,7 +281,7 @@ TEST_CASE("Test divu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     simulator.getState().registers[Register::T2] = 3;
     simulator.interpret(actualLayout);
@@ -323,7 +323,7 @@ TEST_CASE("Test mfhi Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::HI] = 0x12345678;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -352,7 +352,7 @@ TEST_CASE("Test mflo Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::LO] = 0x87654321;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -381,7 +381,7 @@ TEST_CASE("Test mthi Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -410,7 +410,7 @@ TEST_CASE("Test mtlo Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x87654321;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -441,7 +441,7 @@ TEST_CASE("Test mult Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 2;
     simulator.interpret(actualLayout);
@@ -478,7 +478,7 @@ TEST_CASE("Test multu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     simulator.getState().registers[Register::T2] = 2;
     simulator.interpret(actualLayout);
@@ -516,7 +516,7 @@ TEST_CASE("Test nor Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
     simulator.interpret(actualLayout);
@@ -550,7 +550,7 @@ TEST_CASE("Test or Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
     simulator.interpret(actualLayout);
@@ -584,7 +584,7 @@ TEST_CASE("Test ori Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345600;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -617,7 +617,7 @@ TEST_CASE("Test sll Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -650,7 +650,7 @@ TEST_CASE("Test srl Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -683,7 +683,7 @@ TEST_CASE("Test sra Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x80000000; // Negative number
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -716,7 +716,7 @@ TEST_CASE("Test sllv Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 4;
     simulator.interpret(actualLayout);
@@ -750,7 +750,7 @@ TEST_CASE("Test srlv Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 4;
     simulator.interpret(actualLayout);
@@ -784,7 +784,7 @@ TEST_CASE("Test srav Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x80000000; // Negative number
     simulator.getState().registers[Register::T2] = 4;
     simulator.interpret(actualLayout);
@@ -818,7 +818,7 @@ TEST_CASE("Test sub Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
     simulator.getState().registers[Register::T2] = 3;
     simulator.interpret(actualLayout);
@@ -852,7 +852,7 @@ TEST_CASE("Test subu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
     simulator.getState().registers[Register::T2] = 3;
     simulator.interpret(actualLayout);
@@ -886,7 +886,7 @@ TEST_CASE("Test xor Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xAAAAAAAA;
     simulator.getState().registers[Register::T2] = 0x55555555;
     simulator.interpret(actualLayout);
@@ -920,7 +920,7 @@ TEST_CASE("Test xori Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12340000;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {

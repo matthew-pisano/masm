@@ -29,7 +29,7 @@ def main():
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = simulator.Interpreter(io_mode, istream, ostream)
+    masm_interpreter = simulator.Simulator(io_mode, istream, ostream)
     masm_interpreter.init_program(mem_layout)
 
     pos = 0

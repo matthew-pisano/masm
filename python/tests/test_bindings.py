@@ -30,7 +30,7 @@ class TestBindings:
         input_string = "5\n"
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
-        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        simulator = pymasm.simulator.Simulator(io_mode, istream, ostream)
         exitCode = simulator.interpret(layout)
 
         with open("tests/fixtures/input_output/input_output.txt", "rb") as f:
@@ -50,7 +50,7 @@ class TestBindings:
         input_string = "1234"
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
-        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        simulator = pymasm.simulator.Simulator(io_mode, istream, ostream)
         exitCode = simulator.interpret(layout)
 
         with open("tests/fixtures/mmio/mmio.txt", "rb") as f:
@@ -69,7 +69,7 @@ class TestBindings:
         io_mode = pymasm.simulator.IOMode.MMIO
         istream = BytesIO()
         ostream = BytesIO()
-        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        simulator = pymasm.simulator.Simulator(io_mode, istream, ostream)
         simulator.init_program(layout)
 
         # Dummy step before writing to input stream to test error flag clearing

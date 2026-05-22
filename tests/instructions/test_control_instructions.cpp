@@ -33,7 +33,7 @@ TEST_CASE("Test j Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     simulator.interpret(actualLayout);
     SECTION("Test Execute") { REQUIRE(simulator.getState().registers[Register::PC] == 0x00400010); }
@@ -59,7 +59,7 @@ TEST_CASE("Test jal Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -87,7 +87,7 @@ TEST_CASE("Test jr Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     simulator.getState().registers[Register::T0] = 0x00400010;
     simulator.interpret(actualLayout);
@@ -113,7 +113,7 @@ TEST_CASE("Test jalr Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     simulator.getState().registers[Register::T0] = 0x00400010;
     simulator.interpret(actualLayout);
@@ -147,13 +147,13 @@ TEST_CASE("Test beq Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugInterpreter interpreterNe(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
     interpreterNe.getState().registers[Register::T0] = 37;
     interpreterNe.getState().registers[Register::T1] = 42;
     interpreterNe.interpret(actualLayout);
@@ -184,13 +184,13 @@ TEST_CASE("Test bne Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 37;
     interpreterEq.getState().registers[Register::T1] = 37;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004); }
 
-    DebugInterpreter interpreter2Ne(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreter2Ne(IOMode::SYSCALL, streamHandle);
     interpreter2Ne.getState().registers[Register::T0] = 37;
     interpreter2Ne.getState().registers[Register::T1] = 42;
     interpreter2Ne.interpret(actualLayout);
@@ -219,17 +219,17 @@ TEST_CASE("Test bgtz Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugInterpreter interpreterGt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugInterpreter interpreterLt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400008); }
@@ -257,17 +257,17 @@ TEST_CASE("Test bltz Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugInterpreter interpreterGt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugInterpreter interpreterLt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400010); }
@@ -295,17 +295,17 @@ TEST_CASE("Test bgez Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugInterpreter interpreterGt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugInterpreter interpreterLt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400008); }
@@ -333,17 +333,17 @@ TEST_CASE("Test blez Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreterEq(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().registers[Register::T0] = 0;
     interpreterEq.interpret(actualLayout);
     SECTION("Test Execute Equal") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
 
-    DebugInterpreter interpreterGt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterGt(IOMode::SYSCALL, streamHandle);
     interpreterGt.getState().registers[Register::T0] = 69;
     interpreterGt.interpret(actualLayout);
     SECTION("Test Execute Greater Than") { REQUIRE(interpreterGt.getState().registers[Register::PC] == 0x00400008); }
 
-    DebugInterpreter interpreterLt(IOMode::SYSCALL, streamHandle);
+    DebugSimulator interpreterLt(IOMode::SYSCALL, streamHandle);
     interpreterLt.getState().registers[Register::T0] = -420;
     interpreterLt.interpret(actualLayout);
     SECTION("Test Execute Less Than") { REQUIRE(interpreterLt.getState().registers[Register::PC] == 0x00400010); }
@@ -368,7 +368,7 @@ TEST_CASE("Test break Instruction") {
 
     std::ostringstream oss;
     StreamHandle streamHandle(std::cin, oss);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
         simulator.interpret(actualLayout);
@@ -382,10 +382,10 @@ TEST_CASE("Test break Instruction") {
     oss.clear();
 
     StreamHandle interactiveStreamHandle(iss, oss);
-    DebugInterpreter interactiveInterpreter(IOMode::SYSCALL, interactiveStreamHandle);
-    interactiveInterpreter.setInteractive(true);
+    DebugSimulator interactiveSimulator(IOMode::SYSCALL, interactiveStreamHandle);
+    interactiveSimulator.setInteractive(true);
     SECTION("Test Debugger") {
-        interactiveInterpreter.interpret(actualLayout);
+        interactiveSimulator.interpret(actualLayout);
 
         const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 0)\n"
                                            "There is no program running.  Use 'run' to "
@@ -414,7 +414,7 @@ TEST_CASE("Test break Instruction with Code") {
 
     std::ostringstream oss;
     StreamHandle streamHandle(std::cin, oss);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
         simulator.interpret(actualLayout);
@@ -428,10 +428,10 @@ TEST_CASE("Test break Instruction with Code") {
     oss.clear();
 
     StreamHandle interactiveStreamHandle(iss, oss);
-    DebugInterpreter interactiveInterpreter(IOMode::SYSCALL, interactiveStreamHandle);
-    interactiveInterpreter.setInteractive(true);
+    DebugSimulator interactiveSimulator(IOMode::SYSCALL, interactiveStreamHandle);
+    interactiveSimulator.setInteractive(true);
     SECTION("Test Debugger") {
-        interactiveInterpreter.interpret(actualLayout);
+        interactiveSimulator.interpret(actualLayout);
         const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 42)\n"
                                            "There is no program running.  Use 'run' to "
                                            "restart\n\n(mdb) \nExiting debugger (code 0)";

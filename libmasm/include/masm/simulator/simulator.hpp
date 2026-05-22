@@ -14,7 +14,7 @@
 /**
  * The simulator class, which is responsible for executing MIPS instructions
  */
-class Interpreter {
+class Simulator {
 
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
@@ -70,12 +70,12 @@ protected:
     State state;
 
 public:
-    Interpreter(const IOMode ioMode, StreamHandle& streamHandle) : ioMode(ioMode), streamHandle(streamHandle) {}
+    Simulator(const IOMode ioMode, StreamHandle& streamHandle) : ioMode(ioMode), streamHandle(streamHandle) {}
 
-    Interpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
+    Simulator(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
         ioMode(ioMode), streamHandle(streamHandle), state(useLittleEndian) {}
 
-    virtual ~Interpreter() = default;
+    virtual ~Simulator() = default;
 
     /**
      * Initializes the program in the simulator with the given memory layout

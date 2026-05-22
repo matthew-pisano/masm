@@ -53,7 +53,7 @@ int main(const int argc, char* argv[]) {
         const MemLayout layout = loadLayoutFromBinary(inputFileNames);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        DebugInterpreter simulator(ioMode, conHandle, useLittleEndian);
+        DebugSimulator simulator(ioMode, conHandle, useLittleEndian);
         simulator.setInteractive(true);
         exitCode = simulator.interpret(layout);
     } catch (const std::exception& e) {

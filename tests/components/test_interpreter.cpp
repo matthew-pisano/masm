@@ -52,7 +52,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     std::ostringstream oss;
 
     StreamHandle streamHandle(iss, oss);
-    DebugInterpreter simulator(ioMode, streamHandle, useLittleEndian);
+    DebugSimulator simulator(ioMode, streamHandle, useLittleEndian);
     exitCode = simulator.interpret(layout);
 
     REQUIRE(exitCode == 0);
@@ -79,7 +79,7 @@ TEST_CASE("Test Runtime Error") {
     std::ostringstream oss;
 
     StreamHandle streamHandle(iss, oss);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     REQUIRE_THROWS_MATCHES(simulator.interpret(layout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "

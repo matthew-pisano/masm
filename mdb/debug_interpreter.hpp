@@ -9,7 +9,7 @@
 
 
 /**
- * Enum representing the various debug commands that can be issued to the DebugInterpreter
+ * Enum representing the various debug commands that can be issued to the DebugSimulator
  */
 enum class DebugCommand {
     BREAK,
@@ -32,7 +32,7 @@ enum class DebugCommand {
 /**
  * Utility class that allows tests to access the internal state of an simulator
  */
-class DebugInterpreter final : public Interpreter {
+class DebugSimulator final : public Simulator {
 
     /**
      * Whether a program is currently running and has not finished
@@ -83,7 +83,7 @@ class DebugInterpreter final : public Interpreter {
      * loading the program into memory
      * @param layout The memory layout to use for loading the program and data
      */
-    void resetInterpreter(const MemLayout& layout);
+    void resetSimulator(const MemLayout& layout);
 
     /**
      * Lists the source lines surrounding the current program counter
@@ -172,20 +172,20 @@ class DebugInterpreter final : public Interpreter {
 
 public:
     /**
-     * Constructor for the DebugInterpreter class
+     * Constructor for the DebugSimulator class
      * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      */
-    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) : Interpreter(ioMode, streamHandle) {}
+    DebugSimulator(const IOMode ioMode, StreamHandle& streamHandle) : Simulator(ioMode, streamHandle) {}
 
     /**
-     * Constructor for the DebugInterpreter class
+     * Constructor for the DebugSimulator class
      * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      * @param useLittleEndian Whether to use little-endian byte order for memory layout
      */
-    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
-        Interpreter(ioMode, streamHandle, useLittleEndian) {}
+    DebugSimulator(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
+        Simulator(ioMode, streamHandle, useLittleEndian) {}
 
     /**
      * Converts the bytes after e memory address to a string representation, stopping at a null byte

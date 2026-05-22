@@ -35,7 +35,7 @@ TEST_CASE("Test slt Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5;
     simulator.getState().registers[Register::T2] = 3;
     simulator.interpret(actualLayout);
@@ -69,7 +69,7 @@ TEST_CASE("Test sltu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5; // Interpreted as large positive number
     simulator.getState().registers[Register::T2] = 3;
     simulator.interpret(actualLayout);
@@ -103,7 +103,7 @@ TEST_CASE("Test slti Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
@@ -136,7 +136,7 @@ TEST_CASE("Test sltiu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5;
     simulator.interpret(actualLayout);
     SECTION("Test Execute") {
