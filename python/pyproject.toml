@@ -29,5 +29,8 @@ version = { attr = "_version.__version__" }
 [tool.setuptools.package-data]
 pymasm = ["*.so", "*.pyd", "pymasm_core/*.py", "pymasm_core/*.pyi", "py.typed"]
 
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+
 [tool.pybind11.options]
 cpp_std = 23

@@ -68,8 +68,7 @@ jobs:
       - name: Package Python
         run: |
           cp build/python/pymasm_core* python/pymasm/
-          cd python
-          $VENV_PATH/bin/python -m build --wheel
+          $VENV_PATH/bin/python -m build python --wheel
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -127,7 +126,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/logs
       - name: Run PyTests
         run: |
-          $VENV_PATH/bin/pytest --junitxml=${{ github.workspace }}/logs/pytest-results.xml test
+          $VENV_PATH/bin/pytest --junitxml=${{ github.workspace }}/logs/pytest-results.xml python/tests
       - name: Publish test results
         uses: dorny/test-reporter@v2.1.1
         if: always()
