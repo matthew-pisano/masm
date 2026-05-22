@@ -4,8 +4,6 @@
 
 #include <CLI/CLI.hpp>
 
-#include <masm/assembler/parser.hpp>
-#include <masm/assembler/serialization.hpp>
 #include <masm/interpreter/interpreter.hpp>
 #include <masm/io/consoleio.hpp>
 
