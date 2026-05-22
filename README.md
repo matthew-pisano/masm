@@ -1,4 +1,4 @@
-# masm - A C++ MIPS Assembler and Interpreter
+# masm - A C++ MIPS Assembler and Simulator
 
 *masm* takes in one or more assembly source code files as input and outputs the standard output stream of the program. Programs are processed in three steps:
 
@@ -83,7 +83,7 @@ By default, *masm* stores words in a *big endian* format to keep in line with th
 
 ## Interactive Debugger
 
-in addition to the main interpreter executable, this project also contains a *GDB*-like debugger, *mdb*. This program allows the user to step through a running assembly program interactively. At any interactive step, the user can view the state of the program and continue when desired. The commands used for the debugger are very similar to those used with *GDB*. These include:
+in addition to the main simulator executable, this project also contains a *GDB*-like debugger, *mdb*. This program allows the user to step through a running assembly program interactively. At any interactive step, the user can view the state of the program and continue when desired. The commands used for the debugger are very similar to those used with *GDB*. These include:
 
 * `help` - for more detailed information on the commands
 * `step` - to advance the program by one instruction
@@ -113,7 +113,7 @@ After installing the package through the wheel file built by this project, it ca
 from pymasm import exceptions
 from pymasm import tokenizer
 from pymasm import parser
-from pymasm import interpreter
+from pymasm import simulator
 ```
 
 For more detailed usage examples, see the [python/examples](python/examples) directory.
@@ -156,7 +156,7 @@ python -m build python
 Similar to other *MIPS* simulators like [MARS](https://dpetersanderson.github.io/) and [SPIM](https://spimsimulator.sourceforge.net/), *masm* implements a subset of the full MIPS instruction set architecture and executes instructions within an emulated environment. Here, instructions and data are stored in memory in a *big endian* format, similar to the original *MIPS* specification. Additionally, *masm* also supports assembling code in *little endian* format for compatibility with other
 simulators.
 
-This program uses a 32 element array composed of 32-bit integers to represent its register file and an unordered map that can accommodate up to 4GiB of memory. The CPU is implemented within the interpreter, which keeps the current state of the register file and memory to load and operate on instructions.
+This program uses a 32 element array composed of 32-bit integers to represent its register file and an unordered map that can accommodate up to 4GiB of memory. The CPU is implemented within the simulator, which keeps the current state of the register file and memory to load and operate on instructions.
 
 ## Implemented Features
 

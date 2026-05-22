@@ -1,4 +1,4 @@
-"""Masm Interpreter"""
+"""Masm Simulator"""
 
 from enum import Enum
 from typing import Any, IO
@@ -7,14 +7,14 @@ from .parser import MemLayout
 
 
 class IOMode(Enum):
-    """Enumeration of the I/O modes for the interpreter"""
+    """Enumeration of the I/O modes for the simulator"""
 
     SYSCALL = ...  # System call mode for reading/writing
     MMIO = ...  # Memory-mapped I/O mode for reading/writing MMIO registers
 
 
-class Interpreter:
-    """Interpreter for MIPS assembly programs"""
+class Simulator:
+    """Simulator for MIPS assembly programs"""
 
     def __init__(self, ioMode: IOMode, istream: IO[Any], ostream: IO[Any]) -> None: ...
 
@@ -33,7 +33,7 @@ class Interpreter:
             MasmRuntimeError: If a runtime error occurs during execution"""
         ...
 
-    def interpret(self, layout: MemLayout) -> int:
+    def simulate(self, layout: MemLayout) -> int:
         """Interprets the given memory layout and returns an exit code
 
         Args:

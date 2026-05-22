@@ -12,7 +12,7 @@
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "pybind_buffer.hpp"
 #include "pybind_convert.hpp"
@@ -21,35 +21,35 @@ namespace py = pybind11;
 
 
 /**
- * Wrapper class for the Interpreter object to manage Python streams
+ * Wrapper class for the Simulator object to manage Python streams
  */
-class InterpreterWrapper {
+class SimulatorWrapper {
     std::unique_ptr<PyBytesIOBuf> ibuf_;
     std::unique_ptr<PyBytesIOBuf> obuf_;
     std::shared_ptr<std::istream> istream_;
     std::unique_ptr<std::ostream> ostream_;
     std::unique_ptr<StreamHandle> streamHandle_; // Store as member to avoid lifetime issues
-    std::unique_ptr<Interpreter> obj_;
+    std::unique_ptr<Simulator> obj_;
 
 public:
-    InterpreterWrapper(const IOMode ioMode, const py::object& istream, const py::object& ostream) :
+    SimulatorWrapper(const IOMode ioMode, const py::object& istream, const py::object& ostream) :
         ibuf_(std::make_unique<PyBytesIOBuf>(istream)), obuf_(std::make_unique<PyBytesIOBuf>(ostream)),
         istream_(std::make_shared<std::istream>(ibuf_.get())), ostream_(std::make_unique<std::ostream>(obuf_.get())),
         streamHandle_(std::make_unique<StreamHandle>(*istream_, *ostream_)),
-        obj_(std::make_unique<Interpreter>(ioMode, *streamHandle_)) {}
+        obj_(std::make_unique<Simulator>(ioMode, *streamHandle_)) {}
 
     void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
-    [[nodiscard]] int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
+    [[nodiscard]] int simulate(const MemLayout& layout) const { return obj_->simulate(layout); }
 };
 
 
 PYBIND11_MODULE(pymasm_core, m) {
-    m.doc() = "MIPS Assembly Interpreter Library";
+    m.doc() = "MIPS Assembly Simulator Library";
 
     const py::module_ tokenizer_module = m.def_submodule("tokenizer", "Masm Tokenizer");
     const py::module_ parser_module = m.def_submodule("parser", "Masm Parser");
-    const py::module_ interpreter_module = m.def_submodule("interpreter", "Masm Interpreter");
+    const py::module_ simulator_module = m.def_submodule("simulator", "Masm Simulator");
     const py::module_ exceptions_module = m.def_submodule("exceptions", "Masm Exceptions");
 
     // Tokenizer Bindings //
@@ -150,20 +150,20 @@ PYBIND11_MODULE(pymasm_core, m) {
             .def("parse", &Parser::parse, py::arg("program"), py::arg("raw") = false,
                  "Parses the given program and returns a MemLayout object");
 
-    // Interpreter Bindings //
+    // Simulator Bindings //
 
     // Binding for the IO Mode enum
-    py::enum_<IOMode>(interpreter_module, "IOMode").value("SYSCALL", IOMode::SYSCALL).value("MMIO", IOMode::MMIO);
+    py::enum_<IOMode>(simulator_module, "IOMode").value("SYSCALL", IOMode::SYSCALL).value("MMIO", IOMode::MMIO);
 
-    // Bindings for the Interpreter class
-    py::class_<InterpreterWrapper>(interpreter_module, "Interpreter")
+    // Bindings for the Simulator class
+    py::class_<SimulatorWrapper>(simulator_module, "Simulator")
             // Constructor that accepts Python file-like objects
             .def(py::init<IOMode, py::object, py::object>())
-            .def("step", &InterpreterWrapper::step, "Executes a single instruction")
-            .def("init_program", &InterpreterWrapper::initProgram, py::arg("layout"),
-                 "Initializes the interpreter with the given memory layout")
-            .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
-                 "Interprets the given memory layout and returns an exit code");
+            .def("step", &SimulatorWrapper::step, "Executes a single instruction")
+            .def("init_program", &SimulatorWrapper::initProgram, py::arg("layout"),
+                 "Initializes the simulator with the given memory layout")
+            .def("simulate", &SimulatorWrapper::simulate, py::arg("layout"),
+                 "Simulates the given memory layout and returns an exit code");
 
     // Exceptions Bindings //
 

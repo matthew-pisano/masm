@@ -7,9 +7,9 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(masm-tests
         testing_utilities.cpp
-        ${CMAKE_SOURCE_DIR}/mdb/debug_interpreter.cpp
+        ${CMAKE_SOURCE_DIR}/mdb/debug_simulator.cpp
         components/test_intermediates.cpp
-        components/test_interpreter.cpp
+        components/test_simulator.cpp
         components/test_parser.cpp
         components/test_postprocessor.cpp
         components/test_syscall.cpp

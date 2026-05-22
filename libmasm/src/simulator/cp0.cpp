@@ -2,7 +2,7 @@
 // Created by matthew on 6/7/25.
 //
 
-#include <masm/interpreter/cp0.hpp>
+#include <masm/simulator/cp0.hpp>
 
 #include <stdexcept>
 

@@ -18,9 +18,11 @@
 TEST_CASE("Test Stringify Layout") {
     const std::string fixturePath = "tests/fixtures/hello_world/hello_world.asm";
     Parser parser;
-    const MemLayout layout = loadLayoutFromSource({fixturePath}, parser);
+    const MemLayout layout = loadLayoutFromSource({fixturePath}, parser, true);
     const std::string layoutString = stringifyLayout(layout, parser.getLabels());
-    const std::string expectedString = readFile(fixturePath + ".i");
+    std::filesystem::path fsFicturePath(fixturePath);
+    fsFicturePath.replace_extension("i");
+    const std::string expectedString = readFile(fsFicturePath);
 
     REQUIRE(layoutString == expectedString);
 }
@@ -34,13 +36,14 @@ TEST_CASE("Test Save Layout") {
                               {}};
 
     SECTION("All Sections") {
-        const std::vector<std::byte> binary = saveLayout(layout);
+        const std::vector<std::byte> binary = saveLayout(layout, false);
         const std::vector<std::byte> expected = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
-                0x14, 0x00, 0x00, 0x00, // Text locator
-                0x1C, 0x00, 0x00, 0x00, // Data locator
-                0x24, 0x00, 0x00, 0x00, // KText locator
-                0x30, 0x00, 0x00, 0x00, // KData locator
+                0x18, 0x00, 0x00, 0x00, // Text locator
+                0x20, 0x00, 0x00, 0x00, // Data locator
+                0x28, 0x00, 0x00, 0x00, // KText locator
+                0x34, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x03, 0x00, 0x00, 0x00, // Text size
                 0x01, 0x02, 0x03, 0x00, // Text section
                 0x02, 0x00, 0x00, 0x00, // Data size
@@ -58,14 +61,14 @@ TEST_CASE("Test Save Layout") {
                                    {MemSection::KTEXT, layout.data.at(MemSection::KTEXT)},
                                    {MemSection::KDATA, layout.data.at(MemSection::KDATA)}},
                                   {}};
-        const std::vector<std::byte> binary = saveLayout(noText);
+        const std::vector<std::byte> binary = saveLayout(noText, false);
         const std::vector<std::byte> expected = iV2bV({
-                'M', 'A', 'S', 'M', // Binary identifier
+                'M',  'A',  'S',  'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
-                0x14, 0x00, 0x00, 0x00, // Data locator
-                0x1C, 0x00, 0x00, 0x00, // KText locator
-                0x28, 0x00, 0x00, 0x00, // KData locator
-                // Text section missing
+                0x18, 0x00, 0x00, 0x00, // Data locator
+                0x20, 0x00, 0x00, 0x00, // KText locator
+                0x2C, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x02, 0x00, 0x00, 0x00, // Data size
                 0x04, 0x05, 0x00, 0x00, // Data section
                 0x05, 0x00, 0x00, 0x00, // KText size
@@ -79,23 +82,23 @@ TEST_CASE("Test Save Layout") {
 
 
 TEST_CASE("Test Load Layout") {
-    const std::vector<std::byte> binary = iV2bV({
-            'M',  'A',  'S',  'M', // Binary identifier
-            0x14, 0x00, 0x00, 0x00, // Text locator
-            0x1C, 0x00, 0x00, 0x00, // Data locator
-            0x24, 0x00, 0x00, 0x00, // KText locator
-            0x30, 0x00, 0x00, 0x00, // KData locator
-            0x03, 0x00, 0x00, 0x00, // Text size
-            0x01, 0x02, 0x03, 0x00, // Text section
-            0x02, 0x00, 0x00, 0x00, // Data size
-            0x04, 0x05, 0x00, 0x00, // Data section
-            0x05, 0x00, 0x00, 0x00, // KText size
-            0x07, 0x08, 0x09, 0x10, 0x11, 0x00, 0x00, 0x00, // KText section
-            0x01, 0x00, 0x00, 0x00, // KData size
-            0x06, 0x00, 0x00, 0x00 // KData section
-    });
-
     SECTION("All Sections") {
+        const std::vector<std::byte> binary = iV2bV({
+                'M',  'A',  'S',  'M', // Binary identifier
+                0x18, 0x00, 0x00, 0x00, // Text locator
+                0x20, 0x00, 0x00, 0x00, // Data locator
+                0x28, 0x00, 0x00, 0x00, // KText locator
+                0x34, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
+                0x03, 0x00, 0x00, 0x00, // Text size
+                0x01, 0x02, 0x03, 0x00, // Text section
+                0x02, 0x00, 0x00, 0x00, // Data size
+                0x04, 0x05, 0x00, 0x00, // Data section
+                0x05, 0x00, 0x00, 0x00, // KText size
+                0x07, 0x08, 0x09, 0x10, 0x11, 0x00, 0x00, 0x00, // KText section
+                0x01, 0x00, 0x00, 0x00, // KData size
+                0x06, 0x00, 0x00, 0x00 // KData section
+        });
         const MemLayout layout = loadLayout(binary);
         const MemLayout expected = {{{MemSection::TEXT, iV2bV({0x01, 0x02, 0x03})},
                                      {MemSection::DATA, iV2bV({0x04, 0x05})},
@@ -109,9 +112,10 @@ TEST_CASE("Test Load Layout") {
         const std::vector<std::byte> noText = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
-                0x14, 0x00, 0x00, 0x00, // Data locator
-                0x1C, 0x00, 0x00, 0x00, // KText locator
-                0x28, 0x00, 0x00, 0x00, // KData locator
+                0x18, 0x00, 0x00, 0x00, // Data locator
+                0x20, 0x00, 0x00, 0x00, // KText locator
+                0x2C, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x02, 0x00, 0x00, 0x00, // Data size
                 0x04, 0x05, 0x00, 0x00, // Data section
                 0x05, 0x00, 0x00, 0x00, // KText size
@@ -144,9 +148,10 @@ TEST_CASE("Test Load Layout") {
         malformed = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
-                0x14, 0x00, 0x00, 0x00, // Data locator
-                0x1C, 0x00, 0x00, 0x00, // KText locator
-                0x28, 0x00, 0x00, 0x00, // KData locator
+                0x18, 0x00, 0x00, 0x00, // Data locator
+                0x20, 0x00, 0x00, 0x00, // KText locator
+                0x2C, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x02, 0x00, // Data size (truncated)
         });
         REQUIRE_THROWS_MATCHES(

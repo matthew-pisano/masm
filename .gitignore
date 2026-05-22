@@ -46,3 +46,5 @@ dist
 *.egg-info
 build
 .venv
+
+out

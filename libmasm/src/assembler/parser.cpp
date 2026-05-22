@@ -8,8 +8,8 @@
 #include <stdexcept>
 
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/cp1.hpp>
-#include <masm/interpreter/cpu.hpp>
+#include <masm/simulator/cp1.hpp>
+#include <masm/simulator/cpu.hpp>
 
 #include "assembler/directive.hpp"
 #include "assembler/instruction.hpp"
@@ -30,7 +30,8 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool ra
     if (!raw) {
         // Insert dummy nop instruction to save space in case a jump main is needed
         const std::vector<Token> nop = {{TokenCategory::INSTRUCTION, "nop"}};
-        modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<unknown>", 0, nop});
+        modifiedTokenLines.insert(modifiedTokenLines.begin(), {"<internal>", 0, nop});
+        labelMap["_start"] = memSectionOffset(MemSection::TEXT);
     }
 
     // Resolve all label locations before parsing instructions
@@ -38,9 +39,11 @@ MemLayout Parser::parse(const std::vector<LineTokens>& tokenLines, const bool ra
     labelMap.populateLabelMap(modifiedTokenLines);
 
     // Insert jump to main instruction if the label is defined, otherwise start at first text word
-    if (!raw && labelMap.contains("main")) {
-        const std::vector<Token> jumpMain = {{TokenCategory::INSTRUCTION, "j"}, {TokenCategory::LABEL_REF, "main"}};
-        modifiedTokenLines[0] = {"<unknown>", 0, jumpMain};
+    const std::string mangledMain = mangleLabel("main", tokenLines[0].filename);
+    if (!raw && labelMap.contains(mangledMain)) {
+        const std::vector<Token> jumpMain = {{TokenCategory::INSTRUCTION, "j"},
+                                             {TokenCategory::LABEL_REF, mangledMain}};
+        modifiedTokenLines[0] = {"<internal>", 0, jumpMain};
     }
 
     // Resolve pseudo instructions in the token lines

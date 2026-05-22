@@ -6,7 +6,6 @@
 
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/serialization.hpp>
-#include <masm/interpreter/interpreter.hpp>
 #include <masm/io/consoleio.hpp>
 
 #include "fileio.hpp"
@@ -15,23 +14,23 @@
 
 
 int main(const int argc, char* argv[]) {
-    std::string name = "libmasm";
+    std::string name = "masm";
     const std::string _computedVersionString(Version::VERSION);
     const std::string version = name + " " + _computedVersionString;
 
     std::vector<std::string> inputFileNames;
-    bool useMMIO = false;
     bool useLittleEndian = false;
+    bool debugBuild = false;
     bool saveTemps = false;
-    bool assembleOnly = false;
+    std::string outputFileName;
 
-    CLI::App app{version + " - MIPS Interpreter", name};
+    CLI::App app{version + " - MIPS Assembler", name};
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
-    app.add_flag("-m,--mmio", useMMIO, "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("-g", debugBuild, "Whether to generate a debug build");
     app.add_flag("--save-temps", saveTemps, "Write intermediate files to the current working directory");
-    app.add_flag("-s,--assemble", assembleOnly, "Assemble only; do not execute the given program");
+    app.add_option("-o", outputFileName, "The name of the output file");
     app.set_version_flag("--version", version);
 
     // Set up help message
@@ -52,36 +51,39 @@ int main(const int argc, char* argv[]) {
     // resolve wildcards in path names to real paths
     inputFileNames = resolveWildcards(inputFileNames);
 
-    const bool loadingBinary = isLoadingBinary(inputFileNames);
-    if (loadingBinary && saveTemps)
-        std::cerr << "Warning: temp files are not generated when parsing binaries" << std::endl;
-    if (loadingBinary && useLittleEndian)
-        std::cerr << "Warning: little-endian mode has no effect on binary files" << std::endl;
+    // Resolve absolute file names
+    for (size_t i = 0; i < inputFileNames.size(); i++)
+        try {
+            inputFileNames[i] = std::filesystem::canonical(inputFileNames[i]);
+        } catch (std::filesystem::filesystem_error&) {
+            std::cerr << "error: Could not find file '" << inputFileNames[i] << "'" << std::endl;
+            return 1;
+        }
+
+    // Ensure the directory of the output file exists
+    if (!outputFileName.empty()) {
+        std::filesystem::path outputFilePath(outputFileName);
+        std::string outputDirName = std::filesystem::absolute(outputFilePath).parent_path();
+        if (!std::filesystem::is_directory(outputDirName)) {
+            std::cerr << "error: Could not find directory '" << outputDirName << "'" << std::endl;
+            return 1;
+        }
+    } else
+        outputFileName = std::filesystem::path(inputFileNames[0]).stem();
 
     int exitCode = 1;
     try {
-        MemLayout layout;
-        if (loadingBinary)
-            layout = loadLayoutFromBinary(inputFileNames);
-        else {
-            Parser parser(useLittleEndian);
-            layout = loadLayoutFromSource(inputFileNames, parser);
-            if (saveTemps) {
-                std::string preprocessed = stringifyLayout(layout, parser.getLabels());
-                writeFile(inputFileNames[0] + ".i", preprocessed);
-
-                std::vector<std::byte> binary = saveLayout(layout);
-                writeFileBytes(inputFileNames[0] + ".o", binary);
-            }
+        Parser parser(useLittleEndian);
+        const MemLayout layout = loadLayoutFromSource(inputFileNames, parser);
+        if (saveTemps) {
+            const std::string preprocessed = stringifyLayout(layout, parser.getLabels());
+            writeFile(outputFileName + ".i", preprocessed);
         }
 
-        // Do not interpret program if only assembling
-        if (!assembleOnly) {
-            const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-            Interpreter interpreter(ioMode, conHandle, useLittleEndian);
-            exitCode = interpreter.interpret(layout);
-        } else
-            exitCode = 0;
+        const std::vector<std::byte> binary = saveLayout(layout, debugBuild);
+        writeFileBytes(outputFileName + ".o", binary);
+
+        exitCode = 0;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

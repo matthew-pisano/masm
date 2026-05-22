@@ -6,7 +6,7 @@
 #define CP0_H
 #include <array>
 
-#include <masm/interpreter/cpu.hpp>
+#include <masm/simulator/cpu.hpp>
 
 /**
  * Enum representing the valid coprocessor 0 registers

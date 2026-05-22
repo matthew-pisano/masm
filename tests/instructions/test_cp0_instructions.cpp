@@ -7,9 +7,9 @@
 
 #include <masm/assembler/memory.hpp>
 #include <masm/assembler/tokenizer.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
-#include "mdb/debug_interpreter.hpp"
+#include "mdb/debug_simulator.hpp"
 #include "tests/testing_utilities.hpp"
 
 
@@ -31,14 +31,14 @@ TEST_CASE("Test Eret Instruction") {
 
     constexpr int32_t expectedPC = 0x00400004;
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp0[Coproc0Register::EPC] = expectedPC;
-    interpreter.getState().cp0[Coproc0Register::CAUSE] = 1;
-    interpreter.interpret(actualLayout);
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().cp0[Coproc0Register::EPC] = expectedPC;
+    simulator.getState().cp0[Coproc0Register::CAUSE] = 1;
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
-        REQUIRE(expectedPC == interpreter.getState().registers[Register::PC]);
-        REQUIRE(0 == interpreter.getState().cp0[Coproc0Register::EPC]);
-        REQUIRE(0 == interpreter.getState().cp0[Coproc0Register::CAUSE]);
+        REQUIRE(expectedPC == simulator.getState().registers[Register::PC]);
+        REQUIRE(0 == simulator.getState().cp0[Coproc0Register::EPC]);
+        REQUIRE(0 == simulator.getState().cp0[Coproc0Register::CAUSE]);
     }
 }
 
@@ -63,10 +63,10 @@ TEST_CASE("Test Mtc0 Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().registers[Register::T1] = 1444;
-    interpreter.interpret(actualLayout);
-    SECTION("Test Execute") { REQUIRE(1444 == interpreter.getState().cp0[Coproc0Register::VADDR]); }
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().registers[Register::T1] = 1444;
+    simulator.simulate(actualLayout);
+    SECTION("Test Execute") { REQUIRE(1444 == simulator.getState().cp0[Coproc0Register::VADDR]); }
 }
 
 
@@ -90,8 +90,8 @@ TEST_CASE("Test Mfc0 Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().cp0[Coproc0Register::VADDR] = 1444;
-    interpreter.interpret(actualLayout);
-    SECTION("Test Execute") { REQUIRE(1444 == interpreter.getState().registers[Register::T1]); }
+    DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().cp0[Coproc0Register::VADDR] = 1444;
+    simulator.simulate(actualLayout);
+    SECTION("Test Execute") { REQUIRE(1444 == simulator.getState().registers[Register::T1]); }
 }

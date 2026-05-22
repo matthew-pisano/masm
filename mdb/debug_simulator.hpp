@@ -2,14 +2,14 @@
 // Created by matthew on 6/15/25.
 //
 
-#ifndef DEBUG_INTERPRETER_H
-#define DEBUG_INTERPRETER_H
+#ifndef DEBUG_SIMULATOR_H
+#define DEBUG_SIMULATOR_H
 
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 
 /**
- * Enum representing the various debug commands that can be issued to the DebugInterpreter
+ * Enum representing the various debug commands that can be issued to the DebugSimulator
  */
 enum class DebugCommand {
     BREAK,
@@ -30,9 +30,9 @@ enum class DebugCommand {
 
 
 /**
- * Utility class that allows tests to access the internal state of an interpreter
+ * Utility class that allows tests to access the internal state of an simulator
  */
-class DebugInterpreter final : public Interpreter {
+class DebugSimulator final : public Simulator {
 
     /**
      * Whether a program is currently running and has not finished
@@ -40,7 +40,7 @@ class DebugInterpreter final : public Interpreter {
     bool isRunning = false;
 
     /**
-     * Whether the debug interpreter is in interactive mode, allowing user input to control the flow
+     * Whether the debug simulator is in interactive mode, allowing user input to control the flow
      * of the program
      */
     bool isInteractive = false;
@@ -83,7 +83,7 @@ class DebugInterpreter final : public Interpreter {
      * loading the program into memory
      * @param layout The memory layout to use for loading the program and data
      */
-    void resetInterpreter(const MemLayout& layout);
+    void resetSimulator(const MemLayout& layout);
 
     /**
      * Lists the source lines surrounding the current program counter
@@ -127,7 +127,7 @@ class DebugInterpreter final : public Interpreter {
     void deleteBreakpoint(const std::string& arg);
 
     /**
-     * Lists all breakpoints currently set in the interpreter
+     * Lists all breakpoints currently set in the simulator
      */
     void listBreakpoints();
 
@@ -137,7 +137,7 @@ class DebugInterpreter final : public Interpreter {
     void listLabels();
 
     /**
-     * Lists all registers in the interpreter, including general-purpose and special-purpose
+     * Lists all registers in the simulator, including general-purpose and special-purpose
      */
     void listRegisters();
 
@@ -172,20 +172,20 @@ class DebugInterpreter final : public Interpreter {
 
 public:
     /**
-     * Constructor for the DebugInterpreter class
-     * @param ioMode The I/O mode to use for the interpreter
+     * Constructor for the DebugSimulator class
+     * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      */
-    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) : Interpreter(ioMode, streamHandle) {}
+    DebugSimulator(const IOMode ioMode, StreamHandle& streamHandle) : Simulator(ioMode, streamHandle) {}
 
     /**
-     * Constructor for the DebugInterpreter class
-     * @param ioMode The I/O mode to use for the interpreter
+     * Constructor for the DebugSimulator class
+     * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      * @param useLittleEndian Whether to use little-endian byte order for memory layout
      */
-    DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
-        Interpreter(ioMode, streamHandle, useLittleEndian) {}
+    DebugSimulator(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
+        Simulator(ioMode, streamHandle, useLittleEndian) {}
 
     /**
      * Converts the bytes after e memory address to a string representation, stopping at a null byte
@@ -203,14 +203,14 @@ public:
     std::string strAt(uint32_t addr, size_t maxLen);
 
     /**
-     * Gets the current state of the interpreter
-     * @return The current state of the interpreter
+     * Gets the current state of the simulator
+     * @return The current state of the simulator
      */
     State& getState();
 
     /**
-     * Sets whether the interpreter is in interactive mode
-     * @param interactive True to set the interpreter to interactive mode, false otherwise
+     * Sets whether the simulator is in interactive mode
+     * @param interactive True to set the simulator to interactive mode, false otherwise
      */
     void setInteractive(bool interactive);
 
@@ -220,7 +220,7 @@ public:
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */
-    int interpret(const MemLayout& layout) override;
+    int simulate(const MemLayout& layout) override;
 };
 
-#endif // DEBUG_INTERPRETER_H
+#endif // DEBUG_SIMULATOR_H

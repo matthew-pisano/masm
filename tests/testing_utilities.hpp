@@ -8,7 +8,7 @@
 
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 
 /**

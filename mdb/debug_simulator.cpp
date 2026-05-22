@@ -2,7 +2,7 @@
 // Created by matthew on 6/15/25.
 //
 
-#include "debug_interpreter.hpp"
+#include "debug_simulator.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -18,7 +18,7 @@ const std::string prompt = "\n(mdb) ";
  * A help message for the debugger, listing available commands and their descriptions
  */
 const std::string debuggerHelp =
-        "Debug Interpreter Commands:\n\n"
+        "Debug Simulator Commands:\n\n"
         "break, b <ref> - Set a breakpoint at the given reference\n"
         "continue, cont, c - Continue execution until the next breakpoint or program termination\n"
         "delete, d - Delete all breakpoints\n"
@@ -87,7 +87,7 @@ std::string unmangleDebugLabel(const std::string& mangledLabel) {
 }
 
 
-std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
+std::string DebugSimulator::strAt(const uint32_t addr, const size_t maxLen) {
     std::string result;
     while (result.length() < maxLen) {
         const uint8_t byte = state.memory.byteAt(addr + result.length());
@@ -98,14 +98,14 @@ std::string DebugInterpreter::strAt(const uint32_t addr, const size_t maxLen) {
     return result;
 }
 
-std::string DebugInterpreter::strAt(const uint32_t addr) { return strAt(addr, std::numeric_limits<size_t>::max()); }
+std::string DebugSimulator::strAt(const uint32_t addr) { return strAt(addr, std::numeric_limits<size_t>::max()); }
 
 
-State& DebugInterpreter::getState() { return state; }
+State& DebugSimulator::getState() { return state; }
 
-void DebugInterpreter::setInteractive(const bool interactive) { isInteractive = interactive; }
+void DebugSimulator::setInteractive(const bool interactive) { isInteractive = interactive; }
 
-void DebugInterpreter::interactiveStep(const MemLayout& layout) {
+void DebugSimulator::interactiveStep(const MemLayout& layout) {
     const uint32_t pc = state.registers[Register::PC];
     // Always get command if system breakpoint is zero
     bool getCommand = breakpoints.contains(pc) || (breakpoints.contains(0) && breakpoints[0] == 0);
@@ -127,7 +127,7 @@ void DebugInterpreter::interactiveStep(const MemLayout& layout) {
     }
 }
 
-int DebugInterpreter::interpret(const MemLayout& layout) {
+int DebugSimulator::simulate(const MemLayout& layout) {
     initProgram(layout);
     // Set initial breakpoint at start of program
     breakpoints[state.registers[Register::PC]] = 0;
@@ -167,7 +167,7 @@ int DebugInterpreter::interpret(const MemLayout& layout) {
     }
 }
 
-std::tuple<DebugCommand, std::vector<std::string>> DebugInterpreter::parseCommand(const std::string& cmdStr) {
+std::tuple<DebugCommand, std::vector<std::string>> DebugSimulator::parseCommand(const std::string& cmdStr) {
     if (cmdStr.empty())
         throw std::invalid_argument("Command cannot be empty");
 
@@ -254,7 +254,7 @@ std::tuple<DebugCommand, std::vector<std::string>> DebugInterpreter::parseComman
     throw std::invalid_argument("Unknown debug command: " + cmd);
 }
 
-bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& layout) {
+bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& layout) {
     // Parse the command string into a command and its arguments
     try {
         const std::tuple<DebugCommand, std::vector<std::string>> parsedCmd = parseCommand(cmdStr);
@@ -263,8 +263,8 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
 
         switch (cmd) {
             case DebugCommand::RUN: {
-                // Reset the interpreter and run the program from the beginning
-                resetInterpreter(layout);
+                // Reset the simulator and run the program from the beginning
+                resetSimulator(layout);
                 return true;
             }
             case DebugCommand::HELP: {
@@ -366,7 +366,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
     return false;
 }
 
-void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
+void DebugSimulator::resetSimulator(const MemLayout& layout) {
     // Clear state
     state = State(state.memory.isLittleEndian());
     // Clear Syscall State
@@ -378,7 +378,7 @@ void DebugInterpreter::resetInterpreter(const MemLayout& layout) {
     isRunning = true;
 }
 
-void DebugInterpreter::listLines(const std::string& arg) {
+void DebugSimulator::listLines(const std::string& arg) {
     const uint32_t pc = state.registers[Register::PC];
     const uint32_t addr = arg.empty() ? pc : addrFromStr(arg);
 
@@ -399,14 +399,14 @@ void DebugInterpreter::listLines(const std::string& arg) {
     }
 }
 
-void DebugInterpreter::getFrame() {
+void DebugSimulator::getFrame() {
     const uint32_t fp = state.registers[Register::FP];
     const uint32_t sp = state.registers[Register::SP];
     for (uint32_t i = fp; i >= sp; i -= 4)
         streamHandle.putStr(std::format("0x{:08x}: 0x{:08x}\n", i, state.memory.wordAt(i)));
 }
 
-size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::string& filename) {
+size_t DebugSimulator::locateLabelInFile(const std::string& label, const std::string& filename) {
     // Find debug info that matches the given label in the current file
     const auto it = std::ranges::find_if(state.debugInfo, [label, filename](const auto& pair) {
         return unmangleDebugLabel(pair.second.label) == label && pair.second.source.filename == filename;
@@ -417,7 +417,7 @@ size_t DebugInterpreter::locateLabelInFile(const std::string& label, const std::
     return it->second.source.lineno;
 }
 
-uint32_t DebugInterpreter::addrFromStr(const std::string& ref) {
+uint32_t DebugSimulator::addrFromStr(const std::string& ref) {
     // Check if the argument is a valid hex address
     if (ref.starts_with("0x")) {
         try {
@@ -461,7 +461,7 @@ uint32_t DebugInterpreter::addrFromStr(const std::string& ref) {
     return it->first;
 }
 
-void DebugInterpreter::setBreakpoint(const std::string& arg) {
+void DebugSimulator::setBreakpoint(const std::string& arg) {
     const uint32_t addr = addrFromStr(arg);
     if (!breakpoints.contains(addr)) {
         // Set breakpoint at the found address
@@ -472,7 +472,7 @@ void DebugInterpreter::setBreakpoint(const std::string& arg) {
         streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
 }
 
-void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
+void DebugSimulator::deleteBreakpoint(const std::string& arg) {
     // Delete all breakpoints
     if (arg.empty()) {
         std::vector<uint32_t> breakAddrs;
@@ -500,7 +500,7 @@ void DebugInterpreter::deleteBreakpoint(const std::string& arg) {
 }
 
 
-void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWords) {
+void DebugSimulator::examineAddress(const std::string& arg, const size_t numWords) {
     const uint32_t addr = addrFromStr(arg);
 
     for (size_t i = 0; i < numWords; i++) {
@@ -509,7 +509,7 @@ void DebugInterpreter::examineAddress(const std::string& arg, const size_t numWo
     }
 }
 
-void DebugInterpreter::listBreakpoints() {
+void DebugSimulator::listBreakpoints() {
     if (breakpoints.empty()) {
         streamHandle.putStr("No breakpoints set.\n");
         return;
@@ -523,7 +523,7 @@ void DebugInterpreter::listBreakpoints() {
     }
 }
 
-void DebugInterpreter::listLabels() {
+void DebugSimulator::listLabels() {
     bool foundLabel = false;
     for (const auto& [addr, debugInfo] : state.debugInfo)
         if (!debugInfo.label.empty()) {
@@ -537,14 +537,14 @@ void DebugInterpreter::listLabels() {
         streamHandle.putStr("No labels found in the program.\n");
 }
 
-void DebugInterpreter::listRegisters() {
+void DebugSimulator::listRegisters() {
     for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
         const int32_t value = state.registers[i];
         streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
     }
 }
 
-void DebugInterpreter::listCP0Registers() {
+void DebugSimulator::listCP0Registers() {
     const int32_t vaddrValue = state.cp0[Coproc0Register::VADDR];
     streamHandle.putStr(std::format("$8  : 0x{:08x}\n", vaddrValue));
     const int32_t statusValue = state.cp0[Coproc0Register::STATUS];
@@ -555,7 +555,7 @@ void DebugInterpreter::listCP0Registers() {
     streamHandle.putStr(std::format("$14 : 0x{:08x}\n", epcValue));
 }
 
-void DebugInterpreter::listCP1Registers() {
+void DebugSimulator::listCP1Registers() {
     for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
         const int32_t value = state.cp1[i];
         const float floatValue = state.cp1.getFloat(i);
@@ -569,7 +569,7 @@ void DebugInterpreter::listCP1Registers() {
     }
 }
 
-void DebugInterpreter::printRegister(const std::string& arg) {
+void DebugSimulator::printRegister(const std::string& arg) {
     if (arg.size() > 1 && arg[0] == 'f') {
         // Co-Processor 1 register
         try {
@@ -605,7 +605,7 @@ void DebugInterpreter::printRegister(const std::string& arg) {
     }
 }
 
-void DebugInterpreter::printRef(const std::string& arg) {
+void DebugSimulator::printRef(const std::string& arg) {
     const uint32_t addr = addrFromStr(arg);
 
     if (state.debugInfo.contains(addr)) {

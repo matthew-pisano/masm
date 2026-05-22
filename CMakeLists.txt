@@ -24,6 +24,7 @@ endif ()
 add_subdirectory(libmasm)
 add_subdirectory(masm)
 add_subdirectory(mdb)
+add_subdirectory(msim)
 
 # No tests or Python bindings for cross-compilation on Windows
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))

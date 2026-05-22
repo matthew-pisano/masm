@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pymasm"
 dynamic = ["version"]
-description = "MIPS Assembly Interpreter Library"
+description = "MIPS Assembly Simulator Library"
 authors = [{ name = "Matthew Pisano", email = "matthewpisano14@gmail.com" }]
 license = "BSD-3-Clause"
 readme = "README.md"

@@ -22,9 +22,10 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap);
 /**
  * Converts a memory layout to a binary representation, which is a vector of bytes
  * @param layout The memory layout to convert
+ * @param debug Whether to include debug information in the binary
  * @return A vector of bytes representing the memory layout in binary form
  */
-std::vector<std::byte> saveLayout(const MemLayout& layout);
+std::vector<std::byte> saveLayout(const MemLayout& layout, bool debug);
 
 
 /**

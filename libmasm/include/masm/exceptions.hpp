@@ -101,7 +101,7 @@ public:
 
 
 /**
- * The possible exception codes thrown by the interpreter (stored in bits [2-6] of cause
+ * The possible exception codes thrown by the simulator (stored in bits [2-6] of cause
  * register)
  */
 enum class EXCEPT_CODE {

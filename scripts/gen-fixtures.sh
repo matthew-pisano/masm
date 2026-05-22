@@ -3,8 +3,8 @@
 # Fixture Generation Script
 # Executes the fixture generator on all assembly files within the fixtures directory.
 
-# Loop over directories in test/fixtures
-for dir in test/fixtures/*; do
+# Loop over directories in tests/fixtures
+for dir in tests/fixtures/*; do
   if [ -d "$dir" ]; then
     # Get the directory name without the path
     dir_name=$(basename "$dir")
@@ -18,12 +18,18 @@ for dir in test/fixtures/*; do
     if [ "$dir_name" == "globals" ]; then
       fixture_files+=("${dir_name}One.asm")
       fixture_files+=("${dir_name}Two.asm")
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}"
+      continue
     else
       fixture_files+=("${dir_name}.asm")
     fi
 
     # Run fixture gen command with fixture files
-    ../../../cmake-build-debug/masm-fg "${fixture_files[@]}"
+    if [[ "${dir_name}" == *_le ]]; then
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" -l --raw-parse
+    else
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" --raw-parse
+    fi
 
     cd - > /dev/null || exit 1
   fi

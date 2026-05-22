@@ -2,19 +2,19 @@
 // Created by matthew on 4/24/25.
 //
 
-#ifndef INTERPRETER_H
-#define INTERPRETER_H
+#ifndef SIMULATOR_H
+#define SIMULATOR_H
 
 #include <masm/assembler/memory.hpp>
-#include <masm/interpreter/state.hpp>
-#include <masm/interpreter/syscalls.hpp>
 #include <masm/io/streamio.hpp>
+#include <masm/simulator/state.hpp>
+#include <masm/simulator/syscalls.hpp>
 
 
 /**
- * The interpreter class, which is responsible for executing MIPS instructions
+ * The simulator class, which is responsible for executing MIPS instructions
  */
-class Interpreter {
+class Simulator {
 
     /**
      * Reads from the input stream and updates the MMIO input ready bit and data word
@@ -50,7 +50,7 @@ class Interpreter {
 
 protected:
     /**
-     * The I/O mode of the interpreter, which determines how input/output is handled
+     * The I/O mode of the simulator, which determines how input/output is handled
      */
     IOMode ioMode;
 
@@ -70,15 +70,15 @@ protected:
     State state;
 
 public:
-    Interpreter(const IOMode ioMode, StreamHandle& streamHandle) : ioMode(ioMode), streamHandle(streamHandle) {}
+    Simulator(const IOMode ioMode, StreamHandle& streamHandle) : ioMode(ioMode), streamHandle(streamHandle) {}
 
-    Interpreter(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
+    Simulator(const IOMode ioMode, StreamHandle& streamHandle, const bool useLittleEndian) :
         ioMode(ioMode), streamHandle(streamHandle), state(useLittleEndian) {}
 
-    virtual ~Interpreter() = default;
+    virtual ~Simulator() = default;
 
     /**
-     * Initializes the program in the interpreter with the given memory layout
+     * Initializes the program in the simulator with the given memory layout
      * @param layout The initial memory layout to use for loading in the program and data
      */
     void initProgram(const MemLayout& layout);
@@ -95,7 +95,7 @@ public:
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */
-    virtual int interpret(const MemLayout& layout);
+    virtual int simulate(const MemLayout& layout);
 };
 
-#endif // INTERPRETER_H
+#endif // SIMULATOR_H

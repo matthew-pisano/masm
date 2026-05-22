@@ -7,14 +7,13 @@
 #include <masm/io/consoleio.hpp>
 #include <masm/simulator/simulator.hpp>
 
-#include "debug_simulator.hpp"
 #include "fileio.hpp"
 #include "load_layout.hpp"
 #include "version.h"
 
 
 int main(const int argc, char* argv[]) {
-    std::string name = "mdb";
+    std::string name = "msim";
     const std::string _computedVersionString(Version::VERSION);
     const std::string version = name + " " + _computedVersionString;
 
@@ -22,7 +21,7 @@ int main(const int argc, char* argv[]) {
     bool useMMIO = false;
     bool useLittleEndian = false;
 
-    CLI::App app{version + " - Masm Debugger", name};
+    CLI::App app{version + " - MIPS Simulator", name};
     app.add_option("file", inputFileNames, "A MIPS binary object file")->required();
     app.add_flag("-m,--mmio", useMMIO, "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
@@ -52,8 +51,7 @@ int main(const int argc, char* argv[]) {
         const MemLayout layout = loadLayoutFromBinary(inputFileNames);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        DebugSimulator simulator(ioMode, conHandle, useLittleEndian);
-        simulator.setInteractive(true);
+        Simulator simulator(ioMode, conHandle, useLittleEndian);
         exitCode = simulator.simulate(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

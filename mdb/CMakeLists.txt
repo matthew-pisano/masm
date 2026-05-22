@@ -1,5 +1,5 @@
 set(MDB_SOURCES
-        debug_interpreter.cpp
+        debug_simulator.cpp
 )
 
 add_executable(mdb mdb.cpp ${MDB_SOURCES})
