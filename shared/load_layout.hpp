@@ -29,16 +29,19 @@ inline std::string getFileBasename(const std::string& path) {
  * Loads a memory layout from source files, which are MIPS assembly files
  * @param inputFileNames A vector of file names to load the MIPS assembly source code from
  * @param parser The parser to use for parsing the source code
+ * @param raw If true, the parser will translate the given tokens verbatim, without adding any
+ * new tokens, useful for debugging or tests
  * @return A memory layout object constructed from the source files
  */
-inline MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser) {
+inline MemLayout loadLayoutFromSource(const std::vector<std::string>& inputFileNames, Parser& parser,
+                                      const bool raw = false) {
     std::vector<SourceFile> sourceFiles;
     sourceFiles.reserve(inputFileNames.size()); // Preallocate memory for performance
     for (const std::string& fileName : inputFileNames)
         sourceFiles.push_back({getFileBasename(fileName), readFile(fileName)});
 
     const std::vector<LineTokens> program = Tokenizer::tokenize(sourceFiles);
-    const MemLayout layout = parser.parse(program);
+    const MemLayout layout = parser.parse(program, raw);
 
     return layout;
 }

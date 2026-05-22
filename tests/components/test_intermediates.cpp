@@ -18,9 +18,11 @@
 TEST_CASE("Test Stringify Layout") {
     const std::string fixturePath = "tests/fixtures/hello_world/hello_world.asm";
     Parser parser;
-    const MemLayout layout = loadLayoutFromSource({fixturePath}, parser);
+    const MemLayout layout = loadLayoutFromSource({fixturePath}, parser, true);
     const std::string layoutString = stringifyLayout(layout, parser.getLabels());
-    const std::string expectedString = readFile(fixturePath + ".i");
+    std::filesystem::path fsFicturePath(fixturePath);
+    fsFicturePath.replace_extension("i");
+    const std::string expectedString = readFile(fsFicturePath);
 
     REQUIRE(layoutString == expectedString);
 }
