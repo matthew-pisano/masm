@@ -34,9 +34,9 @@ std::string memSectionToName(const MemSection& section) {
 
 uint32_t BEByteToi32(const std::span<const std::byte>& bytes) {
     uint32_t i32 = 0;
-    i32 |= static_cast<uint32_t>(bytes[0] << 24);
-    i32 |= static_cast<uint32_t>(bytes[1] << 16);
-    i32 |= static_cast<uint32_t>(bytes[2] << 8);
+    i32 |= static_cast<uint32_t>(bytes[0]) << 24;
+    i32 |= static_cast<uint32_t>(bytes[1]) << 16;
+    i32 |= static_cast<uint32_t>(bytes[2]) << 8;
     i32 |= static_cast<uint32_t>(bytes[3]);
     return i32;
 }
