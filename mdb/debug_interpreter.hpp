@@ -5,7 +5,7 @@
 #ifndef DEBUG_INTERPRETER_H
 #define DEBUG_INTERPRETER_H
 
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 
 /**
@@ -30,7 +30,7 @@ enum class DebugCommand {
 
 
 /**
- * Utility class that allows tests to access the internal state of an interpreter
+ * Utility class that allows tests to access the internal state of an simulator
  */
 class DebugInterpreter final : public Interpreter {
 
@@ -40,7 +40,7 @@ class DebugInterpreter final : public Interpreter {
     bool isRunning = false;
 
     /**
-     * Whether the debug interpreter is in interactive mode, allowing user input to control the flow
+     * Whether the debug simulator is in interactive mode, allowing user input to control the flow
      * of the program
      */
     bool isInteractive = false;
@@ -127,7 +127,7 @@ class DebugInterpreter final : public Interpreter {
     void deleteBreakpoint(const std::string& arg);
 
     /**
-     * Lists all breakpoints currently set in the interpreter
+     * Lists all breakpoints currently set in the simulator
      */
     void listBreakpoints();
 
@@ -137,7 +137,7 @@ class DebugInterpreter final : public Interpreter {
     void listLabels();
 
     /**
-     * Lists all registers in the interpreter, including general-purpose and special-purpose
+     * Lists all registers in the simulator, including general-purpose and special-purpose
      */
     void listRegisters();
 
@@ -173,14 +173,14 @@ class DebugInterpreter final : public Interpreter {
 public:
     /**
      * Constructor for the DebugInterpreter class
-     * @param ioMode The I/O mode to use for the interpreter
+     * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      */
     DebugInterpreter(const IOMode ioMode, StreamHandle& streamHandle) : Interpreter(ioMode, streamHandle) {}
 
     /**
      * Constructor for the DebugInterpreter class
-     * @param ioMode The I/O mode to use for the interpreter
+     * @param ioMode The I/O mode to use for the simulator
      * @param streamHandle The stream handle to use for I/O operations
      * @param useLittleEndian Whether to use little-endian byte order for memory layout
      */
@@ -203,14 +203,14 @@ public:
     std::string strAt(uint32_t addr, size_t maxLen);
 
     /**
-     * Gets the current state of the interpreter
-     * @return The current state of the interpreter
+     * Gets the current state of the simulator
+     * @return The current state of the simulator
      */
     State& getState();
 
     /**
-     * Sets whether the interpreter is in interactive mode
-     * @param interactive True to set the interpreter to interactive mode, false otherwise
+     * Sets whether the simulator is in interactive mode
+     * @param interactive True to set the simulator to interactive mode, false otherwise
      */
     void setInteractive(bool interactive);
 

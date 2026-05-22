@@ -7,7 +7,7 @@ from .parser import MemLayout
 
 
 class IOMode(Enum):
-    """Enumeration of the I/O modes for the interpreter"""
+    """Enumeration of the I/O modes for the simulator"""
 
     SYSCALL = ...  # System call mode for reading/writing
     MMIO = ...  # Memory-mapped I/O mode for reading/writing MMIO registers

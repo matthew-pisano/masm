@@ -2,13 +2,13 @@
 // Created by matthew on 6/7/25.
 //
 
-#include <masm/interpreter/cp1.hpp>
+#include <masm/simulator/cp1.hpp>
 
 #include <cmath>
 #include <stdexcept>
 
 #include <masm/assembler/memory.hpp>
-#include <masm/interpreter/cpu.hpp>
+#include <masm/simulator/cpu.hpp>
 
 #include "assembler/instruction.hpp"
 #include "util/conversion.hpp"

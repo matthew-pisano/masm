@@ -1,5 +1,5 @@
 add_subdirectory(src/assembler)
-add_subdirectory(src/interpreter)
+add_subdirectory(src/simulator)
 add_subdirectory(src/io)
 add_subdirectory(src/util)
 

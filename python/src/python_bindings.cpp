@@ -12,7 +12,7 @@
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "pybind_buffer.hpp"
 #include "pybind_convert.hpp"
@@ -49,7 +49,7 @@ PYBIND11_MODULE(pymasm_core, m) {
 
     const py::module_ tokenizer_module = m.def_submodule("tokenizer", "Masm Tokenizer");
     const py::module_ parser_module = m.def_submodule("parser", "Masm Parser");
-    const py::module_ interpreter_module = m.def_submodule("interpreter", "Masm Interpreter");
+    const py::module_ interpreter_module = m.def_submodule("simulator", "Masm Interpreter");
     const py::module_ exceptions_module = m.def_submodule("exceptions", "Masm Exceptions");
 
     // Tokenizer Bindings //
@@ -161,7 +161,7 @@ PYBIND11_MODULE(pymasm_core, m) {
             .def(py::init<IOMode, py::object, py::object>())
             .def("step", &InterpreterWrapper::step, "Executes a single instruction")
             .def("init_program", &InterpreterWrapper::initProgram, py::arg("layout"),
-                 "Initializes the interpreter with the given memory layout")
+                 "Initializes the simulator with the given memory layout")
             .def("interpret", &InterpreterWrapper::interpret, py::arg("layout"),
                  "Interprets the given memory layout and returns an exit code");
 

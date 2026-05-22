@@ -12,7 +12,7 @@
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "mdb/debug_interpreter.hpp"
 #include "shared/fileio.hpp"
@@ -21,7 +21,7 @@
 
 /**
  * Validates the output of a program versus the expected output
- * @param ioMode The I/O mode to use for the interpreter
+ * @param ioMode The I/O mode to use for the simulator
  * @param sourceFileNames The names of the source files to tokenize
  * @param logFileName The name of the output log to compare against
  * @param inputString The input string to provide to the program
@@ -52,8 +52,8 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     std::ostringstream oss;
 
     StreamHandle streamHandle(iss, oss);
-    DebugInterpreter interpreter(ioMode, streamHandle, useLittleEndian);
-    exitCode = interpreter.interpret(layout);
+    DebugInterpreter simulator(ioMode, streamHandle, useLittleEndian);
+    exitCode = simulator.interpret(layout);
 
     REQUIRE(exitCode == 0);
 
@@ -79,9 +79,9 @@ TEST_CASE("Test Runtime Error") {
     std::ostringstream oss;
 
     StreamHandle streamHandle(iss, oss);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
-    REQUIRE_THROWS_MATCHES(interpreter.interpret(layout), MasmRuntimeError,
+    REQUIRE_THROWS_MATCHES(simulator.interpret(layout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "
                                                     "zero: Division by zero in DIV instruction (unhandled)"));
 }

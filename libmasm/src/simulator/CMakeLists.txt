@@ -3,7 +3,7 @@ set(LIBMASM_INTERPRETER_SOURCES
         cp1.cpp
         cpu.cpp
         heap.cpp
-        interpreter.cpp
+        simulator.cpp
         state.cpp
         syscalls.cpp
 )

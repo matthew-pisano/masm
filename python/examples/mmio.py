@@ -38,14 +38,14 @@ def main():
     masm_parser = parser.Parser()
     mem_layout = masm_parser.parse(program)
 
-    # Set the interpreter to use syscalls for input and output
-    io_mode = interpreter.IOMode.MMIO
+    # Set the simulator to use syscalls for input and output
+    io_mode = simulator.IOMode.MMIO
     # Set up input and output streams
     istream = BytesIO()
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = interpreter.Interpreter(io_mode, istream, ostream)
+    masm_interpreter = simulator.Interpreter(io_mode, istream, ostream)
     masm_interpreter.init_program(mem_layout)
 
     # The current position to read the output buffer at
@@ -55,7 +55,7 @@ def main():
         try:
             curr_char = input_timings(step)
             if curr_char:
-                # Save the current position so interpreter can read from where it left off
+                # Save the current position so simulator can read from where it left off
                 ipos = istream.tell()
                 # Seek to the end to append a character
                 istream.seek(0, os.SEEK_END)
@@ -63,7 +63,7 @@ def main():
                 # Restore the saved position for reading
                 istream.seek(ipos)
 
-            # Step the interpreter
+            # Step the simulator
             masm_interpreter.step()
 
             ostream.seek(opos)

@@ -5,8 +5,8 @@
 #include <CLI/CLI.hpp>
 
 #include <masm/assembler/parser.hpp>
-#include <masm/interpreter/interpreter.hpp>
 #include <masm/io/consoleio.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "debug_interpreter.hpp"
 #include "fileio.hpp"
@@ -53,9 +53,9 @@ int main(const int argc, char* argv[]) {
         const MemLayout layout = loadLayoutFromBinary(inputFileNames);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
-        DebugInterpreter interpreter(ioMode, conHandle, useLittleEndian);
-        interpreter.setInteractive(true);
-        exitCode = interpreter.interpret(layout);
+        DebugInterpreter simulator(ioMode, conHandle, useLittleEndian);
+        simulator.setInteractive(true);
+        exitCode = simulator.interpret(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

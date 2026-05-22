@@ -2,7 +2,7 @@
 // Created by matthew on 5/19/25.
 //
 
-#include <masm/interpreter/heap.hpp>
+#include <masm/simulator/heap.hpp>
 
 #include <masm/exceptions.hpp>
 

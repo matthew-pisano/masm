@@ -6,13 +6,13 @@
 #define INTERPRETER_H
 
 #include <masm/assembler/memory.hpp>
-#include <masm/interpreter/state.hpp>
-#include <masm/interpreter/syscalls.hpp>
 #include <masm/io/streamio.hpp>
+#include <masm/simulator/state.hpp>
+#include <masm/simulator/syscalls.hpp>
 
 
 /**
- * The interpreter class, which is responsible for executing MIPS instructions
+ * The simulator class, which is responsible for executing MIPS instructions
  */
 class Interpreter {
 
@@ -50,7 +50,7 @@ class Interpreter {
 
 protected:
     /**
-     * The I/O mode of the interpreter, which determines how input/output is handled
+     * The I/O mode of the simulator, which determines how input/output is handled
      */
     IOMode ioMode;
 
@@ -78,7 +78,7 @@ public:
     virtual ~Interpreter() = default;
 
     /**
-     * Initializes the program in the interpreter with the given memory layout
+     * Initializes the program in the simulator with the given memory layout
      * @param layout The initial memory layout to use for loading in the program and data
      */
     void initProgram(const MemLayout& layout);

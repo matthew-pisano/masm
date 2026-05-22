@@ -8,7 +8,7 @@
 
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "mdb/debug_interpreter.hpp"
 #include "tests/testing_utilities.hpp"
@@ -33,10 +33,10 @@ TEST_CASE("Test j Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
-    interpreter.interpret(actualLayout);
-    SECTION("Test Execute") { REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010); }
+    simulator.interpret(actualLayout);
+    SECTION("Test Execute") { REQUIRE(simulator.getState().registers[Register::PC] == 0x00400010); }
 }
 
 
@@ -59,12 +59,12 @@ TEST_CASE("Test jal Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
-    interpreter.interpret(actualLayout);
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
-        REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010);
-        REQUIRE(interpreter.getState().registers[Register::RA] == 0x00400004);
+        REQUIRE(simulator.getState().registers[Register::PC] == 0x00400010);
+        REQUIRE(simulator.getState().registers[Register::RA] == 0x00400004);
     }
 }
 
@@ -87,11 +87,11 @@ TEST_CASE("Test jr Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
-    interpreter.getState().registers[Register::T0] = 0x00400010;
-    interpreter.interpret(actualLayout);
-    SECTION("Test Execute") { REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010); }
+    simulator.getState().registers[Register::T0] = 0x00400010;
+    simulator.interpret(actualLayout);
+    SECTION("Test Execute") { REQUIRE(simulator.getState().registers[Register::PC] == 0x00400010); }
 }
 
 
@@ -113,13 +113,13 @@ TEST_CASE("Test jalr Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
-    interpreter.getState().registers[Register::T0] = 0x00400010;
-    interpreter.interpret(actualLayout);
+    simulator.getState().registers[Register::T0] = 0x00400010;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
-        REQUIRE(interpreter.getState().registers[Register::PC] == 0x00400010);
-        REQUIRE(interpreter.getState().registers[Register::RA] == 0x00400004);
+        REQUIRE(simulator.getState().registers[Register::PC] == 0x00400010);
+        REQUIRE(simulator.getState().registers[Register::RA] == 0x00400004);
     }
 }
 
@@ -368,10 +368,10 @@ TEST_CASE("Test break Instruction") {
 
     std::ostringstream oss;
     StreamHandle streamHandle(std::cin, oss);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
-        interpreter.interpret(actualLayout);
+        simulator.interpret(actualLayout);
         const std::string expectedOutput = "\nBreak instruction executed (code 0)";
         REQUIRE(expectedOutput == oss.str());
     }
@@ -414,10 +414,10 @@ TEST_CASE("Test break Instruction with Code") {
 
     std::ostringstream oss;
     StreamHandle streamHandle(std::cin, oss);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
-        interpreter.interpret(actualLayout);
+        simulator.interpret(actualLayout);
         const std::string expectedOutput = "\nBreak instruction executed (code 42)";
         REQUIRE(expectedOutput == oss.str());
     }

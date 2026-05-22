@@ -8,10 +8,10 @@
 #include <string>
 
 #include <masm/assembler/debug_info.hpp>
-#include <masm/interpreter/cp0.hpp>
-#include <masm/interpreter/cp1.hpp>
-#include <masm/interpreter/cpu.hpp>
-#include <masm/interpreter/heap.hpp>
+#include <masm/simulator/cp0.hpp>
+#include <masm/simulator/cp1.hpp>
+#include <masm/simulator/cpu.hpp>
+#include <masm/simulator/heap.hpp>
 
 
 /**
@@ -29,7 +29,7 @@ std::string causeToString(uint32_t cause);
 
 
 /**
- * Enumeration of the I/O modes for the interpreter
+ * Enumeration of the I/O modes for the simulator
  */
 enum class IOMode {
     SYSCALL, // System call mode for reading/writing
@@ -38,7 +38,7 @@ enum class IOMode {
 
 
 /**
- * The state of the interpreter, which includes the register file, memory, the heap, and debug info
+ * The state of the simulator, which includes the register file, memory, the heap, and debug info
  */
 struct State {
     /**
@@ -57,7 +57,7 @@ struct State {
     Coproc1RegisterFile cp1;
 
     /**
-     * The main memory of the interpreter, which contains the program code and data
+     * The main memory of the simulator, which contains the program code and data
      */
     Memory memory;
 

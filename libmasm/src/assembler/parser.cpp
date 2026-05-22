@@ -8,8 +8,8 @@
 #include <stdexcept>
 
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/cp1.hpp>
-#include <masm/interpreter/cpu.hpp>
+#include <masm/simulator/cp1.hpp>
+#include <masm/simulator/cpu.hpp>
 
 #include "assembler/directive.hpp"
 #include "assembler/instruction.hpp"

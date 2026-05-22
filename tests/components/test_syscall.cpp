@@ -7,8 +7,8 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <masm/exceptions.hpp>
-#include <masm/interpreter/interpreter.hpp>
-#include <masm/interpreter/syscalls.hpp>
+#include <masm/simulator/simulator.hpp>
+#include <masm/simulator/syscalls.hpp>
 
 
 uint32_t writeStringToMem(State& state, const std::string& string) {

@@ -9,8 +9,8 @@
 #include <map>
 #include <random>
 
-#include <masm/interpreter/state.hpp>
 #include <masm/io/consoleio.hpp>
+#include <masm/simulator/state.hpp>
 
 
 /**
@@ -93,7 +93,7 @@ enum class Syscall {
 
 
 /**
- * SystemHandle class that handles the execution of system calls in the MIPS interpreter
+ * SystemHandle class that handles the execution of system calls in the MIPS simulator
  */
 class SystemHandle {
 
@@ -104,7 +104,7 @@ class SystemHandle {
 
     /**
      * Checks if the current I/O mode is SYSCALL mode, and throws an exception if it is not.
-     * @param ioMode The current I/O mode of the interpreter
+     * @param ioMode The current I/O mode of the simulator
      * @param syscallName The name of the system call that requires SYSCALL mode
      * @throw ExecExcept if the I/O mode is not SYSCALL mode
      */
@@ -113,23 +113,23 @@ class SystemHandle {
 public:
     /**
      * Executes the system call based on the value in the $v0 register
-     * @param ioMode The I/O mode of the interpreter (some syscalls will fail if not in SYSCALL
+     * @param ioMode The I/O mode of the simulator (some syscalls will fail if not in SYSCALL
      * mode)
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for input/output operations
      */
     void exec(IOMode ioMode, State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the integer stored in the register $a0 to the console
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printInt(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the floating-point number stored in the register $f12 to the console
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printFloat(const State& state, StreamHandle& streamHandle);
@@ -137,28 +137,28 @@ public:
     /**
      * Prints the double-precision floating-point number stored in the registers $f12 and $f13 to
      * the console
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printDouble(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the null-terminated string stored in the memory at the address in $a0 to the console
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printString(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads an integer from the console and stores it in the register $v0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for reading
      */
     static void readInt(State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a floating-point number from the console and stores it in the register $f0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for reading
      */
     static void readFloat(State& state, StreamHandle& streamHandle);
@@ -166,7 +166,7 @@ public:
     /**
      * Reads a double-precision floating-point number from the console and stores it in the
      * registers $f0 and $f1
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for reading
      */
     static void readDouble(State& state, StreamHandle& streamHandle);
@@ -174,14 +174,14 @@ public:
     /**
      * Reads a string from the console and stores it in the memory at the address in $a0 up to the
      * length in $a1
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for reading
      */
     static void readString(State& state, StreamHandle& streamHandle);
 
     /**
      * Allocates a block of memory of the size in $a0 and stores the address in $v0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     static void heapAlloc(State& state);
 
@@ -192,53 +192,53 @@ public:
 
     /**
      * Prints the character stored in the register $a0 to the console
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printChar(const State& state, StreamHandle& streamHandle);
 
     /**
      * Reads a character from the console and stores it in the register $v0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for reading
      */
     static void readChar(State& state, StreamHandle& streamHandle);
 
     /**
      * Exits the program with the exit code stored in $a0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     static void exitVal(const State& state);
 
     /**
      * Gets the current system time as a 64-bit integer with low bits in $a0 and high bits in $a1
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     static void time(State& state);
 
     /**
      * Sleeps for the given number of milliseconds specified in $a0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     static void sleep(State& state);
 
     /**
      * Prints the integer stored in the register $a0 as a hexadecimal value
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printIntHex(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the integer stored in the register $a0 as a binary value
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printIntBin(const State& state, StreamHandle& streamHandle);
 
     /**
      * Prints the unsigned integer stored in the register $a0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      * @param streamHandle The stream handle for printing
      */
     static void printUInt(const State& state, StreamHandle& streamHandle);
@@ -246,28 +246,28 @@ public:
     /**
      * Sets the random seed for the random number generator with the ID of the RNG in $a0 and the
      * seed in $a1
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     void setRandSeed(State& state);
 
     /**
      * Generates a random integer from the random number generator with the ID in $a0 and stores it
      * in $a0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     void randInt(State& state);
 
     /**
      * Generates a random integer in the range [0, max] from the random number generator with the ID
      * in $a0, the max is in $a1, and stores it in $a0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     void randIntRange(State& state);
 
     /**
      * Generates a random floating-point number in the range [0.0, 1.0] from the random number
      * generator with the ID in $a0 and stores it in $f0
-     * @param state The current state of the interpreter
+     * @param state The current state of the simulator
      */
     void randFloat(State& state);
 

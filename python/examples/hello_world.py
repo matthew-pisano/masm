@@ -23,14 +23,14 @@ def main():
     masm_parser = parser.Parser()
     mem_layout = masm_parser.parse(program)
 
-    # Set the interpreter to use syscalls for input and output
-    io_mode = interpreter.IOMode.SYSCALL
+    # Set the simulator to use syscalls for input and output
+    io_mode = simulator.IOMode.SYSCALL
     # Set up input and output streams
     istream = BytesIO()
     ostream = BytesIO()
 
     # Execute the program
-    masm_interpreter = interpreter.Interpreter(io_mode, istream, ostream)
+    masm_interpreter = simulator.Interpreter(io_mode, istream, ostream)
     exit_code = masm_interpreter.interpret(mem_layout)
 
     # Print out the result and exit

@@ -7,7 +7,7 @@
 
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
-#include <masm/interpreter/interpreter.hpp>
+#include <masm/simulator/simulator.hpp>
 
 #include "libmasm/src/assembler/postprocessor.hpp"
 #include "mdb/debug_interpreter.hpp"
@@ -37,13 +37,13 @@ TEST_CASE("Test lb Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = static_cast<int32_t>(0xffffff87);
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -72,13 +72,13 @@ TEST_CASE("Test lbu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00000087;
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -107,13 +107,13 @@ TEST_CASE("Test lh Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = static_cast<int32_t>(0xffff8687);
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -142,13 +142,13 @@ TEST_CASE("Test lhu Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00008687;
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -177,13 +177,13 @@ TEST_CASE("Test lw Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().memory.wordTo(0x10010004, 0x82348687);
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().memory.wordTo(0x10010004, 0x82348687);
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x82348687;
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -210,11 +210,11 @@ TEST_CASE("Test lui Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00640000;
-        const int32_t actualResult = interpreter.getState().registers[Register::T0];
+        const int32_t actualResult = simulator.getState().registers[Register::T0];
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -243,13 +243,13 @@ TEST_CASE("Test sb Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.getState().registers[Register::T0] = 0x12345678;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.getState().registers[Register::T0] = 0x12345678;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x78;
-        const int32_t actualResult = interpreter.getState().memory.byteAt(0x10010004);
+        const int32_t actualResult = simulator.getState().memory.byteAt(0x10010004);
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -278,13 +278,13 @@ TEST_CASE("Test sh Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.getState().registers[Register::T0] = 0x12345678;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.getState().registers[Register::T0] = 0x12345678;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x5678;
-        const int32_t actualResult = interpreter.getState().memory.halfAt(0x10010004);
+        const int32_t actualResult = simulator.getState().memory.halfAt(0x10010004);
         REQUIRE(expectedResult == actualResult);
     }
 }
@@ -313,13 +313,13 @@ TEST_CASE("Test sw Instruction") {
     }
 
     StreamHandle streamHandle(std::cin, std::cout);
-    DebugInterpreter interpreter(IOMode::SYSCALL, streamHandle);
-    interpreter.getState().registers[Register::T1] = 0x10010000;
-    interpreter.getState().registers[Register::T0] = 0x12345678;
-    interpreter.interpret(actualLayout);
+    DebugInterpreter simulator(IOMode::SYSCALL, streamHandle);
+    simulator.getState().registers[Register::T1] = 0x10010000;
+    simulator.getState().registers[Register::T0] = 0x12345678;
+    simulator.interpret(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x12345678;
-        const int32_t actualResult = interpreter.getState().memory.wordAt(0x10010004);
+        const int32_t actualResult = simulator.getState().memory.wordAt(0x10010004);
         REQUIRE(expectedResult == actualResult);
     }
 }

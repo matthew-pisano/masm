@@ -26,12 +26,12 @@ class TestBindings:
         parser = pymasm.parser.Parser()
         layout = parser.parse(program)
 
-        io_mode = pymasm.interpreter.IOMode.SYSCALL
+        io_mode = pymasm.simulator.IOMode.SYSCALL
         input_string = "5\n"
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
-        interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
-        exitCode = interpreter.interpret(layout)
+        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        exitCode = simulator.interpret(layout)
 
         with open("tests/fixtures/input_output/input_output.txt", "rb") as f:
             expected_output = f.read()
@@ -46,12 +46,12 @@ class TestBindings:
         parser = pymasm.parser.Parser()
         layout = parser.parse(program)
 
-        io_mode = pymasm.interpreter.IOMode.MMIO
+        io_mode = pymasm.simulator.IOMode.MMIO
         input_string = "1234"
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
-        interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
-        exitCode = interpreter.interpret(layout)
+        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        exitCode = simulator.interpret(layout)
 
         with open("tests/fixtures/mmio/mmio.txt", "rb") as f:
             expected_output = f.read()
@@ -66,14 +66,14 @@ class TestBindings:
         parser = pymasm.parser.Parser()
         layout = parser.parse(program)
 
-        io_mode = pymasm.interpreter.IOMode.MMIO
+        io_mode = pymasm.simulator.IOMode.MMIO
         istream = BytesIO()
         ostream = BytesIO()
-        interpreter = pymasm.interpreter.Interpreter(io_mode, istream, ostream)
-        interpreter.init_program(layout)
+        simulator = pymasm.simulator.Interpreter(io_mode, istream, ostream)
+        simulator.init_program(layout)
 
         # Dummy step before writing to input stream to test error flag clearing
-        interpreter.step()
+        simulator.step()
 
         chars = [b'd', b'c', b'b', b'a']
 
@@ -81,7 +81,7 @@ class TestBindings:
             try:
                 # Write data incrementally as process steps through instructions
                 if chars:
-                    # Save the current position so interpreter can read from where it left off
+                    # Save the current position so simulator can read from where it left off
                     pos = istream.tell()
                     # Seek to the end to append a character
                     istream.seek(0, os.SEEK_END)
@@ -89,7 +89,7 @@ class TestBindings:
                     # Restore the saved position for reading
                     istream.seek(pos)
 
-                interpreter.step()
+                simulator.step()
             except pymasm.exceptions.ExecExit as e:
                 assert str(e) == "Program exited (code 0)"
                 break

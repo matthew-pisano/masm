@@ -263,7 +263,7 @@ bool DebugInterpreter::execCommand(const std::string& cmdStr, const MemLayout& l
 
         switch (cmd) {
             case DebugCommand::RUN: {
-                // Reset the interpreter and run the program from the beginning
+                // Reset the simulator and run the program from the beginning
                 resetInterpreter(layout);
                 return true;
             }

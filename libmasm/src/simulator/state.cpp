@@ -2,7 +2,7 @@
 // Created by matthew on 6/8/25.
 //
 
-#include <masm/interpreter/state.hpp>
+#include <masm/simulator/state.hpp>
 
 #include <masm/exceptions.hpp>
 
