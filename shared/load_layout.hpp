@@ -63,19 +63,4 @@ inline MemLayout loadLayoutFromBinary(const std::vector<std::string>& inputFileN
     }
 }
 
-
-/**
- * Checks if the first input file is a binary file (compiled MIPS program)
- * @param inputFileNames A vector of file names to check
- * @return True if the first file is a binary file, false otherwise
- */
-inline bool isLoadingBinary(const std::vector<std::string>& inputFileNames) {
-    if (inputFileNames.empty())
-        return false;
-
-    const std::string& firstName = inputFileNames[0];
-    const size_t firstSize = firstName.size();
-    return firstSize > 2 && firstName.substr(firstSize - 2, 2) == ".o";
-}
-
 #endif // LOAD_LAYOUT_H
