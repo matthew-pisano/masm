@@ -18,15 +18,17 @@ for dir in tests/fixtures/*; do
     if [ "$dir_name" == "globals" ]; then
       fixture_files+=("${dir_name}One.asm")
       fixture_files+=("${dir_name}Two.asm")
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}"
+      continue
     else
       fixture_files+=("${dir_name}.asm")
     fi
 
     # Run fixture gen command with fixture files
     if [[ "${dir_name}" == *_le ]]; then
-      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" -l
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" -l --raw-parse
     else
-      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}"
+      ../../../cmake-build-debug/bin/masm-fg "${fixture_files[@]}" --raw-parse
     fi
 
     cd - > /dev/null || exit 1

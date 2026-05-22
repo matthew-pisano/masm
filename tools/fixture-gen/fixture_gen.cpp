@@ -44,11 +44,12 @@ std::vector<LineTokens> genTokenFile(std::ofstream& tokenFile, const std::vector
  * @param parserFile The file handle to write to
  * @param tokenizedLines The tokenized lines to parse
  * @param useLittleEndian Whether to use little-endian byte order
+ * @param rawParse Whether to parse the file in raw mode (without adding any new tokens)
  */
 void generateParserFile(std::ofstream& parserFile, const std::vector<LineTokens>& tokenizedLines,
-                        const bool useLittleEndian) {
+                        const bool useLittleEndian, const bool rawParse) {
     Parser parser(useLittleEndian);
-    MemLayout memLayout = parser.parse(tokenizedLines, true);
+    MemLayout memLayout = parser.parse(tokenizedLines, rawParse);
 
     for (const auto& [memSection, bytes] : memLayout.data) {
         constexpr unsigned char groupSep = 0x1d;
@@ -63,11 +64,13 @@ int main(const int argc, char* argv[]) {
 
     std::vector<std::string> inputFileNames;
     bool useLittleEndian = false;
+    bool rawParse = false;
 
     CLI::App app{"libmasm Intermediate Generator", "libmasm-fg"};
     app.add_option("input-file", inputFileNames, "Input file to load")->required()->allow_extra_args();
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("--raw-parse", rawParse, "Parses the raw text of the file without inserting any extra helper tokens");
 
     try {
         app.parse(argc, argv);
@@ -101,10 +104,10 @@ int main(const int argc, char* argv[]) {
         if (!parserFile.is_open())
             throw std::runtime_error("Could not open file " + projectName + ".pse");
 
-        generateParserFile(parserFile, tokenizedLines, useLittleEndian);
+        generateParserFile(parserFile, tokenizedLines, useLittleEndian, rawParse);
 
         Parser parser(useLittleEndian);
-        MemLayout memLayout = parser.parse(tokenizedLines, true);
+        MemLayout memLayout = parser.parse(tokenizedLines, rawParse);
         const std::string preprocessed = stringifyLayout(memLayout, parser.getLabels());
         writeFile(projectName + ".i", preprocessed);
 

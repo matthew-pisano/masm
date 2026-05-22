@@ -67,6 +67,9 @@ local_string:
 
 .text
 
+_start:
+sll $zero, $zero, 0
+
 main:
 addiu $v0, $zero, 4
 lui $at, 4097
