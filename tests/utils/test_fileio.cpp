@@ -30,8 +30,9 @@ TEST_CASE("Test Wild Card Resolution") {
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
 
         inputPaths = {"tests/fixtures/arithmetic/*"};
-        expectedPaths = {"tests/fixtures/arithmetic/arithmetic.asm", "tests/fixtures/arithmetic/arithmetic.pse",
-                         "tests/fixtures/arithmetic/arithmetic.tkn", "tests/fixtures/arithmetic/arithmetic.txt"};
+        expectedPaths = {"tests/fixtures/arithmetic/arithmetic.asm", "tests/fixtures/arithmetic/arithmetic.i",
+                         "tests/fixtures/arithmetic/arithmetic.pse", "tests/fixtures/arithmetic/arithmetic.tkn",
+                         "tests/fixtures/arithmetic/arithmetic.txt"};
         REQUIRE(expectedPaths == resolveWildcards(inputPaths));
     }
 
