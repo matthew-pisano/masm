@@ -49,7 +49,7 @@ std::vector<LineTokens> genTokenFile(std::ofstream& tokenFile, const std::vector
 MemLayout generateParserFile(std::ofstream& parserFile, const std::vector<LineTokens>& tokenizedLines,
                              const bool useLittleEndian) {
     Parser parser(useLittleEndian);
-    MemLayout memLayout = parser.parse(tokenizedLines);
+    MemLayout memLayout = parser.parse(tokenizedLines, true);
 
     for (const std::pair<const MemSection, std::vector<std::byte>>& pair : memLayout.data) {
         constexpr unsigned char groupSep = 0x1d;
