@@ -14,6 +14,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cli11)
 
+include(GNUInstallDirs)
+
 include(cmake/Version.cmake)
 
 # Static linking for Windows cross-compilation
@@ -32,3 +34,22 @@ if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
     add_subdirectory(tests)
     add_subdirectory(tools)
 endif ()
+
+include(cmake/Package.cmake)
+
+# Add installation paths for targets
+install(TARGETS masm mdb msim
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(FILES "${CMAKE_SOURCE_DIR}/LICENSE"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/${CMAKE_PROJECT_NAME}
+        COMPONENT license
+)
+
+install(FILES "${CMAKE_SOURCE_DIR}/README.md"
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        COMPONENT documentation
+)
