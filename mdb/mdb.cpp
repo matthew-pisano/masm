@@ -24,7 +24,7 @@ int main(const int argc, char* argv[]) {
     bool useLittleEndian = false;
 
     CLI::App app{version + " - Masm Debugger", name};
-    app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
+    app.add_option("file", inputFileNames, "A MIPS binary object file")->required();
     app.add_flag("-m,--mmio", useMMIO, "Use memory-mapped I/O instead of system calls for input/output operations");
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
@@ -48,19 +48,9 @@ int main(const int argc, char* argv[]) {
     // resolve wildcards in path names to real paths
     inputFileNames = resolveWildcards(inputFileNames);
 
-    const bool loadingBinary = isLoadingBinary(inputFileNames);
-    if (loadingBinary && useLittleEndian)
-        std::cerr << "Warning: little-endian mode has no effect on binary files" << std::endl;
-
     int exitCode = 1;
     try {
-        MemLayout layout;
-        if (loadingBinary)
-            layout = loadLayoutFromBinary(inputFileNames);
-        else {
-            Parser parser(useLittleEndian);
-            layout = loadLayoutFromSource(inputFileNames, parser);
-        }
+        const MemLayout layout = loadLayoutFromBinary(inputFileNames);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
         DebugInterpreter interpreter(ioMode, conHandle, useLittleEndian);

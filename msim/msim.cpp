@@ -50,7 +50,7 @@ int main(const int argc, char* argv[]) {
 
     int exitCode = 1;
     try {
-        MemLayout layout = loadLayoutFromBinary(inputFileNames);
+        const MemLayout layout = loadLayoutFromBinary(inputFileNames);
 
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
         Interpreter interpreter(ioMode, conHandle, useLittleEndian);
