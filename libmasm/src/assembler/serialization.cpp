@@ -135,7 +135,7 @@ std::string stringifyLayout(const MemLayout& layout, const LabelMap& labelMap) {
     return program;
 }
 
-std::vector<std::byte> saveLayout(const MemLayout& layout) {
+std::vector<std::byte> saveLayout(const MemLayout& layout, const bool debug) {
     // Offsets for text, data, ktext, kdata
     std::vector binary = {std::byte{'M'}, std::byte{'A'}, std::byte{'S'}, std::byte{'M'}, std::byte{0}, std::byte{0},
                           std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0},   std::byte{0}, std::byte{0},
@@ -193,7 +193,7 @@ std::vector<std::byte> saveLayout(const MemLayout& layout) {
         binary.append_range(layout.data.at(MemSection::KDATA));
         padBinary();
     }
-    if (!layout.debugInfo.empty()) {
+    if (debug && !layout.debugInfo.empty()) {
         const std::vector<std::byte> binaryDebugInfo = serializeDebugInfo(layout.debugInfo);
         insertOffset(20, binary.size());
         binary.insert(binary.end(), 4, std::byte{0});

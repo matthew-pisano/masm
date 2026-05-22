@@ -20,6 +20,7 @@ int main(const int argc, char* argv[]) {
 
     std::vector<std::string> inputFileNames;
     bool useLittleEndian = false;
+    bool debugBuild = false;
     bool saveTemps = false;
     std::string outputFileName;
 
@@ -27,6 +28,7 @@ int main(const int argc, char* argv[]) {
     app.add_option("file", inputFileNames, "A MIPS assembly file")->required()->allow_extra_args();
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("-g", debugBuild, "Whether to generate a debug build");
     app.add_flag("--save-temps", saveTemps, "Write intermediate files to the current working directory");
     app.add_option("-o", outputFileName, "The name of the output file");
     app.set_version_flag("--version", version);
@@ -78,7 +80,7 @@ int main(const int argc, char* argv[]) {
             writeFile(outputFileName + ".i", preprocessed);
         }
 
-        const std::vector<std::byte> binary = saveLayout(layout);
+        const std::vector<std::byte> binary = saveLayout(layout, debugBuild);
         writeFileBytes(outputFileName + ".o", binary);
 
         exitCode = 0;
