@@ -7,12 +7,12 @@
 #include <catch2/matchers/catch_matchers_all.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/assembler/memory.h>
-#include <masm/assembler/serialization.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/assembler/serialization.hpp>
 
-#include "shared/fileio.h"
-#include "shared/load_layout.h"
-#include "tests/testing_utilities.h"
+#include "shared/fileio.hpp"
+#include "shared/load_layout.hpp"
+#include "tests/testing_utilities.hpp"
 
 
 TEST_CASE("Test Stringify Layout") {

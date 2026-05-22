@@ -1,12 +1,13 @@
 add_subdirectory(src/assembler)
 add_subdirectory(src/interpreter)
 add_subdirectory(src/io)
+add_subdirectory(src/util)
 
 add_library(libmasm STATIC
         ${LIBMASM_ASSEMBLER_SOURCES}
         ${LIBMASM_INTERPRETER_SOURCES}
         ${LIBMASM_IO_SOURCES}
-        src/conversion.cpp
+        ${LIBMASM_UTIL_SOURCES}
 )
 target_include_directories(libmasm
         PUBLIC

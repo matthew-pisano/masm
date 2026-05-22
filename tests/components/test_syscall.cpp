@@ -6,9 +6,9 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/exceptions.h>
-#include <masm/interpreter/interpreter.h>
-#include <masm/interpreter/syscalls.h>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/interpreter.hpp>
+#include <masm/interpreter/syscalls.hpp>
 
 
 uint32_t writeStringToMem(State& state, const std::string& string) {

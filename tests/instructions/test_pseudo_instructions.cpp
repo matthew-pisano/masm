@@ -5,11 +5,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <masm/assembler/parser.h>
-#include <masm/assembler/tokenizer.h>
-#include <masm/interpreter/interpreter.h>
+#include <masm/assembler/parser.hpp>
+#include <masm/assembler/tokenizer.hpp>
+#include <masm/interpreter/interpreter.hpp>
 
-#include "tests/testing_utilities.h"
+#include "tests/testing_utilities.hpp"
 
 
 // No execution tests are needed as the pseudo instructions are made of other, tested instructions

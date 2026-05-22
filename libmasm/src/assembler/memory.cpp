@@ -2,11 +2,11 @@
 // Created by matthew on 4/16/25.
 //
 
-#include <masm/assembler/memory.h>
+#include <masm/assembler/memory.hpp>
 
-#include <masm/exceptions.h>
+#include <masm/exceptions.hpp>
 
-#include "conversion.h"
+#include "util/conversion.hpp"
 
 
 std::byte Memory::_sysByteAt(const uint32_t index) const {

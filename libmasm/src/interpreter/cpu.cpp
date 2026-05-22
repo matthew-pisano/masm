@@ -2,13 +2,13 @@
 // Created by matthew on 6/7/25.
 //
 
-#include <masm/interpreter/cpu.h>
+#include <masm/interpreter/cpu.hpp>
 
 #include <stdexcept>
 
-#include <masm/exceptions.h>
+#include <masm/exceptions.hpp>
 
-#include "assembler/instruction.h"
+#include "assembler/instruction.hpp"
 
 
 std::map<std::string, Register> RegisterFile::nameToIndex = {

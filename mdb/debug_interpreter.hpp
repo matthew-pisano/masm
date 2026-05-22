@@ -5,7 +5,7 @@
 #ifndef DEBUG_INTERPRETER_H
 #define DEBUG_INTERPRETER_H
 
-#include <masm/interpreter/interpreter.h>
+#include <masm/interpreter/interpreter.hpp>
 
 
 /**

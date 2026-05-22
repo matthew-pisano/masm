@@ -5,7 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include "libmasm/src/conversion.h"
+#include "libmasm/src/util/conversion.hpp"
 
 
 TEST_CASE("Test Is Signed Integer") {

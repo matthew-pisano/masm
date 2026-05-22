@@ -2,7 +2,7 @@
 // Created by matthew on 4/13/25.
 //
 
-#include <masm/assembler/tokenizer.h>
+#include <masm/assembler/tokenizer.hpp>
 
 #include <algorithm>
 #include <ostream>
@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
-#include <masm/exceptions.h>
+#include <masm/exceptions.hpp>
 
-#include "assembler/directive.h"
-#include "assembler/instruction.h"
-#include "assembler/postprocessor.h"
+#include "assembler/directive.hpp"
+#include "assembler/instruction.hpp"
+#include "assembler/postprocessor.hpp"
 
 
 /**

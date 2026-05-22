@@ -8,14 +8,14 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 
-#include <masm/assembler/memory.h>
-#include <masm/assembler/parser.h>
-#include <masm/assembler/tokenizer.h>
-#include <masm/exceptions.h>
-#include <masm/interpreter/interpreter.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/assembler/parser.hpp>
+#include <masm/assembler/tokenizer.hpp>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/interpreter.hpp>
 
-#include "pybind_buffer.h"
-#include "pybind_convert.h"
+#include "pybind_buffer.hpp"
+#include "pybind_convert.hpp"
 
 namespace py = pybind11;
 

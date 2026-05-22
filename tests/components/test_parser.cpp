@@ -8,13 +8,13 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/assembler/parser.h>
-#include <masm/exceptions.h>
+#include <masm/assembler/parser.hpp>
+#include <masm/exceptions.hpp>
 
-#include "libmasm/src/assembler/directive.h"
-#include "shared/fileio.h"
-#include "shared/load_layout.h"
-#include "tests/testing_utilities.h"
+#include "libmasm/src/assembler/directive.hpp"
+#include "shared/fileio.hpp"
+#include "shared/load_layout.hpp"
+#include "tests/testing_utilities.hpp"
 
 
 /**

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <masm/assembler/tokenizer.h>
+#include <masm/assembler/tokenizer.hpp>
 
 
 /**

@@ -2,16 +2,16 @@
 // Created by matthew on 6/7/25.
 //
 
-#include <masm/interpreter/cp1.h>
+#include <masm/interpreter/cp1.hpp>
 
 #include <cmath>
 #include <stdexcept>
 
-#include <masm/assembler/memory.h>
-#include <masm/interpreter/cpu.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/interpreter/cpu.hpp>
 
-#include "assembler/instruction.h"
-#include "conversion.h"
+#include "assembler/instruction.hpp"
+#include "util/conversion.hpp"
 
 
 // Coprocessor 1 (floating point) register access

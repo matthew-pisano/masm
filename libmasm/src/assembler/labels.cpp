@@ -2,17 +2,17 @@
 // Created by matthew on 4/26/25.
 //
 
-#include <masm/assembler/labels.h>
+#include <masm/assembler/labels.hpp>
 
 #include <algorithm>
 #include <stdexcept>
 
-#include <masm/assembler/memory.h>
-#include <masm/exceptions.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/exceptions.hpp>
 
-#include "assembler/directive.h"
-#include "assembler/instruction.h"
-#include "assembler/postprocessor.h"
+#include "assembler/directive.hpp"
+#include "assembler/instruction.hpp"
+#include "assembler/postprocessor.hpp"
 
 
 bool LabelMap::contains(const std::string& label) const { return labelMap.contains(label); }

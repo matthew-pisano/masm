@@ -2,12 +2,12 @@
 // Created by matthew on 6/15/25.
 //
 
-#include "debug_interpreter.h"
+#include "debug_interpreter.hpp"
 
 #include <algorithm>
 #include <sstream>
 
-#include <masm/exceptions.h>
+#include <masm/exceptions.hpp>
 
 /**
  * The prompt string for the debugger, displayed before each command input

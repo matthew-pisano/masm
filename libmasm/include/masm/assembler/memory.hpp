@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <masm/assembler/debug_info.h>
+#include <masm/assembler/debug_info.hpp>
 
 
 /**

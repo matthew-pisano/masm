@@ -7,9 +7,9 @@
 
 #include <cstdint>
 
-#include <masm/assembler/labels.h>
-#include <masm/assembler/memory.h>
-#include <masm/assembler/tokenizer.h>
+#include <masm/assembler/labels.hpp>
+#include <masm/assembler/memory.hpp>
+#include <masm/assembler/tokenizer.hpp>
 
 
 /**

@@ -7,14 +7,14 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/assembler/memory.h>
-#include <masm/assembler/tokenizer.h>
-#include <masm/exceptions.h>
-#include <masm/interpreter/interpreter.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/assembler/tokenizer.hpp>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/interpreter.hpp>
 
-#include "libmasm/src/assembler/postprocessor.h"
-#include "mdb/debug_interpreter.h"
-#include "tests/testing_utilities.h"
+#include "libmasm/src/assembler/postprocessor.hpp"
+#include "mdb/debug_interpreter.hpp"
+#include "tests/testing_utilities.hpp"
 
 
 TEST_CASE("Test FP Double Invalid Register Read") {

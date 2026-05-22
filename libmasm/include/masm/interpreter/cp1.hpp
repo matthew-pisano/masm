@@ -7,7 +7,7 @@
 #include <array>
 #include <cstdint>
 
-#include <masm/interpreter/cpu.h>
+#include <masm/interpreter/cpu.hpp>
 
 /**
  * Enum representing the valid coprocessor 1 (floating point) registers

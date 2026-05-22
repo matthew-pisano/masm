@@ -2,19 +2,19 @@
 // Created by matthew on 4/14/25.
 //
 
-#include <masm/assembler/parser.h>
+#include <masm/assembler/parser.hpp>
 
 #include <algorithm>
 #include <stdexcept>
 
-#include <masm/exceptions.h>
-#include <masm/interpreter/cp1.h>
-#include <masm/interpreter/cpu.h>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/cp1.hpp>
+#include <masm/interpreter/cpu.hpp>
 
-#include "assembler/directive.h"
-#include "assembler/instruction.h"
-#include "assembler/postprocessor.h"
-#include "conversion.h"
+#include "assembler/directive.hpp"
+#include "assembler/instruction.hpp"
+#include "assembler/postprocessor.hpp"
+#include "util/conversion.hpp"
 
 
 LabelMap& Parser::getLabels() { return labelMap; }

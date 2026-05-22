@@ -2,7 +2,7 @@
 // Created by matthew on 6/8/25.
 //
 
-#include <masm/io/streamio.h>
+#include <masm/io/streamio.hpp>
 
 #include <unistd.h>
 

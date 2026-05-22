@@ -2,15 +2,15 @@
 // Created by matthew on 4/26/25.
 //
 
-#include <masm/interpreter/syscalls.h>
+#include <masm/interpreter/syscalls.hpp>
 
 #include <chrono>
 #include <iomanip>
 #include <unistd.h>
 
-#include <masm/exceptions.h>
-#include <masm/interpreter/cpu.h>
-#include <masm/io/consoleio.h>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/cpu.hpp>
+#include <masm/io/consoleio.hpp>
 
 
 void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& syscallName) {

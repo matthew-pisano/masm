@@ -4,13 +4,13 @@
 
 #include <CLI/CLI.hpp>
 
-#include <masm/assembler/parser.h>
-#include <masm/interpreter/interpreter.h>
-#include <masm/io/consoleio.h>
+#include <masm/assembler/parser.hpp>
+#include <masm/interpreter/interpreter.hpp>
+#include <masm/io/consoleio.hpp>
 
-#include "debug_interpreter.h"
-#include "fileio.h"
-#include "load_layout.h"
+#include "debug_interpreter.hpp"
+#include "fileio.hpp"
+#include "load_layout.hpp"
 #include "version.h"
 
 

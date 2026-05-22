@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "shared/fileio.h"
+#include "shared/fileio.hpp"
 
 
 TEST_CASE("Test Wild Card Resolution") {

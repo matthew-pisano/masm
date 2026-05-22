@@ -2,12 +2,12 @@
 // Created by matthew on 4/29/25.
 //
 
-#include "assembler/directive.h"
+#include "assembler/directive.hpp"
 
 #include <algorithm>
 #include <stdexcept>
 
-#include "conversion.h"
+#include "util/conversion.hpp"
 
 
 std::string escapeString(const std::string& string) {

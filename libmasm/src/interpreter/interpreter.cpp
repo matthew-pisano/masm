@@ -2,12 +2,12 @@
 // Created by matthew on 4/24/25.
 //
 
-#include <masm/interpreter/interpreter.h>
+#include <masm/interpreter/interpreter.hpp>
 
 #include <stdexcept>
 
-#include <masm/exceptions.h>
-#include <masm/interpreter/syscalls.h>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/syscalls.hpp>
 
 
 void Interpreter::initProgram(const MemLayout& layout) {

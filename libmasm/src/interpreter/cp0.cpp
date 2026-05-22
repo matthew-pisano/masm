@@ -2,11 +2,11 @@
 // Created by matthew on 6/7/25.
 //
 
-#include <masm/interpreter/cp0.h>
+#include <masm/interpreter/cp0.hpp>
 
 #include <stdexcept>
 
-#include "assembler/instruction.h"
+#include "assembler/instruction.hpp"
 
 
 // Coprocessor 0 register access

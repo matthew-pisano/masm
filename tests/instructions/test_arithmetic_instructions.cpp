@@ -7,13 +7,13 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/assembler/parser.h>
-#include <masm/assembler/tokenizer.h>
-#include <masm/exceptions.h>
-#include <masm/interpreter/interpreter.h>
+#include <masm/assembler/parser.hpp>
+#include <masm/assembler/tokenizer.hpp>
+#include <masm/exceptions.hpp>
+#include <masm/interpreter/interpreter.hpp>
 
-#include "mdb/debug_interpreter.h"
-#include "tests/testing_utilities.h"
+#include "mdb/debug_interpreter.hpp"
+#include "tests/testing_utilities.hpp"
 
 
 TEST_CASE("Test add Instruction") {

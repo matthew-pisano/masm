@@ -2,13 +2,13 @@
 // Created by matthew on 4/15/25.
 //
 
-#include "assembler/instruction.h"
+#include "assembler/instruction.hpp"
 
 #include <algorithm>
 #include <map>
 #include <stdexcept>
 
-#include "assembler/postprocessor.h"
+#include "assembler/postprocessor.hpp"
 
 
 /**

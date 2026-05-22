@@ -2,7 +2,7 @@
 // Created by matthew on 5/22/25.
 //
 
-#include "testing_utilities.h"
+#include "testing_utilities.hpp"
 
 #include <catch2/catch_test_macros.hpp>
 

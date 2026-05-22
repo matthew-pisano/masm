@@ -6,8 +6,8 @@
 #define SERIALIZATION_H
 #include <string>
 
-#include <masm/assembler/labels.h>
-#include <masm/assembler/memory.h>
+#include <masm/assembler/labels.hpp>
+#include <masm/assembler/memory.hpp>
 
 
 /**

@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include <masm/io/streamio.h>
+#include <masm/io/streamio.hpp>
 
 
 /**

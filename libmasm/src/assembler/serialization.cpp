@@ -2,11 +2,11 @@
 // Created by matthew on 7/28/25.
 //
 
-#include <masm/assembler/serialization.h>
+#include <masm/assembler/serialization.hpp>
 
 #include <iomanip>
 
-#include "assembler/postprocessor.h"
+#include "assembler/postprocessor.hpp"
 
 
 std::string memSectionToName(const MemSection& section) {

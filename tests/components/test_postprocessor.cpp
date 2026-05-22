@@ -6,10 +6,10 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
-#include <masm/assembler/tokenizer.h>
+#include <masm/assembler/tokenizer.hpp>
 
-#include "libmasm/src/assembler/directive.h"
-#include "libmasm/src/assembler/postprocessor.h"
+#include "libmasm/src/assembler/directive.hpp"
+#include "libmasm/src/assembler/postprocessor.hpp"
 
 
 TEST_CASE("Test Filter Token List") {

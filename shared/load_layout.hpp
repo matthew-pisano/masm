@@ -7,9 +7,9 @@
 
 #include <filesystem>
 
-#include <masm/assembler/memory.h>
-#include <masm/assembler/parser.h>
-#include <masm/assembler/serialization.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/assembler/parser.hpp>
+#include <masm/assembler/serialization.hpp>
 
 
 /**

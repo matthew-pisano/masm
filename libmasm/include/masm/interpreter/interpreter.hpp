@@ -5,10 +5,10 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#include <masm/assembler/memory.h>
-#include <masm/interpreter/state.h>
-#include <masm/interpreter/syscalls.h>
-#include <masm/io/streamio.h>
+#include <masm/assembler/memory.hpp>
+#include <masm/interpreter/state.hpp>
+#include <masm/interpreter/syscalls.hpp>
+#include <masm/io/streamio.hpp>
 
 
 /**

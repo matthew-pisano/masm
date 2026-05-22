@@ -2,14 +2,14 @@
 // Created by matthew on 5/9/25.
 //
 
-#include "postprocessor.h"
+#include "postprocessor.hpp"
 
 #include <algorithm>
 #include <ranges>
 #include <stdexcept>
 #include <unordered_map>
 
-#include <masm/exceptions.h>
+#include <masm/exceptions.hpp>
 
 
 bool tokenCategoryMatch(const std::vector<TokenCategory>& pattern, const std::vector<Token>& tokens) {
