@@ -37,10 +37,11 @@ TEST_CASE("Test Save Layout") {
         const std::vector<std::byte> binary = saveLayout(layout, false);
         const std::vector<std::byte> expected = iV2bV({
                 'M',  'A',  'S',  'M', // Binary identifier
-                0x14, 0x00, 0x00, 0x00, // Text locator
-                0x1C, 0x00, 0x00, 0x00, // Data locator
-                0x24, 0x00, 0x00, 0x00, // KText locator
-                0x30, 0x00, 0x00, 0x00, // KData locator
+                0x18, 0x00, 0x00, 0x00, // Text locator
+                0x20, 0x00, 0x00, 0x00, // Data locator
+                0x28, 0x00, 0x00, 0x00, // KText locator
+                0x34, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x03, 0x00, 0x00, 0x00, // Text size
                 0x01, 0x02, 0x03, 0x00, // Text section
                 0x02, 0x00, 0x00, 0x00, // Data size
@@ -60,12 +61,12 @@ TEST_CASE("Test Save Layout") {
                                   {}};
         const std::vector<std::byte> binary = saveLayout(noText, false);
         const std::vector<std::byte> expected = iV2bV({
-                'M', 'A', 'S', 'M', // Binary identifier
+                'M',  'A',  'S',  'M', // Binary identifier
                 0x00, 0x00, 0x00, 0x00, // Text locator
-                0x14, 0x00, 0x00, 0x00, // Data locator
-                0x1C, 0x00, 0x00, 0x00, // KText locator
-                0x28, 0x00, 0x00, 0x00, // KData locator
-                // Text section missing
+                0x18, 0x00, 0x00, 0x00, // Data locator
+                0x20, 0x00, 0x00, 0x00, // KText locator
+                0x2C, 0x00, 0x00, 0x00, // KData locator
+                0x00, 0x00, 0x00, 0x00, // Debug info locator
                 0x02, 0x00, 0x00, 0x00, // Data size
                 0x04, 0x05, 0x00, 0x00, // Data section
                 0x05, 0x00, 0x00, 0x00, // KText size
