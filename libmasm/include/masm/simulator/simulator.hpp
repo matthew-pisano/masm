@@ -95,7 +95,7 @@ public:
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */
-    virtual int interpret(const MemLayout& layout);
+    virtual int simulate(const MemLayout& layout);
 };
 
 #endif // SIMULATOR_H

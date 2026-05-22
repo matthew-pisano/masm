@@ -40,7 +40,7 @@ public:
 
     void initProgram(const MemLayout& layout) const { obj_->initProgram(layout); }
     void step() const { obj_->step(); }
-    [[nodiscard]] int interpret(const MemLayout& layout) const { return obj_->interpret(layout); }
+    [[nodiscard]] int simulate(const MemLayout& layout) const { return obj_->simulate(layout); }
 };
 
 

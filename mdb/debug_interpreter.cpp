@@ -127,7 +127,7 @@ void DebugSimulator::interactiveStep(const MemLayout& layout) {
     }
 }
 
-int DebugSimulator::interpret(const MemLayout& layout) {
+int DebugSimulator::simulate(const MemLayout& layout) {
     initProgram(layout);
     // Set initial breakpoint at start of program
     breakpoints[state.registers[Register::PC]] = 0;

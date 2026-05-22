@@ -41,7 +41,7 @@ TEST_CASE("Test add Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.getState().registers[Register::T2] = 2;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 1;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -75,7 +75,7 @@ TEST_CASE("Test addu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
     simulator.getState().registers[Register::T2] = 2;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 1;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -108,7 +108,7 @@ TEST_CASE("Test addi Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = -3;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -141,7 +141,7 @@ TEST_CASE("Test addiu Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -1;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = -3;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -175,7 +175,7 @@ TEST_CASE("Test and Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00000000;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -208,7 +208,7 @@ TEST_CASE("Test andi Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00000078;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -240,7 +240,7 @@ TEST_CASE("Test div Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 17;
     simulator.getState().registers[Register::T2] = 5;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         // 17 / 5 = 3 remainder 2
         constexpr int32_t expectedLo = 3; // Quotient
@@ -254,7 +254,7 @@ TEST_CASE("Test div Instruction") {
     simulator.getState().registers[Register::T1] = 17;
     simulator.getState().registers[Register::T2] = 0;
     SECTION("Test Execute Div Zero") {
-        REQUIRE_THROWS_MATCHES(simulator.interpret(actualLayout), MasmRuntimeError,
+        REQUIRE_THROWS_MATCHES(simulator.simulate(actualLayout), MasmRuntimeError,
                                Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> Division by "
                                                         "zero: Division by zero in DIV instruction (unhandled)"));
     }
@@ -284,7 +284,7 @@ TEST_CASE("Test divu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     simulator.getState().registers[Register::T2] = 3;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         // 0xFFFFFFFF / 3 = 0x55555555, remainder 0
         constexpr int32_t expectedLo = 0x55555555; // Quotient
@@ -298,7 +298,7 @@ TEST_CASE("Test divu Instruction") {
     simulator.getState().registers[Register::T1] = 17;
     simulator.getState().registers[Register::T2] = 0;
     SECTION("Test Execute DivU Zero") {
-        REQUIRE_THROWS_MATCHES(simulator.interpret(actualLayout), MasmRuntimeError,
+        REQUIRE_THROWS_MATCHES(simulator.simulate(actualLayout), MasmRuntimeError,
                                Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> Division by "
                                                         "zero: Division by zero in DIVU instruction (unhandled)"));
     }
@@ -325,7 +325,7 @@ TEST_CASE("Test mfhi Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::HI] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x12345678;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -354,7 +354,7 @@ TEST_CASE("Test mflo Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::LO] = 0x87654321;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x87654321;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -383,7 +383,7 @@ TEST_CASE("Test mthi Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x12345678;
         const int32_t actualResult = simulator.getState().registers[Register::HI];
@@ -412,7 +412,7 @@ TEST_CASE("Test mtlo Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x87654321;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x87654321;
         const int32_t actualResult = simulator.getState().registers[Register::LO];
@@ -444,7 +444,7 @@ TEST_CASE("Test mult Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 2;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         // Result should be in HI:LO registers
         // 0x12345678 * 2 = 0x2468ACF0 (fits in 32 bits, so HI should be 0)
@@ -481,7 +481,7 @@ TEST_CASE("Test multu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xFFFFFFFF; // Large unsigned
     simulator.getState().registers[Register::T2] = 2;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         // 0xFFFFFFFF * 2 = 0x1FFFFFFFE (requires both HI and LO)
         constexpr int32_t expectedLo = 0xFFFFFFFE;
@@ -519,7 +519,7 @@ TEST_CASE("Test nor Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00000000;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -553,7 +553,7 @@ TEST_CASE("Test or Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x0F0F0F0F;
     simulator.getState().registers[Register::T2] = 0xF0F0F0F0;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0xFFFFFFFF;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -586,7 +586,7 @@ TEST_CASE("Test ori Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345600;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x123456FF;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -619,7 +619,7 @@ TEST_CASE("Test sll Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x23456780;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -652,7 +652,7 @@ TEST_CASE("Test srl Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x01234567;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -685,7 +685,7 @@ TEST_CASE("Test sra Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x80000000; // Negative number
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0xF8000000; // Sign extended
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -719,7 +719,7 @@ TEST_CASE("Test sllv Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 4;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x23456780;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -753,7 +753,7 @@ TEST_CASE("Test srlv Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12345678;
     simulator.getState().registers[Register::T2] = 4;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x01234567;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -787,7 +787,7 @@ TEST_CASE("Test srav Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x80000000; // Negative number
     simulator.getState().registers[Register::T2] = 4;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0xF8000000; // Sign extended
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -821,7 +821,7 @@ TEST_CASE("Test sub Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
     simulator.getState().registers[Register::T2] = 3;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 2;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -855,7 +855,7 @@ TEST_CASE("Test subu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
     simulator.getState().registers[Register::T2] = 3;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 2;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -889,7 +889,7 @@ TEST_CASE("Test xor Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0xAAAAAAAA;
     simulator.getState().registers[Register::T2] = 0x55555555;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0xFFFFFFFF;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -922,7 +922,7 @@ TEST_CASE("Test xori Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x12340000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x1234FFFF;
         const int32_t actualResult = simulator.getState().registers[Register::T0];

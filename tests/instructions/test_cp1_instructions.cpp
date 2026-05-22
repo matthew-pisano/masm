@@ -26,7 +26,7 @@ TEST_CASE("Test FP Double Invalid Register Read") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
-    REQUIRE_THROWS_MATCHES(simulator.interpret(actualLayout), MasmRuntimeError,
+    REQUIRE_THROWS_MATCHES(simulator.simulate(actualLayout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
                                                     "Invalid double precision register: f1"));
 }
@@ -41,7 +41,7 @@ TEST_CASE("Test FP Double Invalid Register Write") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
-    REQUIRE_THROWS_MATCHES(simulator.interpret(actualLayout), MasmRuntimeError,
+    REQUIRE_THROWS_MATCHES(simulator.simulate(actualLayout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (a.asm:1) -> "
                                                     "Invalid double precision register: f1"));
 }
@@ -70,7 +70,7 @@ TEST_CASE("Test FP Abs.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, expected * -1);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("Test FP Abs.d Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setDouble(Coproc1Register::F2, expected * -1);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getDouble(Coproc1Register::F0)); }
 }
 
@@ -128,7 +128,7 @@ TEST_CASE("Test FP Add.s Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, 10);
     simulator.getState().cp1.setFloat(Coproc1Register::F2, 20);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr float expected = 30;
         REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0));
@@ -161,7 +161,7 @@ TEST_CASE("Test FP Add.d Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setDouble(Coproc1Register::F2, 10);
     simulator.getState().cp1.setDouble(Coproc1Register::F4, 20);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr float expected = 30;
         REQUIRE(expected == simulator.getState().cp1.getDouble(Coproc1Register::F0));
@@ -194,7 +194,7 @@ TEST_CASE("Test FP Div.s Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, 10);
     simulator.getState().cp1.setFloat(Coproc1Register::F2, 5);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr float expected = 2;
         REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0));
@@ -226,7 +226,7 @@ TEST_CASE("Test FP Mul.s Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, 10);
     simulator.getState().cp1.setFloat(Coproc1Register::F2, 5);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr float expected = 50;
         REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0));
@@ -257,7 +257,7 @@ TEST_CASE("Test FP Neg.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, -expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }
 
@@ -285,7 +285,7 @@ TEST_CASE("Test FP Sqrt.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, expected * expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }
 
@@ -315,7 +315,7 @@ TEST_CASE("Test FP Sub.s Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, 20);
     simulator.getState().cp1.setFloat(Coproc1Register::F2, 10);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr float expected = 10;
         REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0));
@@ -349,14 +349,14 @@ TEST_CASE("Test FP c.eq.s Instruction") {
     SECTION("Test Execute Equal") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE(simulator.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Equal") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue + 0.01);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE_FALSE(simulator.getState().cp1.getFlag(0));
     }
 }
@@ -388,14 +388,14 @@ TEST_CASE("Test FP c.lt.s Instruction") {
     SECTION("Test Execute Less Than") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE(simulator.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Less Than") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue * 2);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE_FALSE(simulator.getState().cp1.getFlag(0));
     }
 }
@@ -427,21 +427,21 @@ TEST_CASE("Test FP c.le.s Instruction") {
     SECTION("Test Execute Less Than or Equal") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue * 2);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE(simulator.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Equal") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE(simulator.getState().cp1.getFlag(0));
     }
 
     SECTION("Test Execute Not Less Than or Equal") {
         simulator.getState().cp1.setFloat(Coproc1Register::F0, testValue * 2);
         simulator.getState().cp1.setFloat(Coproc1Register::F1, testValue);
-        simulator.interpret(actualLayout);
+        simulator.simulate(actualLayout);
         REQUIRE_FALSE(simulator.getState().cp1.getFlag(0));
     }
 }
@@ -468,12 +468,12 @@ TEST_CASE("Test FP bc1f Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().cp1.setFlag(0, true);
-    interpreterEq.interpret(actualLayout);
+    interpreterEq.simulate(actualLayout);
     SECTION("Test Execute Flag True") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400004); }
 
     DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().cp1.setFlag(0, false);
-    interpreterNe.interpret(actualLayout);
+    interpreterNe.simulate(actualLayout);
     SECTION("Test Execute Flag False") { REQUIRE(interpreterNe.getState().registers[Register::PC] == 0x00400010); }
 }
 
@@ -499,12 +499,12 @@ TEST_CASE("Test FP bc1t Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator interpreterEq(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().cp1.setFlag(0, true);
-    interpreterEq.interpret(actualLayout);
+    interpreterEq.simulate(actualLayout);
     SECTION("Test Execute Flag True") { REQUIRE(interpreterEq.getState().registers[Register::PC] == 0x00400010); }
 
     DebugSimulator interpreterNe(IOMode::SYSCALL, streamHandle);
     interpreterEq.getState().cp1.setFlag(0, false);
-    interpreterNe.interpret(actualLayout);
+    interpreterNe.simulate(actualLayout);
     SECTION("Test Execute Flag False") { REQUIRE(interpreterNe.getState().registers[Register::PC] == 0x00400004); }
 }
 
@@ -532,7 +532,7 @@ TEST_CASE("Test FP cvt.d.s Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setFloat(Coproc1Register::F1, expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getDouble(Coproc1Register::F0)); }
 }
 
@@ -560,7 +560,7 @@ TEST_CASE("Test FP cvt.s.d Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().cp1.setDouble(Coproc1Register::F2, expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }
 
@@ -596,7 +596,7 @@ TEST_CASE("Test FP ldc1 Instruction") {
     simulator.getState().memory.wordTo(address, intRepr & 0xFFFFFFFF);
     simulator.getState().memory.wordTo(address + 4, intRepr >> 32);
     simulator.getState().registers[Register::T0] = static_cast<int32_t>(address);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getDouble(Coproc1Register::F0)); }
 }
 
@@ -631,7 +631,7 @@ TEST_CASE("Test FP lwc1 Instruction") {
     constexpr int32_t intRepr = std::bit_cast<int32_t>(expected);
     simulator.getState().memory.wordTo(address, intRepr);
     simulator.getState().registers[Register::T0] = static_cast<int32_t>(address);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }
 
@@ -668,7 +668,7 @@ TEST_CASE("Test FP sdc1 Instruction") {
     constexpr int32_t upper = intRepr >> 32;
     simulator.getState().registers[Register::T0] = static_cast<int32_t>(address);
     simulator.getState().cp1.setDouble(Coproc1Register::F0, expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         REQUIRE(simulator.getState().memory.wordAt(address) == lower);
         REQUIRE(simulator.getState().memory.wordAt(address + 4) == upper);
@@ -706,7 +706,7 @@ TEST_CASE("Test FP swc1 Instruction") {
     constexpr int32_t expected = std::bit_cast<int32_t>(floatRepr);
     simulator.getState().registers[Register::T0] = static_cast<int32_t>(address);
     simulator.getState().cp1.setFloat(Coproc1Register::F0, 75.5);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().memory.wordAt(address)); }
 }
 
@@ -735,7 +735,7 @@ TEST_CASE("Test FP mfc1 Instruction") {
 
     constexpr int32_t expected = 0x012345678;
     simulator.getState().cp1[Coproc1Register::F0] = expected;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().registers[Register::T0]); }
 }
 
@@ -764,7 +764,7 @@ TEST_CASE("Test FP mtc1 Instruction") {
 
     constexpr int32_t expected = 0x012345678;
     simulator.getState().registers[Register::T0] = expected;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1[Coproc1Register::F0]); }
 }
 
@@ -793,6 +793,6 @@ TEST_CASE("Test FP mov.s Instruction") {
 
     constexpr float expected = 42.69;
     simulator.getState().cp1.setFloat(Coproc1Register::F1, expected);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") { REQUIRE(expected == simulator.getState().cp1.getFloat(Coproc1Register::F0)); }
 }

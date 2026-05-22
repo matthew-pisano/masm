@@ -53,7 +53,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
 
     StreamHandle streamHandle(iss, oss);
     DebugSimulator simulator(ioMode, streamHandle, useLittleEndian);
-    exitCode = simulator.interpret(layout);
+    exitCode = simulator.simulate(layout);
 
     REQUIRE(exitCode == 0);
 
@@ -81,7 +81,7 @@ TEST_CASE("Test Runtime Error") {
     StreamHandle streamHandle(iss, oss);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
-    REQUIRE_THROWS_MATCHES(simulator.interpret(layout), MasmRuntimeError,
+    REQUIRE_THROWS_MATCHES(simulator.simulate(layout), MasmRuntimeError,
                            Catch::Matchers::Message("Runtime error at 0x00400000 (test.asm:2) -> Division by "
                                                     "zero: Division by zero in DIV instruction (unhandled)"));
 }

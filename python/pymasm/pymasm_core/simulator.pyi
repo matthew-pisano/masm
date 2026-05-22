@@ -33,7 +33,7 @@ class Simulator:
             MasmRuntimeError: If a runtime error occurs during execution"""
         ...
 
-    def interpret(self, layout: MemLayout) -> int:
+    def simulate(self, layout: MemLayout) -> int:
         """Interprets the given memory layout and returns an exit code
 
         Args:

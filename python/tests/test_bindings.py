@@ -31,7 +31,7 @@ class TestBindings:
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
         simulator = pymasm.simulator.Simulator(io_mode, istream, ostream)
-        exitCode = simulator.interpret(layout)
+        exitCode = simulator.simulate(layout)
 
         with open("tests/fixtures/input_output/input_output.txt", "rb") as f:
             expected_output = f.read()
@@ -51,7 +51,7 @@ class TestBindings:
         istream = BytesIO(input_string.encode())
         ostream = BytesIO()
         simulator = pymasm.simulator.Simulator(io_mode, istream, ostream)
-        exitCode = simulator.interpret(layout)
+        exitCode = simulator.simulate(layout)
 
         with open("tests/fixtures/mmio/mmio.txt", "rb") as f:
             expected_output = f.read()

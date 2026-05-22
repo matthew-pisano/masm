@@ -29,7 +29,7 @@ void Simulator::initProgram(const MemLayout& layout) {
 }
 
 
-int Simulator::interpret(const MemLayout& layout) {
+int Simulator::simulate(const MemLayout& layout) {
     initProgram(layout);
 
     while (true) {

@@ -38,7 +38,7 @@ TEST_CASE("Test slt Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5;
     simulator.getState().registers[Register::T2] = 3;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 1; // -5 < 3 is true
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -72,7 +72,7 @@ TEST_CASE("Test sltu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5; // Interpreted as large positive number
     simulator.getState().registers[Register::T2] = 3;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0; // -5 < 3 unsigned is false
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -105,7 +105,7 @@ TEST_CASE("Test slti Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 5;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 1; // 5 < 10 is true
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -138,7 +138,7 @@ TEST_CASE("Test sltiu Instruction") {
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = -5;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0; // -5 < 10 unsigned is false
         const int32_t actualResult = simulator.getState().registers[Register::T0];

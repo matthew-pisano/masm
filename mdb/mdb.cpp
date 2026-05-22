@@ -55,7 +55,7 @@ int main(const int argc, char* argv[]) {
         const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
         DebugSimulator simulator(ioMode, conHandle, useLittleEndian);
         simulator.setInteractive(true);
-        exitCode = simulator.interpret(layout);
+        exitCode = simulator.simulate(layout);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     }

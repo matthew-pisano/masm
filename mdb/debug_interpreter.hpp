@@ -220,7 +220,7 @@ public:
      * @param layout The initial memory layout to use for loading in the program and data
      * @return The exit code of the program
      */
-    int interpret(const MemLayout& layout) override;
+    int simulate(const MemLayout& layout) override;
 };
 
 #endif // DEBUG_SIMULATOR_H

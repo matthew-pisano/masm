@@ -40,7 +40,7 @@ TEST_CASE("Test lb Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
     simulator.getState().registers[Register::T1] = 0x10010000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = static_cast<int32_t>(0xffffff87);
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -75,7 +75,7 @@ TEST_CASE("Test lbu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().memory.byteTo(0x10010004, static_cast<int8_t>(0x82348687));
     simulator.getState().registers[Register::T1] = 0x10010000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00000087;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -110,7 +110,7 @@ TEST_CASE("Test lh Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
     simulator.getState().registers[Register::T1] = 0x10010000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = static_cast<int32_t>(0xffff8687);
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -145,7 +145,7 @@ TEST_CASE("Test lhu Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().memory.halfTo(0x10010004, static_cast<int16_t>(0x82348687));
     simulator.getState().registers[Register::T1] = 0x10010000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00008687;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -180,7 +180,7 @@ TEST_CASE("Test lw Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().memory.wordTo(0x10010004, 0x82348687);
     simulator.getState().registers[Register::T1] = 0x10010000;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x82348687;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -211,7 +211,7 @@ TEST_CASE("Test lui Instruction") {
 
     StreamHandle streamHandle(std::cin, std::cout);
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x00640000;
         const int32_t actualResult = simulator.getState().registers[Register::T0];
@@ -246,7 +246,7 @@ TEST_CASE("Test sb Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x10010000;
     simulator.getState().registers[Register::T0] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x78;
         const int32_t actualResult = simulator.getState().memory.byteAt(0x10010004);
@@ -281,7 +281,7 @@ TEST_CASE("Test sh Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x10010000;
     simulator.getState().registers[Register::T0] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x5678;
         const int32_t actualResult = simulator.getState().memory.halfAt(0x10010004);
@@ -316,7 +316,7 @@ TEST_CASE("Test sw Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
     simulator.getState().registers[Register::T1] = 0x10010000;
     simulator.getState().registers[Register::T0] = 0x12345678;
-    simulator.interpret(actualLayout);
+    simulator.simulate(actualLayout);
     SECTION("Test Execute") {
         constexpr int32_t expectedResult = 0x12345678;
         const int32_t actualResult = simulator.getState().memory.wordAt(0x10010004);
