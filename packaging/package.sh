@@ -22,6 +22,9 @@ for DISTRO in fedora ubuntu; do
   TAR_PATH=$(podman run --rm masm-build-${DISTRO} find /build/build -maxdepth 1 -regextype posix-extended -regex '.*masm-.*tar\.gz')
   podman cp "${CONTAINER}:${TAR_PATH}" dist
 
+  ZIP_PATH=$(podman run --rm masm-build-${DISTRO} find /build/build -maxdepth 1 -regextype posix-extended -regex '.*masm-.*zip')
+  podman cp "${CONTAINER}:${ZIP_PATH}" dist
+
   WHEEL_PATH=$(podman run --rm masm-build-${DISTRO} find /build/python/dist -maxdepth 1 -regextype posix-extended -regex '.*pymasm-.*whl')
   podman cp "${CONTAINER}:${WHEEL_PATH}" dist
 
