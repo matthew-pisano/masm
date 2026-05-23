@@ -36,8 +36,11 @@ int Simulator::simulate(const MemLayout& layout) {
         try {
             step();
         } catch (ExecExit& e) {
-            streamHandle.putStr("\n");
-            streamHandle.putStr(e.what());
+            const std::string what = e.what();
+            if (!what.empty()) {
+                streamHandle.putStr("\n");
+                streamHandle.putStr(what);
+            }
             streamHandle.putStr("\n");
             return e.code();
         }

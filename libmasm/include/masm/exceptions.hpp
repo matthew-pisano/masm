@@ -31,7 +31,7 @@ class MasmSyntaxError final : public MasmException {
     }
 
 public:
-    explicit MasmSyntaxError(const std::string& message, const std::string& filename, const size_t lineno) :
+    MasmSyntaxError(const std::string& message, const std::string& filename, const size_t lineno) :
         MasmException(constructMessage(message, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
@@ -56,8 +56,8 @@ class MasmRuntimeError final : public MasmException {
     }
 
 public:
-    explicit MasmRuntimeError(const std::string& message, const uint32_t addr, const std::string& filename,
-                              const size_t lineno) : MasmException(constructMessage(message, addr, filename, lineno)) {}
+    MasmRuntimeError(const std::string& message, const uint32_t addr, const std::string& filename,
+                     const size_t lineno) : MasmException(constructMessage(message, addr, filename, lineno)) {}
     [[nodiscard]] const char* what() const noexcept override { return MasmException::what(); }
 };
 
@@ -71,16 +71,15 @@ class ExecExit : public std::runtime_error {
     /**
      * Constructs a message for the execution exit exception
      * @param message The original error message to display
-     * @param code The exit code of the program
      * @return The formatted message
      */
-    static std::string constructMessage(const std::string& message, const int32_t code) {
-        return std::format("{} (code {})", message, code);
-    }
+    static std::string constructMessage(const std::string& message) { return std::format("{}", message); }
 
 public:
-    explicit ExecExit(const std::string& message, const int32_t code) :
-        std::runtime_error(constructMessage(message, code)), errorCode(code) {}
+    explicit ExecExit(const int32_t code) : std::runtime_error(constructMessage("")), errorCode(code) {}
+
+    ExecExit(const std::string& message, const int32_t code) :
+        std::runtime_error(constructMessage(message)), errorCode(code) {}
 
     /**
      * Get the error code of the exception
@@ -96,7 +95,7 @@ public:
  */
 class DebuggerExit final : public ExecExit {
 public:
-    explicit DebuggerExit(const std::string& message, const int32_t code) : ExecExit(message, code) {}
+    DebuggerExit(const std::string& message, const int32_t code) : ExecExit(message, code) {}
 };
 
 
@@ -125,8 +124,7 @@ class ExecExcept final : public std::runtime_error {
     EXCEPT_CODE causeCode;
 
 public:
-    explicit ExecExcept(const std::string& message, const EXCEPT_CODE code) :
-        std::runtime_error(message), causeCode(code) {}
+    ExecExcept(const std::string& message, const EXCEPT_CODE code) : std::runtime_error(message), causeCode(code) {}
 
     /**
      * Get the cause value of the exception
