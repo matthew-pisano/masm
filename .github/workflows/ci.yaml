@@ -67,7 +67,6 @@ jobs:
           cmake --build build
       - name: Package Python
         run: |
-          cp build/python/pymasm_core* python/pymasm/
           $VENV_PATH/bin/python -m build python --wheel
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

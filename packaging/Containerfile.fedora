@@ -13,5 +13,4 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja && \
 RUN python3 -m venv .venv && \
     .venv/bin/pip install --upgrade pip && \
     .venv/bin/pip install build wheel setuptools && \
-    cp build/python/pymasm_core* python/pymasm/ && \
     .venv/bin/python -m build python --wheel
