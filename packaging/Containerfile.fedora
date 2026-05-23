@@ -6,11 +6,11 @@ WORKDIR /build
 COPY . .
 
 RUN cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja && \
-    cmake --build build --target masm mdb msim pymasm_core -j 6 && \
+    cmake --build build --target masm mdb msim -j 6 && \
     cd build && \
     cpack -G "RPM;TGZ;ZIP"
 
 RUN python3 -m venv .venv && \
     .venv/bin/pip install --upgrade pip && \
-    .venv/bin/pip install build wheel setuptools && \
+    .venv/bin/pip install build wheel && \
     .venv/bin/python -m build python --wheel
