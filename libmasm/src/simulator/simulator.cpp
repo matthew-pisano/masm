@@ -131,10 +131,10 @@ void Simulator::step() {
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         const uint32_t displayEnabled =
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        if (readMMIO() && interpEnabled && keyboardEnabled)
-            cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
-        if (writeMMIO() && interpEnabled && displayEnabled)
+        if (interpEnabled && displayEnabled && writeMMIO())
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
+        else if (interpEnabled && keyboardEnabled && readMMIO())
+            cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
     }
 
     if (!state.memory.isValid(pc))
