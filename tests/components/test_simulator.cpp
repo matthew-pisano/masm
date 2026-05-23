@@ -94,6 +94,13 @@ TEST_CASE("Test Execute Hello World") {
 }
 
 
+TEST_CASE("Test Execute Fall Off") {
+    const std::string test_case = "falloff";
+    validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
+}
+
+
 TEST_CASE("Test Execute Arithmetic") {
     const std::string test_case = "arithmetic";
     validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
