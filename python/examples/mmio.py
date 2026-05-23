@@ -6,7 +6,7 @@ from pymasm import *
 
 def mmio_asm():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(f"{script_dir}/mmio.asm", "r") as f:
+    with open(f"{script_dir}/../../examples/mmio.asm", "r") as f:
         return f.read()
 
 
