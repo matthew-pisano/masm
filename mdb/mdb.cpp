@@ -44,6 +44,8 @@ int main(const int argc, char* argv[]) {
     // Set terminal to raw mode
     conHandle.enableRawConsoleMode();
 
+    conHandle.putStr(std::format("MASM {}\n\nFor help, type \"help\".", version));
+
     // resolve wildcards in path names to real paths
     inputFileNames = resolveWildcards(inputFileNames);
 
