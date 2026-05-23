@@ -95,7 +95,7 @@ public:
  */
 class DebuggerExit final : public ExecExit {
 public:
-    DebuggerExit(const std::string& message, const int32_t code) : ExecExit(message, code) {}
+    DebuggerExit() : ExecExit("", 0) {}
 };
 
 
