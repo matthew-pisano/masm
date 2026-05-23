@@ -26,10 +26,11 @@
  * @param logFileName The name of the output log to compare against
  * @param inputString The input string to provide to the program
  * @param useLittleEndian Whether to use little-endian byte order
+ * @param targetExitCode The desired exit code of the program
  */
 void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceFileNames,
                     const std::string& logFileName, const std::string& inputString = "",
-                    const bool useLittleEndian = false) {
+                    const bool useLittleEndian = false, const int targetExitCode = 0) {
     const std::string logSource = readFile(logFileName);
     std::vector<std::string> logLines;
     std::stringstream ss(logSource);
@@ -55,7 +56,7 @@ void validateOutput(const IOMode ioMode, const std::vector<std::string>& sourceF
     DebugSimulator simulator(ioMode, streamHandle, useLittleEndian);
     exitCode = simulator.simulate(layout);
 
-    REQUIRE(exitCode == 0);
+    REQUIRE(exitCode == targetExitCode);
 
     std::string actualLines = oss.str();
     for (const std::string& logLine : logLines) {
@@ -97,7 +98,7 @@ TEST_CASE("Test Execute Hello World") {
 TEST_CASE("Test Execute Fall Off") {
     const std::string test_case = "falloff";
     validateOutput(IOMode::SYSCALL, {"tests/fixtures/" + test_case + "/" + test_case + ".asm"},
-                   "tests/fixtures/" + test_case + "/" + test_case + ".txt");
+                   "tests/fixtures/" + test_case + "/" + test_case + ".txt", "", false, 139);
 }
 
 
