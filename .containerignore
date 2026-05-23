@@ -1,0 +1,11 @@
+.idea
+.git
+cmake-build-*
+**/dist
+**/build
+**/__pycache__
+**/*.egg-info
+.venv
+out
+
+**/*.so

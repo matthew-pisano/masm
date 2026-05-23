@@ -7,7 +7,7 @@ from pymasm import *
 
 def hello_world_asm():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(f"{script_dir}/hello_world.asm", "r") as f:
+    with open(f"{script_dir}/../../examples/hello_world.asm", "r") as f:
         return f.read()
 
 

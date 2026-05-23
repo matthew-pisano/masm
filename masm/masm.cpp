@@ -54,7 +54,7 @@ int main(const int argc, char* argv[]) {
     // Resolve absolute file names
     for (size_t i = 0; i < inputFileNames.size(); i++)
         try {
-            inputFileNames[i] = std::filesystem::canonical(inputFileNames[i]);
+            inputFileNames[i] = std::filesystem::canonical(inputFileNames[i]).string();
         } catch (std::filesystem::filesystem_error&) {
             std::cerr << "error: Could not find file '" << inputFileNames[i] << "'" << std::endl;
             return 1;
@@ -63,13 +63,13 @@ int main(const int argc, char* argv[]) {
     // Ensure the directory of the output file exists
     if (!outputFileName.empty()) {
         std::filesystem::path outputFilePath(outputFileName);
-        std::string outputDirName = std::filesystem::absolute(outputFilePath).parent_path();
+        std::string outputDirName = std::filesystem::absolute(outputFilePath).parent_path().string();
         if (!std::filesystem::is_directory(outputDirName)) {
             std::cerr << "error: Could not find directory '" << outputDirName << "'" << std::endl;
             return 1;
         }
     } else
-        outputFileName = std::filesystem::path(inputFileNames[0]).stem();
+        outputFileName = std::filesystem::path(inputFileNames[0]).stem().string();
 
     int exitCode = 1;
     try {

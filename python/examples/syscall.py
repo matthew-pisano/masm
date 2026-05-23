@@ -6,7 +6,7 @@ from pymasm import *
 
 def syscall_asm():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(f"{script_dir}/syscall.asm", "r") as f:
+    with open(f"{script_dir}/../../examples/syscall.asm", "r") as f:
         return f.read()
 
 

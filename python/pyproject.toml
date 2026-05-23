@@ -1,6 +1,6 @@
 [build-system]
-requires = ["pybind11>=2.6.0", "setuptools>=45", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core", "pybind11>=2.6.0"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "pymasm"
@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "MIPS Assembly Simulator Library"
 authors = [{ name = "Matthew Pisano", email = "matthewpisano14@gmail.com" }]
 license = "BSD-3-Clause"
-readme = "README.md"
+readme = "../README.md"
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -20,17 +20,19 @@ classifiers = [
     "Programming Language :: C++",
 ]
 
-[tool.setuptools]
-packages = ["pymasm"]
+[tool.scikit-build]
+cmake.build-type = "Release"
+cmake.source-dir = ".."
+build.targets = ["pymasm_core"]
+install.components = ["python"]
 
-[tool.setuptools.dynamic]
-version = { attr = "_version.__version__" }
-
-[tool.setuptools.package-data]
-pymasm = ["*.so", "*.pyd", "pymasm_core/*.py", "pymasm_core/*.pyi", "py.typed"]
-
-[tool.pytest.ini_options]
-addopts = "--import-mode=importlib"
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "../version/version.json"
+regex = '"version"\s*:\s*"(?P<value>[^"]+)"'
 
 [tool.pybind11.options]
 cpp_std = 23
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
