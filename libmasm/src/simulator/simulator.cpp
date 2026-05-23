@@ -131,9 +131,10 @@ void Simulator::step() {
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         const uint32_t displayEnabled =
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        if (interpEnabled && displayEnabled && writeMMIO())
+        // Read and right unconditionally to allow for polling without interrupts
+        if (writeMMIO() && interpEnabled && displayEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        else if (interpEnabled && keyboardEnabled && readMMIO())
+        else if (readMMIO() && interpEnabled && keyboardEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
     }
 
