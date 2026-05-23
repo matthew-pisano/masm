@@ -1,8 +1,11 @@
 FROM ubuntu:26.04
+
 RUN apt-get update && apt-get install -y git cmake g++ ninja-build python3-dev
 WORKDIR /build
+
 COPY . .
+
 RUN cmake -B build -DCMAKE_BUILD_TYPE=Release -G Ninja && \
     cmake --build build --target masm mdb msim -j 6 && \
     cd build && \
-    cpack -G "DEB" \
+    cpack -G "DEB"

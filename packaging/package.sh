@@ -15,10 +15,15 @@ for DISTRO in fedora ubuntu; do
   PKG_PATH=$(podman run --rm masm-build-${DISTRO} find /build/build -maxdepth 1 -regextype posix-extended -regex '.*masm-.*(rpm|deb)')
   podman cp "${CONTAINER}:${PKG_PATH}" dist
 
-  TAR_PATH=$(podman run --rm masm-build-${DISTRO} find /build/build -maxdepth 1 -regextype posix-extended -regex '.*masm-.*tar\.gz')
-  if [[ -n "${TAR_PATH}" ]]; then
-    podman cp "${CONTAINER}:${TAR_PATH}" dist
+  if [[ "${DISTRO}" != "fedora" ]]; then
+    continue
   fi
+
+  TAR_PATH=$(podman run --rm masm-build-${DISTRO} find /build/build -maxdepth 1 -regextype posix-extended -regex '.*masm-.*tar\.gz')
+  podman cp "${CONTAINER}:${TAR_PATH}" dist
+
+  WHEEL_PATH=$(podman run --rm masm-build-${DISTRO} find /build/python/dist -maxdepth 1 -regextype posix-extended -regex '.*pymasm-.*whl')
+  podman cp "${CONTAINER}:${WHEEL_PATH}" dist
 
   podman rm "${CONTAINER}"
 done
