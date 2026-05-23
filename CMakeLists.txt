@@ -53,3 +53,10 @@ install(FILES "${CMAKE_SOURCE_DIR}/README.md"
         DESTINATION ${CMAKE_INSTALL_DOCDIR}
         COMPONENT documentation
 )
+
+if (CMAKE_CROSSCOMPILING AND WIN32)
+    install(FILES
+            /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll
+            DESTINATION bin
+    )
+endif ()
