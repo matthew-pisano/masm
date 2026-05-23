@@ -23,7 +23,7 @@ const std::string debuggerHelp =
         "continue, cont, c - Continue execution until the next breakpoint or program termination\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
-        "examine, x <ref> [words] - Examine memory at the given reference.  The number of words to "
+        "examine, x <ref> [words] - Examine memory at the given reference or address.  The number of words to "
         "display can also be specified; one by default\n"
         "exit, quit, q - Exit the debugger\n"
         "finish - Execute until the end of the current procedure (the location stored in $ra)\n"
@@ -543,52 +543,45 @@ void DebugSimulator::listLabels() {
 }
 
 void DebugSimulator::listRegisters() {
-    for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
-        const int32_t value = state.registers[i];
-        streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
-    }
+    for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i)
+        printRegister(RegisterFile::nameFromIndex(i));
 }
 
 void DebugSimulator::listCP0Registers() {
-    const int32_t vaddrValue = state.cp0[Coproc0Register::VADDR];
-    streamHandle.putStr(std::format("$8  : 0x{:08x}\n", vaddrValue));
-    const int32_t statusValue = state.cp0[Coproc0Register::STATUS];
-    streamHandle.putStr(std::format("$12 : 0x{:08x}\n", statusValue));
-    const int32_t causeValue = state.cp0[Coproc0Register::CAUSE];
-    streamHandle.putStr(std::format("$13 : 0x{:08x}\n", causeValue));
-    const int32_t epcValue = state.cp0[Coproc0Register::EPC];
-    streamHandle.putStr(std::format("$14 : 0x{:08x}\n", epcValue));
+    printRegister("8");
+    printRegister("12");
+    printRegister("13");
+    printRegister("14");
 }
 
 void DebugSimulator::listCP1Registers() {
-    for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
-        const int32_t value = state.cp1[i];
-        const float floatValue = state.cp1.getFloat(i);
-        if (i % 2 == 0) {
-            const double doubleValue = state.cp1.getDouble(i);
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value, floatValue, doubleValue));
-        } else
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n", Coproc1RegisterFile::nameFromIndex(i), value,
-                                            floatValue));
-    }
+    for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i)
+        printRegister(Coproc1RegisterFile::nameFromIndex(i));
 }
 
 void DebugSimulator::printRegister(const std::string& arg) {
-    if (arg.size() > 1 && arg[0] == 'f') {
+    if (arg.size() > 1 && arg[0] == 'f' && arg != "fp") {
         // Co-Processor 1 register
         try {
             const size_t index = Coproc1RegisterFile::indexFromName(arg);
-            int32_t value = state.cp1[index];
-            streamHandle.putStr(std::format("$f{}: 0x{:08x}\n", index, value));
+            uint32_t value = state.cp1[index];
+            const float floatValue = state.cp1.getFloat(index);
+            if (index % 2 == 0) {
+                const double doubleValue = state.cp1.getDouble(index);
+                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f}, {:.12f}\n",
+                                                Coproc1RegisterFile::nameFromIndex(index), value, floatValue,
+                                                doubleValue));
+            } else
+                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f}\n", Coproc1RegisterFile::nameFromIndex(index),
+                                                value, floatValue));
         } catch (const std::exception&) {
             streamHandle.putStr("Invalid Co-Processor 1 register: " + arg);
         }
     } else if (arg == "8" || arg == "12" || arg == "13" || arg == "14") {
         // Special Co-Processor 0 registers
         const size_t index = std::stoi(arg);
-        int32_t value = state.cp0[index];
-        streamHandle.putStr(std::format("${}: 0x{:08x}\n", index, value));
+        uint32_t value = state.cp0[index];
+        streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", index, value));
     } else {
         // General-purpose register
         try {
@@ -602,8 +595,8 @@ void DebugSimulator::printRegister(const std::string& arg) {
             else
                 index = RegisterFile::indexFromName(arg);
 
-            int32_t value = state.registers[index];
-            streamHandle.putStr(std::format("${} -> 0x{:08x}\n", arg, value));
+            uint32_t value = state.registers[index];
+            streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:010} ({})\n", arg, value, value, wordAsString(value)));
         } catch (const std::exception&) {
             streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)");
         }
