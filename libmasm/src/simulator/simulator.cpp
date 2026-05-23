@@ -138,7 +138,8 @@ void Simulator::step() {
     }
 
     if (!state.memory.isValid(pc))
-        throw ExecExit("Execution terminated (fell off end of program)", -1);
+        throw ExecExit("Execution terminated (Address boundary error)", 139);
+
     const SourceLocator pcSrc = state.getDebugInfo(pc).source;
     if (pc >= TEXT_SEC_END)
         throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
