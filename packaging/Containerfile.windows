@@ -1,0 +1,11 @@
+FROM ubuntu:26.04
+
+RUN apt-get update && apt-get install -y git cmake g++ mingw-w64 ninja-build nsis
+WORKDIR /build
+
+COPY . .
+
+RUN cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw64.cmake -G Ninja && \
+    cmake --build build --target masm mdb msim -j 6 && \
+    cd build && \
+    cpack -G "NSIS"

@@ -33,4 +33,9 @@ if (CPACK_GENERATOR MATCHES "TGZ|ZIP")
     )
 endif ()
 
+# === NSIS (Windows) Package Generation === #
+
+set(CPACK_NSIS_MODIFY_PATH ON)  # Adds install dir to PATH
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
+
 include(CPack)
