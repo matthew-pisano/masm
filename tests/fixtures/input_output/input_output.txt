@@ -1,2 +1,1 @@
-Enter a number to calculate the factorial: The factorial is: 120
-Program exited (code 0)
+Enter a number to calculate the factorial: The factorial is: 0
