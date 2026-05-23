@@ -4,7 +4,7 @@ set(CPACK_PACKAGE_VENDOR "Matthew Pisano")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A MIPS Assembler and Simulator")
 set(CPACK_PACKAGE_DESCRIPTION "The masm MIPS assembler, simulator, and debugger.")
 set(CUSTOM_PACKAGE_URL "https://github.com/matthew-pisano/masm")
-set(CPACK_GENERATOR "RPM;DEB;TGZ")
+set(CPACK_GENERATOR "RPM;DEB;TGZ;ZIP")
 
 # === RPM Package Generation === #
 
@@ -14,11 +14,23 @@ set(CPACK_RPM_PACKAGE_GROUP "Development/Languages")
 set(CPACK_RPM_SPEC_MORE_DEFINE "%define _buildhost anonymized")
 set(CPACK_RPM_PACKAGE_URL "${CUSTOM_PACKAGE_URL}")
 set(CPACK_RPM_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION}") # RPM does not automatically pick up the cpack description
+set(CPACK_RPM_PACKAGE_RELEASE "1")
+set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
 
 # === DEB Package Generation === #
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
 set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "${CUSTOM_PACKAGE_URL}")
+set(CPACK_DEBIAN_PACKAGE_RELEASE "1")
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+
+# === TGZ and ZIP Package Generation === #
+
+if (CPACK_GENERATOR MATCHES "TGZ|ZIP")
+    set(CPACK_PACKAGE_FILE_NAME
+            "${CPACK_PACKAGE_NAME}-${PROJECT_VERSION}-linux-${CMAKE_SYSTEM_PROCESSOR}"
+    )
+endif ()
 
 include(CPack)
