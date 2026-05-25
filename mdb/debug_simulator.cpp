@@ -551,10 +551,8 @@ void DebugSimulator::listMemorySegments() {
                                     state.registers[Register::GP]));
     streamHandle.putStr(std::format("data   0x{:08x}\n", memSectionOffset(MemSection::DATA)));
 
-    float heapPercentage = static_cast<float>(state.heapAllocator.allocatedBytes()) /
-                           static_cast<float>(HeapAllocator::heapSize()) * 100;
-    streamHandle.putStr(
-            std::format("heap   0x{:08x} ({:.2f}% used)\n", memSectionOffset(MemSection::HEAP), heapPercentage));
+    streamHandle.putStr(std::format("heap   0x{:08x} (ptr: 0x{:08x}, alloc: {}B)\n", memSectionOffset(MemSection::HEAP),
+                                    state.heapAllocator.top(), state.heapAllocator.allocated()));
     streamHandle.putStr(std::format("stack  0x{:08x} ($sp: 0x{:08x})\n", memSectionOffset(MemSection::STACK),
                                     state.registers[Register::SP]));
     streamHandle.putStr(std::format("ktext  0x{:08x}\n", memSectionOffset(MemSection::KTEXT)));

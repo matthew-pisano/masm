@@ -57,6 +57,6 @@ uint32_t HeapAllocator::allocate(const uint32_t size) {
 }
 
 
-size_t HeapAllocator::allocatedBytes() const { return std::accumulate(blockSizes.begin(), blockSizes.end(), 0U); }
+size_t HeapAllocator::allocated() const { return std::accumulate(blockSizes.begin(), blockSizes.end(), 0U); }
 
 uint32_t HeapAllocator::top() const { return heapPointer; }

@@ -49,7 +49,7 @@ public:
     /**
      * Gets the total number of bytes allocated on the heap
      */
-    [[nodiscard]] size_t allocatedBytes() const;
+    [[nodiscard]] size_t allocated() const;
 
     /**
      * Gets the pointer to the top of heap memory
