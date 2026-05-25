@@ -24,6 +24,13 @@ class HeapAllocator {
     std::vector<uint32_t> blockSizes;
 
     /**
+     * A pointer to the current top of heap memory
+     *
+     * Initialized to 1MB
+     */
+    uint32_t heapPointer = memSectionOffset(MemSection::HEAP) + 0x100000;
+
+    /**
      * Finds the first unallocated space in the heap that can accommodate a block of the given size
      * @param size The size of the block to allocate
      * @return The first unallocated area that can fit the requested block
@@ -40,14 +47,14 @@ public:
     uint32_t allocate(uint32_t size);
 
     /**
-     * Gets the total number of bytes allocated
+     * Gets the total number of bytes allocated on the heap
      */
     [[nodiscard]] size_t allocatedBytes() const;
 
     /**
-     * Gets the maximum size of the heap
+     * Gets the pointer to the top of heap memory
      */
-    [[nodiscard]] static size_t heapSize();
+    [[nodiscard]] uint32_t top() const;
 };
 
 #endif // HEAP_H
