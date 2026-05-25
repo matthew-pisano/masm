@@ -5,6 +5,7 @@
 #include <masm/simulator/heap.hpp>
 
 #include <masm/exceptions.hpp>
+#include <numeric>
 
 
 const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
@@ -52,3 +53,8 @@ uint32_t HeapAllocator::allocate(const uint32_t size) {
     blockSizes.push_back(size);
     return address;
 }
+
+
+size_t HeapAllocator::allocatedBytes() const { return std::accumulate(blockSizes.begin(), blockSizes.end(), 0U); }
+
+size_t HeapAllocator::heapSize() { return HEAP_SIZE; }

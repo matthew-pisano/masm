@@ -38,6 +38,16 @@ public:
      * @throw runtime_error if the allocation fails
      */
     uint32_t allocate(uint32_t size);
+
+    /**
+     * Gets the total number of bytes allocated
+     */
+    [[nodiscard]] size_t allocatedBytes() const;
+
+    /**
+     * Gets the maximum size of the heap
+     */
+    [[nodiscard]] static size_t heapSize();
 };
 
 #endif // HEAP_H
