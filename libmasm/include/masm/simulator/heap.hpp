@@ -25,10 +25,8 @@ class HeapAllocator {
 
     /**
      * A pointer to the current top of heap memory
-     *
-     * Initialized to 1MB
      */
-    uint32_t heapPointer = memSectionOffset(MemSection::HEAP) + 0x100000;
+    uint32_t heapPointer = memSectionOffset(MemSection::HEAP);
 
     /**
      * Finds the first unallocated space in the heap that can accommodate a block of the given size
