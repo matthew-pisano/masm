@@ -196,7 +196,7 @@ void SystemHandle::heapAlloc(State& state) {
     state.registers[Register::V0] = ptr;
 }
 
-void SystemHandle::exit() { throw ExecExit("Program exited", 0); }
+void SystemHandle::exit() { throw ExecExit(0); }
 
 void SystemHandle::printChar(const State& state, StreamHandle& streamHandle) {
     const char c = static_cast<char>(state.registers[Register::A0]);
@@ -210,7 +210,7 @@ void SystemHandle::readChar(State& state, StreamHandle& streamHandle) {
 
 void SystemHandle::exitVal(const State& state) {
     const int32_t exitCode = state.registers[Register::A0];
-    throw ExecExit("Program exited", exitCode);
+    throw ExecExit(exitCode);
 }
 
 void SystemHandle::time(State& state) {

@@ -5,9 +5,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_exception.hpp>
+#include <catch2/matchers/catch_matchers_predicate.hpp>
 
 #include <masm/exceptions.hpp>
-#include <masm/simulator/simulator.hpp>
 #include <masm/simulator/syscalls.hpp>
 
 
@@ -247,7 +247,10 @@ TEST_CASE("Test Heap Allocation Syscall") {
 
 TEST_CASE("Test Exit Syscall") {
     SystemHandle sysHandle;
-    REQUIRE_THROWS_MATCHES(sysHandle.exit(), ExecExit, Catch::Matchers::Message("Program exited (code 0)"));
+    REQUIRE_THROWS_MATCHES(sysHandle.exit(), ExecExit,
+                           Catch::Matchers::Predicate<ExecExit>(
+                                   [](const ExecExit& e) { return e.code() == 0 && std::string(e.what()).empty(); },
+                                   "code == 0 and what() is empty"));
 }
 
 
@@ -282,12 +285,10 @@ TEST_CASE("Test Exit Value Syscall") {
     State state;
     state.registers[Register::A0] = exitCode;
 
-    REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit, Catch::Matchers::Message("Program exited (code 42)"));
-    try {
-        sysHandle.exitVal(state);
-    } catch (const ExecExit& e) {
-        REQUIRE(e.code() == exitCode);
-    }
+    REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit,
+                           Catch::Matchers::Predicate<ExecExit>(
+                                   [](const ExecExit& e) { return e.code() == 42 && std::string(e.what()).empty(); },
+                                   "code == 42 and what() is empty"));
 }
 
 

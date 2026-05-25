@@ -10,8 +10,10 @@
 
 #include <masm/assembler/parser.hpp>
 #include <masm/assembler/tokenizer.hpp>
-#include "fileio.hpp"
+#include <masm/simulator/simulator.hpp>
+#include <masm/simulator/state.hpp>
 
+#include "fileio.hpp"
 #include "load_layout.hpp"
 
 
@@ -65,11 +67,15 @@ int main(const int argc, char* argv[]) {
     std::vector<std::string> inputFileNames;
     bool useLittleEndian = false;
     bool rawParse = false;
+    bool noSim = false;
+    bool useMMIO = false;
 
     CLI::App app{"libmasm Intermediate Generator", "libmasm-fg"};
     app.add_option("input-file", inputFileNames, "Input file to load")->required()->allow_extra_args();
     app.add_flag("-l,--little-endian", useLittleEndian,
                  "Use little-endian byte order for memory layout (default is big-endian)");
+    app.add_flag("-m,--mmio", useMMIO, "Use memory-mapped I/O instead of system calls for input/output operations");
+    app.add_flag("--no-sim", noSim, "Only generate static fixtures, do not simulate");
     app.add_flag("--raw-parse", rawParse, "Parses the raw text of the file without inserting any extra helper tokens");
 
     try {
@@ -98,21 +104,46 @@ int main(const int argc, char* argv[]) {
         if (!tokenFile.is_open())
             throw std::runtime_error("Could not open file " + projectName + ".tkn");
         const std::vector<LineTokens> tokenizedLines = genTokenFile(tokenFile, sourceFiles);
+        tokenFile.close();
 
         std::ofstream parserFile;
         parserFile.open(projectName + ".pse");
         if (!parserFile.is_open())
             throw std::runtime_error("Could not open file " + projectName + ".pse");
-
         generateParserFile(parserFile, tokenizedLines, useLittleEndian, rawParse);
+        parserFile.close();
 
         Parser parser(useLittleEndian);
         MemLayout memLayout = parser.parse(tokenizedLines, rawParse);
         const std::string preprocessed = stringifyLayout(memLayout, parser.getLabels());
         writeFile(projectName + ".i", preprocessed);
 
-        tokenFile.close();
-        parserFile.close();
+        if (noSim)
+            return 0;
+
+        std::ofstream textFile;
+        textFile.open(projectName + ".txt");
+        if (!textFile.is_open())
+            throw std::runtime_error("Could not open file " + projectName + ".txt");
+
+        std::ifstream inputFile;
+        std::istream* istream = &std::cin;
+        if (std::filesystem::exists(projectName + ".in.txt")) {
+            inputFile.open(projectName + ".in.txt");
+            if (!inputFile.is_open())
+                throw std::runtime_error("Could not open file " + projectName + ".in.txt");
+            istream = &inputFile;
+        }
+
+        StreamHandle streamHandle(*istream, textFile);
+
+        const IOMode ioMode = useMMIO ? IOMode::MMIO : IOMode::SYSCALL;
+        Simulator simulator(ioMode, streamHandle, useLittleEndian);
+        simulator.simulate(memLayout);
+        textFile.close();
+
+        if (inputFile.is_open())
+            inputFile.close();
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;

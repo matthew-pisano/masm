@@ -371,9 +371,10 @@ TEST_CASE("Test break Instruction") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
-        simulator.simulate(actualLayout);
-        const std::string expectedOutput = "\nBreak instruction executed (code 0)";
+        int exitCode = simulator.simulate(actualLayout);
+        const std::string expectedOutput = "\nBreak instruction executed";
         REQUIRE(expectedOutput == oss.str());
+        REQUIRE(exitCode == 0);
     }
 
     std::string inputString = "c\nq\n";
@@ -387,9 +388,9 @@ TEST_CASE("Test break Instruction") {
     SECTION("Test Debugger") {
         interactiveSimulator.simulate(actualLayout);
 
-        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 0)\n"
+        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed\n"
                                            "There is no program running.  Use 'run' to "
-                                           "restart\n\n(mdb) \nExiting debugger (code 0)";
+                                           "restart\n\n(mdb) \n";
         REQUIRE(expectedOutput == oss.str());
     }
 }
@@ -417,9 +418,10 @@ TEST_CASE("Test break Instruction with Code") {
     DebugSimulator simulator(IOMode::SYSCALL, streamHandle);
 
     SECTION("Test Execute") {
-        simulator.simulate(actualLayout);
-        const std::string expectedOutput = "\nBreak instruction executed (code 42)";
+        int exitCode = simulator.simulate(actualLayout);
+        const std::string expectedOutput = "\nBreak instruction executed";
         REQUIRE(expectedOutput == oss.str());
+        REQUIRE(exitCode == 42);
     }
 
     std::string inputString = "c\nq\n";
@@ -432,9 +434,9 @@ TEST_CASE("Test break Instruction with Code") {
     interactiveSimulator.setInteractive(true);
     SECTION("Test Debugger") {
         interactiveSimulator.simulate(actualLayout);
-        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed (code 42)\n"
+        const std::string expectedOutput = "\n(mdb) \nBreak instruction executed\n"
                                            "There is no program running.  Use 'run' to "
-                                           "restart\n\n(mdb) \nExiting debugger (code 0)";
+                                           "restart\n\n(mdb) \n";
         REQUIRE(expectedOutput == oss.str());
     }
 }

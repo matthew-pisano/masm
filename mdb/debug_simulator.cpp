@@ -354,7 +354,7 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
                 return true;
             }
             case DebugCommand::EXIT: {
-                throw DebuggerExit("Exiting debugger", 0);
+                throw DebuggerExit();
             }
         }
     } catch ([[maybe_unused]] const DebuggerExit& e) {

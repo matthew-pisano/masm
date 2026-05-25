@@ -36,8 +36,9 @@ int Simulator::simulate(const MemLayout& layout) {
         try {
             step();
         } catch (ExecExit& e) {
-            streamHandle.putStr("\n");
-            streamHandle.putStr(e.what());
+            const std::string what = e.what();
+            if (!what.empty())
+                streamHandle.putStr(what);
             streamHandle.putStr("\n");
             return e.code();
         }
@@ -128,14 +129,16 @@ void Simulator::step() {
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
         const uint32_t displayEnabled =
                 state.cp0[Coproc0Register::STATUS] & static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
-        if (readMMIO() && interpEnabled && keyboardEnabled)
-            cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
+        // Read and right unconditionally to allow for polling without interrupts
         if (writeMMIO() && interpEnabled && displayEnabled)
             cause |= static_cast<uint32_t>(INTERP_CODE::DISPLAY_INTERP);
+        else if (readMMIO() && interpEnabled && keyboardEnabled)
+            cause |= static_cast<uint32_t>(INTERP_CODE::KEYBOARD_INTERP);
     }
 
     if (!state.memory.isValid(pc))
-        throw ExecExit("Execution terminated (fell off end of program)", -1);
+        throw ExecExit("Execution terminated (Address boundary error)", 139);
+
     const SourceLocator pcSrc = state.getDebugInfo(pc).source;
     if (pc >= TEXT_SEC_END)
         throw MasmRuntimeError("Out of bounds read access", pc, pcSrc.filename, pcSrc.lineno);
