@@ -18,8 +18,8 @@ void Simulator::initProgram(const MemLayout& layout) {
     // Initialize the stack registers
     state.registers[Register::FP] = static_cast<int32_t>(memSectionOffset(MemSection::STACK));
     state.registers[Register::SP] = static_cast<int32_t>(memSectionOffset(MemSection::STACK));
-    // Initialize the global pointer to the start of the global section
-    state.registers[Register::GP] = static_cast<int32_t>(memSectionOffset(MemSection::GLOBAL));
+    // Initialize the global pointer to the middle of the global section
+    state.registers[Register::GP] = static_cast<int32_t>(memSectionOffset(MemSection::GLOBAL)) + 0x00008000;
     // Set MMIO output ready bit to 1
     state.memory._sysWordTo(memSectionOffset(MemSection::MMIO) + 8, 1);
     // Enable interrupts
