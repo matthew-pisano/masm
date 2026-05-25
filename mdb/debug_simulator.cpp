@@ -140,7 +140,7 @@ int DebugSimulator::simulate(const MemLayout& layout) {
                 interactiveStep(layout);
 
             if (!isRunning) {
-                streamHandle.putStr("There is no program running.  Use 'run' to restart");
+                streamHandle.putStr("\nThere is no program running.  Use 'run' to restart");
                 // Set system breakpoint to PC
                 breakpoints[state.registers[Register::PC]] = 0;
             } else
