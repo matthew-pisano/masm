@@ -390,7 +390,7 @@ TEST_CASE("Test break Instruction") {
 
         const std::string expectedOutput = "\n(mdb) \nBreak instruction executed\n"
                                            "There is no program running.  Use 'run' to "
-                                           "restart\n\n(mdb) \nExiting debugger";
+                                           "restart\n\n(mdb) \n";
         REQUIRE(expectedOutput == oss.str());
     }
 }
@@ -436,7 +436,7 @@ TEST_CASE("Test break Instruction with Code") {
         interactiveSimulator.simulate(actualLayout);
         const std::string expectedOutput = "\n(mdb) \nBreak instruction executed\n"
                                            "There is no program running.  Use 'run' to "
-                                           "restart\n\n(mdb) \nExiting debugger";
+                                           "restart\n\n(mdb) \n";
         REQUIRE(expectedOutput == oss.str());
     }
 }
