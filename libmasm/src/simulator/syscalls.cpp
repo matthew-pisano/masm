@@ -193,6 +193,11 @@ void SystemHandle::readString(State& state, StreamHandle& streamHandle) {
 void SystemHandle::heapAlloc(State& state) {
     const int32_t size = state.registers[Register::A0];
     const int32_t ptr = static_cast<int32_t>(state.heapAllocator.allocate(size));
+
+    // Throw if the heap has overflowed past the stack
+    if (static_cast<int32_t>(state.heapAllocator.top()) > state.registers[Register::SP])
+        throw ExecExcept("Out of Memory", EXCEPT_CODE::SYSCALL_EXCEPTION);
+
     state.registers[Register::V0] = ptr;
 }
 

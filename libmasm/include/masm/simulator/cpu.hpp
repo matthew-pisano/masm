@@ -53,7 +53,7 @@ enum class Register {
      */
     K1,
     /**
-     * Stores a pointer to the global area of mmeory
+     * Stores a pointer to the global area of memory
      */
     GP,
     /**

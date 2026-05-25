@@ -163,7 +163,7 @@ uint32_t memSectionOffset(const MemSection section) {
         case MemSection::HEAP:
             return 0x10040000; // Heap grows upwards, so this is the start of the heap
         case MemSection::GLOBAL:
-            return 0x10008000;
+            return 0x10000000;
         case MemSection::STACK:
             return 0x7fffeffc; // Stack grows downwards, so this is the top of the stack
         case MemSection::TEXT:

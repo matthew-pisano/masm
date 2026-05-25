@@ -138,6 +138,11 @@ class DebugSimulator final : public Simulator {
     void listLabels();
 
     /**
+     * Lists the base addresses of program memory segments
+     */
+    void listMemorySegments();
+
+    /**
      * Lists all registers in the simulator, including general-purpose and special-purpose
      */
     void listRegisters();

@@ -8,8 +8,6 @@
 
 #include <masm/assembler/memory.hpp>
 
-const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
-constexpr uint32_t HEAP_SIZE = 0xfd00000; // 253 MiB
 
 /**
  * Class representing a simple heap allocator
@@ -26,6 +24,11 @@ class HeapAllocator {
     std::vector<uint32_t> blockSizes;
 
     /**
+     * A pointer to the current top of heap memory
+     */
+    uint32_t heapPointer = memSectionOffset(MemSection::HEAP);
+
+    /**
      * Finds the first unallocated space in the heap that can accommodate a block of the given size
      * @param size The size of the block to allocate
      * @return The first unallocated area that can fit the requested block
@@ -40,6 +43,16 @@ public:
      * @throw runtime_error if the allocation fails
      */
     uint32_t allocate(uint32_t size);
+
+    /**
+     * Gets the total number of bytes allocated on the heap
+     */
+    [[nodiscard]] size_t allocated() const;
+
+    /**
+     * Gets the pointer to the top of heap memory
+     */
+    [[nodiscard]] uint32_t top() const;
 };
 
 #endif // HEAP_H

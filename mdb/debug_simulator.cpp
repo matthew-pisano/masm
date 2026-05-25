@@ -31,6 +31,7 @@ const std::string debuggerHelp =
         "help, h - Show this help message\n"
         "info, i breakpoints - List all breakpoints\n"
         "info, i labels - List all labels\n"
+        "info, i memory - List the base addresses of program memory segments\n"
         "info, i registers - List all registers and their values\n"
         "info, i cp0 - List all Co-Processor 0 registers and their values\n"
         "info, i cp1 - List all Co-Processor 1 registers and their values\n"
@@ -324,6 +325,8 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
                     listBreakpoints();
                 else if (args[0] == "labels")
                     listLabels();
+                else if (args[0] == "memory")
+                    listMemorySegments();
                 else if (args[0] == "registers")
                     listRegisters();
                 else if (args[0] == "cp0")
@@ -540,6 +543,21 @@ void DebugSimulator::listLabels() {
 
     if (!foundLabel)
         streamHandle.putStr("No labels found in the program");
+}
+
+void DebugSimulator::listMemorySegments() {
+    streamHandle.putStr(std::format("text   0x{:08x}\n", memSectionOffset(MemSection::TEXT)));
+    streamHandle.putStr(std::format("global 0x{:08x} ($gp: 0x{:08x})\n", memSectionOffset(MemSection::GLOBAL),
+                                    state.registers[Register::GP]));
+    streamHandle.putStr(std::format("data   0x{:08x}\n", memSectionOffset(MemSection::DATA)));
+
+    streamHandle.putStr(std::format("heap   0x{:08x} (ptr: 0x{:08x}, alloc: {}B)\n", memSectionOffset(MemSection::HEAP),
+                                    state.heapAllocator.top(), state.heapAllocator.allocated()));
+    streamHandle.putStr(std::format("stack  0x{:08x} ($sp: 0x{:08x})\n", memSectionOffset(MemSection::STACK),
+                                    state.registers[Register::SP]));
+    streamHandle.putStr(std::format("ktext  0x{:08x}\n", memSectionOffset(MemSection::KTEXT)));
+    streamHandle.putStr(std::format("kdata  0x{:08x}\n", memSectionOffset(MemSection::KDATA)));
+    streamHandle.putStr(std::format("MMIO   0x{:08x}\n", memSectionOffset(MemSection::MMIO)));
 }
 
 void DebugSimulator::listRegisters() {

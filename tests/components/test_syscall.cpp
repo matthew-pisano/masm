@@ -218,22 +218,30 @@ TEST_CASE("Test Read String Syscall") {
 TEST_CASE("Test Heap Allocation Syscall") {
     SystemHandle sysHandle;
     State state;
+    const uint32_t heapBaseAddr = memSectionOffset(MemSection::HEAP);
+    state.registers[Register::SP] = static_cast<int32_t>(memSectionOffset(MemSection::STACK));
 
     SECTION("Test Heap Allocation with Valid Size") {
         state.registers[Register::A0] = 100;
         sysHandle.heapAlloc(state);
         uint32_t address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE);
+        REQUIRE(address == heapBaseAddr);
+        REQUIRE(state.heapAllocator.allocated() == 100);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 100);
 
         state.registers[Register::A0] = 50;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE + 100);
+        REQUIRE(address == heapBaseAddr + 100);
+        REQUIRE(state.heapAllocator.allocated() == 150);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 150);
 
         state.registers[Register::A0] = 200;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE + 150);
+        REQUIRE(address == heapBaseAddr + 150);
+        REQUIRE(state.heapAllocator.allocated() == 350);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 350);
     }
 
     SECTION("Test Heap Allocation with Zero Size") {
