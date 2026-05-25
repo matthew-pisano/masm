@@ -284,7 +284,7 @@ TEST_CASE("Test Exit Value Syscall") {
     constexpr int32_t exitCode = 42;
     State state;
     state.registers[Register::A0] = exitCode;
-    
+
     REQUIRE_THROWS_MATCHES(sysHandle.exitVal(state), ExecExit,
                            Catch::Matchers::Predicate<ExecExit>(
                                    [](const ExecExit& e) { return e.code() == 42 && std::string(e.what()).empty(); },
