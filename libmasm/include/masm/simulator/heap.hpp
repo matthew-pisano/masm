@@ -8,8 +8,6 @@
 
 #include <masm/assembler/memory.hpp>
 
-const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
-constexpr uint32_t HEAP_SIZE = 0xfd00000; // 253 MiB
 
 /**
  * Class representing a simple heap allocator

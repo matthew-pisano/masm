@@ -218,22 +218,23 @@ TEST_CASE("Test Read String Syscall") {
 TEST_CASE("Test Heap Allocation Syscall") {
     SystemHandle sysHandle;
     State state;
+    const uint32_t heapBaseAddr = memSectionOffset(MemSection::HEAP);
 
     SECTION("Test Heap Allocation with Valid Size") {
         state.registers[Register::A0] = 100;
         sysHandle.heapAlloc(state);
         uint32_t address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE);
+        REQUIRE(address == heapBaseAddr);
 
         state.registers[Register::A0] = 50;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE + 100);
+        REQUIRE(address == heapBaseAddr + 100);
 
         state.registers[Register::A0] = 200;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == HEAP_BASE + 150);
+        REQUIRE(address == heapBaseAddr + 150);
     }
 
     SECTION("Test Heap Allocation with Zero Size") {

@@ -7,6 +7,10 @@
 #include <masm/exceptions.hpp>
 
 
+const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
+constexpr uint32_t HEAP_SIZE = 0xfd00000; // 253 MiB
+
+
 uint32_t HeapAllocator::nextFree(const uint32_t size) const {
     uint32_t ptr = HEAP_BASE;
 
@@ -37,8 +41,8 @@ uint32_t HeapAllocator::allocate(const uint32_t size) {
     // Insert new block sequentially before the block with the next greatest address
     for (size_t i = 0; i < blockAddresses.size(); i++) {
         if (blockAddresses[i] > address) {
-            blockAddresses.insert(blockAddresses.begin() + i, address);
-            blockSizes.insert(blockSizes.begin() + i, size);
+            blockAddresses.insert(blockAddresses.begin() + static_cast<int32_t>(i), address);
+            blockSizes.insert(blockSizes.begin() + static_cast<int32_t>(i), size);
             return address;
         }
     }
