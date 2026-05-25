@@ -23,6 +23,7 @@ enum class DebugCommand {
     INFO,
     LIST,
     NEXT,
+    NOP,
     PRINT,
     RUN,
     STEP

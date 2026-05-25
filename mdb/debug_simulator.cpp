@@ -12,7 +12,7 @@
 /**
  * The prompt string for the debugger, displayed before each command input
  */
-const std::string prompt = "\n(mdb) ";
+const std::string prompt = "\b\n(mdb) ";
 
 /**
  * A help message for the debugger, listing available commands and their descriptions
@@ -23,7 +23,7 @@ const std::string debuggerHelp =
         "continue, cont, c - Continue execution until the next breakpoint or program termination\n"
         "delete, d - Delete all breakpoints\n"
         "delete, d <num> - Delete the breakpoint with the specified number\n"
-        "examine, x <ref> [words] - Examine memory at the given reference.  The number of words to "
+        "examine, x <ref> [words] - Examine memory at the given reference or address.  The number of words to "
         "display can also be specified; one by default\n"
         "exit, quit, q - Exit the debugger\n"
         "finish - Execute until the end of the current procedure (the location stored in $ra)\n"
@@ -41,7 +41,7 @@ const std::string debuggerHelp =
         "run, r - Run the program from the beginning, pausing at the first instruction\n"
         "step, s - Execute the next instruction\n"
         "\nNote: a \"location reference\" means one of a line number, a label, or a filename:line "
-        "or filename:label pair\n";
+        "or filename:label pair";
 
 
 /**
@@ -140,23 +140,23 @@ int DebugSimulator::simulate(const MemLayout& layout) {
                 interactiveStep(layout);
 
             if (!isRunning) {
-                streamHandle.putStr("\nThere is no program running.  Use 'run' to restart\n");
+                streamHandle.putStr("\nThere is no program running.  Use 'run' to restart");
                 // Set system breakpoint to PC
                 breakpoints[state.registers[Register::PC]] = 0;
             } else
                 step();
         } catch (DebuggerExit& e) {
-            streamHandle.putStr(std::format("\n{}", e.what()));
             return e.code();
         } catch (MasmRuntimeError& e) {
             if (!isInteractive)
                 throw;
-            streamHandle.putStr(std::format("\n{}", e.what()));
+
+            streamHandle.putStr(std::format("{}", e.what()));
             isRunning = false;
             // Decrement PC to offending instruction
             state.registers[Register::PC] -= 4;
         } catch (ExecExit& e) {
-            streamHandle.putStr(std::format("\n{}", e.what()));
+            streamHandle.putStr(std::format("{}", e.what()));
             isRunning = false;
             if (!isInteractive)
                 return e.code();
@@ -169,7 +169,7 @@ int DebugSimulator::simulate(const MemLayout& layout) {
 
 std::tuple<DebugCommand, std::vector<std::string>> DebugSimulator::parseCommand(const std::string& cmdStr) {
     if (cmdStr.empty())
-        throw std::invalid_argument("Command cannot be empty");
+        return {DebugCommand::NOP, {}};
 
     std::vector<std::string> args;
     std::istringstream iss(cmdStr);
@@ -313,7 +313,7 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
                 else if (state.cp0[Coproc0Register::EPC] != 0)
                     breakpoints[state.cp0[Coproc0Register::EPC]] = 0;
                 else {
-                    streamHandle.putStr("No return address found to finish execution\n");
+                    streamHandle.putStr("No return address found to finish execution");
                     return true;
                 }
                 return false;
@@ -331,7 +331,7 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
                 else if (args[0] == "cp1")
                     listCP1Registers();
                 else
-                    streamHandle.putStr("Unknown info command: " + args[0] + "\n");
+                    streamHandle.putStr("Unknown info command: " + args[0]);
                 return true;
             }
             case DebugCommand::EXAMINE: {
@@ -353,6 +353,9 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
                     printRef(args[0]);
                 return true;
             }
+            case DebugCommand::NOP: {
+                return true; // No-op, return the prompt to the user
+            }
             case DebugCommand::EXIT: {
                 throw DebuggerExit();
             }
@@ -360,7 +363,7 @@ bool DebugSimulator::execCommand(const std::string& cmdStr, const MemLayout& lay
     } catch ([[maybe_unused]] const DebuggerExit& e) {
         throw;
     } catch (const std::exception& e) {
-        streamHandle.putStr(std::format("\n{}", e.what()));
+        streamHandle.putStr(std::format("{}", e.what()));
         return true; // Continue prompting for commands
     }
     return false;
@@ -382,7 +385,9 @@ void DebugSimulator::listLines(const std::string& arg) {
     const uint32_t pc = state.registers[Register::PC];
     const uint32_t addr = arg.empty() ? pc : addrFromStr(arg);
 
-    for (uint32_t i = addr - 40; i < addr + 40; i += 4) {
+    constexpr uint32_t addrStep = 4;
+    constexpr uint32_t addrRange = 10;
+    for (uint32_t i = addr - addrStep * addrRange; i < addr + addrStep * addrRange; i += addrStep) {
         if (!state.memory.isValid(i))
             continue; // Skip invalid addresses
 
@@ -412,7 +417,7 @@ size_t DebugSimulator::locateLabelInFile(const std::string& label, const std::st
         return unmangleDebugLabel(pair.second.label) == label && pair.second.source.filename == filename;
     });
     if (it == state.debugInfo.end())
-        throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename + "\n");
+        throw std::invalid_argument("Cannot find label: '" + label + "' in file " + filename);
     // Get the line for the label
     return it->second.source.lineno;
 }
@@ -457,7 +462,7 @@ uint32_t DebugSimulator::addrFromStr(const std::string& ref) {
         return src.filename == refFile && src.lineno == refLine;
     });
     if (it == state.debugInfo.end())
-        throw std::invalid_argument("Cannot find memory at " + refFile + ":" + std::to_string(refLine) + "\n");
+        throw std::invalid_argument("Cannot find memory at " + refFile + ":" + std::to_string(refLine));
     return it->first;
 }
 
@@ -467,9 +472,9 @@ void DebugSimulator::setBreakpoint(const std::string& arg) {
         // Set breakpoint at the found address
         breakpoints[addr] = nextBreakpoint;
         nextBreakpoint++;
-        streamHandle.putStr(std::format("Breakpoint {} set at 0x{:08x}\n", breakpoints[addr], addr));
+        streamHandle.putStr(std::format("Breakpoint {} set at 0x{:08x}", breakpoints[addr], addr));
     } else
-        streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}\n", breakpoints[addr], addr));
+        streamHandle.putStr(std::format("Breakpoint {} already exists at 0x{:08x}", breakpoints[addr], addr));
 }
 
 void DebugSimulator::deleteBreakpoint(const std::string& arg) {
@@ -487,7 +492,7 @@ void DebugSimulator::deleteBreakpoint(const std::string& arg) {
 
     size_t breakpointId = std::stoul(arg);
     if (breakpointId == 0) {
-        streamHandle.putStr("No breakpoint found with ID 0\n");
+        streamHandle.putStr("No breakpoint found with ID 0");
         return;
     }
     // Find and delete the breakpoint with the specified ID
@@ -496,7 +501,7 @@ void DebugSimulator::deleteBreakpoint(const std::string& arg) {
     if (it != breakpoints.end())
         breakpoints.erase(it);
     else
-        streamHandle.putStr("No breakpoint found with ID " + std::to_string(breakpointId) + "\n");
+        streamHandle.putStr("No breakpoint found with ID " + std::to_string(breakpointId));
 }
 
 
@@ -511,7 +516,7 @@ void DebugSimulator::examineAddress(const std::string& arg, const size_t numWord
 
 void DebugSimulator::listBreakpoints() {
     if (breakpoints.empty()) {
-        streamHandle.putStr("No breakpoints set.\n");
+        streamHandle.putStr("No breakpoints set");
         return;
     }
 
@@ -534,56 +539,49 @@ void DebugSimulator::listLabels() {
         }
 
     if (!foundLabel)
-        streamHandle.putStr("No labels found in the program.\n");
+        streamHandle.putStr("No labels found in the program");
 }
 
 void DebugSimulator::listRegisters() {
-    for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i) {
-        const int32_t value = state.registers[i];
-        streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", RegisterFile::nameFromIndex(i), value));
-    }
+    for (size_t i = 0; i < NUM_CPU_REGISTERS; ++i)
+        printRegister(RegisterFile::nameFromIndex(i));
 }
 
 void DebugSimulator::listCP0Registers() {
-    const int32_t vaddrValue = state.cp0[Coproc0Register::VADDR];
-    streamHandle.putStr(std::format("$8  : 0x{:08x}\n", vaddrValue));
-    const int32_t statusValue = state.cp0[Coproc0Register::STATUS];
-    streamHandle.putStr(std::format("$12 : 0x{:08x}\n", statusValue));
-    const int32_t causeValue = state.cp0[Coproc0Register::CAUSE];
-    streamHandle.putStr(std::format("$13 : 0x{:08x}\n", causeValue));
-    const int32_t epcValue = state.cp0[Coproc0Register::EPC];
-    streamHandle.putStr(std::format("$14 : 0x{:08x}\n", epcValue));
+    printRegister("8");
+    printRegister("12");
+    printRegister("13");
+    printRegister("14");
 }
 
 void DebugSimulator::listCP1Registers() {
-    for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i) {
-        const int32_t value = state.cp1[i];
-        const float floatValue = state.cp1.getFloat(i);
-        if (i % 2 == 0) {
-            const double doubleValue = state.cp1.getDouble(i);
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f}, {:.6f})\n",
-                                            Coproc1RegisterFile::nameFromIndex(i), value, floatValue, doubleValue));
-        } else
-            streamHandle.putStr(std::format("${:<4}: 0x{:08x} ({:.6f})\n", Coproc1RegisterFile::nameFromIndex(i), value,
-                                            floatValue));
-    }
+    for (size_t i = 0; i < NUM_CP1_REGISTERS; ++i)
+        printRegister(Coproc1RegisterFile::nameFromIndex(i));
 }
 
 void DebugSimulator::printRegister(const std::string& arg) {
-    if (arg.size() > 1 && arg[0] == 'f') {
+    if (arg.size() > 1 && arg[0] == 'f' && arg != "fp") {
         // Co-Processor 1 register
         try {
             const size_t index = Coproc1RegisterFile::indexFromName(arg);
-            int32_t value = state.cp1[index];
-            streamHandle.putStr(std::format("$f{}: 0x{:08x}\n", index, value));
+            uint32_t value = state.cp1[index];
+            const float floatValue = state.cp1.getFloat(index);
+            if (index % 2 == 0) {
+                const double doubleValue = state.cp1.getDouble(index);
+                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f} {:.12f}\n",
+                                                Coproc1RegisterFile::nameFromIndex(index), value, floatValue,
+                                                doubleValue));
+            } else
+                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f}\n", Coproc1RegisterFile::nameFromIndex(index),
+                                                value, floatValue));
         } catch (const std::exception&) {
-            streamHandle.putStr("Invalid Co-Processor 1 register: " + arg + "\n");
+            streamHandle.putStr("Invalid Co-Processor 1 register: " + arg);
         }
     } else if (arg == "8" || arg == "12" || arg == "13" || arg == "14") {
         // Special Co-Processor 0 registers
         const size_t index = std::stoi(arg);
-        int32_t value = state.cp0[index];
-        streamHandle.putStr(std::format("${}: 0x{:08x}\n", index, value));
+        uint32_t value = state.cp0[index];
+        streamHandle.putStr(std::format("${:<5}: 0x{:08x}\n", index, value));
     } else {
         // General-purpose register
         try {
@@ -597,10 +595,10 @@ void DebugSimulator::printRegister(const std::string& arg) {
             else
                 index = RegisterFile::indexFromName(arg);
 
-            int32_t value = state.registers[index];
-            streamHandle.putStr(std::format("${} -> 0x{:08x}\n", arg, value));
+            uint32_t value = state.registers[index];
+            streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:010} ({})\n", arg, value, value, wordAsString(value)));
         } catch (const std::exception&) {
-            streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)\n");
+            streamHandle.putStr("Invalid register: " + arg + " (CPU registers expect an alias)");
         }
     }
 }
