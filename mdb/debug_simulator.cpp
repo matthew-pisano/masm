@@ -568,7 +568,7 @@ void DebugSimulator::printRegister(const std::string& arg) {
             const float floatValue = state.cp1.getFloat(index);
             if (index % 2 == 0) {
                 const double doubleValue = state.cp1.getDouble(index);
-                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f}, {:.12f}\n",
+                streamHandle.putStr(std::format("${:<5}: 0x{:08x} {:.6f} {:.12f}\n",
                                                 Coproc1RegisterFile::nameFromIndex(index), value, floatValue,
                                                 doubleValue));
             } else
