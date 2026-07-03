@@ -74,3 +74,26 @@ TEST_CASE("Test Allocate Deallocate") {
     REQUIRE(allocator.allocated() == 0);
     REQUIRE(allocator.top() == HEAP_BASE_ADDR);
 }
+
+
+TEST_CASE("Test Two Allocate Deallocate") {
+    HeapAllocator allocator;
+    (void) allocator.allocate(HEAP_BLOCK_SIZE);
+    const uint32_t addr2 = allocator.allocate(HEAP_BLOCK_SIZE);
+    allocator.deallocate(addr2);
+
+    REQUIRE(allocator.allocated() == HEAP_BLOCK_SIZE);
+    REQUIRE(allocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE);
+}
+
+TEST_CASE("Test Allocate Replace") {
+    HeapAllocator allocator;
+    const uint32_t addr1 = allocator.allocate(HEAP_BLOCK_SIZE);
+    (void) allocator.allocate(HEAP_BLOCK_SIZE);
+    allocator.deallocate(addr1);
+    const uint32_t addr2 = allocator.allocate(HEAP_BLOCK_SIZE);
+
+    REQUIRE(addr2 == HEAP_BASE_ADDR);
+    REQUIRE(allocator.allocated() == HEAP_BLOCK_SIZE * 2);
+    REQUIRE(allocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 2);
+}
