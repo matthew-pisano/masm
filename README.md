@@ -129,6 +129,7 @@ For more detailed usage examples, see the [python/examples](python/examples) dir
 > NOTE: Python bindings for macOS have limited support and may not work out-of-the-box
 
 - Python 3.7 or higher
+- pybind11
 
 ### Build Instructions
 
