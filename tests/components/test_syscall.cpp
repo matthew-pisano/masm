@@ -233,9 +233,23 @@ TEST_CASE("Test Heap Allocation Syscall") {
         REQUIRE(state.heapAllocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 3);
     }
 
+    SECTION("Test Heap Free") {
+        state.registers[Register::A0] = 100;
+        SystemHandle::heapAlloc(state);
+        uint32_t address = state.registers[Register::V0];
+        REQUIRE(address == HEAP_BASE_ADDR);
+        REQUIRE(state.heapAllocator.allocated() == HEAP_BLOCK_SIZE);
+        REQUIRE(state.heapAllocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE);
+
+        // Free last allocated block
+        state.registers[Register::A0] = address;
+        SystemHandle::heapFree(state);
+        REQUIRE(state.heapAllocator.allocated() == 0);
+        REQUIRE(state.heapAllocator.top() == HEAP_BASE_ADDR);
+    }
+
     SECTION("Test Heap Allocation with Zero Size") {
         state.registers[Register::A0] = 0;
-
         REQUIRE_THROWS_MATCHES(SystemHandle::heapAlloc(state), ExecExcept,
                                Catch::Matchers::Message("Cannot allocate zero bytes"));
     }
