@@ -9,6 +9,13 @@
 #include <masm/simulator/heap.hpp>
 
 
+TEST_CASE("Test Init Allocator") {
+    const HeapAllocator allocator;
+    REQUIRE(allocator.allocated() == 0);
+    REQUIRE(allocator.top() == HEAP_BASE_ADDR);
+}
+
+
 TEST_CASE("Test Zero Allocation") {
     HeapAllocator allocator;
     REQUIRE_THROWS_MATCHES(allocator.allocate(0), std::runtime_error,
@@ -31,4 +38,39 @@ TEST_CASE("Test Over Block Allocation") {
     REQUIRE(addr == HEAP_BASE_ADDR);
     REQUIRE(allocator.allocated() == HEAP_BLOCK_SIZE * 2);
     REQUIRE(allocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 2);
+}
+
+
+TEST_CASE("Test Two Allocations") {
+    HeapAllocator allocator;
+    const uint32_t addr1 = allocator.allocate(HEAP_BLOCK_SIZE + 1);
+    const uint32_t addr2 = allocator.allocate(1);
+
+    REQUIRE(addr1 == HEAP_BASE_ADDR);
+    REQUIRE(addr2 == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 2);
+    REQUIRE(allocator.allocated() == HEAP_BLOCK_SIZE * 3);
+    REQUIRE(allocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 3);
+}
+
+
+TEST_CASE("Test Bad Deallocation") {
+    HeapAllocator allocator;
+    // Deallocate with nothing allocated
+    REQUIRE_THROWS_MATCHES(allocator.deallocate(0), std::runtime_error,
+                           Catch::Matchers::Message("Invalid free of address: 0x0"));
+
+    // Deallocate with one allocation
+    (void) allocator.allocate(1);
+    REQUIRE_THROWS_MATCHES(allocator.deallocate(0), std::runtime_error,
+                           Catch::Matchers::Message("Invalid free of address: 0x0"));
+}
+
+
+TEST_CASE("Test Allocate Deallocate") {
+    HeapAllocator allocator;
+    const uint32_t addr = allocator.allocate(HEAP_BLOCK_SIZE);
+    allocator.deallocate(addr);
+
+    REQUIRE(allocator.allocated() == 0);
+    REQUIRE(allocator.top() == HEAP_BASE_ADDR);
 }
