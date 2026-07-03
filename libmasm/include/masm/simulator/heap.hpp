@@ -9,6 +9,13 @@
 #include <masm/assembler/memory.hpp>
 
 
+/// The minimum allocatable size
+constexpr uint32_t HEAP_BLOCK_SIZE = 256;
+
+/// The base address for the heap
+const uint32_t HEAP_BASE_ADDR = memSectionOffset(MemSection::HEAP);
+
+
 /**
  * Class representing a simple heap allocator
  */

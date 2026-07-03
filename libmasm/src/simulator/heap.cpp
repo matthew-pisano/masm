@@ -8,13 +8,9 @@
 #include <numeric>
 #include <sstream>
 
-constexpr uint32_t BLOCK_SIZE = 256;
-
-const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
-
 
 uint32_t HeapAllocator::nextFree(const uint32_t size) const {
-    uint32_t ptr = HEAP_BASE;
+    uint32_t ptr = HEAP_BASE_ADDR;
 
     // Walk up through all allocated blocks to find a large enough free gap
     // If no gap exists, the heap grows up towards the stack
@@ -39,7 +35,7 @@ uint32_t HeapAllocator::allocate(uint32_t size) {
         throw ExecExcept("Cannot allocate zero bytes", EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     // Round up to the nearest block size
-    size = size / BLOCK_SIZE + BLOCK_SIZE;
+    size = (size / HEAP_BLOCK_SIZE) * HEAP_BLOCK_SIZE + HEAP_BLOCK_SIZE;
 
     // Get the next available base address
     const uint32_t address = nextFree(size);

@@ -24,6 +24,7 @@ add_executable(masm-tests
         instructions/test_pseudo_instructions.cpp
         utils/test_conversion.cpp
         utils/test_fileio.cpp
+        components/test_allocator.cpp
 )
 target_link_libraries(masm-tests PRIVATE libmasm Catch2::Catch2WithMain)
 target_include_directories(masm-tests SYSTEM PRIVATE
