@@ -159,27 +159,3 @@ Similar to other MIPS simulators like [MARS](https://dpetersanderson.github.io/)
 simulators.
 
 This program uses a 32 element array composed of 32-bit integers to represent its register file and an unordered map that can accommodate up to 4GiB of memory. The CPU is implemented within the simulator, which keeps the current state of the register file and memory to load and operate on instructions.
-
-## Implemented Features
-
-- [x] MIPS ISA Instructions
-    - [x] MIPS Pseudo Instructions
-- [X] Syscalls
-    - [X] Keyboard/Display Syscalls
-    - [X] MARS Extended Syscalls
-    - [X] Heap Allocation Syscalls
-- [X] Basic Memory Directives (`.data`, `.text`)
-- [X] Allocation directives (`.word`, `.space`, etc.)
-- [X] Kernel Memory Directives (`.ktext`, `.kdata`)
-    - [ ] Custom Addresses for Memory Sections
-- [X] Macro Directives
-    - [X] Include Directive
-    - [X] Macros/Eqv Directives
-- [X] Syntax and Runtime Errors
-- [X] Keyboard/Display MMIO
-- [X] Interrupts
-    - [X] MMIO Interrupts
-    - [X] Exceptions
-- [X] Floating Point Coprocessor
-    - [X] Floating Point Syscalls
-- [X] Interactive Debugger
