@@ -1,5 +1,7 @@
 # masm - A C++ MIPS Assembler and Simulator
 
+*masm* enables the development of software for MIPS hardware through providing a featureful assembler and hardware simulator. This project builds an assembler, a simulator, and a debugger. For development, a C++ library and Python bindings are provided.
+
 *masm* takes in one or more assembly source code files as input and outputs the standard output stream of the program. Programs are processed in three steps:
 
 * Tokenization - where the source code is split into groups of valid program tokens
@@ -12,7 +14,7 @@ While this project is designed to be primarily be built using Linux, it can gene
 
 For the main executable, simply navigate to the [latest release](https://github.com/matthew-pisano/masm/releases/latest) and download the executable for your operating system.  *masm* requires no external dependencies or libraries, so it can be installed and run as a standalone executable.
 
-For the accompanying *Python* package, download the wheel file included in the release and run the following to install it to your current environment:
+For the accompanying Python package, download the wheel file included in the release and run the following to install it to your current environment:
 
 ```bash
 pip install pymasm-x.x.x-py3-none-any.whl 
@@ -22,7 +24,7 @@ Remember to replace the `x.x.x` portion with the release version that you have s
 
 ## Usage
 
-*masm* takes in a valid *MIPS* program and executes the instructions within on a virtual CPU that interacts with virtual registers and memory.
+*masm* takes in a valid MIPS program and executes the instructions within on a virtual CPU that interacts with virtual registers and memory.
 
 ```bash
 libmasm [options...] module1.asm module2.asm ...
@@ -54,7 +56,7 @@ main:
 
 ### Interrupts
 
-*masm* handles interrupts differently from other *MIPS* simulators. Interrupts, by default, are disabled. Keyboard interrupts can be enabled by setting the interrupt enable bit (bit zero) of the coprocessor zero *status* ($12) register to 1. Once this is set, both keyboard and display interrupts will be enabled. Each interrupt can be selectively turned off by setting bit 8 (keyboard) or bit 9 (display) to 0. When an interrupt event is detected, control of the program will be transferred at the
+*masm* handles interrupts differently from other MIPS simulators. Interrupts, by default, are disabled. Keyboard interrupts can be enabled by setting the interrupt enable bit (bit zero) of the coprocessor zero *status* ($12) register to 1. Once this is set, both keyboard and display interrupts will be enabled. Each interrupt can be selectively turned off by setting bit 8 (keyboard) or bit 9 (display) to 0. When an interrupt event is detected, control of the program will be transferred at the
 interrupt
 handler at `0x80000000`. If no such handler exists, an exception will be thrown and the program will halt.
 
@@ -79,11 +81,11 @@ Exceptions are handled similarly from interrupts. When a runtime exception is tr
 
 ### Little Endian Compatibility
 
-By default, *masm* stores words in a *big endian* format to keep in line with the original *MIPS* standard. However, *little endian* compatibility can be enabled with the `--little-endian` option. This changes how words are stored, so certain programs, such as those working with MMIO, may not work without modification.
+By default, *masm* stores words in a *big endian* format to keep in line with the original MIPS standard. However, *little endian* compatibility can be enabled with the `--little-endian` option. This changes how words are stored, so certain programs, such as those working with MMIO, may not work without modification.
 
 ## Interactive Debugger
 
-in addition to the main simulator executable, this project also contains a *GDB*-like debugger, *mdb*. This program allows the user to step through a running assembly program interactively. At any interactive step, the user can view the state of the program and continue when desired. The commands used for the debugger are very similar to those used with *GDB*. These include:
+in addition to the main simulator executable, this project also contains a GDB-like debugger, *mdb*. This program allows the user to step through a running assembly program interactively. At any interactive step, the user can view the state of the program and continue when desired. The commands used for the debugger are very similar to those used with GDB. These include:
 
 * `help` - for more detailed information on the commands
 * `step` - to advance the program by one instruction
@@ -103,7 +105,7 @@ libmasm [options...] module1.asm module2.asm ...
 
 ## Python Bindings
 
-In addition to the main executable, this project also builds a set of *Python* bindings accessible through the `pymasm` package. This allows for *Python* code to directly interact with *masm* to assemble and execute strings of assembly programs.
+In addition to the main executable, this project also builds a set of Python bindings accessible through the `pymasm` package. This allows for Python code to directly interact with *masm* to assemble and execute strings of assembly programs.
 
 ### Python Usage
 
@@ -153,7 +155,7 @@ python -m build python
 
 ## Implementation
 
-Similar to other *MIPS* simulators like [MARS](https://dpetersanderson.github.io/) and [SPIM](https://spimsimulator.sourceforge.net/), *masm* implements a subset of the full MIPS instruction set architecture and executes instructions within an emulated environment. Here, instructions and data are stored in memory in a *big endian* format, similar to the original *MIPS* specification. Additionally, *masm* also supports assembling code in *little endian* format for compatibility with other
+Similar to other MIPS simulators like [MARS](https://dpetersanderson.github.io/) and [SPIM](https://spimsimulator.sourceforge.net/), *masm* implements a subset of the full MIPS instruction set architecture and executes instructions within an emulated environment. Here, instructions and data are stored in memory in a *big endian* format, similar to the original MIPS specification. Additionally, *masm* also supports assembling code in *little endian* format for compatibility with other
 simulators.
 
 This program uses a 32 element array composed of 32-bit integers to represent its register file and an unordered map that can accommodate up to 4GiB of memory. The CPU is implemented within the simulator, which keeps the current state of the register file and memory to load and operate on instructions.
