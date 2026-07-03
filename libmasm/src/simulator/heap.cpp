@@ -6,8 +6,9 @@
 
 #include <masm/exceptions.hpp>
 #include <numeric>
+#include <sstream>
 
-constexpr uint32_t BLOCK_SIZE = 1024;
+constexpr uint32_t BLOCK_SIZE = 256;
 
 const uint32_t HEAP_BASE = memSectionOffset(MemSection::HEAP);
 
@@ -60,6 +61,20 @@ uint32_t HeapAllocator::allocate(uint32_t size) {
     blockAddresses.push_back(address);
     blockSizes.push_back(size);
     return address;
+}
+
+
+void HeapAllocator::deallocate(const uint32_t address) {
+    const auto addrIt = std::ranges::find(blockAddresses, address);
+
+    if (addrIt == blockAddresses.end()) {
+        std::stringstream ss;
+        ss << "Invalid free of address: 0x" << std::hex << address;
+        throw ExecExcept(ss.str(), EXCEPT_CODE::SYSCALL_EXCEPTION);
+    }
+
+    blockAddresses.erase(addrIt);
+    blockSizes.erase(blockSizes.begin() + (addrIt - blockAddresses.begin()));
 }
 
 

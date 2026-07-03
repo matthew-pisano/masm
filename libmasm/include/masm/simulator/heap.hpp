@@ -37,12 +37,21 @@ class HeapAllocator {
 
 public:
     /**
-     * Allocates a block of memory of the given size in the heap
+     * Allocates a block of memory of at least the given size in the heap
      * @param size The size of the block to allocate
      * @return The address of the allocated block
      * @throw runtime_error if the allocation fails
      */
     uint32_t allocate(uint32_t size);
+
+    /**
+     * Deallocates the block of memory at the given address
+     *
+     * Fails if the given address is not thr base address of a block
+     *
+     * @param address The address of the block to free
+     */
+    void deallocate(uint32_t address);
 
     /**
      * Gets the total number of bytes allocated on the heap
