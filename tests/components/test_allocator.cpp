@@ -97,3 +97,11 @@ TEST_CASE("Test Allocate Replace") {
     REQUIRE(allocator.allocated() == HEAP_BLOCK_SIZE * 2);
     REQUIRE(allocator.top() == HEAP_BASE_ADDR + HEAP_BLOCK_SIZE * 2);
 }
+
+
+TEST_CASE("Test Heap Overflow") {
+    HeapAllocator allocator;
+    const uint32_t maxAllocation = HEAP_MAX_ADDR - HEAP_BASE_ADDR - HEAP_BLOCK_SIZE;
+    REQUIRE_THROWS_MATCHES(allocator.allocate(maxAllocation + HEAP_BLOCK_SIZE), std::runtime_error,
+                           Catch::Matchers::Message("Heap Overflow"));
+}
