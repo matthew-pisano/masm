@@ -71,6 +71,18 @@ void HeapAllocator::deallocate(const uint32_t address) {
 
     blockAddresses.erase(addrIt);
     blockSizes.erase(blockSizes.begin() + (addrIt - blockAddresses.begin()));
+
+    // Reset heap pointer if there are no blocks allocated
+    if (blockAddresses.empty()) {
+        heapPointer = HEAP_BASE_ADDR;
+        return;
+    }
+
+    // Set the current heap pointer to the end of the last block
+    const size_t lastBlockIdx = blockAddresses.size() - 1;
+    const uint32_t currentHeapTop = blockAddresses.at(lastBlockIdx) + blockSizes.at(lastBlockIdx);
+    if (currentHeapTop < heapPointer)
+        heapPointer = currentHeapTop;
 }
 
 

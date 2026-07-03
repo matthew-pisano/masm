@@ -33,7 +33,7 @@ class HeapAllocator {
     /**
      * A pointer to the current top of heap memory
      */
-    uint32_t heapPointer = memSectionOffset(MemSection::HEAP);
+    uint32_t heapPointer = HEAP_BASE_ADDR;
 
     /**
      * Finds the first unallocated space in the heap that can accommodate a block of the given size
