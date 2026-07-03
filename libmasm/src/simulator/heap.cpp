@@ -44,6 +44,9 @@ uint32_t HeapAllocator::allocate(uint32_t size) {
     if (address + size > heapPointer)
         heapPointer = address + size;
 
+    if (heapPointer > HEAP_MAX_ADDR)
+        throw ExecExcept("Heap Overflow", EXCEPT_CODE::SYSCALL_EXCEPTION);
+
     // Insert new block sequentially before the block with the next greatest address
     for (size_t i = 0; i < blockAddresses.size(); i++) {
         if (blockAddresses[i] > address) {

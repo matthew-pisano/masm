@@ -15,6 +15,9 @@ constexpr uint32_t HEAP_BLOCK_SIZE = 256;
 /// The base address for the heap
 const uint32_t HEAP_BASE_ADDR = memSectionOffset(MemSection::HEAP);
 
+/// The maximum address that the heap can reach; ensures the stack has at minimum 1MB of space
+const uint32_t HEAP_MAX_ADDR = memSectionOffset(MemSection::STACK) - 1024 * 1024;
+
 
 /**
  * Class representing a simple heap allocator
