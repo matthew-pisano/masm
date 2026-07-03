@@ -35,7 +35,7 @@ uint32_t HeapAllocator::allocate(uint32_t size) {
         throw ExecExcept("Cannot allocate zero bytes", EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     // Round up to the nearest block size
-    size = (size / HEAP_BLOCK_SIZE) * HEAP_BLOCK_SIZE + HEAP_BLOCK_SIZE;
+    size = (size - 1) / HEAP_BLOCK_SIZE * HEAP_BLOCK_SIZE + HEAP_BLOCK_SIZE;
 
     // Get the next available base address
     const uint32_t address = nextFree(size);
