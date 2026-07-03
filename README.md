@@ -143,7 +143,7 @@ cmake -B build
 cmake --build build
 
 # Build Python library
-python -m build python
+python3 -m build python
 ```
 
 ## Compatability
