@@ -59,6 +59,9 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
         case Syscall::HEAP_ALLOC:
             heapAlloc(state);
             break;
+        case Syscall::HEAP_FREE:
+            heapFree(state);
+            break;
         case Syscall::EXIT:
             exit();
             break;
@@ -201,6 +204,11 @@ void SystemHandle::heapAlloc(State& state) {
         throw ExecExcept("Out of Memory", EXCEPT_CODE::SYSCALL_EXCEPTION);
 
     state.registers[Register::V0] = ptr;
+}
+
+void SystemHandle::heapFree(State& state) {
+    const int32_t addr = state.registers[Register::A0];
+    state.heapAllocator.deallocate(addr);
 }
 
 void SystemHandle::exit() { throw ExecExit(0); }

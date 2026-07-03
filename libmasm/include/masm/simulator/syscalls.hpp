@@ -63,7 +63,7 @@ public:
  * Enumeration of the system calls available in the MIPS architecture
  */
 enum class Syscall {
-    // Keyboard/Display Syscalls
+    // Basic MIPS Syscalls
     PRINT_INT = 1,
     PRINT_FLOAT = 2,
     PRINT_DOUBLE = 3,
@@ -76,9 +76,10 @@ enum class Syscall {
     EXIT = 10,
     PRINT_CHAR = 11,
     READ_CHAR = 12,
+    HEAP_FREE = 13,
     EXIT_VAL = 17,
 
-    // MARS Extended Syscalls
+    // Extended Syscalls
     TIME = 30,
     SLEEP = 32,
     PRINT_INT_HEX = 34,
@@ -189,6 +190,12 @@ public:
      * @param state The current state of the simulator
      */
     static void heapAlloc(State& state);
+
+    /**
+     * Frees a block of memory whose base address is in $a0
+     * @param state The current state of the simulator
+     */
+    static void heapFree(State& state);
 
     /**
      * Exits the program with the exit code 0
