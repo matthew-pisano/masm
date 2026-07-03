@@ -9,6 +9,16 @@
 #include <masm/assembler/memory.hpp>
 
 
+/// The minimum allocatable size
+constexpr uint32_t HEAP_BLOCK_SIZE = 256;
+
+/// The base address for the heap
+const uint32_t HEAP_BASE_ADDR = memSectionOffset(MemSection::HEAP);
+
+/// The maximum address that the heap can reach; ensures the stack has at minimum 1MB of space
+const uint32_t HEAP_MAX_ADDR = memSectionOffset(MemSection::STACK) - 1024 * 1024;
+
+
 /**
  * Class representing a simple heap allocator
  */
@@ -26,7 +36,7 @@ class HeapAllocator {
     /**
      * A pointer to the current top of heap memory
      */
-    uint32_t heapPointer = memSectionOffset(MemSection::HEAP);
+    uint32_t heapPointer = HEAP_BASE_ADDR;
 
     /**
      * Finds the first unallocated space in the heap that can accommodate a block of the given size
@@ -37,12 +47,21 @@ class HeapAllocator {
 
 public:
     /**
-     * Allocates a block of memory of the given size in the heap
+     * Allocates a block of memory of at least the given size in the heap
      * @param size The size of the block to allocate
      * @return The address of the allocated block
      * @throw runtime_error if the allocation fails
      */
     uint32_t allocate(uint32_t size);
+
+    /**
+     * Deallocates the block of memory at the given address
+     *
+     * Fails if the given address is not thr base address of a block
+     *
+     * @param address The address of the block to free
+     */
+    void deallocate(uint32_t address);
 
     /**
      * Gets the total number of bytes allocated on the heap

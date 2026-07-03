@@ -18,6 +18,8 @@ void SystemHandle::requiresSyscallMode(const IOMode ioMode, const std::string& s
         throw ExecExcept(syscallName + " syscall not supported in MMIO mode", EXCEPT_CODE::SYSCALL_EXCEPTION);
 }
 
+std::map<size_t, RandomGenerator>& SystemHandle::getRngMap() { return rngMap; }
+
 void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamHandle) {
     int32_t syscallCode = state.registers[Register::V0];
 
@@ -57,6 +59,9 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
         case Syscall::HEAP_ALLOC:
             heapAlloc(state);
             break;
+        case Syscall::HEAP_FREE:
+            heapFree(state);
+            break;
         case Syscall::EXIT:
             exit();
             break;
@@ -90,19 +95,19 @@ void SystemHandle::exec(const IOMode ioMode, State& state, StreamHandle& streamH
             printUInt(state, streamHandle);
             break;
         case Syscall::SET_SEED:
-            setRandSeed(state);
+            setRandSeed(state, rngMap);
             break;
         case Syscall::RAND_INT:
-            randInt(state);
+            randInt(state, rngMap);
             break;
         case Syscall::RAND_INT_RANGE:
-            randIntRange(state);
+            randIntRange(state, rngMap);
             break;
         case Syscall::RAND_FLOAT:
-            randFloat(state);
+            randFloat(state, rngMap);
             break;
         case Syscall::RAND_DOUBLE:
-            randDouble(state);
+            randDouble(state, rngMap);
             break;
         default:
             throw std::runtime_error("Unknown syscall " + std::to_string(syscallCode));
@@ -201,6 +206,11 @@ void SystemHandle::heapAlloc(State& state) {
     state.registers[Register::V0] = ptr;
 }
 
+void SystemHandle::heapFree(State& state) {
+    const int32_t addr = state.registers[Register::A0];
+    state.heapAllocator.deallocate(addr);
+}
+
 void SystemHandle::exit() { throw ExecExit(0); }
 
 void SystemHandle::printChar(const State& state, StreamHandle& streamHandle) {
@@ -255,20 +265,20 @@ void SystemHandle::printUInt(const State& state, StreamHandle& streamHandle) {
     streamHandle.putStr(std::to_string(value));
 }
 
-void SystemHandle::setRandSeed(State& state) {
+void SystemHandle::setRandSeed(State& state, std::map<size_t, RandomGenerator>& rngMap) {
     const int32_t id = state.registers[Register::A0];
     const int32_t seed = state.registers[Register::A1];
     rngMap[id] = RandomGenerator(seed);
 }
 
-void SystemHandle::randInt(State& state) {
+void SystemHandle::randInt(State& state, std::map<size_t, RandomGenerator>& rngMap) {
     const int32_t id = state.registers[Register::A0];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();
     state.registers[Register::A0] = static_cast<int32_t>(rngMap[id].getRandomInt());
 }
 
-void SystemHandle::randIntRange(State& state) {
+void SystemHandle::randIntRange(State& state, std::map<size_t, RandomGenerator>& rngMap) {
     const int32_t id = state.registers[Register::A0];
     const int32_t max = state.registers[Register::A1];
     if (!rngMap.contains(id))
@@ -276,14 +286,14 @@ void SystemHandle::randIntRange(State& state) {
     state.registers[Register::A0] = static_cast<int32_t>(rngMap[id].getRandomInt(max));
 }
 
-void SystemHandle::randFloat(State& state) {
+void SystemHandle::randFloat(State& state, std::map<size_t, RandomGenerator>& rngMap) {
     const int32_t id = state.registers[Register::A0];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();
     state.cp1.setFloat(Coproc1Register::F0, rngMap[id].getRandomFloat());
 }
 
-void SystemHandle::randDouble(State& state) {
+void SystemHandle::randDouble(State& state, std::map<size_t, RandomGenerator>& rngMap) {
     const int32_t id = state.registers[Register::A0];
     if (!rngMap.contains(id))
         rngMap[id] = RandomGenerator();

@@ -63,7 +63,7 @@ public:
  * Enumeration of the system calls available in the MIPS architecture
  */
 enum class Syscall {
-    // Keyboard/Display Syscalls
+    // Basic MIPS Syscalls
     PRINT_INT = 1,
     PRINT_FLOAT = 2,
     PRINT_DOUBLE = 3,
@@ -76,9 +76,10 @@ enum class Syscall {
     EXIT = 10,
     PRINT_CHAR = 11,
     READ_CHAR = 12,
+    HEAP_FREE = 13,
     EXIT_VAL = 17,
 
-    // MARS Extended Syscalls
+    // Extended Syscalls
     TIME = 30,
     SLEEP = 32,
     PRINT_INT_HEX = 34,
@@ -119,6 +120,11 @@ public:
      * @param streamHandle The stream handle for input/output operations
      */
     void exec(IOMode ioMode, State& state, StreamHandle& streamHandle);
+
+    /**
+     * Return the mapping between random generators and their ids
+     */
+    std::map<size_t, RandomGenerator>& getRngMap();
 
     /**
      * Prints the integer stored in the register $a0 to the console
@@ -186,6 +192,12 @@ public:
     static void heapAlloc(State& state);
 
     /**
+     * Frees a block of memory whose base address is in $a0
+     * @param state The current state of the simulator
+     */
+    static void heapFree(State& state);
+
+    /**
      * Exits the program with the exit code 0
      */
     static void exit();
@@ -247,36 +259,41 @@ public:
      * Sets the random seed for the random number generator with the ID of the RNG in $a0 and the
      * seed in $a1
      * @param state The current state of the simulator
+     * @param rngMap A mapping between random generators and their ids
      */
-    void setRandSeed(State& state);
+    static void setRandSeed(State& state, std::map<size_t, RandomGenerator>& rngMap);
 
     /**
      * Generates a random integer from the random number generator with the ID in $a0 and stores it
      * in $a0
      * @param state The current state of the simulator
+     * @param rngMap A mapping between random generators and their ids
      */
-    void randInt(State& state);
+    static void randInt(State& state, std::map<size_t, RandomGenerator>& rngMap);
 
     /**
      * Generates a random integer in the range [0, max] from the random number generator with the ID
      * in $a0, the max is in $a1, and stores it in $a0
      * @param state The current state of the simulator
+     * @param rngMap A mapping between random generators and their ids
      */
-    void randIntRange(State& state);
+    static void randIntRange(State& state, std::map<size_t, RandomGenerator>& rngMap);
 
     /**
      * Generates a random floating-point number in the range [0.0, 1.0] from the random number
      * generator with the ID in $a0 and stores it in $f0
      * @param state The current state of the simulator
+     * @param rngMap A mapping between random generators and their ids
      */
-    void randFloat(State& state);
+    static void randFloat(State& state, std::map<size_t, RandomGenerator>& rngMap);
 
     /**
      * Generates a random double-precision floating-point number in the range [0.0, 1.0] from
      * the random number generator with the ID in $a0 and stores it in $f0 and $f1
-     * @param state
+     * @param state The current state of the simulator
+     * @param rngMap A mapping between random generators and their ids
      */
-    void randDouble(State& state);
+    static void randDouble(State& state, std::map<size_t, RandomGenerator>& rngMap);
 };
 
 #endif // SYSCALLS_H
