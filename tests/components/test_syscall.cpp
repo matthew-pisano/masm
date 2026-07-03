@@ -226,22 +226,22 @@ TEST_CASE("Test Heap Allocation Syscall") {
         sysHandle.heapAlloc(state);
         uint32_t address = state.registers[Register::V0];
         REQUIRE(address == heapBaseAddr);
-        REQUIRE(state.heapAllocator.allocated() == 100);
-        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 100);
+        REQUIRE(state.heapAllocator.allocated() == 256);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 256);
 
         state.registers[Register::A0] = 50;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == heapBaseAddr + 100);
-        REQUIRE(state.heapAllocator.allocated() == 150);
-        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 150);
+        REQUIRE(address == heapBaseAddr + 256);
+        REQUIRE(state.heapAllocator.allocated() == 512);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 512);
 
         state.registers[Register::A0] = 200;
         sysHandle.heapAlloc(state);
         address = state.registers[Register::V0];
-        REQUIRE(address == heapBaseAddr + 150);
-        REQUIRE(state.heapAllocator.allocated() == 350);
-        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 350);
+        REQUIRE(address == heapBaseAddr + 512);
+        REQUIRE(state.heapAllocator.allocated() == 768);
+        REQUIRE(state.heapAllocator.top() == heapBaseAddr + 768);
     }
 
     SECTION("Test Heap Allocation with Zero Size") {
