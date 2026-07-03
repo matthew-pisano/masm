@@ -138,7 +138,7 @@ git clone https://github.com/matthew-pisano/masm
 cd masm
 
 # Configure and build
-cmake -S . -B build
+cmake -B build
 cmake --build build
 
 # Build Python library
