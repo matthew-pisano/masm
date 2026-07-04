@@ -67,14 +67,14 @@ jobs:
           cmake --build build
       - name: Package Python
         run: |
-          $VENV_PATH/bin/python -m build python --wheel
+          $VENV_PATH/bin/python -m build
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
             build/
-            python/dist/
+            dist/
 
   test:
     runs-on: ubuntu-latest
@@ -121,7 +121,7 @@ jobs:
           python3 -m venv $VENV_PATH
           $VENV_PATH/bin/pip install --upgrade pip
           $VENV_PATH/bin/pip install pytest
-          $VENV_PATH/bin/pip install --no-index --find-links=python/dist pymasm
+          $VENV_PATH/bin/pip install --no-index --find-links=dist pymasm
           mkdir -p ${{ github.workspace }}/logs
       - name: Run PyTests
         run: |
