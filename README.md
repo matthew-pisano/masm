@@ -72,7 +72,7 @@ mtc0    $t0, $12
 
 ### Exceptions
 
-Exceptions are handled similarly from interrupts. When a runtime exception is triggered, control is transferred to the interrupt handler at `0x80000000`. If no such handler exists, the exception is not handled and is thrown, halting the program. MIPS uses just a single interrupt handler for both hardware interrupts and exceptions. It is the responsibility of the program to make sure this single handler correctly processes all possible interrupts.
+Exceptions are handled similarly to interrupts. When a runtime exception is triggered, control is transferred to the interrupt handler at `0x80000000`. If no such handler exists, the exception is not handled and is thrown, halting the program. MIPS uses just a single interrupt handler for both hardware interrupts and exceptions. It is the responsibility of the program to make sure this single handler correctly processes all possible interrupts.
 
 ## MIPS Debugger
 
@@ -92,7 +92,7 @@ There are many other comments in addition to these, designed to make debugging c
 mdb [--mmio] [--little-endian] a.out
 ```
 
-*mdb* is called similarly to *msim*, it takes in a binary program and options. However, instead of immediately running the program, it is assembled, loaded into memory, and the user is dropped into an interactive shell.
+*mdb* is called similarly to *msim*, it takes in a binary program and options. However, instead of immediately running the program, the user is dropped into an interactive shell.
 
 ### Examples
 
