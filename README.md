@@ -98,6 +98,11 @@ mdb [--mmio] [--little-endian] a.out
 
 This repository contains a variety of example files in [examples](examples) that demonstrate how to utilize the majority of *masm*'s capabilities.
 
+```bash
+masm examples/hello_world.asm
+msim hello_world.o
+```
+
 ## Python Bindings
 
 In addition to the main executable, this project also builds a set of Python bindings accessible through the `pymasm` package. This allows for Python code to directly interact with *masm* to assemble and execute strings of assembly programs.
@@ -145,6 +150,11 @@ cmake --build build
 # Build Python library (Recommended to use a virtual environment)
 pip install build
 python3 -m build
+
+# To install the Python library
+pip install dist/pymasm-*.whl
+# -- OR --
+pip install .
 ```
 
 The sdist and wheel files will appear in `./dist/`.
