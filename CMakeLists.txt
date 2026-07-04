@@ -4,6 +4,8 @@ project(masm)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+option(MASM_BUILD_EXECUTABLES "Build MASM command-line executables and tests" ON)
+
 add_compile_options(-Wall -Wextra -pedantic)
 
 include(FetchContent)
@@ -24,13 +26,23 @@ if (CMAKE_CROSSCOMPILING AND WIN32)
 endif ()
 
 add_subdirectory(libmasm)
+
+# No Python bindings for cross-compilation on Windows
+if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
+    add_subdirectory(python)
+endif ()
+
+# Exit before building executables and tests
+if (NOT MASM_BUILD_EXECUTABLES)
+    message("*** Skipping MASM command-line executables and tests ***")
+    return()
+endif ()
+
 add_subdirectory(masm)
 add_subdirectory(mdb)
 add_subdirectory(msim)
 
-# No tests or Python bindings for cross-compilation on Windows
 if (NOT (CMAKE_CROSSCOMPILING AND WIN32))
-    add_subdirectory(python)
     add_subdirectory(tests)
     add_subdirectory(tools)
 endif ()
@@ -54,6 +66,7 @@ install(FILES "${CMAKE_SOURCE_DIR}/README.md"
         COMPONENT documentation
 )
 
+# Vendor Windows thread library
 if (CMAKE_CROSSCOMPILING AND WIN32)
     install(FILES
             /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll
