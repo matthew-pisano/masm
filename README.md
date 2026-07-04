@@ -4,7 +4,7 @@
 
 ## Quick Start
 
-The *masm* collection of executables can be downloaded and installed from the [latest release](https://github.com/matthew-pisano/masm/releases/latest). Both Linux and Windows installations are provided. For Linux, RPM and DEB packages are built, along with plain archives. For Windows, there is an installer along with a plain archive. This project can also be built for macOS, but binaries are not distributed.
+The *masm* collection of executables can be downloaded and installed from the [latest release](https://github.com/matthew-pisano/masm/releases/latest). Both Linux and Windows installations are provided. For Linux, RPM and DEB packages are built, along with plain archives. For Windows, there is an installer along with a plain archive.
 
 Upon installing, three programs will be made available: *masm*, *msim*, and *mdb*. The assembler takes in plain-text MIPS assembly files and outputs a compiled binary for the simulator's virtual machine. The simulator intakes a given binary, executing it on simulated registers and memory that match the 32-bit MIPS-I architecture specification. Finally, the debugger uses the same engine as the simulator, but with interactive controls which detail the simulated hardware states.
 
