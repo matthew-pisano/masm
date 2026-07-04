@@ -142,9 +142,12 @@ cd masm
 cmake -B build
 cmake --build build
 
-# Build Python library
-python3 -m build python
+# Build Python library (Recommended to use a virtual environment)
+pip install build
+python3 -m build
 ```
+
+The sdist and wheel files will appear in `./dist/`.
 
 ## Compatability
 
